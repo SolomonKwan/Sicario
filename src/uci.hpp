@@ -13,7 +13,7 @@ namespace UCI {
      * @param args: Pointer to command line arguments.
      * @param argv: Command line arguments.
      */
-    void init(Game* game, Computed* moves, CmdLine* args, char *argv[], 
+    void init(Pos* game, Computed* moves, CmdLine* args, char *argv[], 
             std::string input);
 }
 

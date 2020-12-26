@@ -9,6 +9,6 @@
  * @param depth: Depth of the perft test.
  * @param game: Pointer to struct of game.
  */
-void perft(int depth, Game* game);
+void perft(int depth, Pos* game);
 
 #endif

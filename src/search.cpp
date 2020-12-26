@@ -10,7 +10,7 @@ const double material_value[12] = {
     0, 0, 9, 5, 3.25, 3, 1, -9, -5, -3.25, -3, -1
 };
 
-double Game::evaluate() {
+double Pos::evaluate() {
     double value = 0;
     for (int i = 0; i < 12; i++) {
         for (int j = 0; j < this->piece_index[i]; j++) {
@@ -49,7 +49,7 @@ void Searcher::search() {
 
 }
 
-double Game::alphaBeta(int depth, double alpha, double beta, bool max, Computed* moves) {
+double Pos::alphaBeta(int depth, double alpha, double beta, bool max, Computed* moves) {
     // Get moves
     uint64_t enemy_attacks = 0;
     std::vector<uint16_t>* pos_moves[MAX_MOVE_SETS];

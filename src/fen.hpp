@@ -14,7 +14,7 @@ bool isDark(int square);
  * Get and return the FEN string of the current position.
  * @param game: Pointer to game struct.
  */
-std::string getFEN(Game* game);
+std::string getFEN(Pos* game);
 
 /**
  * Splits a string by a delimeter string and returns vector of results.

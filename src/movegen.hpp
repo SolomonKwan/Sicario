@@ -60,7 +60,7 @@ bool bitAt(uint64_t pos, int n);
  * @param game: A pointer to the game struct.
  * @param args: The command line arguments.
  */
-void display(Game* game, CmdLine* args);
+void display(Pos* game, CmdLine* args);
 
 /**
  * @param pos: A bitboard.
@@ -71,7 +71,7 @@ void displayBB(uint64_t pos);
  * Display all individual game position information.
  * @param game: Pointer to game struct.
  */
-void displayAll(Game* game);
+void displayAll(Pos* game);
 
 /**
  * Calls all functions to make the precomputations for a game.
@@ -87,7 +87,7 @@ void precompute(Computed* moves);
  * @param moves_index: Pointer to number of move struct in pos_moves.
  * @param kEnemy_attacks: Bitboard of enemy attacks with king masked out.
  */
-void getKingMoves(Game* game, Computed* computed_moves, 
+void getKingMoves(Pos* game, Computed* computed_moves, 
         std::vector<uint16_t>* pos_moves[MAX_MOVE_SETS], int* moves_index, 
         uint64_t kEnemy_attacks);
 
@@ -101,7 +101,7 @@ void getKingMoves(Game* game, Computed* computed_moves,
  * @param bishop_pins: 64 bit unsigned int pointer for bishop pins.
  * @param kEnemy_attacks: 64 bit unsigned int pointer with value 0.
  */
-void getEnemyAttacks(Game* game, Computed* moves, 
+void getEnemyAttacks(Pos* game, Computed* moves, 
         uint64_t* enemy_attacks, uint64_t* rook_pins, uint64_t* bishop_pins, 
         uint64_t* kEnemy_attacks);
 
@@ -116,7 +116,7 @@ void getEnemyAttacks(Game* game, Computed* moves,
  * @param moves_index: Pointer to number of move struct in pos_moves.
  * @param kEnemy_attacks: Bitboard of enemy attacks with king masked out.
  */
-void getNormalMoves(Game* game, Computed* computed_moves, 
+void getNormalMoves(Pos* game, Computed* computed_moves, 
         uint64_t* enemy_attacks, uint64_t* rook_pins, uint64_t* bishop_pins, 
         std::vector<uint16_t>* pos_moves[MAX_MOVE_SETS], int* moves_index, 
         uint64_t kEnemy_attacks);
@@ -132,7 +132,7 @@ void getNormalMoves(Game* game, Computed* computed_moves,
  * @param moves_index: Pointer to number of move struct in pos_moves.
  * @param kEnemy_attacks: Bitboard of enemy attacks with king masked out.
  */
-void getCheckedMoves(Game* game, Computed* moves, uint64_t* enemy_attacks, 
+void getCheckedMoves(Pos* game, Computed* moves, uint64_t* enemy_attacks, 
         uint64_t* rook_pins, uint64_t* bishop_pins, 
         std::vector<uint16_t>* pos_moves[MAX_MOVE_SETS], int* moves_index, 
         uint64_t kEnemy_attacks);
@@ -156,7 +156,7 @@ const int bishopIndex(const uint64_t pos, Square square);
  * @param square: The square of the king in check.
  * @param checkers_only: Pointer to bit board of checkers only.
  */
-uint64_t getBishopCheckRays(Game* game, Computed* moves, Square square,
+uint64_t getBishopCheckRays(Pos* game, Computed* moves, Square square,
         uint64_t* checkers_only);
 
 /**
@@ -184,7 +184,7 @@ void computeBishopBlocks(MovesStruct* BISHOP_BLOCKS);
  * @param moves: A struct of the precomputed moves.
  * @param square: The square on which the bishop is on.
  */
-MovesStruct* getBishopFamily(Game* game, Computed* moves, Square square);
+MovesStruct* getBishopFamily(Pos* game, Computed* moves, Square square);
 
 /**
  * Compute the king moves.
@@ -206,7 +206,7 @@ void computeKnightMoves(MovesStruct* KNIGHT_MOVES);
  * @param checkers_only: A pointer to a bit board of checkers only.
  * @return: Bitboard of knight checkers.
  */
-uint64_t getKnightCheckers(Game* game, Computed* move, Square square, 
+uint64_t getKnightCheckers(Pos* game, Computed* move, Square square, 
         uint64_t* checkers_only);
 
 /**
@@ -225,7 +225,7 @@ void computePawnMoves(MovesStruct PAWN_MOVES[][48], MovesStruct EN_PASSANT_MOVES
  * @param game: Pointer to game struct.
  * @param square: Square of pawn.
  */
-uint64_t pawnMoveArgs(Game* game, Square square);
+uint64_t pawnMoveArgs(Pos* game, Square square);
 
 /**
  * Returns a bitboard of all pawn checkers.
@@ -233,7 +233,7 @@ uint64_t pawnMoveArgs(Game* game, Square square);
  * @param square: The square of the king in check.
  * @param checkers_only: Pointer to bit board of checkers only.
  */
-uint64_t getPawnCheckers(Game* game, Square square, uint64_t* checkers_only);
+uint64_t getPawnCheckers(Pos* game, Square square, uint64_t* checkers_only);
 
 /**
  * Returns the index from ROOK_INDEX into ROOK_MOVES based on the square and 
@@ -253,7 +253,7 @@ const int rookIndex(const uint64_t pos, Square square);
  * @param checkers: Bitboard of checkers.
  * @return: Check rays of rooks and queens.
  */
-uint64_t getRookCheckRays(Game* game, Computed* moves, Square square, 
+uint64_t getRookCheckRays(Pos* game, Computed* moves, Square square, 
         uint64_t* checkers);
 
 /**
@@ -279,7 +279,7 @@ void computeRookBlocks(MovesStruct* ROOK_BLOCKS);
  * @param square: The square on which the rook is on.
  * @return Pointer to moves struct.
  */
-MovesStruct* getRookFamily(Game* game, Computed* moves, Square square);
+MovesStruct* getRookFamily(Pos* game, Computed* moves, Square square);
 
 /**
  * Finds and returns a pointer to a rook block move family.
@@ -288,6 +288,6 @@ MovesStruct* getRookFamily(Game* game, Computed* moves, Square square);
  * @param square: The square on which the rook is on.
  * @return Pointer to moves struct.
  */
-MovesStruct* getRookBlockFamily(Game* game, Computed* moves, Square square);
+MovesStruct* getRookBlockFamily(Pos* game, Computed* moves, Square square);
 
 #endif

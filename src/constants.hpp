@@ -167,37 +167,13 @@ struct CmdLine {
 /**
  * A struct representing the current board position.
  */
-class Game {
+class Pos {
     public:
-        uint64_t sides[2];
-        uint64_t kings, queens, rooks, bishops, knights, pawns;
-        bool turn;
-        int castling;
-        Square en_passant;
-        int halfmove, fullmove;
-
-        // The piece positions.
-        Square piece_list[12][10];
-        int piece_index[12];
-        PieceType pieces[64];
-
-        // Piece counts for insufficient material checks.
-        int piece_cnt = 0;
-        int knight_cnt = 0;
-        int wdsb_cnt = 0, wlsb_cnt = 0;
-        int bdsb_cnt = 0, blsb_cnt = 0;
-
-        uint16_t last_move;
-        PieceType piece_moved;
-        PieceType piece_captured;
-        MoveType last_move_type;
-
-        // Game history
-        History history[MAX_MOVES];
-        int ply;
-        uint64_t hash;
         std::string original_fen;
+        int halfmove, fullmove;
+        int piece_index[12];
 
+        void displayAll(Pos* game);
         ExitCode parseFen(std::string fen);
         void zero();
         void handleGame(Computed* moves, CmdLine* args, char *argv[]);
@@ -262,28 +238,41 @@ class Game {
         void printMove(uint16_t move, bool extraInfo);
         void showEOG(ExitCode code, char *argv[]);
         const int rookBlockIndex(uint64_t pos, Computed* moves, Square square);
-        
-        static void setRookMoves(int square, MovesStruct* move_family);
-        static void computeRCentreMoves(int square, int* offset, std::vector<int>* ROOK_INDEX, MovesStruct* ROOK_MOVES);
-        static void computeRULSideMoves(int square, int* offset, std::vector<int>* ROOK_INDEX, MovesStruct* ROOK_MOVES);
-        static void computeRLRSideMoves(int square, int* offset, std::vector<int>* ROOK_INDEX, MovesStruct* ROOK_MOVES);
-        static void computeRCornerMoves(int square, int* offset, std::vector<int>* ROOK_INDEX, MovesStruct* ROOK_MOVES);
-        
-        static void setBishopMoves(int square, MovesStruct* move_family);
-        static void computeBCornerMoves(int square, int* offset, std::vector<int>* BISHOP_INDEX, MovesStruct* BISHOP_MOVES);
-        static void computeBLRSideMoves(int square, int* offset, std::vector<int>* BISHOP_INDEX, MovesStruct* BISHOP_MOVES);
-        static void computeBULSideMoves(int square, int* offset, std::vector<int>* BISHOP_INDEX, MovesStruct* BISHOP_MOVES);
-        static void computeBCentreMoves(int sq, int* offset, std::vector<int>* BISHOP_INDEX, MovesStruct* BISHOP_MOVES);
 
         static void computeRookBlocks(MovesStruct* ROOK_BLOCKS);
         static void computeBishopBlocks(MovesStruct* BISHOP_BLOCKS);
         static void computeCastling(MovesStruct* CASTLING_MOVES);
-        
-        static void computeRookMoves(std::vector<int>* ROOK_INDEX, MovesStruct* ROOK_MOVES);
-        static void computeBishopMoves(std::vector<int>* BISHOP_INDEX, MovesStruct* BISHOP_MOVES);
+
         static void computeKnightMoves(MovesStruct* KNIGHT_MOVES);
         static void computeKingMoves(MovesStruct* KING_MOVES);
         static void computePawnMoves(MovesStruct PAWN_MOVES[][48], MovesStruct EN_PASSANT_MOVES[16], MovesStruct DOUBLE_PUSH[16]);
+
+    private:
+        uint64_t sides[2];
+        uint64_t kings, queens, rooks, bishops, knights, pawns;
+        bool turn;
+        int castling;
+        Square en_passant;
+
+        // The piece positions.
+        Square piece_list[12][10];
+        PieceType pieces[64];
+
+        // Piece counts for insufficient material checks.
+        int piece_cnt = 0;
+        int knight_cnt = 0;
+        int wdsb_cnt = 0, wlsb_cnt = 0;
+        int bdsb_cnt = 0, blsb_cnt = 0;
+
+        uint16_t last_move;
+        PieceType piece_moved;
+        PieceType piece_captured;
+        MoveType last_move_type;
+
+        // Pos history
+        History history[MAX_MOVES];
+        int ply;
+        uint64_t hash;
 };
 
 /**

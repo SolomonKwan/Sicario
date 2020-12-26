@@ -29,7 +29,7 @@ namespace Opening {
         0, 0, 9, 5, 3.25, 3, 1, -9, -5, -3.25, -3, -1
     };
 
-    const bool is_phase(Game* game) {
+    const bool is_phase(Pos* game) {
         if (game->fullmove <= 12) {
             return true;
         }
@@ -64,7 +64,7 @@ namespace MiddleGame {
         0, 0, 9, 5, 3.25, 3, 1, -9, -5, -3.25, -3, -1
     };
 
-    const bool is_phase(Game* game) {
+    const bool is_phase(Pos* game) {
         if (game->fullmove > 12 && (game->piece_index[W_QUEEN] || game->piece_index[B_QUEEN])) {
             return true;
         }
@@ -99,7 +99,7 @@ namespace EndGame {
         0, 0, 9, 5, 3.25, 3, 1, -9, -5, -3.25, -3, -1
     };
 
-    const bool is_phase(Game* game) {
+    const bool is_phase(Pos* game) {
         if (game->fullmove > 12 && !game->piece_index[W_QUEEN] && !game->piece_index[B_QUEEN]) {
             return true;
         }
@@ -108,11 +108,11 @@ namespace EndGame {
 }
 
 
-Evaluator::Evaluator(Game* game) {
+Evaluator::Evaluator(Pos* game) {
     this->game = game;
 }
 
-int Evaluator::evaluate(Game* game) {
+int Evaluator::evaluate(Pos* game) {
     return material();
 }
 

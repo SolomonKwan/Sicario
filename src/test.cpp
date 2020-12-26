@@ -70,7 +70,7 @@ void printPerft(bool print, uint16_t move, uint64_t* current_nodes) {
  * @param print: Boolean to indicate whether or not to print.
  * @param args: Pointer to command line arguments.
  */
-uint64_t runPerft(int depth, Game* game, Computed* precomputed_moves, 
+uint64_t runPerft(int depth, Pos* game, Computed* precomputed_moves, 
         bool print) {
     uint64_t nodes = 0;
     uint64_t enemy_attacks = 0;
@@ -111,15 +111,12 @@ uint64_t runPerft(int depth, Game* game, Computed* precomputed_moves,
  * @param args: Pointer to command line arguments.
  * @param game: Pointer to struct of game.
  */
-void perft(int depth, Game* game) {
+void perft(int depth, Pos* game) {
     if (depth != 0) {
         Computed computed_moves;
         precompute(&computed_moves);
-        auto start = std::chrono::steady_clock::now();
         uint64_t num = runPerft(depth, game, &computed_moves, 
                 true);
-        auto end = std::chrono::steady_clock::now();
-        std::cout << std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count() << " ns\n";
         std::cout << "\nNodes searched: " << num << "\n\n";
     }
 }

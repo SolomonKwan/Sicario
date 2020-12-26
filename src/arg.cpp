@@ -37,11 +37,11 @@ bool isFlagged(char** start, char** end, std::string option) {
 /**
  * Parse the command line arguments.
  * 
- * @param: game The Game struct representing the game position.
+ * @param: game The Pos struct representing the game position.
  * @param: argc The argument count.
  * @param: argv The array of command line arguments.
  */
-ExitCode parseArgs(Game* game, int argc, char *argv[], 
+ExitCode parseArgs(Pos* game, int argc, char *argv[], 
         CmdLine* args) {
 
     // Version
@@ -93,7 +93,7 @@ ExitCode parseArgs(Game* game, int argc, char *argv[],
     return NORMAL_PLY;
 }
 
-void Args::init(Game* game, int argc, char *argv[], CmdLine* args) {
+void Args::init(Pos* game, int argc, char *argv[], CmdLine* args) {
     ExitCode code = parseArgs(game, argc, argv, args);
     if (code) exit(code);
 }

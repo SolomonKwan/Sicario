@@ -46,7 +46,7 @@ void UCI_ReadyOk() {
  * @param args: Pointer to command line arguments.
  * @param argv: Command line arguments.
  */
-void runUCI(Game* game, Computed* moves, CmdLine* args, char *argv[]) {
+void runUCI(Pos* game, Computed* moves, CmdLine* args, char *argv[]) {
     std::string input;
     UCI_InitialResponse();
     while (std::getline(std::cin, input)) {
@@ -62,7 +62,7 @@ void runUCI(Game* game, Computed* moves, CmdLine* args, char *argv[]) {
  * @param args: Pointer to command line arguments.
  * @param argv: Command line arguments.
  */
-void UCI::init(Game* game, Computed* moves, CmdLine* args, char *argv[], 
+void UCI::init(Pos* game, Computed* moves, CmdLine* args, char *argv[], 
         std::string input) {
     runUCI(game, moves, args, argv);
 }

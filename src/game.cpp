@@ -2,7 +2,6 @@
 #include <iostream>
 #include <unordered_map>
 
-#include "rook_moves.hpp"
 #include "fen.hpp"
 #include "game.hpp"
 #include "test.hpp"
@@ -38,7 +37,7 @@ void showUsage(char *argv[]) {
  * @param code: The exitcode of the game.
  * @param argv: Array of command line arguments.
  */
-void Game::showEOG(ExitCode code, char *argv[]) {
+void Pos::showEOG(ExitCode code, char *argv[]) {
     switch (code) {
         case NORMAL_PLY:
             std::cout << "Debugging: normal\n";
@@ -91,7 +90,7 @@ void Game::showEOG(ExitCode code, char *argv[]) {
  * @param game: Pointer to game struct.
  * @return: True if draw, else false.
  */
-bool Game::insufficientMaterial() {
+bool Pos::insufficientMaterial() {
     // King vs king
     if (this->piece_cnt == 2) return true;
 
@@ -123,7 +122,7 @@ bool Game::insufficientMaterial() {
  * @param enemy_attacks: Bitboard of squares attacked by enemy pieces.
  * @return: True if in check, else false.
  */
-bool Game::isChecked(uint64_t enemy_attacks) {
+bool Pos::isChecked(uint64_t enemy_attacks) {
     return (1ULL << this->piece_list[this->turn][0]) & enemy_attacks;
 }
 
@@ -133,7 +132,7 @@ bool Game::isChecked(uint64_t enemy_attacks) {
  * @param moves: Pointer to precomputed moves struct.
  * @return: True if in double-check, else false.
  */
-bool Game::isDoubleChecked(Computed* moves) {
+bool Pos::isDoubleChecked(Computed* moves) {
     bool turn = this->turn;
     Square king = this->piece_list[turn][0];
     uint64_t rook_attacks = this->getRookFamily(moves, king)->reach;
@@ -166,7 +165,7 @@ bool Game::isDoubleChecked(Computed* moves) {
  * Computes and returns the hash of the current position.
  * @param game: Pointer to game struct.
  */
-uint64_t getPosHash(Game* game) {
+uint64_t getPosHash(Pos* game) {
     uint64_t hash = 0ULL;
     // if (game->ply == 0) { // Start of game, loop through all pieces.
     //     for (int sq = A1; sq <= H8; sq++) {
@@ -214,7 +213,7 @@ uint64_t getPosHash(Game* game) {
  * Also performs the hash updates for the history.
  * @param game: Pointer to game struct.
  */
-bool Game::isThreeFoldRep() {
+bool Pos::isThreeFoldRep() {
     std::unordered_map<uint64_t, int> counts;
     for (int i = this->ply - 1; i > this->ply - 15; i--) {
         if (i < 0) break;
@@ -234,7 +233,7 @@ bool Game::isThreeFoldRep() {
  * @param moves_index: Pointer to number of vectors in pos_moves.
  * @return: The appropriate ExitCode.
  */
-ExitCode Game::isEOG(Computed* moves, uint64_t enemy_attacks, int move_index) {
+ExitCode Pos::isEOG(Computed* moves, uint64_t enemy_attacks, int move_index) {
     // Draw by threefold repetition.
     if (this->isThreeFoldRep()) return THREE_FOLD_REPETITION;
 
@@ -259,14 +258,14 @@ ExitCode Game::isEOG(Computed* moves, uint64_t enemy_attacks, int move_index) {
 /**
  * Retrives all legal moves of the current position.
  * 
- * @param game: Pointer to Game struct of the current position.
+ * @param game: Pointer to Pos struct of the current position.
  * @param moves: Pointer to the precomputed moves struct.
  * @param enemy_attacks: Pointer to bitboard of all squares attacked by the 
  *  enemy.
  * @param pos_moves: Array of vectors pointers of 16 bit unsigned int moves.
  * @return: The number of move sets.
  */
-int Game::getMoves(Computed* moves, uint64_t* enemy_attacks, 
+int Pos::getMoves(Computed* moves, uint64_t* enemy_attacks, 
         std::vector<uint16_t>* pos_moves[MAX_MOVE_SETS]) {
     // The pinning rays
     uint64_t rook_pins = 0;
@@ -295,7 +294,7 @@ int Game::getMoves(Computed* moves, uint64_t* enemy_attacks,
  * @param piece: The piece type to find and remove.
  * @param square: The square of the piece type to find and remove.
  */
-void Game::findAndRemovePiece(PieceType piece, Square square) {
+void Pos::findAndRemovePiece(PieceType piece, Square square) {
     int taken_index = -1;
     for (int i = 0; i < this->piece_index[piece]; i++) {
         if (this->piece_list[piece][i] == square) {
@@ -331,7 +330,7 @@ void Game::findAndRemovePiece(PieceType piece, Square square) {
  * @param piece: The piece type to add.
  * @param square: The square to add for piece.
  */
-void Game::addPiece(PieceType piece, Square square) {
+void Pos::addPiece(PieceType piece, Square square) {
     this->piece_list[piece][this->piece_index[piece]] = square;
     this->piece_index[piece]++;
     if (piece == W_BISHOP) {
@@ -356,7 +355,7 @@ void Game::addPiece(PieceType piece, Square square) {
  * Process the removal of a piece just captured, if any.
  * @param game: Pointer to game struct.
  */
-void Game::removePiece() {
+void Pos::removePiece() {
     PieceType captured = this->piece_captured;
     if (captured == NO_PIECE) return;
     int end = (this->last_move >> 6) & 0b111111;
@@ -382,7 +381,7 @@ void Game::removePiece() {
  * Process castling.
  * @param game: Pointer to game struct.
  */
-void Game::handleCastle() {
+void Pos::handleCastle() {
     int start, end;
     int last_end = (this->last_move >> 6) & 0b111111;
     PieceType rook;
@@ -421,7 +420,7 @@ void Game::handleCastle() {
  * @param move: The move to make.
  * @param game: Pointer to game struct.
  */
-void Game::makeKingMoves(uint16_t move) {
+void Pos::makeKingMoves(uint16_t move) {
     this->removePiece();
     int start = move & 0b111111;
     int end = (move >> 6) & 0b111111;
@@ -449,7 +448,7 @@ void Game::makeKingMoves(uint16_t move) {
  * @param move: The move to make.
  * @param game: Pointer to game struct.
  */
-void Game::makeQueenMoves(uint16_t move) {
+void Pos::makeQueenMoves(uint16_t move) {
     this->removePiece();
     int start = move & 0b111111;
     int end = (move >> 6) & 0b111111;
@@ -465,7 +464,7 @@ void Game::makeQueenMoves(uint16_t move) {
  * @param move: The move to make.
  * @param game: Pointer to game struct.
  */
-void Game::makeRookMoves(uint16_t move) {
+void Pos::makeRookMoves(uint16_t move) {
     this->removePiece();
     int start = move & 0b111111;
     int end = (move >> 6) & 0b111111;
@@ -481,7 +480,7 @@ void Game::makeRookMoves(uint16_t move) {
  * @param move: The move to make.
  * @param game: Pointer to game struct.
  */
-void Game::makeBishopMoves(uint16_t move) {
+void Pos::makeBishopMoves(uint16_t move) {
     this->removePiece();
     int start = move & 0b111111;
     int end = (move >> 6) & 0b111111;
@@ -497,7 +496,7 @@ void Game::makeBishopMoves(uint16_t move) {
  * @param move: The move to make.
  * @param game: Pointer to game struct.
  */
-void Game::makeKnightMoves(uint16_t move) {
+void Pos::makeKnightMoves(uint16_t move) {
     this->removePiece();
     int start = move & 0b111111;
     int end = (move >> 6) & 0b111111;
@@ -513,7 +512,7 @@ void Game::makeKnightMoves(uint16_t move) {
  * @param move: The move to make.
  * @param game: Pointer to game struct.
  */
-void Game::makePawnMoves(uint16_t move) {
+void Pos::makePawnMoves(uint16_t move) {
     this->removePiece();
     int start = move & 0b111111;
     int end = (move >> 6) & 0b111111;
@@ -577,7 +576,7 @@ void Game::makePawnMoves(uint16_t move) {
  * @param game: Pointer to game struct.
  * @param move: The move to made.
  */
-void Game::saveHistory(uint16_t move) {
+void Pos::saveHistory(uint16_t move) {
     this->history[this->ply].castling = this->castling;
     this->history[this->ply].en_passant = this->en_passant;
     this->history[this->ply].halfmove = this->halfmove;
@@ -590,7 +589,7 @@ void Game::saveHistory(uint16_t move) {
  * Undo normal moves.
  * @param game: Pointer to game struct.
  */
-void Game::undoNormal() {
+void Pos::undoNormal() {
     // Change game history
     this->ply--;
     History previous_pos = this->history[this->ply];
@@ -690,7 +689,7 @@ void Game::undoNormal() {
  * Undo promotion moves.
  * @param game: Pointer to game struct.
  */
-void Game::undoPromotion() {
+void Pos::undoPromotion() {
     // Change game history
     this->ply--;
     History previous_pos = this->history[this->ply];
@@ -755,7 +754,7 @@ void Game::undoPromotion() {
  * Undo en-passant moves.
  * @param game: Pointer to game struct.
  */
-void Game::undoEnPassant() {
+void Pos::undoEnPassant() {
     // Change game history
     this->ply--;
     History previous_pos = this->history[this->ply];
@@ -805,7 +804,7 @@ void Game::undoEnPassant() {
  * Undo castling moves.
  * @param game: Pointer to game struct.
  */
-void Game::undoCastling() {
+void Pos::undoCastling() {
     // Change game history
     this->ply--;
     History previous_pos = this->history[this->ply];
@@ -875,7 +874,7 @@ void Game::undoCastling() {
  * Undo moves.
  * @param game: Pointer to game struct.
  */
-void Game::undoMove() {
+void Pos::undoMove() {
     if (this->ply == 0) {
         std::cout << "Nothing to undo...\n";
         return;
@@ -898,7 +897,7 @@ void Game::undoMove() {
  * @param move: The moves to make.
  * @param game: Pointer to game struct.
  */
-void Game::makeMove(uint16_t move) {
+void Pos::makeMove(uint16_t move) {
     if (move == 0) {
         this->undoMove();
         return;
@@ -960,7 +959,7 @@ void Game::makeMove(uint16_t move) {
  * @param moves_index: Pointer to int of number of move vectors in pos_moves.
  * @return: The number of moves in the position.
  */
-int countMoves(Game* game, std::vector<uint16_t>* pos_moves[MAX_MOVE_SETS], 
+int countMoves(Pos* game, std::vector<uint16_t>* pos_moves[MAX_MOVE_SETS], 
         int* moves_index) {
     int count = 0;
     for (int i = 0; i < *moves_index; i++) {
@@ -983,7 +982,7 @@ int countMoves(Game* game, std::vector<uint16_t>* pos_moves[MAX_MOVE_SETS],
  * @param moves_index: Int pointer to number of vectors in pos_moves.
  * @return: True if move is valid, else false.
  */
-bool Game::validMove(uint16_t move, std::vector<uint16_t>* pos_moves[
+bool Pos::validMove(uint16_t move, std::vector<uint16_t>* pos_moves[
         MAX_MOVE_SETS], int* moves_index) {
     for (int i = 0; i < *moves_index; i++) {
         for (uint16_t move_candidate : *pos_moves[i]) {
@@ -996,7 +995,7 @@ bool Game::validMove(uint16_t move, std::vector<uint16_t>* pos_moves[
 /**
  * Calls getFEN to get the FEN string of the current position and prints out.
  */
-void Game::fen() {
+void Pos::fen() {
     std::cout << this->getFEN() << '\n';
 }
 
@@ -1007,7 +1006,7 @@ void Game::fen() {
  * @param start: Pointer to unsigned int for start square.
  * @param end: Pointer to unsigned int for end square.
  */
-void Game::getSquares(std::string move_string, uint16_t* move, uint* start, uint* end) {
+void Pos::getSquares(std::string move_string, uint16_t* move, uint* start, uint* end) {
     int start_file, start_rank, end_file, end_rank;
             start_file = move_string[0] - 'a';
             start_rank = move_string[1] - '1';
@@ -1035,7 +1034,7 @@ void Game::getSquares(std::string move_string, uint16_t* move, uint* start, uint
  * @param end: The end square.
  * @param move: Pointer to the integer representing the move.
  */
-void Game::checkCastlingEnPassantMoves(uint start, uint end, uint16_t* move) {
+void Pos::checkCastlingEnPassantMoves(uint start, uint end, uint16_t* move) {
     // Check for castling move.
     if (this->turn && this->piece_list[WHITE][0] == E1) {
         if (start == E1 && end == G1 && (this->castling & (1 << 
@@ -1075,7 +1074,7 @@ void Game::checkCastlingEnPassantMoves(uint start, uint end, uint16_t* move) {
  * @param moves_index: Int pointer to number of vectors in pos_moves.
  * @return: The chosen move.
  */
-uint16_t Game::chooseMove(int white, int black, std::vector<uint16_t>* 
+uint16_t Pos::chooseMove(int white, int black, std::vector<uint16_t>* 
         pos_moves[MAX_MOVE_SETS], int* moves_index, Computed* moves) {
     uint16_t move = NORMAL | pKNIGHT;
     
@@ -1137,7 +1136,7 @@ uint16_t Game::chooseMove(int white, int black, std::vector<uint16_t>*
  * @param moves: Pointer to precomputed moves struct.
  * @param args: Pointer to command line arguments struct.
  */
-void Game::handleGame(Computed* moves, CmdLine* args, char *argv[]) {
+void Pos::handleGame(Computed* moves, CmdLine* args, char *argv[]) {
     ExitCode code = NORMAL_PLY;
     
     uint64_t enemy_attacks = 0;
@@ -1169,7 +1168,7 @@ void Game::handleGame(Computed* moves, CmdLine* args, char *argv[]) {
  * @param argv: Command line arguments.
  * @param input: Command given by the user.
  */
-void runNormal(Game* game, Computed* moves, CmdLine* args, char *argv[], 
+void runNormal(Pos* game, Computed* moves, CmdLine* args, char *argv[], 
         std::string input) {
     goto start;
     while (std::getline(std::cin, input)) {
@@ -1185,7 +1184,7 @@ void runNormal(Game* game, Computed* moves, CmdLine* args, char *argv[],
     }
 }
 
-void Play::init(Game* game, Computed* moves, CmdLine* args, char *argv[], 
+void Play::init(Pos* game, Computed* moves, CmdLine* args, char *argv[], 
         std::string input) {
     runNormal(game, moves, args, argv, input);
 }

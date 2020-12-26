@@ -12,7 +12,7 @@
  * Prints a readable version of a move.
  * @param move: The move to be printed.
  */
-void Game::printMove(uint16_t move, bool extraInfo) {
+void Pos::printMove(uint16_t move, bool extraInfo) {
     if (extraInfo) {
         std::cout << squareName[move & 0b111111] << squareName[(move >> 6) &
             0b111111] << " " << moveName[(move >> 12) & 0b11] << " " << 
@@ -49,7 +49,7 @@ void displayBB(uint64_t pos) {
  * @param game: A pointer to the game struct.
  * @param args: The command line arguments.
  */
-void Game::display(CmdLine* args) {
+void Pos::display(CmdLine* args) {
     bool light_mode = !(args->dark_mode);
     std::cout << '\n';
     
@@ -143,53 +143,53 @@ void Game::display(CmdLine* args) {
  * Display all individual game position information.
  * @param game: Pointer to game struct.
  */
-void displayAll(Game* game) {
+void Pos::displayAll(Pos* game) {
     std::cout << "White";
-    displayBB(game->sides[WHITE]);
+    displayBB(this->sides[WHITE]);
 
     std::cout << "Black";
-    displayBB(game->sides[BLACK]);
+    displayBB(this->sides[BLACK]);
 
     std::cout << "Kings";
-    displayBB(game->kings);
+    displayBB(this->kings);
 
     std::cout << "Queens";
-    displayBB(game->queens);
+    displayBB(this->queens);
 
     std::cout << "Rooks";
-    displayBB(game->rooks);
+    displayBB(this->rooks);
 
     std::cout << "Bishops";
-    displayBB(game->bishops);
+    displayBB(this->bishops);
 
     std::cout << "Knights";
-    displayBB(game->knights);
+    displayBB(this->knights);
 
     std::cout << "pawns";
-    displayBB(game->pawns);
+    displayBB(this->pawns);
 
-    std::cout << (game->turn ? "White" : "Black") << '\n';
+    std::cout << (this->turn ? "White" : "Black") << '\n';
 
-    std::cout << "Castling: " << std::bitset<4>(game->castling) << '\n';
+    std::cout << "Castling: " << std::bitset<4>(this->castling) << '\n';
 
-    std::cout << "En-passant: " << squareName[game->en_passant] << '\n';
+    std::cout << "En-passant: " << squareName[this->en_passant] << '\n';
 
-    std::cout << "Halfmove: " << game->halfmove << '\n';
+    std::cout << "Halfmove: " << this->halfmove << '\n';
     
-    std::cout << "Fullmove: " << game->fullmove << "\n\n";
+    std::cout << "Fullmove: " << this->fullmove << "\n\n";
 
     for (int i = 0; i < 12; i++) {
-        std::cout << piece_type_string[i] << " " << game->piece_index[i] << 
+        std::cout << piece_type_string[i] << " " << this->piece_index[i] << 
                 " :";
-        for (int j = 0; j < game->piece_index[i]; j++) {
-            std::cout << squareName[game->piece_list[i][j]] << " ";
+        for (int j = 0; j < this->piece_index[i]; j++) {
+            std::cout << squareName[this->piece_list[i][j]] << " ";
         }
         std::cout << '\n';
     }
     std::cout << '\n';
 
     for (int i = 0; i < 64; i++) {
-        std::cout << squareName[i] << ":" << piece_type_string[game->pieces[i]] 
+        std::cout << squareName[i] << ":" << piece_type_string[this->pieces[i]] 
                 << " ";
         if (i % 8 == 7) std::cout << '\n';
     }
@@ -249,7 +249,7 @@ int moveSetIndex(uint64_t masked_reach, MovesStruct* move_family) {
  * Compute the castling moves.
  * @param CASTLING_MOVES: Array of move struct pointers.
  */
-void Game::computeCastling(MovesStruct* CASTLING_MOVES) {
+void Pos::computeCastling(MovesStruct* CASTLING_MOVES) {
     CASTLING_MOVES[WQSC].move_set.resize(1);
     std::vector<uint16_t>* moves_set = &(CASTLING_MOVES[WQSC].move_set[0]);
     moves_set->push_back(E1 | C1 << 6 | CASTLING | pKNIGHT);
@@ -272,15 +272,15 @@ void Game::computeCastling(MovesStruct* CASTLING_MOVES) {
  * @param moves: Pointer to precomputed moves structs.
  */
 void precompute(Computed* moves) {
-    Game::computeRookMoves(moves->ROOK_INDEX, moves->ROOK_MOVES);
-    Game::computeRookBlocks(moves->ROOK_BLOCKS);
-    Game::computeBishopMoves(moves->BISHOP_INDEX, moves->BISHOP_MOVES);
-    Game::computeBishopBlocks(moves->BISHOP_BLOCKS);
-    Game::computeKnightMoves(moves->KNIGHT_MOVES);
-    Game::computeKingMoves(moves->KING_MOVES);
-    Game::computePawnMoves(moves->PAWN_MOVES, moves->EN_PASSANT_MOVES, moves->
+    computeRookMoves(moves->ROOK_INDEX, moves->ROOK_MOVES);
+    Pos::computeRookBlocks(moves->ROOK_BLOCKS);
+    computeBishopMoves(moves->BISHOP_INDEX, moves->BISHOP_MOVES);
+    Pos::computeBishopBlocks(moves->BISHOP_BLOCKS);
+    Pos::computeKnightMoves(moves->KNIGHT_MOVES);
+    Pos::computeKingMoves(moves->KING_MOVES);
+    Pos::computePawnMoves(moves->PAWN_MOVES, moves->EN_PASSANT_MOVES, moves->
             DOUBLE_PUSH);
-    Game::computeCastling(moves->CASTLING_MOVES);
+    Pos::computeCastling(moves->CASTLING_MOVES);
 }
 
 /**
@@ -297,7 +297,7 @@ void Compute::init(Computed* moves) {
  * @param pos_moves: Array of 16 bit unsigned int move vectors.
  * @param moves_index: Pointer to number of move struct in pos_moves.
  */
-void Game::getKingMoves(Computed* computed_moves, 
+void Pos::getKingMoves(Computed* computed_moves, 
         std::vector<uint16_t>* pos_moves[MAX_MOVE_SETS], int* moves_index, 
         uint64_t kEnemy_attacks) {
     MovesStruct* king_family = &computed_moves->KING_MOVES[this->piece_list[this->turn][0]];
@@ -315,7 +315,7 @@ void Game::getKingMoves(Computed* computed_moves,
  * @param pos_moves: Array of 16 bit unsigned int move vectors.
  * @param moves_index: Pointer to number of move struct in pos_moves.
  */
-void Game::getRookPinMoves(Computed* moves, int square, 
+void Pos::getRookPinMoves(Computed* moves, int square, 
         std::vector<uint16_t>* pos_moves[MAX_MOVE_SETS], int* moves_index) {
     int king = this->piece_list[this->turn][0];
     uint64_t pos = this->sides[BLACK] | this->sides[WHITE];
@@ -361,7 +361,7 @@ void Game::getRookPinMoves(Computed* moves, int square,
  * @param pos_moves: Array of 16 bit unsigned int move vectors.
  * @param moves_index: Pointer to number of move struct in pos_moves.
  */
-void Game::getBishopPinMoves (Computed* moves, int square, 
+void Pos::getBishopPinMoves (Computed* moves, int square, 
         std::vector<uint16_t>* pos_moves[MAX_MOVE_SETS], int* moves_index) {
     int king = this->piece_list[this->turn][0];
     uint64_t pos = this->sides[BLACK] | this->sides[WHITE];
@@ -398,7 +398,7 @@ void Game::getBishopPinMoves (Computed* moves, int square,
  * @param pos_moves: Array of 16 bit unsigned int move vectors.
  * @param moves_index: Pointer to number of move struct in pos_moves.
  */
-void Game::getQueenMoves(Computed* computed_moves, uint64_t rook_pins, 
+void Pos::getQueenMoves(Computed* computed_moves, uint64_t rook_pins, 
         uint64_t bishop_pins, std::vector<uint16_t>* pos_moves[MAX_MOVE_SETS], 
         int* moves_index) {
     PieceType piece = this->turn ? W_QUEEN : B_QUEEN;
@@ -437,7 +437,7 @@ void Game::getQueenMoves(Computed* computed_moves, uint64_t rook_pins,
  * @param pos_moves: Array of 16 bit unsigned int move vectors.
  * @param moves_index: Pointer to number of move struct in pos_moves.
  */
-void Game::getRookMoves(Computed* computed_moves, uint64_t rook_pins, 
+void Pos::getRookMoves(Computed* computed_moves, uint64_t rook_pins, 
         uint64_t bishop_pins, std::vector<uint16_t>* pos_moves[MAX_MOVE_SETS], 
         int* moves_index) {
     PieceType piece = this->turn ? W_ROOK : B_ROOK;
@@ -467,7 +467,7 @@ void Game::getRookMoves(Computed* computed_moves, uint64_t rook_pins,
  * @param pos_moves: Array of 16 bit unsigned int move vectors.
  * @param moves_index: Pointer to number of move struct in pos_moves.
  */
-void Game::getBishopMoves(Computed* computed_moves, uint64_t rook_pins, 
+void Pos::getBishopMoves(Computed* computed_moves, uint64_t rook_pins, 
         uint64_t bishop_pins, std::vector<uint16_t>* pos_moves[MAX_MOVE_SETS], 
         int* moves_index) {
     PieceType piece = this->turn ? W_BISHOP : B_BISHOP;
@@ -498,7 +498,7 @@ void Game::getBishopMoves(Computed* computed_moves, uint64_t rook_pins,
  * @param pos_moves: Array of 16 bit unsigned int move vectors.
  * @param moves_index: Pointer to number of move struct in pos_moves.
  */
-void Game::getKnightMoves(Computed* computed_moves, uint64_t rook_pins, 
+void Pos::getKnightMoves(Computed* computed_moves, uint64_t rook_pins, 
         uint64_t bishop_pins, std::vector<uint16_t>* pos_moves[MAX_MOVE_SETS], 
         int* moves_index) {
     PieceType piece = this->turn ? W_KNIGHT : B_KNIGHT;
@@ -525,7 +525,7 @@ void Game::getKnightMoves(Computed* computed_moves, uint64_t rook_pins,
  * @param pos_moves: Array of 16 bit unsigned int move vectors.
  * @param moves_index: Pointer to number of move struct in pos_moves.
  */
-void Game::getPawnMoves(Computed* computed_moves, uint64_t rook_pins, 
+void Pos::getPawnMoves(Computed* computed_moves, uint64_t rook_pins, 
         uint64_t bishop_pins, std::vector<uint16_t>* pos_moves[MAX_MOVE_SETS], 
         int* moves_index) {
     Square king = this->piece_list[this->turn][0];
@@ -586,7 +586,7 @@ void Game::getPawnMoves(Computed* computed_moves, uint64_t rook_pins,
  * @param bishop_pins: 64 bit unsigned int pointer for bishop pins.
  * @param kEnemy_attacks: 64 bit unsigned int pointer with value 0.
  */
-void Game::getEnemyAttacks(Computed* moves, uint64_t* enemy_attacks, 
+void Pos::getEnemyAttacks(Computed* moves, uint64_t* enemy_attacks, 
         uint64_t* rook_pins, uint64_t* bishop_pins, uint64_t* kEnemy_attacks) {
     bool turn = this->turn;
     Square king_sq = this->piece_list[turn][0];
@@ -698,7 +698,7 @@ void Game::getEnemyAttacks(Computed* moves, uint64_t* enemy_attacks,
  * @param pos_moves: Array of 16 bit unsigned int move vectors.
  * @param moves_index: Pointer to number of move struct in pos_moves.
  */
-void Game::getCastlingMoves(uint64_t enemy_attacks, Computed* moves, 
+void Pos::getCastlingMoves(uint64_t enemy_attacks, Computed* moves, 
         std::vector<uint16_t>* pos_moves[MAX_MOVE_SETS], int* moves_index) {
     uint64_t sides = this->sides[WHITE] | this->sides[BLACK];
     if (this->turn) {
@@ -767,7 +767,7 @@ void Game::getCastlingMoves(uint64_t enemy_attacks, Computed* moves,
  * @param pos_moves: Array of 16 bit unsigned int move vectors.
  * @param moves_index: Pointer to number of move struct in pos_moves.
  */
-void Game::horizontalPinEp(int king, bool turn, int attacker_sq, 
+void Pos::horizontalPinEp(int king, bool turn, int attacker_sq, 
         int captured_pawn, Computed* moves, int ep, std::vector<uint16_t>* 
         pos_moves[MAX_MOVE_SETS], int* moves_index) {
     int rank = (king / 8) * 8, rank_end = rank + 7;
@@ -831,7 +831,7 @@ void Game::horizontalPinEp(int king, bool turn, int attacker_sq,
  * @param pos_moves: Array of 16 bit unsigned int move vectors.
  * @param moves_index: Pointer to number of move struct in pos_moves.
  */
-void Game::diagonalPinEp(int king, bool turn, int attacker_sq, 
+void Pos::diagonalPinEp(int king, bool turn, int attacker_sq, 
         int captured_pawn, Computed* moves, int ep, std::vector<uint16_t>* 
         pos_moves[MAX_MOVE_SETS], int* moves_index) {
     if (ep > attacker_sq && ep % 8 < attacker_sq % 8) { // Upper left.
@@ -914,7 +914,7 @@ void Game::diagonalPinEp(int king, bool turn, int attacker_sq,
  * @param pos_moves: Array of 16 bit unsigned int move vectors.
  * @param moves_index: Pointer to number of move struct in pos_moves.
  */
-void Game::getEpMoves(uint64_t rook_pins, uint64_t bishop_pins, 
+void Pos::getEpMoves(uint64_t rook_pins, uint64_t bishop_pins, 
         Computed* moves, std::vector<uint16_t>* pos_moves[MAX_MOVE_SETS],
         int* moves_index) {
     if (this->en_passant != NONE) {
@@ -993,7 +993,7 @@ void Game::getEpMoves(uint64_t rook_pins, uint64_t bishop_pins,
  * @param pos_moves: Array of 16 bit unsigned int move vectors.
  * @param moves_index: Pointer to number of move struct in pos_moves.
  */
-void Game::getNormalMoves(Computed* moves, uint64_t* enemy_attacks, 
+void Pos::getNormalMoves(Computed* moves, uint64_t* enemy_attacks, 
         uint64_t* rook_pins, uint64_t* bishop_pins, std::vector<uint16_t>*
         pos_moves[MAX_MOVE_SETS], int* moves_index, uint64_t kEnemy_attacks) {
     this->getKingMoves(moves, pos_moves, moves_index, kEnemy_attacks);
@@ -1016,7 +1016,7 @@ void Game::getNormalMoves(Computed* moves, uint64_t* enemy_attacks,
  * @param pos_moves: Array of 16 bit unsigned int move vectors.
  * @param moves_index: Pointer to number of move struct in pos_moves.
  */
-void Game::getCheckedEp(uint64_t* rook_pins, uint64_t* bishop_pins, 
+void Pos::getCheckedEp(uint64_t* rook_pins, uint64_t* bishop_pins, 
         uint64_t checkers, Computed* moves, 
         std::vector<uint16_t>* pos_moves[MAX_MOVE_SETS], int* moves_index) {
     if (this->en_passant != NONE) {
@@ -1123,7 +1123,7 @@ void Game::getCheckedEp(uint64_t* rook_pins, uint64_t* bishop_pins,
  * @param pos_moves: Array of 16 bit unsigned int move vectors.
  * @param moves_index: Pointer to number of move struct in pos_moves.
  */
-void Game::getCheckedMoves(Computed* moves, uint64_t* enemy_attacks, 
+void Pos::getCheckedMoves(Computed* moves, uint64_t* enemy_attacks, 
         uint64_t* rook_pins, uint64_t* bishop_pins,
         std::vector<uint16_t>* pos_moves[MAX_MOVE_SETS], int* moves_index, 
         uint64_t kEnemy_attacks) {    
@@ -1267,7 +1267,7 @@ void Game::getCheckedMoves(Computed* moves, uint64_t* enemy_attacks,
  * @param square: The square that the bishop is on.
  * @param move_family: Pointer to struct holding the moves family for bishop.
  */
-void Game::setBishopMoves(int square, MovesStruct* move_family) {
+void setBishopMoves(int square, MovesStruct* move_family) {
     move_family->reach = 0;
 
     // Set the reach.
@@ -1361,7 +1361,7 @@ void Game::setBishopMoves(int square, MovesStruct* move_family) {
  *      bishop attack sets are set.
  * @param BISHOP_MOVES: Array of move structs for each bishop move family.
  */
-void Game::computeBCornerMoves(int square, int* offset, 
+void computeBCornerMoves(int square, int* offset, 
         std::vector<int>* BISHOP_INDEX, MovesStruct* BISHOP_MOVES) {
     // The diagonal start and end squares.
     int start = square + (square / 8 <= 3 ? 8 : -8) + 
@@ -1404,7 +1404,7 @@ void Game::computeBCornerMoves(int square, int* offset,
             );
             std::sort(BISHOP_MOVES[move_index].block_bits.begin(),
                     BISHOP_MOVES[move_index].block_bits.end());
-            Game::setBishopMoves(square, &(BISHOP_MOVES[move_index]));
+            setBishopMoves(square, &(BISHOP_MOVES[move_index]));
         }
     }
 
@@ -1421,7 +1421,7 @@ void Game::computeBCornerMoves(int square, int* offset,
  *      bishop attack sets are set.
  * @param BISHOP_MOVES: Array of move structs for each bishop move family.
  */
-void Game::computeBLRSideMoves(int square, int* offset, 
+void computeBLRSideMoves(int square, int* offset, 
         std::vector<int>* BISHOP_INDEX, MovesStruct* BISHOP_MOVES) {
     // The diagonal start and end squares.
     int start1 = square % 8 == 0 ? square + 9 : square - 9;
@@ -1507,7 +1507,7 @@ void Game::computeBLRSideMoves(int square, int* offset,
 
                 std::sort(BISHOP_MOVES[move_index].block_bits.begin(),
                         BISHOP_MOVES[move_index].block_bits.end());
-                Game::setBishopMoves(square, &(BISHOP_MOVES[move_index]));
+                setBishopMoves(square, &(BISHOP_MOVES[move_index]));
             }
         }
     }
@@ -1525,7 +1525,7 @@ void Game::computeBLRSideMoves(int square, int* offset,
  *      bishop attack sets are set.
  * @param BISHOP_MOVES: Array of move structs for each bishop move family.
  */
-void Game::computeBULSideMoves(int square, int* offset, 
+void computeBULSideMoves(int square, int* offset, 
         std::vector<int>* BISHOP_INDEX, MovesStruct* BISHOP_MOVES) {
     // The diagonal start and end squares.
     int start1 = square / 8 == 0 ? square + 9 : square - 9;
@@ -1610,7 +1610,7 @@ void Game::computeBULSideMoves(int square, int* offset,
 
                 std::sort(BISHOP_MOVES[move_index].block_bits.begin(),
                         BISHOP_MOVES[move_index].block_bits.end());
-                Game::setBishopMoves(square, &(BISHOP_MOVES[move_index]));
+                setBishopMoves(square, &(BISHOP_MOVES[move_index]));
             }
         }
     }
@@ -1627,7 +1627,7 @@ void Game::computeBULSideMoves(int square, int* offset,
  *      bishop attack sets are set.
  * @param BISHOP_MOVES: Array of move structs for each bishop move family.
  */
-void Game::computeBCentreMoves(int sq, int* offset, std::vector<int>* BISHOP_INDEX, 
+void computeBCentreMoves(int sq, int* offset, std::vector<int>* BISHOP_INDEX, 
         MovesStruct* BISHOP_MOVES) {
     int start1 = sq + 9; // Upper right.
     int start2 = sq - 7; // Lower right.
@@ -1845,14 +1845,14 @@ void Game::computeBCentreMoves(int sq, int* offset, std::vector<int>* BISHOP_IND
                     BISHOP_INDEX[sq][bishopIndex] = move_index;
 
                     if (BISHOP_MOVES[move_index].reach == UNSET) {
-                        BISHOP_MOVES[move_index].block_bits.push_back(msb1);                        
+                        BISHOP_MOVES[move_index].block_bits.push_back(msb1);
                         BISHOP_MOVES[move_index].block_bits.push_back(msb2);
                         BISHOP_MOVES[move_index].block_bits.push_back(msb3);
                         BISHOP_MOVES[move_index].block_bits.push_back(msb4);
 
                         std::sort(BISHOP_MOVES[move_index].block_bits.begin(),
                                 BISHOP_MOVES[move_index].block_bits.end());
-                        Game::setBishopMoves(sq, &(BISHOP_MOVES[move_index]));
+                        setBishopMoves(sq, &(BISHOP_MOVES[move_index]));
                     }
                 }
             }
@@ -1869,7 +1869,7 @@ void Game::computeBCentreMoves(int sq, int* offset, std::vector<int>* BISHOP_IND
  * @param pos: A bitboard of the pieces on the board.
  * @param square: The square of the piece whose moves we want.
  */
-const int Game::bishopIndex(const uint64_t pos, Square square) {
+const int Pos::bishopIndex(const uint64_t pos, Square square) {
     return ((pos & bishopMasks[square]) * bishopMagicNums[square]) >> 
             bishopShifts[square];
 }
@@ -1883,7 +1883,7 @@ const int Game::bishopIndex(const uint64_t pos, Square square) {
  * @param square: The square of the king in check.
  * @param checkers_only: Pointer to bit board of checkers only.
  */
-uint64_t Game::getBishopCheckRays(Computed* moves, Square square, uint64_t* checkers_only) {
+uint64_t Pos::getBishopCheckRays(Computed* moves, Square square, uint64_t* checkers_only) {
     uint64_t result = 0;
     bool turn = this->turn;
     Square king_sq = this->piece_list[turn][0];
@@ -1923,7 +1923,7 @@ uint64_t Game::getBishopCheckRays(Computed* moves, Square square, uint64_t* chec
  *      bishop attack sets are set.
  * @param BISHOP_MOVES: Array of bishop move sets to store precomputed moves.
  */
-void Game::computeBishopMoves(std::vector<int>* BISHOP_INDEX, MovesStruct* BISHOP_MOVES) {
+void computeBishopMoves(std::vector<int>* BISHOP_INDEX, MovesStruct* BISHOP_MOVES) {
     // Set initial reach to UNSET.
     for (int i = 0; i < 1428; i++) {
         BISHOP_MOVES[i].reach = UNSET;
@@ -1933,13 +1933,13 @@ void Game::computeBishopMoves(std::vector<int>* BISHOP_INDEX, MovesStruct* BISHO
     int offset = 0;
     for (int square = A1; square <= H8; square++) {
         if (square == A1 || square == A8 || square == H1 || square == H8) {
-            Game::computeBCornerMoves(square, &offset, BISHOP_INDEX, BISHOP_MOVES);
+            computeBCornerMoves(square, &offset, BISHOP_INDEX, BISHOP_MOVES);
         } else if (square % 8 == 0 || square % 8 == 7) {
-            Game::computeBLRSideMoves(square, &offset, BISHOP_INDEX, BISHOP_MOVES);
+            computeBLRSideMoves(square, &offset, BISHOP_INDEX, BISHOP_MOVES);
         } else if (square / 8 == 0 || square / 8 == 7) {
-            Game::computeBULSideMoves(square, &offset, BISHOP_INDEX, BISHOP_MOVES);
+            computeBULSideMoves(square, &offset, BISHOP_INDEX, BISHOP_MOVES);
         } else {
-            Game::computeBCentreMoves(square, &offset, BISHOP_INDEX, BISHOP_MOVES);
+            computeBCentreMoves(square, &offset, BISHOP_INDEX, BISHOP_MOVES);
         }
     }
 }
@@ -1950,7 +1950,7 @@ void Game::computeBishopMoves(std::vector<int>* BISHOP_INDEX, MovesStruct* BISHO
  * 
  * @param BISHOP_BLOCKS: A vector of move structs.
  */
-void Game::computeBishopBlocks(MovesStruct* BISHOP_BLOCKS) {
+void Pos::computeBishopBlocks(MovesStruct* BISHOP_BLOCKS) {
     std::tuple<int, int> pairs[4] = {
         std::make_tuple(9, -7), std::make_tuple(-7, -9), std::make_tuple(-9, 7),
         std::make_tuple(7, 9)
@@ -2040,7 +2040,7 @@ void Game::computeBishopBlocks(MovesStruct* BISHOP_BLOCKS) {
  * @param moves: A struct of the precomputed moves.
  * @param square: The square on which the bishop is on.
  */
-MovesStruct* Game::getBishopFamily(Computed* moves, Square square) {
+MovesStruct* Pos::getBishopFamily(Computed* moves, Square square) {
     return &moves->BISHOP_MOVES[moves->BISHOP_INDEX[square][
             this->bishopIndex(this->sides[BLACK] | this->sides[WHITE], square)]];
 }
@@ -2049,7 +2049,7 @@ MovesStruct* Game::getBishopFamily(Computed* moves, Square square) {
  * Compute the king moves.
  * @param KING_MOVES: The array of king moves to be computed.
  */
-void Game::computeKingMoves(MovesStruct* KING_MOVES) {
+void Pos::computeKingMoves(MovesStruct* KING_MOVES) {
     // Compute the moves and reach.
     for (int square = A1; square <= H8; square++) {
         KING_MOVES[square].reach = 0;
@@ -2123,7 +2123,7 @@ void Game::computeKingMoves(MovesStruct* KING_MOVES) {
  * Compute the knight moves.
  * @param KNIGHT_MOVES: Array of knight moves to be computed.
  */
-void Game::computeKnightMoves(MovesStruct* KNIGHT_MOVES) {
+void Pos::computeKnightMoves(MovesStruct* KNIGHT_MOVES) {
     // Compute the moves and reach.
     for (int square = A1; square <= H8; square++) {
         // Compute the reach.
@@ -2202,7 +2202,7 @@ void Game::computeKnightMoves(MovesStruct* KNIGHT_MOVES) {
  * @param checkers_only: A pointer to a bit board of checkers only.
  * @return: Bitboard of knight checkers.
  */
-uint64_t Game::getKnightCheckers(Computed* moves, Square square, uint64_t* checkers_only) {
+uint64_t Pos::getKnightCheckers(Computed* moves, Square square, uint64_t* checkers_only) {
     uint64_t result = 0;
     *checkers_only |= moves->KNIGHT_MOVES[square].reach & this->sides[1 - this->turn] & this->knights;
     return result;
@@ -2216,7 +2216,7 @@ uint64_t Game::getKnightCheckers(Computed* moves, Square square, uint64_t* check
  *  ep.
  * @param DOUBLE_PUSH: An array of moves structs for double pawn push blocks.
  */
-void Game::computePawnMoves(MovesStruct PAWN_MOVES[][48], MovesStruct EN_PASSANT_MOVES[16],
+void Pos::computePawnMoves(MovesStruct PAWN_MOVES[][48], MovesStruct EN_PASSANT_MOVES[16],
         MovesStruct DOUBLE_PUSH[16]) {
     for (int player = BLACK; player <= WHITE; player++) {
         int left = player == BLACK ? -9 : 7;
@@ -2447,7 +2447,7 @@ void Game::computePawnMoves(MovesStruct PAWN_MOVES[][48], MovesStruct EN_PASSANT
  * @param game: Pointer to game struct.
  * @param square: Square of pawn.
  */
-uint64_t Game::pawnMoveArgs(Square square) {
+uint64_t Pos::pawnMoveArgs(Square square) {
     bool turn = this->turn;
     return (this->sides[!turn] | (this->sides[turn] & files[square % 8]));
 }
@@ -2458,7 +2458,7 @@ uint64_t Game::pawnMoveArgs(Square square) {
  * @param square: The square of the king in check.
  * @param checkers_only: Pointer to bit board of checkers only.
  */
-uint64_t Game::getPawnCheckers(Square square, uint64_t* checkers_only) {
+uint64_t Pos::getPawnCheckers(Square square, uint64_t* checkers_only) {
     uint64_t enemy_pawns = this->sides[1 - this->turn] & this->pawns;
     uint64_t result = 0;
     int rank_offset = this->turn ? 8 : -8;
@@ -2486,7 +2486,7 @@ uint64_t Game::getPawnCheckers(Square square, uint64_t* checkers_only) {
  * @param square: The square that the rook is on.
  * @param move_family: The struct holding the moves family for rooks.
  */
-void Game::setRookMoves(int square, MovesStruct* move_family) {
+void setRookMoves(int square, MovesStruct* move_family) {
     move_family->reach = 0;
 
     // Set the reach.
@@ -2583,7 +2583,7 @@ void Game::setRookMoves(int square, MovesStruct* move_family) {
  *      attack sets are set.
  * @param ROOK_MOVES: Array of move structs for each rook move family.
  */
-void Game::computeRCornerMoves(int square, int* offset, std::vector<int>* ROOK_INDEX, 
+void computeRCornerMoves(int square, int* offset, std::vector<int>* ROOK_INDEX, 
         MovesStruct* ROOK_MOVES) {
     // The horizontal and vertical start and end squares.
     int hStart = (square / 8) * 8 + 1;
@@ -2629,7 +2629,7 @@ void Game::computeRCornerMoves(int square, int* offset, std::vector<int>* ROOK_I
                     square % 8 == 0 ? square + (7 - MSB(hOcc)) : square - (7 - MSB(hOcc))
                 );
                 std::sort(ROOK_MOVES[move_index].block_bits.begin(), ROOK_MOVES[move_index].block_bits.end());
-                Game::setRookMoves(square, &(ROOK_MOVES[move_index]));
+                setRookMoves(square, &(ROOK_MOVES[move_index]));
             }
         }
     }
@@ -2646,7 +2646,7 @@ void Game::computeRCornerMoves(int square, int* offset, std::vector<int>* ROOK_I
  *      attack sets are set.
  * @param ROOK_MOVES: Array of move structs for each rook move family.
  */
-void Game::computeRLRSideMoves(int square, int* offset, std::vector<int>* ROOK_INDEX,
+void computeRLRSideMoves(int square, int* offset, std::vector<int>* ROOK_INDEX,
         MovesStruct* ROOK_MOVES) {
     // The horizontal and vertical start and end squares.
     int hStart = (square / 8) * 8 + 1;
@@ -2759,7 +2759,7 @@ void Game::computeRLRSideMoves(int square, int* offset, std::vector<int>* ROOK_I
  *      attack sets are set.
  * @param ROOK_MOVES: Array of move structs for each rook move family.
  */
-void Game::computeRULSideMoves(int square, int* offset, std::vector<int>* ROOK_INDEX,
+void computeRULSideMoves(int square, int* offset, std::vector<int>* ROOK_INDEX,
         MovesStruct* ROOK_MOVES) {
     // The horizontal and vertical start and end squares.
     int h1_Start = (square / 8) * 8 + 1;
@@ -2876,7 +2876,7 @@ void Game::computeRULSideMoves(int square, int* offset, std::vector<int>* ROOK_I
  *      attack sets are set.
  * @param ROOK_MOVES: Array of move structs for each rook move family.
  */
-void Game::computeRCentreMoves(int square, int* offset, std::vector<int>* ROOK_INDEX,
+void computeRCentreMoves(int square, int* offset, std::vector<int>* ROOK_INDEX,
         MovesStruct* ROOK_MOVES) {
     // The horizontal and vertical start and end squares.
     int h1_Start = (square / 8) * 8 + 1;
@@ -3054,7 +3054,7 @@ void Game::computeRCentreMoves(int square, int* offset, std::vector<int>* ROOK_I
  * @param square: The square of the piece whose moves we want.
  * @return: Index into ROOK_MOVES.
  */
-const int Game::rookIndex(const uint64_t pos, Square square) {
+const int Pos::rookIndex(const uint64_t pos, Square square) {
     return ((pos & rookMasks[square]) * rookMagicNums[square]) >> 
             rookShifts[square];
 }
@@ -3068,7 +3068,7 @@ const int Game::rookIndex(const uint64_t pos, Square square) {
  * @param game: A Game struct pointer.
  * @return: Index into the ROOK_BLOCK array.
  */
-const int Game::rookBlockIndex(uint64_t pos, Computed* moves, Square square) {
+const int Pos::rookBlockIndex(uint64_t pos, Computed* moves, Square square) {
     return pos & this->getRookFamily(moves, square)->reach;
 }
 
@@ -3081,7 +3081,7 @@ const int Game::rookBlockIndex(uint64_t pos, Computed* moves, Square square) {
  * @param checkers: Bitboard of checkers.
  * @return: Check rays of rooks and queens.
  */
-uint64_t Game::getRookCheckRays(Computed* moves, Square square, uint64_t* checkers) {
+uint64_t Pos::getRookCheckRays(Computed* moves, Square square, uint64_t* checkers) {
     uint64_t result = 0;
     Square king_sq = this->piece_list[this->turn][0];
     uint64_t king_rays = this->getRookFamily(moves, king_sq)->reach & ~this->sides[this->turn];
@@ -3115,7 +3115,7 @@ uint64_t Game::getRookCheckRays(Computed* moves, Square square, uint64_t* checke
  *      attack sets are set.
  * @param ROOK_MOVES: Move struct to store the moves.
  */
-void Game::computeRookMoves(std::vector<int>* ROOK_INDEX, MovesStruct* ROOK_MOVES) {
+void computeRookMoves(std::vector<int>* ROOK_INDEX, MovesStruct* ROOK_MOVES) {
     // Set initial reach to UNSET.
     for (int i = 0; i < 4900; i++) {
         ROOK_MOVES[i].reach = UNSET;
@@ -3125,13 +3125,13 @@ void Game::computeRookMoves(std::vector<int>* ROOK_INDEX, MovesStruct* ROOK_MOVE
     int offset = 0;
     for (int square = A1; square <= H8; square++) {
         if (square == A1 || square == A8 || square == H1 || square == H8) {
-            Game::computeRCornerMoves(square, &offset, ROOK_INDEX, ROOK_MOVES);
+            computeRCornerMoves(square, &offset, ROOK_INDEX, ROOK_MOVES);
         } else if (square % 8 == 0 || square % 8 == 7) {
-            Game::computeRLRSideMoves(square, &offset, ROOK_INDEX, ROOK_MOVES);
+            computeRLRSideMoves(square, &offset, ROOK_INDEX, ROOK_MOVES);
         } else if (square / 8 == 0 || square / 8 == 7) {
-            Game::computeRULSideMoves(square, &offset, ROOK_INDEX, ROOK_MOVES);
+            computeRULSideMoves(square, &offset, ROOK_INDEX, ROOK_MOVES);
         } else {
-            Game::computeRCentreMoves(square, &offset, ROOK_INDEX, ROOK_MOVES);
+            computeRCentreMoves(square, &offset, ROOK_INDEX, ROOK_MOVES);
         }
     }
 }
@@ -3141,7 +3141,7 @@ void Game::computeRookMoves(std::vector<int>* ROOK_INDEX, MovesStruct* ROOK_MOVE
  * square.
  * @param ROOK_BLOCKS: A vector of move structs.
  */
-void Game::computeRookBlocks(MovesStruct* ROOK_BLOCKS) {
+void Pos::computeRookBlocks(MovesStruct* ROOK_BLOCKS) {
     std::tuple<int, int> pairs[4] = {
         std::make_tuple(8, 1), std::make_tuple(1, -8), std::make_tuple(-8, -1),
         std::make_tuple(-1, 8)
@@ -3220,7 +3220,7 @@ void Game::computeRookBlocks(MovesStruct* ROOK_BLOCKS) {
  * @param square: The square on which the rook is on.
  * @return Pointer to moves struct.
  */
-MovesStruct* Game::getRookFamily(Computed* moves, Square square) {
+MovesStruct* Pos::getRookFamily(Computed* moves, Square square) {
     &moves->ROOK_MOVES[moves->ROOK_INDEX[square][rookIndex(this->sides[BLACK] | this->sides[WHITE], square)]];
     return &moves->ROOK_MOVES[moves->ROOK_INDEX[square][
             rookIndex(this->sides[BLACK] | this->sides[WHITE], square)]];
@@ -3233,6 +3233,6 @@ MovesStruct* Game::getRookFamily(Computed* moves, Square square) {
  * @param square: The square on which the rook is on.
  * @return Pointer to moves struct.
  */
-MovesStruct* getRookBlockFamily(Game* game, Computed* moves, Square square) {
+MovesStruct* getRookBlockFamily(Pos* game, Computed* moves, Square square) {
     return nullptr;
 }

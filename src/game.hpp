@@ -5,7 +5,7 @@
 #include "constants.hpp"
 
 namespace Play {
-    void init(Game* game, Computed* moves, CmdLine* args,char *argv[], 
+    void init(Pos* game, Computed* moves, CmdLine* args,char *argv[], 
             std::string input);
 }
 
@@ -17,7 +17,7 @@ namespace Play {
  * @param moves_index: Pointer to number of vectors in pos_moves.
  * @return: The appropriate ExitCode.
  */
-ExitCode isEOG(Game* game, Computed* moves, uint64_t enemy_attacks, 
+ExitCode isEOG(Pos* game, Computed* moves, uint64_t enemy_attacks, 
         int move_index);
 
 /**
@@ -40,32 +40,32 @@ void showEOG(ExitCode code, char *argv[]);
  * @param moves: Pointer to precomputed moves struct.
  * @param args: Pointer to command line arguments struct.
  */
-void handleGame(Game* game, Computed* Moves, CmdLine* args, char *argv[]);
+void handleGame(Pos* game, Computed* Moves, CmdLine* args, char *argv[]);
 
 /**
  * Make the moves.
  * @param move: The moves to make.
  * @param game: Pointer to game struct.
  */
-void makeMove(uint16_t move, Game* game);
+void makeMove(uint16_t move, Pos* game);
 
 /**
  * Undo moves.
  * @param game: Pointer to game struct.
  */
-void undoMove(Game* game);
+void undoMove(Pos* game);
 
 /**
  * Retrives all legal moves of the current position.
  * 
- * @param game: Pointer to Game struct of the current position.
+ * @param game: Pointer to Pos struct of the current position.
  * @param moves: Pointer to the precomputed moves struct.
  * @param enemy_attacks: Pointer to bitboard of all squares attacked by the 
  *  enemy.
  * 
  * @return: The number of move sets.
  */
-int getMoves(Game* game, Computed* moves, uint64_t* enemy_attacks, 
+int getMoves(Pos* game, Computed* moves, uint64_t* enemy_attacks, 
         std::vector<uint16_t>* pos_moves[MAX_MOVE_SETS]);
 
 #endif

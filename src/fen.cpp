@@ -34,7 +34,7 @@ bool goodFen(std::string fen) {
     return true;
 }
 
-void Game::zero() {
+void Pos::zero() {
     this->sides[WHITE] = 0ULL;
     this->sides[BLACK] = 0ULL;
     this->kings = 0ULL;
@@ -64,7 +64,7 @@ void Game::zero() {
  * 
  * @return: INVALID_FEN if fen is invalid, else NORMAL_PLY.
  */
-ExitCode Game::parseFen(std::string fen) {
+ExitCode Pos::parseFen(std::string fen) {
     if (!goodFen(fen)) return INVALID_FEN;
 
     // Zero out variables.
@@ -241,7 +241,7 @@ ExitCode Game::parseFen(std::string fen) {
  * Return true if a square is a dark square, else false.
  * @param square: The square to check.
  */
-bool Game::isDark(int square) {
+bool Pos::isDark(int square) {
     if ((square % 2 == 0 && ((square / 8) % 2) == 0) || 
             (square % 2 == 1 && ((square / 8) % 2) == 1)) {
         return true;
@@ -253,7 +253,7 @@ bool Game::isDark(int square) {
  * Get and return the FEN string of the current position.
  * @param game: Pointer to game struct.
  */
-std::string Game::getFEN() {
+std::string Pos::getFEN() {
     std::string fen = "";
     int no_piece_count = 0;
     for (int rank = 7; rank >= 0; rank--) {
