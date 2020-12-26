@@ -3,7 +3,6 @@
 #include <unordered_map>
 
 #include "rook_moves.hpp"
-#include "bishop_moves.hpp"
 #include "fen.hpp"
 #include "game.hpp"
 #include "test.hpp"

@@ -4,26 +4,8 @@ OBJ = ../obj
 
 all: main
 
-$(OBJ)/movegen.o: movegen.cpp movegen.hpp constants.hpp rook_moves.hpp \
-		bishop_moves.hpp knight_moves.hpp king_moves.hpp game.hpp
+$(OBJ)/movegen.o: movegen.cpp movegen.hpp constants.hpp game.hpp
 	$(FLAGS) -c movegen.cpp -o $(OBJ)/movegen.o
-
-$(OBJ)/rook_moves.o: rook_moves.cpp rook_moves.hpp constants.hpp movegen.hpp
-	$(FLAGS) -c rook_moves.cpp -o $(OBJ)/rook_moves.o
-
-$(OBJ)/bishop_moves.o: bishop_moves.cpp bishop_moves.hpp constants.hpp \
-		movegen.hpp
-	$(FLAGS) -c bishop_moves.cpp -o $(OBJ)/bishop_moves.o
-
-$(OBJ)/knight_moves.o: knight_moves.cpp knight_moves.hpp constants.hpp \
-		movegen.hpp
-	$(FLAGS) -c knight_moves.cpp -o $(OBJ)/knight_moves.o
-
-$(OBJ)/king_moves.o: king_moves.cpp king_moves.hpp constants.hpp movegen.hpp
-	$(FLAGS) -c king_moves.cpp -o $(OBJ)/king_moves.o
-
-$(OBJ)/pawn_moves.o: pawn_moves.cpp pawn_moves.hpp constants.hpp movegen.hpp
-	$(FLAGS) -c pawn_moves.cpp -o $(OBJ)/pawn_moves.o
 
 $(OBJ)/fen.o: fen.cpp fen.hpp constants.hpp movegen.hpp
 	$(FLAGS) -c fen.cpp -o $(OBJ)/fen.o
@@ -46,19 +28,17 @@ $(OBJ)/evaluate.o: evaluate.cpp evaluate.hpp constants.hpp
 $(OBJ)/uci.o: uci.cpp uci.hpp
 	$(FLAGS) -c uci.cpp -o $(OBJ)/uci.o
 
-$(OBJ)/main.o: main.cpp movegen.hpp rook_moves.hpp test.hpp game.hpp \
+$(OBJ)/main.o: main.cpp movegen.hpp test.hpp game.hpp \
 		search.hpp evaluate.hpp uci.hpp
 	$(FLAGS) -c main.cpp -o $(OBJ)/main.o
 
-main: $(OBJ)/main.o $(OBJ)/rook_moves.o $(OBJ)/bishop_moves.o \
-		$(OBJ)/knight_moves.o $(OBJ)/king_moves.o $(OBJ)/pawn_moves.o \
+main: $(OBJ)/main.o \
 		$(OBJ)/fen.o $(OBJ)/game.o $(OBJ)/movegen.o $(OBJ)/test.o \
 		$(OBJ)/arg.o $(OBJ)/search.o $(OBJ)/evaluate.o $(OBJ)/uci.o
-	$(FLAGS) $(OBJ)/main.o $(OBJ)/rook_moves.o $(OBJ)/bishop_moves.o \
-			$(OBJ)/knight_moves.o $(OBJ)/king_moves.o $(OBJ)/pawn_moves.o \
+	$(FLAGS) $(OBJ)/main.o \
 			$(OBJ)/fen.o $(OBJ)/game.o $(OBJ)/movegen.o $(OBJ)/test.o \
 			$(OBJ)/arg.o $(OBJ)/search.o $(OBJ)/evaluate.o $(OBJ)/uci.o \
 			-o tardigrade
 
 clean:
-	rm -rf *.o tardigrade
+	rm $(OBJ)/*.o tardigrade run_tests
