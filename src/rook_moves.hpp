@@ -32,14 +32,14 @@ uint64_t getRookCheckRays(Game* game, Computed* moves, Square square,
  *      attack sets are set.
  * @param ROOK_MOVES: Move struct to store the moves.
  */
-void computeRookMoves(std::vector<int>* ROOK_INDEX, Moves* ROOK_MOVES);
+void computeRookMoves(std::vector<int>* ROOK_INDEX, MovesStruct* ROOK_MOVES);
 
 /**
  * Computes the blocking moves (and captures in case of check) for rooks on each
  * square.
  * @param ROOK_BLOCKS: A vector of move structs.
  */
-void computeRookBlocks(Moves* ROOK_BLOCKS);
+void computeRookBlocks(MovesStruct* ROOK_BLOCKS);
 
 /**
  * Finds and returns a pointer to a rook move family.
@@ -48,7 +48,7 @@ void computeRookBlocks(Moves* ROOK_BLOCKS);
  * @param square: The square on which the rook is on.
  * @return Pointer to moves struct.
  */
-Moves* getRookFamily(Game* game, Computed* moves, Square square);
+MovesStruct* getRookFamily(Game* game, Computed* moves, Square square);
 
 /**
  * Finds and returns a pointer to a rook block move family.
@@ -57,6 +57,6 @@ Moves* getRookFamily(Game* game, Computed* moves, Square square);
  * @param square: The square on which the rook is on.
  * @return Pointer to moves struct.
  */
-Moves* getRookBlockFamily(Game* game, Computed* moves, Square square);
+MovesStruct* getRookBlockFamily(Game* game, Computed* moves, Square square);
 
 #endif

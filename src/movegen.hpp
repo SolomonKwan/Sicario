@@ -4,6 +4,17 @@
 
 #include "constants.hpp"
 
+typedef uint64_t Bitboard;
+// typedef std::vector<Bitboard> BitBoardSet;
+// typedef std::vector<BitBoardSet> BitBoardFamily;
+
+// typedef uint16_t Move;
+// typedef std::vector<Move> MoveSet;
+// typedef std::vector<MoveSet> MoveFamily;
+// typedef std::vector<MoveFamily> PieceMoves;
+
+// typedef std::vector<std::unordered_map<Bitboard, std::vector<Move>>> CheckMap; // For check moves
+
 namespace Compute {
     void init(Computed* moves);
 }
@@ -24,7 +35,7 @@ void printMove(uint16_t move, bool extraInfo = false);
  *      largest.
  * @return:  Index into the move_set.
  */
-int moveSetIndex(uint64_t masked_reach, Moves* move_family);
+int moveSetIndex(uint64_t masked_reach, MovesStruct* move_family);
 
 /**
  * Finds and returns the position of the most significant set bit. If no bits
@@ -156,7 +167,7 @@ uint64_t getBishopCheckRays(Game* game, Computed* moves, Square square,
  *      bishop attack sets are set.
  * @param BISHOP_MOVES: Array of bishop move sets to store precomputed moves.
  */
-void computeBishopMoves(std::vector<int>* BISHOP_INDEX, Moves* BISHOP_MOVES);
+void computeBishopMoves(std::vector<int>* BISHOP_INDEX, MovesStruct* BISHOP_MOVES);
 
 /**
  * Computes the blocking moves (and captures in case of check) for bishops on 
@@ -164,7 +175,7 @@ void computeBishopMoves(std::vector<int>* BISHOP_INDEX, Moves* BISHOP_MOVES);
  * 
  * @param BISHOP_BLOCKS: A vector of move structs.
  */
-void computeBishopBlocks(Moves* BISHOP_BLOCKS);
+void computeBishopBlocks(MovesStruct* BISHOP_BLOCKS);
 
 /**
  * Finds and returns a pointer to a bishop move family.
@@ -173,19 +184,19 @@ void computeBishopBlocks(Moves* BISHOP_BLOCKS);
  * @param moves: A struct of the precomputed moves.
  * @param square: The square on which the bishop is on.
  */
-Moves* getBishopFamily(Game* game, Computed* moves, Square square);
+MovesStruct* getBishopFamily(Game* game, Computed* moves, Square square);
 
 /**
  * Compute the king moves.
  * @param KING_MOVES: The array of king moves to be computed.
  */
-void computeKingMoves(Moves* KING_MOVES);
+void computeKingMoves(MovesStruct* KING_MOVES);
 
 /**
  * Compute the knight moves.
  * @param KNIGHT_MOVES: Array of knight moves to be computed.
  */
-void computeKnightMoves(Moves* KNIGHT_MOVES);
+void computeKnightMoves(MovesStruct* KNIGHT_MOVES);
 
 /**
  * Gets a bitboard of knight checkers.
@@ -206,8 +217,8 @@ uint64_t getKnightCheckers(Game* game, Computed* move, Square square,
  *  ep.
  * @param DOUBLE_PUSH: An array of moves structs for double pawn push blocks.
  */
-void computePawnMoves(Moves PAWN_MOVES[][48], Moves EN_PASSANT_MOVES[16], 
-        Moves DOUBLE_PUSH[16]);
+void computePawnMoves(MovesStruct PAWN_MOVES[][48], MovesStruct EN_PASSANT_MOVES[16], 
+        MovesStruct DOUBLE_PUSH[16]);
 
 /**
  * Get the arguments for the pawn index function for pawns.
@@ -252,14 +263,14 @@ uint64_t getRookCheckRays(Game* game, Computed* moves, Square square,
  *      attack sets are set.
  * @param ROOK_MOVES: Move struct to store the moves.
  */
-void computeRookMoves(std::vector<int>* ROOK_INDEX, Moves* ROOK_MOVES);
+void computeRookMoves(std::vector<int>* ROOK_INDEX, MovesStruct* ROOK_MOVES);
 
 /**
  * Computes the blocking moves (and captures in case of check) for rooks on each
  * square.
  * @param ROOK_BLOCKS: A vector of move structs.
  */
-void computeRookBlocks(Moves* ROOK_BLOCKS);
+void computeRookBlocks(MovesStruct* ROOK_BLOCKS);
 
 /**
  * Finds and returns a pointer to a rook move family.
@@ -268,7 +279,7 @@ void computeRookBlocks(Moves* ROOK_BLOCKS);
  * @param square: The square on which the rook is on.
  * @return Pointer to moves struct.
  */
-Moves* getRookFamily(Game* game, Computed* moves, Square square);
+MovesStruct* getRookFamily(Game* game, Computed* moves, Square square);
 
 /**
  * Finds and returns a pointer to a rook block move family.
@@ -277,6 +288,6 @@ Moves* getRookFamily(Game* game, Computed* moves, Square square);
  * @param square: The square on which the rook is on.
  * @return Pointer to moves struct.
  */
-Moves* getRookBlockFamily(Game* game, Computed* moves, Square square);
+MovesStruct* getRookBlockFamily(Game* game, Computed* moves, Square square);
 
 #endif

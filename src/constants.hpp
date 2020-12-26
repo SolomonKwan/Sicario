@@ -115,7 +115,7 @@ enum Castling {
  *      destination squares (captures and blocks) set. The value is a vector of
  *      moves to those squares.
  */
-struct Moves {
+struct MovesStruct {
     uint64_t reach;
     std::vector<int> block_bits;
     std::vector<std::vector<uint16_t>> move_set;
@@ -139,19 +139,19 @@ struct History {
 
 struct Computed {
     std::vector<int> ROOK_INDEX[64];
-    Moves ROOK_MOVES[4900];
-    Moves ROOK_BLOCKS[64];
+    MovesStruct ROOK_MOVES[4900];
+    MovesStruct ROOK_BLOCKS[64];
 
     std::vector<int> BISHOP_INDEX[64];
-    Moves BISHOP_MOVES[1428];
-    Moves BISHOP_BLOCKS[64];
+    MovesStruct BISHOP_MOVES[1428];
+    MovesStruct BISHOP_BLOCKS[64];
 
-    Moves KNIGHT_MOVES[64];
-    Moves KING_MOVES[64];
-    Moves PAWN_MOVES[2][48];
-    Moves CASTLING_MOVES[4];
-    Moves EN_PASSANT_MOVES[16];
-    Moves DOUBLE_PUSH[16];
+    MovesStruct KNIGHT_MOVES[64];
+    MovesStruct KING_MOVES[64];
+    MovesStruct PAWN_MOVES[2][48];
+    MovesStruct CASTLING_MOVES[4];
+    MovesStruct EN_PASSANT_MOVES[16];
+    MovesStruct DOUBLE_PUSH[16];
 };
 
 /**
@@ -206,8 +206,8 @@ class Game {
         const int bishopIndex(const uint64_t pos, Square square);
         const int rookIndex(const uint64_t pos, Square square);
         bool isDoubleChecked(Computed* moves);
-        Moves* getRookFamily(Computed* moves, Square square);
-        Moves* getBishopFamily(Computed* moves, Square square);
+        MovesStruct* getRookFamily(Computed* moves, Square square);
+        MovesStruct* getBishopFamily(Computed* moves, Square square);
         void display(CmdLine* args);
         ExitCode isEOG(Computed* moves, uint64_t enemy_attacks, int move_index);
         bool isThreeFoldRep();
@@ -263,27 +263,27 @@ class Game {
         void showEOG(ExitCode code, char *argv[]);
         const int rookBlockIndex(uint64_t pos, Computed* moves, Square square);
         
-        static void setRookMoves(int square, Moves* move_family);
-        static void computeRCentreMoves(int square, int* offset, std::vector<int>* ROOK_INDEX, Moves* ROOK_MOVES);
-        static void computeRULSideMoves(int square, int* offset, std::vector<int>* ROOK_INDEX, Moves* ROOK_MOVES);
-        static void computeRLRSideMoves(int square, int* offset, std::vector<int>* ROOK_INDEX, Moves* ROOK_MOVES);
-        static void computeRCornerMoves(int square, int* offset, std::vector<int>* ROOK_INDEX, Moves* ROOK_MOVES);
+        static void setRookMoves(int square, MovesStruct* move_family);
+        static void computeRCentreMoves(int square, int* offset, std::vector<int>* ROOK_INDEX, MovesStruct* ROOK_MOVES);
+        static void computeRULSideMoves(int square, int* offset, std::vector<int>* ROOK_INDEX, MovesStruct* ROOK_MOVES);
+        static void computeRLRSideMoves(int square, int* offset, std::vector<int>* ROOK_INDEX, MovesStruct* ROOK_MOVES);
+        static void computeRCornerMoves(int square, int* offset, std::vector<int>* ROOK_INDEX, MovesStruct* ROOK_MOVES);
         
-        static void setBishopMoves(int square, Moves* move_family);
-        static void computeBCornerMoves(int square, int* offset, std::vector<int>* BISHOP_INDEX, Moves* BISHOP_MOVES);
-        static void computeBLRSideMoves(int square, int* offset, std::vector<int>* BISHOP_INDEX, Moves* BISHOP_MOVES);
-        static void computeBULSideMoves(int square, int* offset, std::vector<int>* BISHOP_INDEX, Moves* BISHOP_MOVES);
-        static void computeBCentreMoves(int sq, int* offset, std::vector<int>* BISHOP_INDEX, Moves* BISHOP_MOVES);
+        static void setBishopMoves(int square, MovesStruct* move_family);
+        static void computeBCornerMoves(int square, int* offset, std::vector<int>* BISHOP_INDEX, MovesStruct* BISHOP_MOVES);
+        static void computeBLRSideMoves(int square, int* offset, std::vector<int>* BISHOP_INDEX, MovesStruct* BISHOP_MOVES);
+        static void computeBULSideMoves(int square, int* offset, std::vector<int>* BISHOP_INDEX, MovesStruct* BISHOP_MOVES);
+        static void computeBCentreMoves(int sq, int* offset, std::vector<int>* BISHOP_INDEX, MovesStruct* BISHOP_MOVES);
 
-        static void computeRookBlocks(Moves* ROOK_BLOCKS);
-        static void computeBishopBlocks(Moves* BISHOP_BLOCKS);
-        static void computeCastling(Moves* CASTLING_MOVES);
+        static void computeRookBlocks(MovesStruct* ROOK_BLOCKS);
+        static void computeBishopBlocks(MovesStruct* BISHOP_BLOCKS);
+        static void computeCastling(MovesStruct* CASTLING_MOVES);
         
-        static void computeRookMoves(std::vector<int>* ROOK_INDEX, Moves* ROOK_MOVES);
-        static void computeBishopMoves(std::vector<int>* BISHOP_INDEX, Moves* BISHOP_MOVES);
-        static void computeKnightMoves(Moves* KNIGHT_MOVES);
-        static void computeKingMoves(Moves* KING_MOVES);
-        static void computePawnMoves(Moves PAWN_MOVES[][48], Moves EN_PASSANT_MOVES[16], Moves DOUBLE_PUSH[16]);
+        static void computeRookMoves(std::vector<int>* ROOK_INDEX, MovesStruct* ROOK_MOVES);
+        static void computeBishopMoves(std::vector<int>* BISHOP_INDEX, MovesStruct* BISHOP_MOVES);
+        static void computeKnightMoves(MovesStruct* KNIGHT_MOVES);
+        static void computeKingMoves(MovesStruct* KING_MOVES);
+        static void computePawnMoves(MovesStruct PAWN_MOVES[][48], MovesStruct EN_PASSANT_MOVES[16], MovesStruct DOUBLE_PUSH[16]);
 };
 
 /**

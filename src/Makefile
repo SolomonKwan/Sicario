@@ -28,17 +28,13 @@ $(OBJ)/evaluate.o: evaluate.cpp evaluate.hpp constants.hpp
 $(OBJ)/uci.o: uci.cpp uci.hpp
 	$(FLAGS) -c uci.cpp -o $(OBJ)/uci.o
 
-$(OBJ)/main.o: main.cpp movegen.hpp test.hpp game.hpp \
-		search.hpp evaluate.hpp uci.hpp
+$(OBJ)/main.o: main.cpp movegen.hpp test.hpp game.hpp search.hpp evaluate.hpp uci.hpp
 	$(FLAGS) -c main.cpp -o $(OBJ)/main.o
 
-main: $(OBJ)/main.o \
-		$(OBJ)/fen.o $(OBJ)/game.o $(OBJ)/movegen.o $(OBJ)/test.o \
-		$(OBJ)/arg.o $(OBJ)/search.o $(OBJ)/evaluate.o $(OBJ)/uci.o
-	$(FLAGS) $(OBJ)/main.o \
-			$(OBJ)/fen.o $(OBJ)/game.o $(OBJ)/movegen.o $(OBJ)/test.o \
-			$(OBJ)/arg.o $(OBJ)/search.o $(OBJ)/evaluate.o $(OBJ)/uci.o \
-			-o tardigrade
+main: $(OBJ)/main.o $(OBJ)/fen.o $(OBJ)/game.o $(OBJ)/movegen.o $(OBJ)/test.o $(OBJ)/arg.o $(OBJ)/search.o \
+		$(OBJ)/evaluate.o $(OBJ)/uci.o
+	$(FLAGS) $(OBJ)/main.o $(OBJ)/fen.o $(OBJ)/game.o $(OBJ)/movegen.o $(OBJ)/test.o $(OBJ)/arg.o $(OBJ)/search.o \
+			$(OBJ)/evaluate.o $(OBJ)/uci.o -o tardigrade
 
 clean:
 	rm $(OBJ)/*.o tardigrade run_tests

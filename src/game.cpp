@@ -8,6 +8,10 @@
 #include "test.hpp"
 #include "search.hpp"
 
+namespace Moves {
+
+}
+
 /**
  * Show the usage of the program.
  * 

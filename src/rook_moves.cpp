@@ -11,7 +11,7 @@
  * @param square: The square that the rook is on.
  * @param move_family: The struct holding the moves family for rooks.
  */
-void Game::setRookMoves(int square, Moves* move_family) {
+void Game::setRookMoves(int square, MovesStruct* move_family) {
     move_family->reach = 0;
 
     // Set the reach.
@@ -109,7 +109,7 @@ void Game::setRookMoves(int square, Moves* move_family) {
  * @param ROOK_MOVES: Array of move structs for each rook move family.
  */
 void Game::computeRCornerMoves(int square, int* offset, std::vector<int>* ROOK_INDEX, 
-        Moves* ROOK_MOVES) {
+        MovesStruct* ROOK_MOVES) {
     // The horizontal and vertical start and end squares.
     int hStart = (square / 8) * 8 + 1;
     int hEnd = (square / 8) * 8 + 6;
@@ -176,7 +176,7 @@ void Game::computeRCornerMoves(int square, int* offset, std::vector<int>* ROOK_I
  * @param ROOK_MOVES: Array of move structs for each rook move family.
  */
 void Game::computeRLRSideMoves(int square, int* offset, std::vector<int>* ROOK_INDEX,
-        Moves* ROOK_MOVES) {
+        MovesStruct* ROOK_MOVES) {
     // The horizontal and vertical start and end squares.
     int hStart = (square / 8) * 8 + 1;
     int hEnd = (square / 8) * 8 + 6;
@@ -289,7 +289,7 @@ void Game::computeRLRSideMoves(int square, int* offset, std::vector<int>* ROOK_I
  * @param ROOK_MOVES: Array of move structs for each rook move family.
  */
 void Game::computeRULSideMoves(int square, int* offset, std::vector<int>* ROOK_INDEX,
-        Moves* ROOK_MOVES) {
+        MovesStruct* ROOK_MOVES) {
     // The horizontal and vertical start and end squares.
     int h1_Start = (square / 8) * 8 + 1;
     int h1_End = square - 1;
@@ -406,7 +406,7 @@ void Game::computeRULSideMoves(int square, int* offset, std::vector<int>* ROOK_I
  * @param ROOK_MOVES: Array of move structs for each rook move family.
  */
 void Game::computeRCentreMoves(int square, int* offset, std::vector<int>* ROOK_INDEX,
-        Moves* ROOK_MOVES) {
+        MovesStruct* ROOK_MOVES) {
     // The horizontal and vertical start and end squares.
     int h1_Start = (square / 8) * 8 + 1;
     int h1_End = square - 1;
@@ -644,7 +644,7 @@ uint64_t Game::getRookCheckRays(Computed* moves, Square square, uint64_t* checke
  *      attack sets are set.
  * @param ROOK_MOVES: Move struct to store the moves.
  */
-void Game::computeRookMoves(std::vector<int>* ROOK_INDEX, Moves* ROOK_MOVES) {
+void Game::computeRookMoves(std::vector<int>* ROOK_INDEX, MovesStruct* ROOK_MOVES) {
     // Set initial reach to UNSET.
     for (int i = 0; i < 4900; i++) {
         ROOK_MOVES[i].reach = UNSET;
@@ -670,7 +670,7 @@ void Game::computeRookMoves(std::vector<int>* ROOK_INDEX, Moves* ROOK_MOVES) {
  * square.
  * @param ROOK_BLOCKS: A vector of move structs.
  */
-void Game::computeRookBlocks(Moves* ROOK_BLOCKS) {
+void Game::computeRookBlocks(MovesStruct* ROOK_BLOCKS) {
     std::tuple<int, int> pairs[4] = {
         std::make_tuple(8, 1), std::make_tuple(1, -8), std::make_tuple(-8, -1),
         std::make_tuple(-1, 8)
@@ -749,7 +749,7 @@ void Game::computeRookBlocks(Moves* ROOK_BLOCKS) {
  * @param square: The square on which the rook is on.
  * @return Pointer to moves struct.
  */
-Moves* Game::getRookFamily(Computed* moves, Square square) {
+MovesStruct* Game::getRookFamily(Computed* moves, Square square) {
     &moves->ROOK_MOVES[moves->ROOK_INDEX[square][rookIndex(this->sides[BLACK] | this->sides[WHITE], square)]];
     return &moves->ROOK_MOVES[moves->ROOK_INDEX[square][
             rookIndex(this->sides[BLACK] | this->sides[WHITE], square)]];
@@ -762,6 +762,6 @@ Moves* Game::getRookFamily(Computed* moves, Square square) {
  * @param square: The square on which the rook is on.
  * @return Pointer to moves struct.
  */
-Moves* getRookBlockFamily(Game* game, Computed* moves, Square square) {
+MovesStruct* getRookBlockFamily(Game* game, Computed* moves, Square square) {
     return nullptr;
 }
