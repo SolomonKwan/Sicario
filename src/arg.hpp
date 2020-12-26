@@ -2,6 +2,8 @@
 #ifndef ARG_HPP
 #define ARG_HPP
 
+#include "game.hpp"
+
 namespace Args {
     void init(Pos* game, int argc, char *argv[], CmdLine* args);
 }

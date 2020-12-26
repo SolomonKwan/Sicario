@@ -3,6 +3,7 @@
 #define EVALUATE_HPP
 
 #include "constants.hpp"
+#include "game.hpp"
 
 namespace Opening {
     extern const float w_pawn[64];

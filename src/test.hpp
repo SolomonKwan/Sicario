@@ -3,6 +3,7 @@
 #define TEST_HPP
 
 #include "movegen.hpp"
+#include "game.hpp"
 
 /**
  * Prepares and makes call to run perft.

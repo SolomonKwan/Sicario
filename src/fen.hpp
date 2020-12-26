@@ -3,6 +3,7 @@
 #define FEN_HPP
 
 #include "constants.hpp"
+#include "game.hpp"
 
 /**
  * Return true if a square is a dark square, else false.

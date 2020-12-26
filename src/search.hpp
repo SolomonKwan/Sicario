@@ -3,6 +3,7 @@
 #define SEARCH_HPP
 
 #include "constants.hpp"
+#include "game.hpp"
 
 class Searcher {
     public:

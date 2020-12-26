@@ -7,6 +7,7 @@
 
 #include "constants.hpp"
 #include "movegen.hpp"
+#include "game.hpp"
 
 /**
  * Prints a readable version of a move.
@@ -249,7 +250,7 @@ int moveSetIndex(uint64_t masked_reach, MovesStruct* move_family) {
  * Compute the castling moves.
  * @param CASTLING_MOVES: Array of move struct pointers.
  */
-void Pos::computeCastling(MovesStruct* CASTLING_MOVES) {
+void computeCastling(MovesStruct* CASTLING_MOVES) {
     CASTLING_MOVES[WQSC].move_set.resize(1);
     std::vector<uint16_t>* moves_set = &(CASTLING_MOVES[WQSC].move_set[0]);
     moves_set->push_back(E1 | C1 << 6 | CASTLING | pKNIGHT);
@@ -273,14 +274,13 @@ void Pos::computeCastling(MovesStruct* CASTLING_MOVES) {
  */
 void precompute(Computed* moves) {
     computeRookMoves(moves->ROOK_INDEX, moves->ROOK_MOVES);
-    Pos::computeRookBlocks(moves->ROOK_BLOCKS);
+    computeRookBlocks(moves->ROOK_BLOCKS);
     computeBishopMoves(moves->BISHOP_INDEX, moves->BISHOP_MOVES);
-    Pos::computeBishopBlocks(moves->BISHOP_BLOCKS);
-    Pos::computeKnightMoves(moves->KNIGHT_MOVES);
-    Pos::computeKingMoves(moves->KING_MOVES);
-    Pos::computePawnMoves(moves->PAWN_MOVES, moves->EN_PASSANT_MOVES, moves->
-            DOUBLE_PUSH);
-    Pos::computeCastling(moves->CASTLING_MOVES);
+    computeBishopBlocks(moves->BISHOP_BLOCKS);
+    computeKnightMoves(moves->KNIGHT_MOVES);
+    computeKingMoves(moves->KING_MOVES);
+    computePawnMoves(moves->PAWN_MOVES, moves->EN_PASSANT_MOVES, moves->DOUBLE_PUSH);
+    computeCastling(moves->CASTLING_MOVES);
 }
 
 /**
@@ -345,7 +345,7 @@ void Pos::getRookPinMoves(Computed* moves, int square,
             friendly |= 1ULL << (square - 8);
         }
     }
-    MovesStruct* rook_moves = &moves->ROOK_MOVES[moves->ROOK_INDEX[square][this->rookIndex(
+    MovesStruct* rook_moves = &moves->ROOK_MOVES[moves->ROOK_INDEX[square][rookIndex(
             pos, (Square) square)]];
     std::vector<uint16_t>* move_set = &rook_moves->move_set[moveSetIndex(
             rook_moves->reach ^ (this->sides[this->turn] | friendly), 
@@ -382,7 +382,7 @@ void Pos::getBishopPinMoves (Computed* moves, int square,
         }
     }
     MovesStruct* bishop_moves = &moves->BISHOP_MOVES[moves->BISHOP_INDEX[square]
-            [this->bishopIndex(pos, (Square) square)]];
+            [bishopIndex(pos, (Square) square)]];
     std::vector<uint16_t>* move_set = &bishop_moves->move_set[moveSetIndex(
             bishop_moves->reach ^ (this->sides[this->turn] | friendly), 
             bishop_moves)];
@@ -611,21 +611,21 @@ void Pos::getEnemyAttacks(Computed* moves, uint64_t* enemy_attacks,
 
     // Bishop attacks.
     uint64_t king_bishop_rays = moves->BISHOP_MOVES[moves->BISHOP_INDEX[
-            king_sq][this->bishopIndex(pieces ^ (1ULL << king_sq), king_sq)]].reach;
+            king_sq][bishopIndex(pieces ^ (1ULL << king_sq), king_sq)]].reach;
     piece = turn ? B_BISHOP : W_BISHOP;
     for (int i = 0; i < this->piece_index[piece]; i++) {
         int square = this->piece_list[piece][i];
         *enemy_attacks |= moves->BISHOP_MOVES[moves->BISHOP_INDEX[square]
-                [this->bishopIndex(pieces ^ (1ULL << this->piece_list[turn][0]), 
+                [bishopIndex(pieces ^ (1ULL << this->piece_list[turn][0]), 
                 (Square) square)]].reach;
         *kEnemy_attacks |= moves->BISHOP_MOVES[moves->BISHOP_INDEX[square][
-                this->bishopIndex(masked_king_bb, (Square)square)]].reach;
+                bishopIndex(masked_king_bb, (Square)square)]].reach;
         
         if (std::abs(square % 8 - king_sq % 8) == std::abs(((square / 8) % 
                 8) - ((king_sq / 8) % 8))) {
             // Attacks.
             uint64_t attacks = moves->BISHOP_MOVES[moves->BISHOP_INDEX[square][
-                    this->bishopIndex(pieces ^ (1ULL << square), (Square) square)]].
+                    bishopIndex(pieces ^ (1ULL << square), (Square) square)]].
                     reach;
             *bishop_pins |= king_bishop_rays & attacks;
         }
@@ -633,19 +633,19 @@ void Pos::getEnemyAttacks(Computed* moves, uint64_t* enemy_attacks,
 
     // Rook attacks.
     uint64_t king_rook_rays = moves->ROOK_MOVES[moves->ROOK_INDEX[king_sq][
-            this->rookIndex(pieces ^ (1ULL << king_sq), king_sq)]].reach;
+            rookIndex(pieces ^ (1ULL << king_sq), king_sq)]].reach;
     piece = turn ? B_ROOK : W_ROOK;
     for (int i = 0; i < this->piece_index[piece]; i++) {
         int square = this->piece_list[piece][i];
         *enemy_attacks |= moves->ROOK_MOVES[moves->ROOK_INDEX[square]
-                [this->rookIndex(pieces ^ (1ULL << this->piece_list[turn][0]), 
+                [rookIndex(pieces ^ (1ULL << this->piece_list[turn][0]), 
                 (Square) square)]].reach;
         *kEnemy_attacks |= moves->ROOK_MOVES[moves->ROOK_INDEX[square][
-                this->rookIndex(masked_king_bb, (Square)square)]].reach;
+                rookIndex(masked_king_bb, (Square)square)]].reach;
         if (king_sq / 8 == square / 8 || king_sq % 8 == square % 8) {
             // Attacks.
             uint64_t attacks = moves->ROOK_MOVES[moves->ROOK_INDEX[square][
-                    this->rookIndex(pieces ^ (1ULL << square), (Square) square)]].
+                    rookIndex(pieces ^ (1ULL << square), (Square) square)]].
                     reach;
             *rook_pins |= king_rook_rays & attacks;
         }
@@ -656,21 +656,21 @@ void Pos::getEnemyAttacks(Computed* moves, uint64_t* enemy_attacks,
     for (int i = 0; i < this->piece_index[piece]; i++) {
         int square = this->piece_list[piece][i];
         *enemy_attacks |= moves->BISHOP_MOVES[moves->BISHOP_INDEX[square]
-                [this->bishopIndex(pieces ^ (1ULL << this->piece_list[turn][0]), 
+                [bishopIndex(pieces ^ (1ULL << this->piece_list[turn][0]), 
                 (Square) square)]].reach;
         *enemy_attacks |= moves->ROOK_MOVES[moves->ROOK_INDEX[square]
-                [this->rookIndex(pieces ^ (1ULL << this->piece_list[turn][0]), 
+                [rookIndex(pieces ^ (1ULL << this->piece_list[turn][0]), 
                 (Square) square)]].reach;
         *kEnemy_attacks |= moves->BISHOP_MOVES[moves->BISHOP_INDEX[square][
-                this->bishopIndex(masked_king_bb, (Square)square)]].reach;
+                bishopIndex(masked_king_bb, (Square)square)]].reach;
         *kEnemy_attacks |= moves->ROOK_MOVES[moves->ROOK_INDEX[square][
-                this->rookIndex(masked_king_bb, (Square)square)]].reach;
+                rookIndex(masked_king_bb, (Square)square)]].reach;
         
         if (std::abs(square % 8 - king_sq % 8) == std::abs(((square / 8) % 
                 8) - ((king_sq / 8) % 8))) {
             // Attacks.
             uint64_t attacks = moves->BISHOP_MOVES[moves->BISHOP_INDEX[square][
-                    this->bishopIndex(pieces ^ (1ULL << square), (Square) square)]].
+                    bishopIndex(pieces ^ (1ULL << square), (Square) square)]].
                     reach;
             *bishop_pins |= king_bishop_rays & attacks;
         }
@@ -678,7 +678,7 @@ void Pos::getEnemyAttacks(Computed* moves, uint64_t* enemy_attacks,
         if (king_sq / 8 == square / 8 || king_sq % 8 == square % 8) {
             // Attacks.
             uint64_t attacks = moves->ROOK_MOVES[moves->ROOK_INDEX[square][
-                    this->rookIndex(pieces ^ (1ULL << square), (Square) square)]].
+                    rookIndex(pieces ^ (1ULL << square), (Square) square)]].
                     reach;
             *rook_pins |= king_rook_rays & attacks;
         }
@@ -783,14 +783,14 @@ void Pos::horizontalPinEp(int king, bool turn, int attacker_sq,
         else if (this->pieces[i] == e_queen) e_queen_sq = i;
     }
 
-    uint64_t king_reach = moves->ROOK_MOVES[moves->ROOK_INDEX[king][this->rookIndex(
+    uint64_t king_reach = moves->ROOK_MOVES[moves->ROOK_INDEX[king][rookIndex(
             pieces ^ pawns, (Square) king)]].reach;
     uint64_t pin_ray = 0;
 
     // Ray between rook and king without pawns of interest.
     uint64_t rook_reach = 0;
     if (e_rook_sq != -1) {
-        rook_reach = moves->ROOK_MOVES[moves->ROOK_INDEX[e_rook_sq][this->rookIndex(
+        rook_reach = moves->ROOK_MOVES[moves->ROOK_INDEX[e_rook_sq][rookIndex(
                 pieces ^ pawns, (Square) e_rook_sq)]].reach;
         pin_ray |= (king_reach & rook_reach);
     }
@@ -798,7 +798,7 @@ void Pos::horizontalPinEp(int king, bool turn, int attacker_sq,
     // Ray between queen and king without pawns of interest.
     uint64_t queen_reach = 0;
     if (e_queen_sq != -1) {
-        queen_reach = moves->ROOK_MOVES[moves->ROOK_INDEX[e_queen_sq][this->rookIndex(
+        queen_reach = moves->ROOK_MOVES[moves->ROOK_INDEX[e_queen_sq][rookIndex(
                 pieces ^ pawns, (Square) e_queen_sq)]].reach;
         pin_ray |= (king_reach & queen_reach);
     }
@@ -1147,7 +1147,7 @@ void Pos::getCheckedMoves(Computed* moves, uint64_t* enemy_attacks,
             continue;
         }
         MovesStruct* bishop_move = &moves->BISHOP_MOVES[moves->BISHOP_INDEX[queen][
-                this->bishopIndex(this->sides[BLACK] | this->sides[WHITE], 
+                bishopIndex(this->sides[BLACK] | this->sides[WHITE], 
                         (Square) queen)]];
         uint64_t bishop_index = bishop_move->reach & (check_rays_only | 
                 checkers_only);
@@ -1156,7 +1156,7 @@ void Pos::getCheckedMoves(Computed* moves, uint64_t* enemy_attacks,
         if (move_set->size() != 0) pos_moves[(*moves_index)++] = move_set;
 
         MovesStruct* rook_move = &moves->ROOK_MOVES[moves->ROOK_INDEX[queen][
-                this->rookIndex(this->sides[BLACK] | this->sides[WHITE], 
+                rookIndex(this->sides[BLACK] | this->sides[WHITE], 
                 (Square) queen)]];
         uint64_t rook_index = rook_move->reach & (check_rays_only | 
                 checkers_only);
@@ -1173,7 +1173,7 @@ void Pos::getCheckedMoves(Computed* moves, uint64_t* enemy_attacks,
             continue;
         }
         MovesStruct* rook_move = &moves->ROOK_MOVES[moves->ROOK_INDEX[rook][
-                this->rookIndex(this->sides[BLACK] | this->sides[WHITE], 
+                rookIndex(this->sides[BLACK] | this->sides[WHITE], 
                 (Square) rook)]];
         uint64_t rook_index = rook_move->reach & (check_rays_only | 
                 checkers_only);
@@ -1191,7 +1191,7 @@ void Pos::getCheckedMoves(Computed* moves, uint64_t* enemy_attacks,
         }
         // displayBB(checkers_and_rays);
         MovesStruct* bishop_move = &moves->BISHOP_MOVES[moves->BISHOP_INDEX[bishop][
-                this->bishopIndex(this->sides[BLACK] | this->sides[WHITE], 
+                bishopIndex(this->sides[BLACK] | this->sides[WHITE], 
                 (Square) bishop)]];
         uint64_t bishop_index = bishop_move->reach & (check_rays_only | 
                 checkers_only);
@@ -1869,9 +1869,8 @@ void computeBCentreMoves(int sq, int* offset, std::vector<int>* BISHOP_INDEX,
  * @param pos: A bitboard of the pieces on the board.
  * @param square: The square of the piece whose moves we want.
  */
-const int Pos::bishopIndex(const uint64_t pos, Square square) {
-    return ((pos & bishopMasks[square]) * bishopMagicNums[square]) >> 
-            bishopShifts[square];
+const int bishopIndex(const uint64_t pos, Square square) {
+    return ((pos & bishopMasks[square]) * bishopMagicNums[square]) >> bishopShifts[square];
 }
 
 /**
@@ -1950,7 +1949,7 @@ void computeBishopMoves(std::vector<int>* BISHOP_INDEX, MovesStruct* BISHOP_MOVE
  * 
  * @param BISHOP_BLOCKS: A vector of move structs.
  */
-void Pos::computeBishopBlocks(MovesStruct* BISHOP_BLOCKS) {
+void computeBishopBlocks(MovesStruct* BISHOP_BLOCKS) {
     std::tuple<int, int> pairs[4] = {
         std::make_tuple(9, -7), std::make_tuple(-7, -9), std::make_tuple(-9, 7),
         std::make_tuple(7, 9)
@@ -2041,15 +2040,14 @@ void Pos::computeBishopBlocks(MovesStruct* BISHOP_BLOCKS) {
  * @param square: The square on which the bishop is on.
  */
 MovesStruct* Pos::getBishopFamily(Computed* moves, Square square) {
-    return &moves->BISHOP_MOVES[moves->BISHOP_INDEX[square][
-            this->bishopIndex(this->sides[BLACK] | this->sides[WHITE], square)]];
+    return &moves->BISHOP_MOVES[moves->BISHOP_INDEX[square][bishopIndex(this->sides[BLACK] | this->sides[WHITE], square)]];
 }
 
 /**
  * Compute the king moves.
  * @param KING_MOVES: The array of king moves to be computed.
  */
-void Pos::computeKingMoves(MovesStruct* KING_MOVES) {
+void computeKingMoves(MovesStruct* KING_MOVES) {
     // Compute the moves and reach.
     for (int square = A1; square <= H8; square++) {
         KING_MOVES[square].reach = 0;
@@ -2123,7 +2121,7 @@ void Pos::computeKingMoves(MovesStruct* KING_MOVES) {
  * Compute the knight moves.
  * @param KNIGHT_MOVES: Array of knight moves to be computed.
  */
-void Pos::computeKnightMoves(MovesStruct* KNIGHT_MOVES) {
+void computeKnightMoves(MovesStruct* KNIGHT_MOVES) {
     // Compute the moves and reach.
     for (int square = A1; square <= H8; square++) {
         // Compute the reach.
@@ -2216,8 +2214,7 @@ uint64_t Pos::getKnightCheckers(Computed* moves, Square square, uint64_t* checke
  *  ep.
  * @param DOUBLE_PUSH: An array of moves structs for double pawn push blocks.
  */
-void Pos::computePawnMoves(MovesStruct PAWN_MOVES[][48], MovesStruct EN_PASSANT_MOVES[16],
-        MovesStruct DOUBLE_PUSH[16]) {
+void computePawnMoves(MovesStruct PAWN_MOVES[][48], MovesStruct EN_PASSANT_MOVES[16], MovesStruct DOUBLE_PUSH[16]) {
     for (int player = BLACK; player <= WHITE; player++) {
         int left = player == BLACK ? -9 : 7;
         int right = player == BLACK ? -7 : 9;
@@ -2230,81 +2227,62 @@ void Pos::computePawnMoves(MovesStruct PAWN_MOVES[][48], MovesStruct EN_PASSANT_
 
             // Create the attack reach.
             if (square % 8 != 0) {
-                PAWN_MOVES[player][square - 8].reach |= 1ULL << (square + 
-                        left);
-                PAWN_MOVES[player][square - 8].block_bits.push_back(square + 
-                        left);
+                PAWN_MOVES[player][square - 8].reach |= 1ULL << (square + left);
+                PAWN_MOVES[player][square - 8].block_bits.push_back(square + left);
                 pos |= 1ULL << (square + left);
             }
             if (square % 8 != 7) {
-                PAWN_MOVES[player][square - 8].reach |= 1ULL << (square + 
-                        right);
-                PAWN_MOVES[player][square - 8].block_bits.push_back(square + 
-                        right);
+                PAWN_MOVES[player][square - 8].reach |= 1ULL << (square + right);
+                PAWN_MOVES[player][square - 8].block_bits.push_back(square + right);
                 pos |= 1ULL << (square + right);
             }
 
             // Add one push block bit.
-            PAWN_MOVES[player][square - 8].block_bits.push_back(square + 
-                    forward_push);
+            PAWN_MOVES[player][square - 8].block_bits.push_back(square + forward_push);
             pos |= 1ULL << (square + forward_push);
 
             // Add two push block bit.
-            if ((player == WHITE && square / 8 == 1) || (player == BLACK && 
-                    square / 8 == 6)) {
-                PAWN_MOVES[player][square - 8].block_bits.push_back(square + 
-                        double_push);
+            if ((player == WHITE && square / 8 == 1) || (player == BLACK && square / 8 == 6)) {
+                PAWN_MOVES[player][square - 8].block_bits.push_back(square + double_push);
                 pos |= 1ULL << (square + double_push);
             }
             
             // Sort the block bits.
-            std::sort(PAWN_MOVES[player][square - 8].block_bits.begin(), 
-                    PAWN_MOVES[player][square - 8].block_bits.end());
+            std::sort(PAWN_MOVES[player][square - 8].block_bits.begin(), PAWN_MOVES[player][square - 8].block_bits
+                    .end());
 
             // Set the moves.
-            std::vector<int>* blockers = &(PAWN_MOVES[player][square - 8].
-                    block_bits);
-            PAWN_MOVES[player][square - 8].move_set.resize(std::pow(2, 
-                    blockers->size()));
+            std::vector<int>* blockers = &(PAWN_MOVES[player][square - 8].block_bits);
+            PAWN_MOVES[player][square - 8].move_set.resize(std::pow(2, blockers->size()));
             
             // En-passant captures
             if (player == WHITE && square / 8 == 4) { // En-passant.
                 EN_PASSANT_MOVES[square - 24].move_set.resize(2);
-                std::vector<uint16_t>* r_ep_set = &(EN_PASSANT_MOVES[square - 
-                        24].move_set[0]);
-                std::vector<uint16_t>* l_ep_set = &(EN_PASSANT_MOVES[square - 
-                        24].move_set[1]);
-                r_ep_set->push_back(square | (square + right) << 6 | 
-                        EN_PASSANT | pKNIGHT);
-                l_ep_set->push_back(square | (square + left) << 6 | EN_PASSANT |
-                        pKNIGHT);
+                std::vector<uint16_t>* r_ep_set = &(EN_PASSANT_MOVES[square - 24].move_set[0]);
+                std::vector<uint16_t>* l_ep_set = &(EN_PASSANT_MOVES[square - 24].move_set[1]);
+                r_ep_set->push_back(square | (square + right) << 6 | EN_PASSANT | pKNIGHT);
+                l_ep_set->push_back(square | (square + left) << 6 | EN_PASSANT |pKNIGHT);
             } else if (player == BLACK && square / 8 == 3) { // En-passant.
                 EN_PASSANT_MOVES[square - 24].move_set.resize(2);
-                std::vector<uint16_t>* r_ep_set = &(EN_PASSANT_MOVES[square - 
-                        24].move_set[0]);
-                std::vector<uint16_t>* l_ep_set = &(EN_PASSANT_MOVES[square - 
-                        24].move_set[1]);
-                r_ep_set->push_back(square | (square + right) << 6 | 
-                        EN_PASSANT | pKNIGHT);
-                l_ep_set->push_back(square | (square + left) << 6 | EN_PASSANT |
-                        pKNIGHT);
+                std::vector<uint16_t>* r_ep_set = &(EN_PASSANT_MOVES[square - 24].move_set[0]);
+                std::vector<uint16_t>* l_ep_set = &(EN_PASSANT_MOVES[square - 24].move_set[1]);
+                r_ep_set->push_back(square | (square + right) << 6 | EN_PASSANT | pKNIGHT);
+                l_ep_set->push_back(square | (square + left) << 6 | EN_PASSANT |pKNIGHT);
             }
 
             // Double push blocks
             if (player == WHITE && square / 8 == 1) {
                 DOUBLE_PUSH[square - 8].move_set.resize(1);
-                std::vector<uint16_t>* move = &(DOUBLE_PUSH[square - 8].
-                        move_set[0]);
+                std::vector<uint16_t>* move = &(DOUBLE_PUSH[square - 8].move_set[0]);
                 move->push_back(square | (square + 16) << 6 | NORMAL | pKNIGHT);
             } else if (player == BLACK && square / 8 == 6) {
                 DOUBLE_PUSH[square - 40].move_set.resize(1);
-                std::vector<uint16_t>* move = &(DOUBLE_PUSH[square - 40].
-                        move_set[0]);
+                std::vector<uint16_t>* move = &(DOUBLE_PUSH[square - 40].move_set[0]);
                 move->push_back(square | (square - 16) << 6 | NORMAL | pKNIGHT);
             }
 
             // Iterate over occupancies.
-            for (int i = 0; i < std::pow(2, blockers->size()); i++) {            
+            for (int i = 0; i < std::pow(2, blockers->size()); i++) {
                 // Create the position with masked ends.
                 int index = 0;
                 for (auto j = blockers->begin(); j != blockers->end(); j++) {
@@ -2312,44 +2290,33 @@ void Pos::computePawnMoves(MovesStruct PAWN_MOVES[][48], MovesStruct EN_PASSANT_
                     index++;
                 }
 
-                std::vector<uint16_t>* moves_set = &(PAWN_MOVES[player][square -
-                        8].move_set[moveSetIndex(pos, &PAWN_MOVES[player][
-                        square - 8])]);
+                std::vector<uint16_t>* moves_set = &(PAWN_MOVES[player][square -8].move_set[moveSetIndex(pos,
+                        &PAWN_MOVES[player][square - 8])]);
 
                 if (player == WHITE) {
                     if (square % 8 != 7 && square / 8 == 6) { // Right promo.
                         if (bitAt(pos, square + right)) { // Right capture.
-                            moves_set->push_back(square | (square + right) << 
-                                    6 | PROMOTION | pKNIGHT);
-                            moves_set->push_back(square | (square + right) << 
-                                    6 | PROMOTION | pBISHOP);
-                            moves_set->push_back(square | (square + right) << 
-                                    6 | PROMOTION | pROOK);
-                            moves_set->push_back(square | (square + right) << 
-                                    6 | PROMOTION | pQUEEN);
+                            moves_set->push_back(square | (square + right) << 6 | PROMOTION | pKNIGHT);
+                            moves_set->push_back(square | (square + right) << 6 | PROMOTION | pBISHOP);
+                            moves_set->push_back(square | (square + right) << 6 | PROMOTION | pROOK);
+                            moves_set->push_back(square | (square + right) << 6 | PROMOTION | pQUEEN);
                         }
                     } else if (square % 8 != 7) { // Normal right capture.
                         if (bitAt(pos, square + right)) { // Right capture.
-                            moves_set->push_back(square | (square + right) << 
-                                    6 | NORMAL | pKNIGHT);
+                            moves_set->push_back(square | (square + right) << 6 | NORMAL | pKNIGHT);
                         }
                     }
 
                     if (square % 8 != 0 && square / 8 == 6) { // Left promo
                         if (bitAt(pos, square + left)) { // Left capture.
-                            moves_set->push_back(square | (square + left) << 6 |
-                                    PROMOTION | pKNIGHT);
-                            moves_set->push_back(square | (square + left) << 6 |
-                                    PROMOTION | pBISHOP);
-                            moves_set->push_back(square | (square + left) << 6 |
-                                    PROMOTION | pROOK);
-                            moves_set->push_back(square | (square + left) << 6 |
-                                    PROMOTION | pQUEEN);
+                            moves_set->push_back(square | (square + left) << 6 | PROMOTION | pKNIGHT);
+                            moves_set->push_back(square | (square + left) << 6 | PROMOTION | pBISHOP);
+                            moves_set->push_back(square | (square + left) << 6 | PROMOTION | pROOK);
+                            moves_set->push_back(square | (square + left) << 6 | PROMOTION | pQUEEN);
                         }
                     } else if (square % 8 != 0) { // Normal left capture.
                         if (bitAt(pos, square + left)) { // Left capture.
-                            moves_set->push_back(square | (square + left) << 6 |
-                                    NORMAL | pKNIGHT);
+                            moves_set->push_back(square | (square + left) << 6 | NORMAL | pKNIGHT);
                         }
                     }
 
@@ -3054,9 +3021,8 @@ void computeRCentreMoves(int square, int* offset, std::vector<int>* ROOK_INDEX,
  * @param square: The square of the piece whose moves we want.
  * @return: Index into ROOK_MOVES.
  */
-const int Pos::rookIndex(const uint64_t pos, Square square) {
-    return ((pos & rookMasks[square]) * rookMagicNums[square]) >> 
-            rookShifts[square];
+const int rookIndex(const uint64_t pos, Square square) {
+    return ((pos & rookMasks[square]) * rookMagicNums[square]) >> rookShifts[square];
 }
 
 /**
@@ -3141,7 +3107,7 @@ void computeRookMoves(std::vector<int>* ROOK_INDEX, MovesStruct* ROOK_MOVES) {
  * square.
  * @param ROOK_BLOCKS: A vector of move structs.
  */
-void Pos::computeRookBlocks(MovesStruct* ROOK_BLOCKS) {
+void computeRookBlocks(MovesStruct* ROOK_BLOCKS) {
     std::tuple<int, int> pairs[4] = {
         std::make_tuple(8, 1), std::make_tuple(1, -8), std::make_tuple(-8, -1),
         std::make_tuple(-1, 8)
@@ -3222,17 +3188,5 @@ void Pos::computeRookBlocks(MovesStruct* ROOK_BLOCKS) {
  */
 MovesStruct* Pos::getRookFamily(Computed* moves, Square square) {
     &moves->ROOK_MOVES[moves->ROOK_INDEX[square][rookIndex(this->sides[BLACK] | this->sides[WHITE], square)]];
-    return &moves->ROOK_MOVES[moves->ROOK_INDEX[square][
-            rookIndex(this->sides[BLACK] | this->sides[WHITE], square)]];
-}
-
-/**
- * Finds and returns a pointer to a rook block move family.
- * @param game: A pointer to a game struct representing the state of the game.
- * @param moves: A struct of the precomputed moves.
- * @param square: The square on which the rook is on.
- * @return Pointer to moves struct.
- */
-MovesStruct* getRookBlockFamily(Pos* game, Computed* moves, Square square) {
-    return nullptr;
+    return &moves->ROOK_MOVES[moves->ROOK_INDEX[square][rookIndex(this->sides[BLACK] | this->sides[WHITE], square)]];
 }
