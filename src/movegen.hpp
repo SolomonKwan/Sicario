@@ -73,12 +73,6 @@ bool bitAt(uint64_t pos, int n);
 void displayBB(uint64_t pos);
 
 /**
- * Calls all functions to make the precomputations for a game.
- * @param moves: Pointer to precomputed moves structs.
- */
-void precompute(Computed* moves);
-
-/**
  * Returns the index from BISHOP_INDEX into BISHOP_MOVES based on the square and 
  * occupancy.
  * 

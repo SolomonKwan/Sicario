@@ -59,7 +59,7 @@ ExitCode parseArgs(Pos* game, int argc, char *argv[],
     // Help.
     if (isFlagged(argv, argv + argc, "-h") || isFlagged(argv, argv + argc, 
             "--help")) {
-        showUsage(argv);
+        // game->showUsage(argv);
         exit(0);
     }
 

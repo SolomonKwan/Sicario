@@ -49,13 +49,13 @@ void Searcher::search() {
 
 }
 
-double Pos::alphaBeta(int depth, double alpha, double beta, bool max, Computed* moves) {
+double Pos::alphaBeta(int depth, double alpha, double beta, bool max) {
     // Get moves
     uint64_t enemy_attacks = 0;
     std::vector<uint16_t>* pos_moves[MAX_MOVE_SETS];
-    int moves_index = this->getMoves(moves, &enemy_attacks, pos_moves);
+    int moves_index = this->getMoves(&enemy_attacks, pos_moves);
 
-    ExitCode code = this->isEOG(moves, enemy_attacks, moves_index);
+    ExitCode code = this->isEOG(enemy_attacks, moves_index);
     if (code == WHITE_WINS) {
         return 10000;
     } else if (code == BLACK_WINS) {
@@ -75,7 +75,7 @@ double Pos::alphaBeta(int depth, double alpha, double beta, bool max, Computed* 
             std::vector<uint16_t>* move_set = pos_moves[i];
             for (uint16_t move : *move_set) {
                 this->makeMove(move);
-                value = std::fmax(value, this->alphaBeta(depth - 1, alpha, beta, false, moves));
+                value = std::fmax(value, this->alphaBeta(depth - 1, alpha, beta, false));
                 this->undoMove();
                 alpha = std::fmax(alpha, value);
                 if (alpha >= beta) break;
@@ -88,7 +88,7 @@ double Pos::alphaBeta(int depth, double alpha, double beta, bool max, Computed* 
             std::vector<uint16_t>* move_set = pos_moves[i];
             for (uint16_t move : *move_set) {
                 this->makeMove(move);
-                value = std::fmin(value, this->alphaBeta(depth - 1, alpha, beta, true, moves));
+                value = std::fmin(value, this->alphaBeta(depth - 1, alpha, beta, true));
                 this->undoMove();
                 beta = std::fmin(beta, value);
                 if (beta <= alpha) break;

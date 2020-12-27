@@ -17,40 +17,40 @@ class Pos {
         void displayAll(Pos* game);
         ExitCode parseFen(std::string fen);
         void zero();
-        void handleGame(Computed* moves, CmdLine* args, char *argv[]);
-        int getMoves(Computed* moves, uint64_t* enemy_attacks, std::vector<uint16_t>* pos_moves[MAX_MOVE_SETS]);
-        void getEnemyAttacks(Computed* moves, uint64_t* enemy_attacks, uint64_t* rook_pins, uint64_t* bishop_pins, uint64_t* kEnemy_attacks);
+        void handleGame(CmdLine* args, char *argv[]);
+        int getMoves(uint64_t* enemy_attacks, std::vector<uint16_t>* pos_moves[MAX_MOVE_SETS]);
+        void getEnemyAttacks(uint64_t* enemy_attacks, uint64_t* rook_pins, uint64_t* bishop_pins, uint64_t* kEnemy_attacks);
 
 
-        bool isDoubleChecked(Computed* moves);
-        MovesStruct* getRookFamily(Computed* moves, Square square);
-        MovesStruct* getBishopFamily(Computed* moves, Square square);
+        bool isDoubleChecked();
+        MovesStruct* getRookFamily(Square square);
+        MovesStruct* getBishopFamily(Square square);
         void display(CmdLine* args);
-        ExitCode isEOG(Computed* moves, uint64_t enemy_attacks, int move_index);
+        ExitCode isEOG(uint64_t enemy_attacks, int move_index);
         bool isThreeFoldRep();
         bool insufficientMaterial();
         bool isChecked(uint64_t enemy_attacks);
-        void getKingMoves(Computed* computed_moves, std::vector<uint16_t>* pos_moves[MAX_MOVE_SETS], int* moves_index, uint64_t kEnemy_attacks);
-        void getCheckedMoves(Computed* moves, uint64_t* enemy_attacks, uint64_t* rook_pins, uint64_t* bishop_pins, std::vector<uint16_t>* pos_moves[MAX_MOVE_SETS], int* moves_index, uint64_t kEnemy_attacks);
-        uint64_t getBishopCheckRays(Computed* moves, Square square, uint64_t* checkers_only);
-        uint64_t getRookCheckRays(Computed* moves, Square square, uint64_t* checkers);
+        void getKingMoves(std::vector<uint16_t>* pos_moves[MAX_MOVE_SETS], int* moves_index, uint64_t kEnemy_attacks);
+        void getCheckedMoves(uint64_t* enemy_attacks, uint64_t* rook_pins, uint64_t* bishop_pins, std::vector<uint16_t>* pos_moves[MAX_MOVE_SETS], int* moves_index, uint64_t kEnemy_attacks);
+        uint64_t getBishopCheckRays(Square square, uint64_t* checkers_only);
+        uint64_t getRookCheckRays(Square square, uint64_t* checkers);
         uint64_t getPawnCheckers(Square square, uint64_t* checkers_only);
-        uint64_t getKnightCheckers(Computed* moves, Square square, uint64_t* checkers_only);
-        void getCheckedEp(uint64_t* rook_pins, uint64_t* bishop_pins, uint64_t checkers, Computed* moves, std::vector<uint16_t>* pos_moves[MAX_MOVE_SETS], int* moves_index);
-        void getNormalMoves(Computed* moves, uint64_t* enemy_attacks, uint64_t* rook_pins, uint64_t* bishop_pins, std::vector<uint16_t>* pos_moves[MAX_MOVE_SETS], int* moves_index, uint64_t kEnemy_attacks);
-        void getQueenMoves(Computed* computed_moves, uint64_t rook_pins, uint64_t bishop_pins, std::vector<uint16_t>* pos_moves[MAX_MOVE_SETS], int* moves_index);
-        void getRookPinMoves(Computed* moves, int square, std::vector<uint16_t>* pos_moves[MAX_MOVE_SETS], int* moves_index);
-        void getBishopPinMoves (Computed* moves, int square, std::vector<uint16_t>* pos_moves[MAX_MOVE_SETS], int* moves_index);
-        void getRookMoves(Computed* computed_moves, uint64_t rook_pins, uint64_t bishop_pins, std::vector<uint16_t>* pos_moves[MAX_MOVE_SETS], int* moves_index);
-        void getBishopMoves(Computed* computed_moves, uint64_t rook_pins, uint64_t bishop_pins, std::vector<uint16_t>* pos_moves[MAX_MOVE_SETS], int* moves_index);
-        void getKnightMoves(Computed* computed_moves, uint64_t rook_pins, uint64_t bishop_pins, std::vector<uint16_t>* pos_moves[MAX_MOVE_SETS], int* moves_index);
-        void getPawnMoves(Computed* computed_moves, uint64_t rook_pins, uint64_t bishop_pins, std::vector<uint16_t>* pos_moves[MAX_MOVE_SETS], int* moves_index);
+        uint64_t getKnightCheckers(Square square, uint64_t* checkers_only);
+        void getCheckedEp(uint64_t* rook_pins, uint64_t* bishop_pins, uint64_t checkers, std::vector<uint16_t>* pos_moves[MAX_MOVE_SETS], int* moves_index);
+        void getNormalMoves(uint64_t* enemy_attacks, uint64_t* rook_pins, uint64_t* bishop_pins, std::vector<uint16_t>* pos_moves[MAX_MOVE_SETS], int* moves_index, uint64_t kEnemy_attacks);
+        void getQueenMoves(uint64_t rook_pins, uint64_t bishop_pins, std::vector<uint16_t>* pos_moves[MAX_MOVE_SETS], int* moves_index);
+        void getRookPinMoves(int square, std::vector<uint16_t>* pos_moves[MAX_MOVE_SETS], int* moves_index);
+        void getBishopPinMoves (int square, std::vector<uint16_t>* pos_moves[MAX_MOVE_SETS], int* moves_index);
+        void getRookMoves(uint64_t rook_pins, uint64_t bishop_pins, std::vector<uint16_t>* pos_moves[MAX_MOVE_SETS], int* moves_index);
+        void getBishopMoves(uint64_t rook_pins, uint64_t bishop_pins, std::vector<uint16_t>* pos_moves[MAX_MOVE_SETS], int* moves_index);
+        void getKnightMoves(uint64_t rook_pins, uint64_t bishop_pins, std::vector<uint16_t>* pos_moves[MAX_MOVE_SETS], int* moves_index);
+        void getPawnMoves(uint64_t rook_pins, uint64_t bishop_pins, std::vector<uint16_t>* pos_moves[MAX_MOVE_SETS], int* moves_index);
         uint64_t pawnMoveArgs(Square square);
-        void getCastlingMoves(uint64_t enemy_attacks, Computed* moves, std::vector<uint16_t>* pos_moves[MAX_MOVE_SETS], int* moves_index);
-        void getEpMoves(uint64_t rook_pins, uint64_t bishop_pins, Computed* moves, std::vector<uint16_t>* pos_moves[MAX_MOVE_SETS], int* moves_index);
-        void horizontalPinEp(int king, bool turn, int attacker_sq, int captured_pawn, Computed* moves, int ep, std::vector<uint16_t>* pos_moves[MAX_MOVE_SETS], int* moves_index);
-        void diagonalPinEp(int king, bool turn, int attacker_sq, int captured_pawn, Computed* moves, int ep, std::vector<uint16_t>* pos_moves[MAX_MOVE_SETS], int* moves_index);
-        uint16_t chooseMove(int white, int black, std::vector<uint16_t>* pos_moves[MAX_MOVE_SETS], int* moves_index, Computed* moves);
+        void getCastlingMoves(uint64_t enemy_attacks, std::vector<uint16_t>* pos_moves[MAX_MOVE_SETS], int* moves_index);
+        void getEpMoves(uint64_t rook_pins, uint64_t bishop_pins, std::vector<uint16_t>* pos_moves[MAX_MOVE_SETS], int* moves_index);
+        void horizontalPinEp(int king, bool turn, int attacker_sq, int captured_pawn, int ep, std::vector<uint16_t>* pos_moves[MAX_MOVE_SETS], int* moves_index);
+        void diagonalPinEp(int king, bool turn, int attacker_sq, int captured_pawn, int ep, std::vector<uint16_t>* pos_moves[MAX_MOVE_SETS], int* moves_index);
+        uint16_t chooseMove(int white, int black, std::vector<uint16_t>* pos_moves[MAX_MOVE_SETS], int* moves_index);
         void fen();
         std::string getFEN();
         void getSquares(std::string move_string, uint16_t* move, uint* start, uint* end);
@@ -74,11 +74,11 @@ class Pos {
         void makeBishopMoves(uint16_t move);
         void makeKnightMoves(uint16_t move);
         void makePawnMoves(uint16_t move);
-        double alphaBeta(int depth, double alpha, double beta, bool max, Computed* moves);
+        double alphaBeta(int depth, double alpha, double beta, bool max);
         double evaluate();
         void printMove(uint16_t move, bool extraInfo);
         void showEOG(ExitCode code, char *argv[]);
-        const int rookBlockIndex(uint64_t pos, Computed* moves, Square square);
+        const int rookBlockIndex(uint64_t pos, Square square);
 
     private:
         uint64_t sides[2];
@@ -111,64 +111,5 @@ class Pos {
 namespace Play {
     void init(Pos* game, CmdLine* args,char *argv[], std::string input);
 }
-
-/**
- * Checks if end of game has been reached.
- * @param game: Pointer to game struct.
- * @param moves: Pointer to precomputed moves.
- * @param enemy_attacks: Bitboard of squares attacked by enemy pieces.
- * @param moves_index: Pointer to number of vectors in pos_moves.
- * @return: The appropriate ExitCode.
- */
-ExitCode isEOG(Pos* game, Computed* moves, uint64_t enemy_attacks, 
-        int move_index);
-
-/**
- * Show the usage of the program.
- * 
- * @param argv: Array of command line arguments.
- */
-void showUsage(char *argv[]);
-
-/**
- * Show the end of game message.
- * @param code: The exitcode of the game.
- * @param argv: Array of command line arguments.
- */
-void showEOG(ExitCode code, char *argv[]);
-
-/**
- * Handles a single game.
- * @param game: Pointer to game struct.
- * @param moves: Pointer to precomputed moves struct.
- * @param args: Pointer to command line arguments struct.
- */
-void handleGame(Pos* game, Computed* Moves, CmdLine* args, char *argv[]);
-
-/**
- * Make the moves.
- * @param move: The moves to make.
- * @param game: Pointer to game struct.
- */
-void makeMove(uint16_t move, Pos* game);
-
-/**
- * Undo moves.
- * @param game: Pointer to game struct.
- */
-void undoMove(Pos* game);
-
-/**
- * Retrives all legal moves of the current position.
- * 
- * @param game: Pointer to Pos struct of the current position.
- * @param moves: Pointer to the precomputed moves struct.
- * @param enemy_attacks: Pointer to bitboard of all squares attacked by the 
- *  enemy.
- * 
- * @return: The number of move sets.
- */
-int getMoves(Pos* game, Computed* moves, uint64_t* enemy_attacks, 
-        std::vector<uint16_t>* pos_moves[MAX_MOVE_SETS]);
 
 #endif

@@ -70,12 +70,12 @@ void printPerft(bool print, uint16_t move, uint64_t* current_nodes) {
  * @param print: Boolean to indicate whether or not to print.
  * @param args: Pointer to command line arguments.
  */
-uint64_t runPerft(int depth, Pos* game, Computed* precomputed_moves, 
+uint64_t runPerft(int depth, Pos* game, 
         bool print) {
     uint64_t nodes = 0;
     uint64_t enemy_attacks = 0;
     std::vector<uint16_t>* pos_moves[MAX_MOVE_SETS];
-    int moves_index = game->getMoves(precomputed_moves, &enemy_attacks, 
+    int moves_index = game->getMoves(&enemy_attacks, 
             pos_moves);
 
     for (int i = 0; i < moves_index; i++) {
@@ -92,8 +92,7 @@ uint64_t runPerft(int depth, Pos* game, Computed* precomputed_moves,
                 break;
             } else {
                 game->makeMove(move);
-                current_nodes = runPerft(depth - 1, game, 
-                        precomputed_moves, false);
+                current_nodes = runPerft(depth - 1, game, false);
             }
 
             printPerft(print, move, &current_nodes);
@@ -113,10 +112,7 @@ uint64_t runPerft(int depth, Pos* game, Computed* precomputed_moves,
  */
 void perft(int depth, Pos* game) {
     if (depth != 0) {
-        Computed computed_moves;
-        precompute(&computed_moves);
-        uint64_t num = runPerft(depth, game, &computed_moves, 
-                true);
+        uint64_t num = runPerft(depth, game, true);
         std::cout << "\nNodes searched: " << num << "\n\n";
     }
 }

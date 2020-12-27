@@ -382,8 +382,8 @@ void Pos::showEOG(ExitCode code, char *argv[]) {
  * @param game: A Game struct pointer.
  * @return: Index into the ROOK_BLOCK array.
  */
-const int Pos::rookBlockIndex(uint64_t pos, Computed* moves, Square square) {
-    return pos & this->getRookFamily(moves, square)->reach;
+const int Pos::rookBlockIndex(uint64_t pos, Square square) {
+    return pos & this->getRookFamily(square)->reach;
 }
 
 /**
@@ -435,8 +435,7 @@ bool Pos::isChecked(uint64_t enemy_attacks) {
  * @param pos_moves: Array of 16 bit unsigned int move vectors.
  * @param moves_index: Pointer to number of move struct in pos_moves.
  */
-void Pos::getKingMoves(Computed* computed_moves, 
-        std::vector<uint16_t>* pos_moves[MAX_MOVE_SETS], int* moves_index, 
+void Pos::getKingMoves(std::vector<uint16_t>* pos_moves[MAX_MOVE_SETS], int* moves_index, 
         uint64_t kEnemy_attacks) {
     MovesStruct* king_family = &Moves_::KING[this->piece_list[this->turn][0]];
     std::vector<uint16_t>* move_set = &king_family->move_set[
@@ -455,7 +454,7 @@ void Pos::getKingMoves(Computed* computed_moves,
  * @param pos_moves: Array of 16 bit unsigned int move vectors.
  * @param moves_index: Pointer to number of move struct in pos_moves.
  */
-void Pos::getCheckedMoves(Computed* moves, uint64_t* enemy_attacks, 
+void Pos::getCheckedMoves(uint64_t* enemy_attacks, 
         uint64_t* rook_pins, uint64_t* bishop_pins,
         std::vector<uint16_t>* pos_moves[MAX_MOVE_SETS], int* moves_index, 
         uint64_t kEnemy_attacks) {    
@@ -463,13 +462,13 @@ void Pos::getCheckedMoves(Computed* moves, uint64_t* enemy_attacks,
     Square king_sq = this->piece_list[this->turn][0];
     uint64_t checkers_only = 0ULL;
     uint64_t check_rays_only = 
-            this->getBishopCheckRays(moves, king_sq, &checkers_only) | 
-            this->getRookCheckRays(moves, king_sq, &checkers_only) | 
+            this->getBishopCheckRays(king_sq, &checkers_only) | 
+            this->getRookCheckRays(king_sq, &checkers_only) | 
             this->getPawnCheckers(king_sq, &checkers_only) | 
-            this->getKnightCheckers(moves, king_sq, &checkers_only);
+            this->getKnightCheckers(king_sq, &checkers_only);
     
     // King checked moves.
-    this->getKingMoves(moves, pos_moves, moves_index, kEnemy_attacks);
+    this->getKingMoves(pos_moves, moves_index, kEnemy_attacks);
 
     // Queen checked moves.
     PieceType piece = this->turn ? W_QUEEN : B_QUEEN;
@@ -580,8 +579,7 @@ void Pos::getCheckedMoves(Computed* moves, uint64_t* enemy_attacks,
     }
 
     // En-passant moves.
-    this->getCheckedEp(rook_pins, bishop_pins, checkers_only,
-            moves, pos_moves, moves_index);
+    this->getCheckedEp(rook_pins, bishop_pins, checkers_only, pos_moves, moves_index);
 }
 
 /**
@@ -593,11 +591,11 @@ void Pos::getCheckedMoves(Computed* moves, uint64_t* enemy_attacks,
  * @param square: The square of the king in check.
  * @param checkers_only: Pointer to bit board of checkers only.
  */
-uint64_t Pos::getBishopCheckRays(Computed* moves, Square square, uint64_t* checkers_only) {
+uint64_t Pos::getBishopCheckRays(Square square, uint64_t* checkers_only) {
     uint64_t result = 0;
     bool turn = this->turn;
     Square king_sq = this->piece_list[turn][0];
-    uint64_t king_rays = this->getBishopFamily(moves, king_sq)->reach & 
+    uint64_t king_rays = this->getBishopFamily(king_sq)->reach & 
             ~this->sides[turn];
     *checkers_only |= (this->queens | this->bishops) & this->sides[!turn] & 
             king_rays;
@@ -608,7 +606,7 @@ uint64_t Pos::getBishopCheckRays(Computed* moves, Square square, uint64_t* check
         Square piece = this->piece_list[queen][i];
         if (std::abs(piece % 8 - king_sq % 8) == std::abs(piece / 8 - king_sq / 
                 8)) {
-            result |= (this->getBishopFamily(moves, (Square) piece)->reach & 
+            result |= (this->getBishopFamily((Square) piece)->reach & 
                     ~this->sides[!turn] & king_rays);
         }
     }
@@ -617,7 +615,7 @@ uint64_t Pos::getBishopCheckRays(Computed* moves, Square square, uint64_t* check
         Square piece = this->piece_list[bishop][i];
         if (std::abs(piece % 8 - king_sq % 8) == std::abs(piece / 8 - king_sq / 
                 8)) {
-            result |= (this->getBishopFamily(moves, (Square) piece)->reach & 
+            result |= (this->getBishopFamily((Square) piece)->reach & 
                     ~this->sides[!turn] & king_rays);
         }
     }
@@ -634,10 +632,10 @@ uint64_t Pos::getBishopCheckRays(Computed* moves, Square square, uint64_t* check
  * @param checkers: Bitboard of checkers.
  * @return: Check rays of rooks and queens.
  */
-uint64_t Pos::getRookCheckRays(Computed* moves, Square square, uint64_t* checkers) {
+uint64_t Pos::getRookCheckRays(Square square, uint64_t* checkers) {
     uint64_t result = 0;
     Square king_sq = this->piece_list[this->turn][0];
-    uint64_t king_rays = this->getRookFamily(moves, king_sq)->reach & ~this->sides[this->turn];
+    uint64_t king_rays = this->getRookFamily(king_sq)->reach & ~this->sides[this->turn];
     *checkers |= (this->queens | this->rooks) & this->sides[1 - this->turn] & king_rays;
     PieceType queen = this->turn ? B_QUEEN : W_QUEEN;
     PieceType rook = this->turn ? B_ROOK : W_ROOK;
@@ -645,7 +643,7 @@ uint64_t Pos::getRookCheckRays(Computed* moves, Square square, uint64_t* checker
     for (int i = 0; i < this->piece_index[queen]; i++) {
         Square queen_sq = this->piece_list[queen][i];
         if (queen_sq % 8 == king_sq % 8 || queen_sq / 8 == king_sq / 8) {
-            result |= (this->getRookFamily(moves, (Square) queen_sq)->reach & 
+            result |= (this->getRookFamily((Square) queen_sq)->reach & 
                     ~this->sides[1 - this->turn] & king_rays);
         }
     }
@@ -653,7 +651,7 @@ uint64_t Pos::getRookCheckRays(Computed* moves, Square square, uint64_t* checker
     for (int i = 0; i < this->piece_index[rook]; i++) {
         Square rook_sq = this->piece_list[rook][i];
         if (rook_sq % 8 == king_sq % 8 || rook_sq / 8 == king_sq / 8) {
-            result |= (this->getRookFamily(moves, (Square) rook_sq)->reach & 
+            result |= (this->getRookFamily((Square) rook_sq)->reach & 
                     ~this->sides[1 - this->turn] & king_rays);
         }
     }
@@ -699,8 +697,7 @@ uint64_t Pos::getPawnCheckers(Square square, uint64_t* checkers_only) {
  * @param moves_index: Pointer to number of move struct in pos_moves.
  */
 void Pos::getCheckedEp(uint64_t* rook_pins, uint64_t* bishop_pins, 
-        uint64_t checkers, Computed* moves, 
-        std::vector<uint16_t>* pos_moves[MAX_MOVE_SETS], int* moves_index) {
+        uint64_t checkers, std::vector<uint16_t>* pos_moves[MAX_MOVE_SETS], int* moves_index) {
     if (this->en_passant != NONE) {
         int rank_offset = this->turn ? -8 : 8;
         int ep = this->en_passant;
@@ -805,17 +802,17 @@ void Pos::getCheckedEp(uint64_t* rook_pins, uint64_t* bishop_pins,
  * @param pos_moves: Array of 16 bit unsigned int move vectors.
  * @param moves_index: Pointer to number of move struct in pos_moves.
  */
-void Pos::getNormalMoves(Computed* moves, uint64_t* enemy_attacks, 
+void Pos::getNormalMoves(uint64_t* enemy_attacks, 
         uint64_t* rook_pins, uint64_t* bishop_pins, std::vector<uint16_t>*
         pos_moves[MAX_MOVE_SETS], int* moves_index, uint64_t kEnemy_attacks) {
-    this->getKingMoves(moves, pos_moves, moves_index, kEnemy_attacks);
-    this->getQueenMoves(moves, *rook_pins, *bishop_pins, pos_moves, moves_index);
-    this->getRookMoves(moves, *rook_pins, *bishop_pins, pos_moves, moves_index);
-    this->getBishopMoves(moves, *rook_pins, *bishop_pins, pos_moves, moves_index);
-    this->getKnightMoves(moves, *rook_pins, *bishop_pins, pos_moves, moves_index);
-    this->getPawnMoves(moves, *rook_pins, *bishop_pins, pos_moves, moves_index);
-    this->getCastlingMoves(*enemy_attacks, moves, pos_moves, moves_index);
-    this->getEpMoves(*rook_pins, *bishop_pins, moves, pos_moves, moves_index);
+    this->getKingMoves(pos_moves, moves_index, kEnemy_attacks);
+    this->getQueenMoves(*rook_pins, *bishop_pins, pos_moves, moves_index);
+    this->getRookMoves(*rook_pins, *bishop_pins, pos_moves, moves_index);
+    this->getBishopMoves(*rook_pins, *bishop_pins, pos_moves, moves_index);
+    this->getKnightMoves(*rook_pins, *bishop_pins, pos_moves, moves_index);
+    this->getPawnMoves(*rook_pins, *bishop_pins, pos_moves, moves_index);
+    this->getCastlingMoves(*enemy_attacks, pos_moves, moves_index);
+    this->getEpMoves(*rook_pins, *bishop_pins, pos_moves, moves_index);
 }
 
 /**
@@ -827,28 +824,24 @@ void Pos::getNormalMoves(Computed* moves, uint64_t* enemy_attacks,
  * @param pos_moves: Array of 16 bit unsigned int move vectors.
  * @param moves_index: Pointer to number of move struct in pos_moves.
  */
-void Pos::getQueenMoves(Computed* computed_moves, uint64_t rook_pins, 
+void Pos::getQueenMoves(uint64_t rook_pins, 
         uint64_t bishop_pins, std::vector<uint16_t>* pos_moves[MAX_MOVE_SETS], 
         int* moves_index) {
     PieceType piece = this->turn ? W_QUEEN : B_QUEEN;
     for (int i = 0; i < this->piece_index[piece]; i++) {
         int queen = this->piece_list[piece][i];
         if (rook_pins & (1ULL << queen)) { // Pinned.
-            this->getRookPinMoves(computed_moves, queen, pos_moves, 
-                    moves_index);
+            this->getRookPinMoves(queen, pos_moves, moves_index);
         } else if (bishop_pins & (1ULL << queen)) { // Pinned.
-            this->getBishopPinMoves(computed_moves, queen, pos_moves, 
-                    moves_index);
+            this->getBishopPinMoves(queen, pos_moves, moves_index);
         } else {
-            MovesStruct* rook_like_moves = this->getRookFamily(computed_moves, 
-                    (Square) queen);
+            MovesStruct* rook_like_moves = this->getRookFamily((Square) queen);
             std::vector<uint16_t>* move_set = &rook_like_moves->move_set[
                     moveSetIndex(rook_like_moves->reach ^ this->sides[
                     this->turn], rook_like_moves)];
             if (move_set->size() != 0) pos_moves[(*moves_index)++] = move_set;
 
-            MovesStruct* bishop_like_moves = this->getBishopFamily(computed_moves, 
-                    (Square) queen);
+            MovesStruct* bishop_like_moves = this->getBishopFamily((Square) queen);
             move_set = &bishop_like_moves->move_set[
                     moveSetIndex(bishop_like_moves->reach ^ this->sides[
                     this->turn], bishop_like_moves)];
@@ -865,8 +858,7 @@ void Pos::getQueenMoves(Computed* computed_moves, uint64_t rook_pins,
  * @param pos_moves: Array of 16 bit unsigned int move vectors.
  * @param moves_index: Pointer to number of move struct in pos_moves.
  */
-void Pos::getRookPinMoves(Computed* moves, int square, 
-        std::vector<uint16_t>* pos_moves[MAX_MOVE_SETS], int* moves_index) {
+void Pos::getRookPinMoves(int square, std::vector<uint16_t>* pos_moves[MAX_MOVE_SETS], int* moves_index) {
     int king = this->piece_list[this->turn][0];
     uint64_t pos = this->sides[BLACK] | this->sides[WHITE];
     uint64_t friendly = 0;
@@ -911,7 +903,7 @@ void Pos::getRookPinMoves(Computed* moves, int square,
  * @param pos_moves: Array of 16 bit unsigned int move vectors.
  * @param moves_index: Pointer to number of move struct in pos_moves.
  */
-void Pos::getBishopPinMoves (Computed* moves, int square, 
+void Pos::getBishopPinMoves (int square, 
         std::vector<uint16_t>* pos_moves[MAX_MOVE_SETS], int* moves_index) {
     int king = this->piece_list[this->turn][0];
     uint64_t pos = this->sides[BLACK] | this->sides[WHITE];
@@ -948,19 +940,18 @@ void Pos::getBishopPinMoves (Computed* moves, int square,
  * @param pos_moves: Array of 16 bit unsigned int move vectors.
  * @param moves_index: Pointer to number of move struct in pos_moves.
  */
-void Pos::getRookMoves(Computed* computed_moves, uint64_t rook_pins, 
+void Pos::getRookMoves(uint64_t rook_pins, 
         uint64_t bishop_pins, std::vector<uint16_t>* pos_moves[MAX_MOVE_SETS], 
         int* moves_index) {
     PieceType piece = this->turn ? W_ROOK : B_ROOK;
     for (int i = 0; i < this->piece_index[piece]; i++) {
         int rook = this->piece_list[piece][i];
         if (rook_pins & (1ULL << rook)) { // Pinned.
-            this->getRookPinMoves(computed_moves, rook, pos_moves, moves_index);
+            this->getRookPinMoves(rook, pos_moves, moves_index);
         } else if (bishop_pins & (1ULL << rook)) {
             continue;
         } else {
-            MovesStruct* rook_like_moves = this->getRookFamily(computed_moves, 
-                    (Square) rook);
+            MovesStruct* rook_like_moves = this->getRookFamily((Square) rook);
             std::vector<uint16_t>* move_set = &rook_like_moves->move_set[
                     moveSetIndex(rook_like_moves->reach ^ this->
                     sides[this->turn], rook_like_moves)];
@@ -978,7 +969,7 @@ void Pos::getRookMoves(Computed* computed_moves, uint64_t rook_pins,
  * @param pos_moves: Array of 16 bit unsigned int move vectors.
  * @param moves_index: Pointer to number of move struct in pos_moves.
  */
-void Pos::getBishopMoves(Computed* computed_moves, uint64_t rook_pins, 
+void Pos::getBishopMoves(uint64_t rook_pins, 
         uint64_t bishop_pins, std::vector<uint16_t>* pos_moves[MAX_MOVE_SETS], 
         int* moves_index) {
     PieceType piece = this->turn ? W_BISHOP : B_BISHOP;
@@ -987,11 +978,10 @@ void Pos::getBishopMoves(Computed* computed_moves, uint64_t rook_pins,
         if (rook_pins & (1ULL << bishop)) { // Pinned.
             continue;
         } else if (bishop_pins & (1ULL << bishop)) { // Pinned.
-            this->getBishopPinMoves(computed_moves, bishop, pos_moves, 
+            this->getBishopPinMoves(bishop, pos_moves, 
                     moves_index);
         } else {
-            MovesStruct* bishop_like_moves = this->getBishopFamily(computed_moves, 
-                    (Square) bishop);
+            MovesStruct* bishop_like_moves = this->getBishopFamily((Square) bishop);
             std::vector<uint16_t>* move_set = &bishop_like_moves->move_set[
                     moveSetIndex(bishop_like_moves->reach ^ this->sides[
                     this->turn], bishop_like_moves)];
@@ -1009,7 +999,7 @@ void Pos::getBishopMoves(Computed* computed_moves, uint64_t rook_pins,
  * @param pos_moves: Array of 16 bit unsigned int move vectors.
  * @param moves_index: Pointer to number of move struct in pos_moves.
  */
-void Pos::getKnightMoves(Computed* computed_moves, uint64_t rook_pins, 
+void Pos::getKnightMoves(uint64_t rook_pins, 
         uint64_t bishop_pins, std::vector<uint16_t>* pos_moves[MAX_MOVE_SETS], 
         int* moves_index) {
     PieceType piece = this->turn ? W_KNIGHT : B_KNIGHT;
@@ -1035,7 +1025,7 @@ void Pos::getKnightMoves(Computed* computed_moves, uint64_t rook_pins,
  * @param pos_moves: Array of 16 bit unsigned int move vectors.
  * @param moves_index: Pointer to number of move struct in pos_moves.
  */
-void Pos::getPawnMoves(Computed* computed_moves, uint64_t rook_pins, 
+void Pos::getPawnMoves(uint64_t rook_pins, 
         uint64_t bishop_pins, std::vector<uint16_t>* pos_moves[MAX_MOVE_SETS], 
         int* moves_index) {
     Square king = this->piece_list[this->turn][0];
@@ -1105,8 +1095,7 @@ uint64_t Pos::pawnMoveArgs(Square square) {
  * @param pos_moves: Array of 16 bit unsigned int move vectors.
  * @param moves_index: Pointer to number of move struct in pos_moves.
  */
-void Pos::getCastlingMoves(uint64_t enemy_attacks, Computed* moves, 
-        std::vector<uint16_t>* pos_moves[MAX_MOVE_SETS], int* moves_index) {
+void Pos::getCastlingMoves(uint64_t enemy_attacks, std::vector<uint16_t>* pos_moves[MAX_MOVE_SETS], int* moves_index) {
     uint64_t sides = this->sides[WHITE] | this->sides[BLACK];
     if (this->turn) {
         if (this->castling & (1 << WKSC)) {
@@ -1169,8 +1158,7 @@ void Pos::getCastlingMoves(uint64_t enemy_attacks, Computed* moves,
  * @param pos_moves: Array of 16 bit unsigned int move vectors.
  * @param moves_index: Pointer to number of move struct in pos_moves.
  */
-void Pos::getEpMoves(uint64_t rook_pins, uint64_t bishop_pins, 
-        Computed* moves, std::vector<uint16_t>* pos_moves[MAX_MOVE_SETS],
+void Pos::getEpMoves(uint64_t rook_pins, uint64_t bishop_pins, std::vector<uint16_t>* pos_moves[MAX_MOVE_SETS],
         int* moves_index) {
     if (this->en_passant != NONE) {
         bool turn = this->turn;
@@ -1186,10 +1174,10 @@ void Pos::getEpMoves(uint64_t rook_pins, uint64_t bishop_pins,
                     !((1ULL << attacker_sq) & rook_pins)) {
                 if (captured_pawn / 8 == king_sq / 8) {
                     this->horizontalPinEp(king_sq, turn, attacker_sq, 
-                            captured_pawn, moves, ep, pos_moves, moves_index);
+                            captured_pawn, ep, pos_moves, moves_index);
                 } else if ((1ULL << attacker_sq) & bishop_pins) {
                     this->diagonalPinEp(king_sq, turn, attacker_sq, 
-                            captured_pawn, moves, ep, pos_moves, moves_index);
+                            captured_pawn, ep, pos_moves, moves_index);
                 } else {
                     if (attacker_sq % 8 < ep % 8) {
                         std::vector<uint16_t>* move_set = &Moves_::EN_PASSANT[attacker_sq - 24].move_set[0];
@@ -1212,10 +1200,10 @@ void Pos::getEpMoves(uint64_t rook_pins, uint64_t bishop_pins,
                     !((1ULL << attacker_sq) & rook_pins)) {
                 if (captured_pawn / 8 == king_sq / 8) {
                     this->horizontalPinEp(king_sq, turn, attacker_sq, 
-                            captured_pawn, moves, ep, pos_moves, moves_index);
+                            captured_pawn, ep, pos_moves, moves_index);
                 } else if ((1ULL << attacker_sq) & bishop_pins) {
                     this->diagonalPinEp(king_sq, turn, attacker_sq, 
-                            captured_pawn, moves, ep, pos_moves, moves_index);
+                            captured_pawn, ep, pos_moves, moves_index);
                 } else {
                     if (attacker_sq % 8 < ep % 8) {
                         std::vector<uint16_t>* move_set = &Moves_::EN_PASSANT[attacker_sq - 24].move_set[0];
@@ -1249,7 +1237,7 @@ void Pos::getEpMoves(uint64_t rook_pins, uint64_t bishop_pins,
  * @param moves_index: Pointer to number of move struct in pos_moves.
  */
 void Pos::horizontalPinEp(int king, bool turn, int attacker_sq, 
-        int captured_pawn, Computed* moves, int ep, std::vector<uint16_t>* 
+        int captured_pawn, int ep, std::vector<uint16_t>* 
         pos_moves[MAX_MOVE_SETS], int* moves_index) {
     int rank = (king / 8) * 8, rank_end = rank + 7;
     PieceType e_rook = turn ? B_ROOK : W_ROOK;
@@ -1313,7 +1301,7 @@ void Pos::horizontalPinEp(int king, bool turn, int attacker_sq,
  * @param moves_index: Pointer to number of move struct in pos_moves.
  */
 void Pos::diagonalPinEp(int king, bool turn, int attacker_sq, 
-        int captured_pawn, Computed* moves, int ep, std::vector<uint16_t>* 
+        int captured_pawn, int ep, std::vector<uint16_t>* 
         pos_moves[MAX_MOVE_SETS], int* moves_index) {
     if (ep > attacker_sq && ep % 8 < attacker_sq % 8) { // Upper left.
         if ((king > attacker_sq && king % 8 < attacker_sq % 8) ||
@@ -1394,7 +1382,7 @@ void Pos::diagonalPinEp(int king, bool turn, int attacker_sq,
  * @param checkers_only: A pointer to a bit board of checkers only.
  * @return: Bitboard of knight checkers.
  */
-uint64_t Pos::getKnightCheckers(Computed* moves, Square square, uint64_t* checkers_only) {
+uint64_t Pos::getKnightCheckers(Square square, uint64_t* checkers_only) {
     uint64_t result = 0;
     *checkers_only |= Moves_::KNIGHT[square].reach & this->sides[1 - this->turn] & this->knights;
     return result;
@@ -1406,11 +1394,11 @@ uint64_t Pos::getKnightCheckers(Computed* moves, Square square, uint64_t* checke
  * @param moves: Pointer to precomputed moves struct.
  * @return: True if in double-check, else false.
  */
-bool Pos::isDoubleChecked(Computed* moves) {
+bool Pos::isDoubleChecked() {
     bool turn = this->turn;
     Square king = this->piece_list[turn][0];
-    uint64_t rook_attacks = this->getRookFamily(moves, king)->reach;
-    uint64_t bishop_attacks = this->getBishopFamily(moves, king)->reach;
+    uint64_t rook_attacks = this->getRookFamily(king)->reach;
+    uint64_t bishop_attacks = this->getBishopFamily(king)->reach;
 
     uint64_t attackers = (rook_attacks & this->rooks & this->sides[!turn]) | 
             (bishop_attacks & this->bishops & this->sides[!turn]) |
@@ -1442,7 +1430,7 @@ bool Pos::isDoubleChecked(Computed* moves) {
  * @param square: The square on which the rook is on.
  * @return Pointer to moves struct.
  */
-MovesStruct* Pos::getRookFamily(Computed* moves, Square square) {
+MovesStruct* Pos::getRookFamily(Square square) {
     return &Moves_::ROOK[Indices::ROOK[square][rookIndex(this->sides[BLACK] | this->sides[WHITE], square)]];
 }
 
@@ -1453,7 +1441,7 @@ MovesStruct* Pos::getRookFamily(Computed* moves, Square square) {
  * @param moves: A struct of the precomputed moves.
  * @param square: The square on which the bishop is on.
  */
-MovesStruct* Pos::getBishopFamily(Computed* moves, Square square) {
+MovesStruct* Pos::getBishopFamily(Square square) {
     return &Moves_::BISHOP[Indices::BISHOP[square][bishopIndex(this->sides[BLACK] | this->sides[WHITE], square)]];
 }
 
@@ -1624,7 +1612,7 @@ bool Pos::isThreeFoldRep() {
  * @param moves_index: Pointer to number of vectors in pos_moves.
  * @return: The appropriate ExitCode.
  */
-ExitCode Pos::isEOG(Computed* moves, uint64_t enemy_attacks, int move_index) {
+ExitCode Pos::isEOG(uint64_t enemy_attacks, int move_index) {
     // Draw by threefold repetition.
     if (this->isThreeFoldRep()) return THREE_FOLD_REPETITION;
 
@@ -1656,24 +1644,24 @@ ExitCode Pos::isEOG(Computed* moves, uint64_t enemy_attacks, int move_index) {
  * @param pos_moves: Array of vectors pointers of 16 bit unsigned int moves.
  * @return: The number of move sets.
  */
-int Pos::getMoves(Computed* moves, uint64_t* enemy_attacks, 
+int Pos::getMoves(uint64_t* enemy_attacks, 
         std::vector<uint16_t>* pos_moves[MAX_MOVE_SETS]) {
     // The pinning rays
     uint64_t rook_pins = 0;
     uint64_t bishop_pins = 0;
     uint64_t kEnemy_attacks = 0;
-    this->getEnemyAttacks(moves, enemy_attacks, &rook_pins, &bishop_pins, 
+    this->getEnemyAttacks(enemy_attacks, &rook_pins, &bishop_pins, 
             &kEnemy_attacks);
 
     // Move retrieval for the 3 cases.
     int moves_index = 0;
-    if (isDoubleChecked(moves)) {
-        this->getKingMoves(moves, pos_moves, &moves_index, kEnemy_attacks);
+    if (isDoubleChecked()) {
+        this->getKingMoves(pos_moves, &moves_index, kEnemy_attacks);
     } else if (this->isChecked(*enemy_attacks)) {
-        this->getCheckedMoves(moves, enemy_attacks, &rook_pins, &bishop_pins, 
+        this->getCheckedMoves(enemy_attacks, &rook_pins, &bishop_pins, 
                 pos_moves, &moves_index, kEnemy_attacks);
     } else {
-        this->getNormalMoves(moves, enemy_attacks, &rook_pins, &bishop_pins, 
+        this->getNormalMoves(enemy_attacks, &rook_pins, &bishop_pins, 
                 pos_moves, &moves_index, kEnemy_attacks);
     }
     return moves_index;
@@ -1689,7 +1677,7 @@ int Pos::getMoves(Computed* moves, uint64_t* enemy_attacks,
  * @param bishop_pins: 64 bit unsigned int pointer for bishop pins.
  * @param kEnemy_attacks: 64 bit unsigned int pointer with value 0.
  */
-void Pos::getEnemyAttacks(Computed* moves, uint64_t* enemy_attacks, 
+void Pos::getEnemyAttacks(uint64_t* enemy_attacks, 
         uint64_t* rook_pins, uint64_t* bishop_pins, uint64_t* kEnemy_attacks) {
     bool turn = this->turn;
     Square king_sq = this->piece_list[turn][0];
@@ -2685,7 +2673,7 @@ void Pos::checkCastlingEnPassantMoves(uint start, uint end, uint16_t* move) {
  * @return: The chosen move.
  */
 uint16_t Pos::chooseMove(int white, int black, std::vector<uint16_t>* 
-        pos_moves[MAX_MOVE_SETS], int* moves_index, Computed* moves) {
+        pos_moves[MAX_MOVE_SETS], int* moves_index) {
     uint16_t move = NORMAL | pKNIGHT;
     
     // Recieve and print move.
@@ -2715,14 +2703,14 @@ uint16_t Pos::chooseMove(int white, int black, std::vector<uint16_t>*
     } else {
         uint64_t enemy_attacks = 0;
         std::vector<uint16_t>* pos_moves[MAX_MOVE_SETS];
-        int moves_index = this->getMoves(moves, &enemy_attacks, pos_moves);
+        int moves_index = this->getMoves(&enemy_attacks, pos_moves);
         double value = this->turn ? -1000000 : 1000000;
         std::cout << "Thinking..." << std::flush;
         for (int i = 0; i < moves_index; i++) {
             std::vector<uint16_t>* move_set = pos_moves[i];
             for (uint16_t move_candidate : *move_set) {
                 this->makeMove(move_candidate);
-                double pos_value = this->alphaBeta(4, -100000, 100000, this->turn, moves);
+                double pos_value = this->alphaBeta(4, -100000, 100000, this->turn);
                 if (pos_value > value && !this->turn) {
                     move = move_candidate;
                     value = pos_value;
@@ -2746,24 +2734,24 @@ uint16_t Pos::chooseMove(int white, int black, std::vector<uint16_t>*
  * @param moves: Pointer to precomputed moves struct.
  * @param args: Pointer to command line arguments struct.
  */
-void Pos::handleGame(Computed* moves, CmdLine* args, char *argv[]) {
+void Pos::handleGame(CmdLine* args, char *argv[]) {
     ExitCode code = NORMAL_PLY;
     
     uint64_t enemy_attacks = 0;
     std::vector<uint16_t>* pos_moves[MAX_MOVE_SETS];
-    int moves_index = this->getMoves(moves, &enemy_attacks, pos_moves);
+    int moves_index = this->getMoves(&enemy_attacks, pos_moves);
     
     while (!code) {
         if (!args->quiet) this->display(args);
 
-        code = this->isEOG(moves, enemy_attacks, moves_index);
+        code = this->isEOG(enemy_attacks, moves_index);
         if (code) break;
         uint16_t move = this->chooseMove(args->white, args->black, pos_moves, 
-                &moves_index, moves);
+                &moves_index);
         this->makeMove(move);
 
         enemy_attacks = 0;
-        moves_index = this->getMoves(moves, &enemy_attacks, pos_moves);
+        moves_index = this->getMoves(&enemy_attacks, pos_moves);
     }
 
     this->showEOG(code, argv);
@@ -2779,14 +2767,12 @@ void Pos::handleGame(Computed* moves, CmdLine* args, char *argv[]) {
  * @param input: Command given by the user.
  */
 void runNormal(Pos* game, CmdLine* args, char *argv[], std::string input) {
-    Computed moves;
-    Compute::init(&moves);
     goto start;
     while (std::getline(std::cin, input)) {
         start:
         std::vector<std::string> commands = split(input, " ");
         if (commands[0] == "perft") perft(commands.size() == 2 ? std::stoi(commands[1]) : 0, game);
-        if (commands[0] == "play") game->handleGame(&moves, args, argv);
+        if (commands[0] == "play") game->handleGame(args, argv);
         if (commands[0] == "fen") game->fen();
         if (commands[0] == "exit") break;
 

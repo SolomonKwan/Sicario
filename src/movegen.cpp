@@ -103,20 +103,6 @@ std::vector<MovesStruct> computeCastling() {
 }
 
 /**
- * Calls all functions to make the precomputations for a game.
- * @param moves: Pointer to precomputed moves structs.
- */
-void precompute(Computed* moves) {
-}
-
-/**
- * Calls the function to perform pre-game move computations.
- */
-void Compute::init(Computed* moves) {
-    precompute(moves);
-}
-
-/**
  * Sets the reach of the bishop for a particular square and occupancy (according
  * to MSBs) and creates the moves. This only happens if the family of moves has
  * not been set yet.
