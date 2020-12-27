@@ -17,11 +17,6 @@
 #define MAX_MOVE_SETS 100
 #define MAX_THREADS 4
 
-typedef uint64_t U64;
-typedef uint16_t U16;
-typedef U16 MOVE;
-typedef std::vector<MOVE> MOVES;
-
 /**
  * The squares of the board and their associated numbers. NONE (64) used as
  * sentinel value.
@@ -91,53 +86,6 @@ enum Player {
 
 enum Castling {
     WKSC, WQSC, BKSC, BQSC
-};
-
-/**
- * A struct holding the move families. 
- * 
- * Contains:
- *  reach:      A bit board of the squares a piece can reach. Enemy and friendly
- *              pieces included. Goes all the way to the edge of the board.
- *  block_bits: A vector of the end squares on each ray of the reach bitboard.
- *  move_set:   A vector of vectors of 16 bit unsigned integers. Each integer
- *              encodes a move as Promotion (4) | MoveType (4) | Destination (6)
- *              | Origin (6).
- *  en_passant: Vector of vectors of en-passant moves. Used only for pawns.
- *  checked_moves: Unnorderd map whose keys are uint64_t ints with the possible
- *      destination squares (captures and blocks) set. The value is a vector of
- *      moves to those squares.
- */
-struct MovesStruct {
-    uint64_t reach;
-    std::vector<int> block_bits;
-    std::vector<std::vector<uint16_t>> move_set;
-    std::vector<std::vector<uint16_t>> en_passant;
-    std::vector<std::vector<uint16_t>> double_push;
-
-    std::unordered_map<uint64_t, std::vector<uint16_t>> checked_moves;
-};
-
-/**
- * Information before current move is made.
- */
-struct History {
-    int castling;
-    Square en_passant;
-    int halfmove;
-    uint16_t move;
-    PieceType captured;
-    uint64_t hash;
-};
-
-/**
- * Some of the command line arguments.
- */
-struct CmdLine {
-    Player white;
-    Player black;
-    std::string fen = STANDARD_GAME;
-    bool dark_mode, quiet;
 };
 
 /**
@@ -332,56 +280,5 @@ const int bishopShifts[64] = {
 	59, 59, 59, 59, 59, 59, 59, 59,
 	58, 59, 59, 59, 59, 59, 59, 58
 };
-
-/******************************************************************************/
-/********************** Zobrist hashing used in gameplay **********************/
-template <typename T>
-T generateZobristArray(int size) {
-    std::mersenne_twister_engine<std::uint_fast64_t, 64, 312, 156, 31, 
-            0xb5026f5aa96619e9, 29, 0x5555555555555555, 17, 
-            0x71d67fffeda60000, 37, 0xfff7eee000000000, 43, 
-            6364136223846793005> rng;
-    T array;
-    for (int i = 0; i < size; i++) array[i] = rng();
-    return array;
-}
-
-typedef std::array<uint64_t, 64> ZobristArray64;
-typedef std::array<uint64_t, 48> ZobristArray48;
-typedef std::array<uint64_t, 16> ZobristArray16;
-typedef std::array<uint64_t, 8> ZobristArray8;
-typedef std::array<uint64_t, 1> ZobristArray1;
-
-const ZobristArray64 ZOBRIST_WKING = generateZobristArray<ZobristArray64>(64);
-
-const ZobristArray64 ZOBRIST_BKING = generateZobristArray<ZobristArray64>(64);
-
-const ZobristArray64 ZOBRIST_WQUEEN = generateZobristArray<ZobristArray64>(64);
-
-const ZobristArray64 ZOBRIST_BQUEEN = generateZobristArray<ZobristArray64>(64);
-
-const ZobristArray64 ZOBRIST_WROOK = generateZobristArray<ZobristArray64>(64);
-
-const ZobristArray64 ZOBRIST_BROOK = generateZobristArray<ZobristArray64>(64);
-
-const ZobristArray64 ZOBRIST_WBISHOP = generateZobristArray<ZobristArray64>(64);
-
-const ZobristArray64 ZOBRIST_BBISHOP = generateZobristArray<ZobristArray64>(64);
-
-const ZobristArray64 ZOBRIST_WKNIGHT = generateZobristArray<ZobristArray64>(64);
-
-const ZobristArray64 ZOBRIST_BKNIGHT = generateZobristArray<ZobristArray64>(64);
-
-const ZobristArray48 ZOBRIST_WPAWN = generateZobristArray<ZobristArray48>(48);
-
-const ZobristArray48 ZOBRIST_BPAWN = generateZobristArray<ZobristArray48>(48);
-
-const ZobristArray16 ZOBRIST_CASTLING = generateZobristArray<ZobristArray16>(16);
-
-const ZobristArray8 ZOBRIST_EP = generateZobristArray<ZobristArray8>(8);
-
-const ZobristArray1 ZOBRIST_BLACK = generateZobristArray<ZobristArray1>(1);
-/******************** End Zobrist hashing used in gameplay ********************/
-/******************************************************************************/
 
 #endif

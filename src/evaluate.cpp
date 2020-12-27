@@ -30,9 +30,6 @@ namespace Opening {
     };
 
     const bool is_phase(Pos* game) {
-        if (game->fullmove <= 12) {
-            return true;
-        }
         return false;
     }
 }
@@ -65,9 +62,6 @@ namespace MiddleGame {
     };
 
     const bool is_phase(Pos* game) {
-        if (game->fullmove > 12 && (game->piece_index[W_QUEEN] || game->piece_index[B_QUEEN])) {
-            return true;
-        }
         return false;
     }
 }
@@ -100,9 +94,6 @@ namespace EndGame {
     };
 
     const bool is_phase(Pos* game) {
-        if (game->fullmove > 12 && !game->piece_index[W_QUEEN] && !game->piece_index[B_QUEEN]) {
-            return true;
-        }
         return false;
     }
 }
@@ -121,10 +112,10 @@ int Evaluator::evaluate(Pos* game) {
  */
 double Evaluator::material() {
     double value = 0;
-    for (int i = 0; i < 12; i++) {
-        for (int j = 0; j < game->piece_index[i]; j++) {
-            value += material_value[i];
-        }
-    }
+    // for (int i = 0; i < 12; i++) {
+    //     for (int j = 0; j < game->piece_index[i]; j++) {
+    //         value += material_value[i];
+    //     }
+    // }
     return value;
 }

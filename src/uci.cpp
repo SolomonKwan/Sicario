@@ -1,7 +1,6 @@
 
 #include <iostream>
 
-#include "test.hpp"
 #include "game.hpp"
 #include "uci.hpp"
 
@@ -46,7 +45,7 @@ void UCI_ReadyOk() {
  * @param args: Pointer to command line arguments.
  * @param argv: Command line arguments.
  */
-void runUCI(Pos* game, Computed* moves, CmdLine* args, char *argv[]) {
+void runUCI(Pos* game, char *argv[]) {
     std::string input;
     UCI_InitialResponse();
     while (std::getline(std::cin, input)) {
@@ -62,7 +61,6 @@ void runUCI(Pos* game, Computed* moves, CmdLine* args, char *argv[]) {
  * @param args: Pointer to command line arguments.
  * @param argv: Command line arguments.
  */
-void UCI::init(Pos* game, Computed* moves, CmdLine* args, char *argv[], 
-        std::string input) {
-    runUCI(game, moves, args, argv);
-}
+// void UCI::init(Pos* game, char *argv[], std::string input) {
+//     runUCI(game, argv);
+// }

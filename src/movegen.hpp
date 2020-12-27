@@ -4,17 +4,44 @@
 
 #include "constants.hpp"
 
-struct Computed {
+typedef uint16_t Move;
+typedef uint64_t Bitboard;
 
-    MovesStruct PAWN_MOVES[2][48];
+/**
+ * A struct holding the move families. 
+ * 
+ * Contains:
+ *  reach:      A bit board of the squares a piece can reach. Enemy and friendly
+ *              pieces included. Goes all the way to the edge of the board.
+ *  block_bits: A vector of the end squares on each ray of the reach bitboard.
+ *  move_set:   A vector of vectors of 16 bit unsigned integers. Each integer
+ *              encodes a move as Promotion (4) | MoveType (4) | Destination (6)
+ *              | Origin (6).
+ *  en_passant: Vector of vectors of en-passant moves. Used only for pawns.
+ *  checked_moves: Unnorderd map whose keys are uint64_t ints with the possible
+ *      destination squares (captures and blocks) set. The value is a vector of
+ *      moves to those squares.
+ */
+struct MovesStruct {
+    uint64_t reach;
+    std::vector<int> block_bits;
+    std::vector<std::vector<Move>> move_set;
+    std::vector<std::vector<Move>> en_passant;
+    std::vector<std::vector<Move>> double_push;
 
-    /////////////////////////////////////////
+    std::unordered_map<uint64_t, std::vector<Move>> checked_moves;
+};
 
-    MovesStruct EN_PASSANT_MOVES[16];
-
-    /////////////////////////////////////////
-
-    MovesStruct DOUBLE_PUSH[16];
+/**
+ * Information before current move is made.
+ */
+struct History {
+    int castling;
+    Square en_passant;
+    int halfmove;
+    Move move;
+    PieceType captured;
+    uint64_t hash;
 };
 
 std::vector<std::vector<int>> computeRookIndices();
@@ -22,37 +49,18 @@ std::vector<std::vector<int>> computeBishopIndices();
 std::vector<MovesStruct> computeEnPassantMoves();
 std::vector<MovesStruct> computeDoublePushMoves();
 
-typedef uint64_t Bitboard;
-// typedef std::vector<Bitboard> BitBoardSet;
-// typedef std::vector<BitBoardSet> BitBoardFamily;
-
-// typedef uint16_t Move;
-// typedef std::vector<Move> MoveSet;
-// typedef std::vector<MoveSet> MoveFamily;
-// typedef std::vector<MoveFamily> PieceMoves;
-
-// typedef std::vector<std::unordered_map<Bitboard, std::vector<Move>>> CheckMap; // For check moves
-
-namespace Compute {
-    void init(Computed* moves);
-}
-
 /**
  * Calculates the index into the move_set of a particular move family.
  * 
- * @param masked_reach: A bitboard of the reach of the piece with own pieces
- *      masked out.
- * @param move_family: A pointer to Moves struct holding the move family. The
- *      block_bits vector MUST hold the squares in order from smallest to 
- *      largest.
+ * @param masked_reach: A bitboard of the reach of the piece with own pieces masked out.
+ * @param move_family: A pointer to Moves struct holding the move family. The block_bits vector MUST hold the squares
+ *      in order from smallest to largest.
  * @return:  Index into the move_set.
  */
 int moveSetIndex(uint64_t masked_reach, MovesStruct* move_family);
 
 /**
- * Finds and returns the position of the most significant set bit. If no bits
- * are set, returns 0.
- * 
+ * Finds and returns the position of the most significant set bit. If no bits are set, returns 0.
  * @param n: The integer to find the MSB.
  * @return: The most significant bit position.
  */

@@ -69,8 +69,7 @@ bool bitAt(uint64_t pos, int n) {
  */
 int moveSetIndex(uint64_t masked_reach, MovesStruct* move_family) {
     int index = 0, result = 0;
-    for (auto i = move_family->block_bits.begin(); i != move_family->
-            block_bits.end(); i++) {
+    for (auto i = move_family->block_bits.begin(); i != move_family->block_bits.end(); i++) {
         result |= ((masked_reach >> *i) & 1ULL) << index;
         index++;
     }
@@ -84,7 +83,7 @@ int moveSetIndex(uint64_t masked_reach, MovesStruct* move_family) {
 std::vector<MovesStruct> computeCastling() {
     std::vector<MovesStruct> CASTLING_MOVES(4);
     CASTLING_MOVES[WQSC].move_set.resize(1);
-    std::vector<uint16_t>* moves_set = &(CASTLING_MOVES[WQSC].move_set[0]);
+    std::vector<Move>* moves_set = &(CASTLING_MOVES[WQSC].move_set[0]);
     moves_set->push_back(E1 | C1 << 6 | CASTLING | pKNIGHT);
 
     CASTLING_MOVES[WKSC].move_set.resize(1);
@@ -157,7 +156,7 @@ void setBishopMoves(int square, MovesStruct* move_family) {
             index++;
         }
 
-        std::vector<uint16_t>* moves_set = &(move_family->
+        std::vector<Move>* moves_set = &(move_family->
                 move_set[moveSetIndex(pos, move_family)]);
 
         // Set upper right moves.
@@ -1152,11 +1151,11 @@ std::vector<MovesStruct> computeBishopBlocks() {
             }
             end_pt += direction;
 
-            std::unordered_map<uint64_t, std::vector<uint16_t>>* moves = 
+            std::unordered_map<uint64_t, std::vector<Move>>* moves = 
                     &blocks[square].checked_moves;
             while (start != end_pt) {
-                uint16_t move = square | start << 6 | NORMAL | pKNIGHT;
-                std::vector<uint16_t> moveset = {move};
+                Move move = square | start << 6 | NORMAL | pKNIGHT;
+                std::vector<Move> moveset = {move};
                 moves->insert(std::make_pair(1ULL << start, moveset));
                 start += direction;
             }
@@ -1190,15 +1189,15 @@ std::vector<MovesStruct> computeBishopBlocks() {
             }
             end2 += ray2;
             
-            std::unordered_map<uint64_t, std::vector<uint16_t>>* moves = 
+            std::unordered_map<uint64_t, std::vector<Move>>* moves = 
                     &blocks[square].checked_moves;
 
             while (start1 != end1) {
                 start2 = square + ray2;
                 while (start2 != end2) {
-                    uint16_t move1 = square | start1 << 6 | NORMAL | pKNIGHT;
-                    uint16_t move2 = square | start2 << 6 | NORMAL | pKNIGHT;
-                    std::vector<uint16_t> moveset = {move1, move2};
+                    Move move1 = square | start1 << 6 | NORMAL | pKNIGHT;
+                    Move move2 = square | start2 << 6 | NORMAL | pKNIGHT;
+                    std::vector<Move> moveset = {move1, move2};
                     moves->insert(std::make_pair(1ULL << start1 | 1ULL << 
                             start2, moveset));
                     start2 += ray2;
@@ -1273,7 +1272,7 @@ std::vector<MovesStruct> computeKingMoves() {
                 index++;
             }
 
-            std::vector<uint16_t>* moves_set = &(moves[square].move_set[moveSetIndex(pos, &moves[square])]);
+            std::vector<Move>* moves_set = &(moves[square].move_set[moveSetIndex(pos, &moves[square])]);
             
             // Set the moves.
             for (uint64_t shift = 0; shift < 64; shift++) {
@@ -1348,7 +1347,7 @@ std::vector<MovesStruct> computeKnightMoves() {
                 index++;
             }
 
-            std::vector<uint16_t>* moves_set = &(knight[square].move_set[moveSetIndex(pos, &knight[square])]);
+            std::vector<Move>* moves_set = &(knight[square].move_set[moveSetIndex(pos, &knight[square])]);
             
             // Set the moves.
             for (uint64_t shift = 0; shift < 64; shift++) {
@@ -1420,7 +1419,7 @@ std::vector<std::vector<MovesStruct>> computePawnMoves() {
                     index++;
                 }
 
-                std::vector<uint16_t>* moves_set = &(PAWN_MOVES[player][square -8].move_set[moveSetIndex(pos,
+                std::vector<Move>* moves_set = &(PAWN_MOVES[player][square -8].move_set[moveSetIndex(pos,
                         &PAWN_MOVES[player][square - 8])]);
 
                 if (player == WHITE) {
@@ -1550,14 +1549,14 @@ std::vector<MovesStruct> computeEnPassantMoves() {
             // En-passant captures
             if (player == WHITE && square / 8 == 4) { // En-passant.
                 moves[square - 24].move_set.resize(2);
-                std::vector<uint16_t>* r_ep_set = &(moves[square - 24].move_set[0]);
-                std::vector<uint16_t>* l_ep_set = &(moves[square - 24].move_set[1]);
+                std::vector<Move>* r_ep_set = &(moves[square - 24].move_set[0]);
+                std::vector<Move>* l_ep_set = &(moves[square - 24].move_set[1]);
                 r_ep_set->push_back(square | (square + right) << 6 | EN_PASSANT | pKNIGHT);
                 l_ep_set->push_back(square | (square + left) << 6 | EN_PASSANT |pKNIGHT);
             } else if (player == BLACK && square / 8 == 3) { // En-passant.
                 moves[square - 24].move_set.resize(2);
-                std::vector<uint16_t>* r_ep_set = &(moves[square - 24].move_set[0]);
-                std::vector<uint16_t>* l_ep_set = &(moves[square - 24].move_set[1]);
+                std::vector<Move>* r_ep_set = &(moves[square - 24].move_set[0]);
+                std::vector<Move>* l_ep_set = &(moves[square - 24].move_set[1]);
                 r_ep_set->push_back(square | (square + right) << 6 | EN_PASSANT | pKNIGHT);
                 l_ep_set->push_back(square | (square + left) << 6 | EN_PASSANT |pKNIGHT);
             }
@@ -1573,11 +1572,11 @@ std::vector<MovesStruct> computeDoublePushMoves() {
             // Double push blocks
             if (player == WHITE && square / 8 == 1) {
                 DOUBLE_PUSH[square - 8].move_set.resize(1);
-                std::vector<uint16_t>* move = &(DOUBLE_PUSH[square - 8].move_set[0]);
+                std::vector<Move>* move = &(DOUBLE_PUSH[square - 8].move_set[0]);
                 move->push_back(square | (square + 16) << 6 | NORMAL | pKNIGHT);
             } else if (player == BLACK && square / 8 == 6) {
                 DOUBLE_PUSH[square - 40].move_set.resize(1);
-                std::vector<uint16_t>* move = &(DOUBLE_PUSH[square - 40].move_set[0]);
+                std::vector<Move>* move = &(DOUBLE_PUSH[square - 40].move_set[0]);
                 move->push_back(square | (square - 16) << 6 | NORMAL | pKNIGHT);
             }
         }
@@ -1643,7 +1642,7 @@ void setRookMoves(int square, MovesStruct* move_family) {
             index++;
         }
 
-        std::vector<uint16_t>* moves_set = &(move_family->
+        std::vector<Move>* moves_set = &(move_family->
                 move_set[moveSetIndex(pos, move_family)]);
 
         // Set upward moves.
@@ -2562,12 +2561,12 @@ std::vector<MovesStruct> computeRookBlocks() {
                     (direction == 8 ? 64 : -8)) : (8 * (start / 8) + 
                     (direction == 1 ? 8 : -1));
 
-            std::unordered_map<uint64_t, std::vector<uint16_t>>* moves = 
+            std::unordered_map<uint64_t, std::vector<Move>>* moves = 
                     &blocks[square].checked_moves;
             while (start != end_pt) {
-                // moves[pos] = std::vector<uint16_t>(); WHY DOESN'T WORK????
-                uint16_t move = square | start << 6 | NORMAL | pKNIGHT;
-                std::vector<uint16_t> moveset = {move};
+                // moves[pos] = std::vector<Move>(); WHY DOESN'T WORK????
+                Move move = square | start << 6 | NORMAL | pKNIGHT;
+                std::vector<Move> moveset = {move};
                 moves->insert(std::make_pair(1ULL << start, moveset));
                 start += direction;
             }
@@ -2593,15 +2592,15 @@ std::vector<MovesStruct> computeRookBlocks() {
             end2 = std::abs(ray2) == 8 ? (start2 % 8 + (ray2 == 8 ? 64 : -8)) :
                     (8 * (start2 / 8) + (ray2 == 1 ? 8 : -1));
             
-            std::unordered_map<uint64_t, std::vector<uint16_t>>* moves = 
+            std::unordered_map<uint64_t, std::vector<Move>>* moves = 
                     &blocks[square].checked_moves;
 
             while (start1 != end1) {
                 start2 = square + ray2;
                 while (start2 != end2) {
-                    uint16_t move1 = square | start1 << 6 | NORMAL | pKNIGHT;
-                    uint16_t move2 = square | start2 << 6 | NORMAL | pKNIGHT;
-                    std::vector<uint16_t> moveset = {move1, move2};
+                    Move move1 = square | start1 << 6 | NORMAL | pKNIGHT;
+                    Move move2 = square | start2 << 6 | NORMAL | pKNIGHT;
+                    std::vector<Move> moveset = {move1, move2};
                     moves->insert(std::make_pair(1ULL << start1 | 1ULL << start2, 
                             moveset));
                     start2 += ray2;

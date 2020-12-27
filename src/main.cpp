@@ -1,7 +1,6 @@
 
 #include <iostream>
 #include "movegen.hpp"
-#include "arg.hpp"
 #include "uci.hpp"
 #include "game.hpp"
 

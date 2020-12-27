@@ -15,6 +15,6 @@ class Searcher {
 
 double evaluate(Pos* game);
 
-double alphaBeta(Pos* game, int depth, double alpha, double beta, bool max, Computed* moves);
+double alphaBeta(Pos* game, int depth, double alpha, double beta, bool max);
 
 #endif
