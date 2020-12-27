@@ -10,6 +10,7 @@
  */
 class Pos {
     public:
+        Pos(std::string fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
         std::string original_fen;
         int halfmove, fullmove;
         int piece_index[12];
@@ -17,7 +18,7 @@ class Pos {
         void displayAll(Pos* game);
         ExitCode parseFen(std::string fen);
         void zero();
-        void handleGame(CmdLine* args, char *argv[]);
+        void handleGame();
         int getMoves(uint64_t* enemy_attacks, std::vector<uint16_t>* pos_moves[MAX_MOVE_SETS]);
         void getEnemyAttacks(uint64_t* enemy_attacks, uint64_t* rook_pins, uint64_t* bishop_pins, uint64_t* kEnemy_attacks);
 
@@ -25,7 +26,7 @@ class Pos {
         bool isDoubleChecked();
         MovesStruct* getRookFamily(Square square);
         MovesStruct* getBishopFamily(Square square);
-        void display(CmdLine* args);
+        void display();
         ExitCode isEOG(uint64_t enemy_attacks, int move_index);
         bool isThreeFoldRep();
         bool insufficientMaterial();
@@ -77,7 +78,7 @@ class Pos {
         double alphaBeta(int depth, double alpha, double beta, bool max);
         double evaluate();
         void printMove(uint16_t move, bool extraInfo);
-        void showEOG(ExitCode code, char *argv[]);
+        void showEOG(ExitCode code);
         const int rookBlockIndex(uint64_t pos, Square square);
 
     private:
@@ -109,7 +110,7 @@ class Pos {
 };
 
 namespace Play {
-    void init(Pos* game, CmdLine* args,char *argv[], std::string input);
+    void init(std::string input);
 }
 
 #endif

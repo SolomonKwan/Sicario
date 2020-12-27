@@ -6,24 +6,35 @@
 #include "game.hpp"
 
 namespace Run {
-    void init(Pos* game, CmdLine* args, char *argv[]) {
+    #define VERSION "alpha v1.0.0"
+    #define AUTHOR "S. Kwan"
+    #define CHESS_PROGRAMMING "www.chessprogramming.org"
+    #define STOCKFISH "Stockfish"
+    #define BLUE_FEVER_SOFT "bluefeversoft"
+
+    void showStartUp() {
+        std::cout << "\nnameless (to be named) " << VERSION << '\n';
+        std::cout << "By " << AUTHOR << '\n';
+        std::cout << "Acknowledgments:\n";
+        std::cout << "    " << CHESS_PROGRAMMING << '\n';
+        std::cout << "    " << STOCKFISH << '\n';
+        std::cout << "    " << BLUE_FEVER_SOFT << '\n';
+        std::cout << '\n';
+    }
+
+    void init() {
+        showStartUp();
         std::string input;
         std::getline(std::cin, input);
         if (input == "uci") {
-            // UCI::init(game, moves, args, argv, input);
+            // UCI::init(input);
         } else {
-            Play::init(game, args, argv, input);
+            Play::init(input);
         }
     }
 }
 
 int main(int argc, char *argv[]) {
-    CmdLine args;
-    Pos game;
-
-    // Initialisation.
-    Args::init(&game, argc, argv, &args);
-    Run::init(&game, &args, argv);
-
+    Run::init();
     return 0;
 }

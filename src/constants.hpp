@@ -17,13 +17,6 @@
 #define MAX_MOVE_SETS 100
 #define MAX_THREADS 4
 
-#define VERSION "Tardigrade (Alpha 3.0.0)"
-#define AUTHOR "S. Kwan"
-#define ACKNOWLEDGMENTS "Acknowledgments:"
-#define CHESS_PROGRAMMING "www.chessprogramming.org"
-#define STOCKFISH "https://github.com/official-stockfish/Stockfish"
-#define BLUE_FEVER_SOFT "https://github.com/bluefeversoft"
-
 typedef uint64_t U64;
 typedef uint16_t U16;
 typedef U16 MOVE;

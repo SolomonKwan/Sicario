@@ -326,7 +326,7 @@ void showUsage(char *argv[]) {
  * @param code: The exitcode of the game.
  * @param argv: Array of command line arguments.
  */
-void Pos::showEOG(ExitCode code, char *argv[]) {
+void Pos::showEOG(ExitCode code) {
     switch (code) {
         case NORMAL_PLY:
             std::cout << "Debugging: normal\n";
@@ -365,7 +365,7 @@ void Pos::showEOG(ExitCode code, char *argv[]) {
             break;
         
         case INVALID_ARGS:
-            showUsage(argv);
+            // showUsage(argv);
             break;
 
         default:
@@ -1450,8 +1450,8 @@ MovesStruct* Pos::getBishopFamily(Square square) {
  * @param game: A pointer to the game struct.
  * @param args: The command line arguments.
  */
-void Pos::display(CmdLine* args) {
-    bool light_mode = !(args->dark_mode);
+void Pos::display() {
+    bool light_mode = false;
     std::cout << '\n';
     
     // Print the pieces
@@ -2734,7 +2734,7 @@ uint16_t Pos::chooseMove(int white, int black, std::vector<uint16_t>*
  * @param moves: Pointer to precomputed moves struct.
  * @param args: Pointer to command line arguments struct.
  */
-void Pos::handleGame(CmdLine* args, char *argv[]) {
+void Pos::handleGame() {
     ExitCode code = NORMAL_PLY;
     
     uint64_t enemy_attacks = 0;
@@ -2742,45 +2742,53 @@ void Pos::handleGame(CmdLine* args, char *argv[]) {
     int moves_index = this->getMoves(&enemy_attacks, pos_moves);
     
     while (!code) {
-        if (!args->quiet) this->display(args);
+        this->display();
 
         code = this->isEOG(enemy_attacks, moves_index);
         if (code) break;
-        uint16_t move = this->chooseMove(args->white, args->black, pos_moves, 
-                &moves_index);
+        uint16_t move = this->chooseMove(HUMAN, HUMAN, pos_moves, &moves_index);
         this->makeMove(move);
 
         enemy_attacks = 0;
         moves_index = this->getMoves(&enemy_attacks, pos_moves);
     }
 
-    this->showEOG(code, argv);
+    this->showEOG(code);
+}
+
+Pos::Pos(std::string fen) {
+    this->parseFen(fen);
 }
 
 /**
- * The main loop that constantly reads from stdin for commands. Calls other
- * functions that create threads which handle different parts of program.
- * @param game: Pointer to game struct.
- * @param moves: Pointer to precomputed moves struct.
- * @param args: Pointer to command line arguments.
- * @param argv: Command line arguments.
- * @param input: Command given by the user.
+ * Concatenates vector of strings with space.
  */
-void runNormal(Pos* game, CmdLine* args, char *argv[], std::string input) {
-    goto start;
-    while (std::getline(std::cin, input)) {
-        start:
-        std::vector<std::string> commands = split(input, " ");
-        if (commands[0] == "perft") perft(commands.size() == 2 ? std::stoi(commands[1]) : 0, game);
-        if (commands[0] == "play") game->handleGame(args, argv);
-        if (commands[0] == "fen") game->fen();
-        if (commands[0] == "exit") break;
+std::string concatFEN(std::vector<std::string> strings) {
+    std::string result = "";
+    for (int i = 2; i < (int) strings.size(); i++) {
+        result += strings[i] + " ";
+    }
 
-        // Reset to the position.
-        game->parseFen(game->original_fen);
+    return result;
+}
+
+/**
+ * Loop for user input tasks.
+ * @param input: The initial user input.
+ */
+void runNormal(std::string input) {
+    Pos pos;
+    while (input != "exit" && input != "quit") {
+        std::vector<std::string> commands = split(input, " ");
+        if (commands[0] == "play") pos.handleGame();
+        if (commands[0] == "perft") perft(std::stoi(commands[1]), &pos);
+        if (commands[0] == "set" && commands[1] == "fen") pos.parseFen(concatFEN(commands));
+        if (commands[0] == "fen") pos.fen();
+        if (commands[0] == "exit" || commands[0] == "quit" || commands[0] == "q") break;
+        std::getline(std::cin, input);
     }
 }
 
-void Play::init(Pos* game, CmdLine* args, char *argv[], std::string input) {
-    runNormal(game, args, argv, input);
+void Play::init(std::string input) {
+    runNormal(input);
 }

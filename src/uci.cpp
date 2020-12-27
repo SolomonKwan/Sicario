@@ -22,10 +22,10 @@ void communicate(std::string communication) {
  * @param uci: Boolean indicating whether the uci command was recieved.
  */
 void UCI_InitialResponse() {
-    communicate("id name " + (std::string) VERSION);
-    communicate("id author " + (std::string) AUTHOR);
-    communicate("options"); // To determine.
-    communicate("uciok");
+    // communicate("id name " + (std::string) VERSION);
+    // communicate("id author " + (std::string) AUTHOR);
+    // communicate("options"); // To determine.
+    // communicate("uciok");
 }
 
 /**
