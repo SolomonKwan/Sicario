@@ -5,9 +5,9 @@
 #include "constants.hpp"
 
 struct Computed {
-    std::vector<int> ROOK_INDEX[64];
-    MovesStruct ROOK_MOVES[4900];
-    MovesStruct ROOK_BLOCKS[64];
+    // std::vector<int> ROOK_INDEX[64];
+    // MovesStruct ROOK_MOVES[4900];
+    // MovesStruct ROOK_BLOCKS[64];
 
     /////////////////////////////////////////
 
@@ -169,8 +169,7 @@ std::vector<MovesStruct> computeRookMoves();
 /**
  * Computes the blocking moves (and captures in case of check) for rooks on each
  * square.
- * @param ROOK_BLOCKS: A vector of move structs.
  */
-void computeRookBlocks(MovesStruct* ROOK_BLOCKS);
+std::vector<MovesStruct> computeRookBlocks();
 
 #endif

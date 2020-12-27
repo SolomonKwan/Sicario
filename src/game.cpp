@@ -11,7 +11,6 @@
 
 namespace Moves_ {
     std::vector<MovesStruct> ROOK = computeRookMoves(); // 4900
-    std::vector<MovesStruct> ROOK_BLOCKS; // 64
 
     /////////////////////////////////////////
 
@@ -41,6 +40,10 @@ namespace Moves_ {
     /////////////////////////////////////////
 
     std::vector<MovesStruct> DOUBLE_PUSH; // 16
+
+    namespace Blocks {
+        std::vector<MovesStruct> ROOK = computeRookBlocks(); // 64
+    }
 }
 
 namespace Indices {
@@ -510,8 +513,7 @@ void Pos::getCheckedMoves(Computed* moves, uint64_t* enemy_attacks,
                 (Square) queen)]];
         uint64_t rook_index = rook_move->reach & (check_rays_only | 
                 checkers_only);
-        move_set = &moves->ROOK_BLOCKS[queen].
-                checked_moves[rook_index];
+        move_set = &Moves_::Blocks::ROOK[queen].checked_moves[rook_index];
         if (move_set->size() != 0) pos_moves[(*moves_index)++] = move_set;
     }
 
@@ -525,10 +527,8 @@ void Pos::getCheckedMoves(Computed* moves, uint64_t* enemy_attacks,
         MovesStruct* rook_move = &Moves_::ROOK[Indices::ROOK[rook][
                 rookIndex(this->sides[BLACK] | this->sides[WHITE], 
                 (Square) rook)]];
-        uint64_t rook_index = rook_move->reach & (check_rays_only | 
-                checkers_only);
-        std::vector<uint16_t>* move_set = &moves->ROOK_BLOCKS[rook].
-                checked_moves[rook_index];
+        uint64_t rook_index = rook_move->reach & (check_rays_only | checkers_only);
+        std::vector<uint16_t>* move_set = &Moves_::Blocks::ROOK[rook].checked_moves[rook_index];
         if (move_set->size() != 0) pos_moves[(*moves_index)++] = move_set;
     }
 

@@ -104,7 +104,6 @@ void computeCastling(MovesStruct* CASTLING_MOVES) {
  * @param moves: Pointer to precomputed moves structs.
  */
 void precompute(Computed* moves) {
-    computeRookBlocks(moves->ROOK_BLOCKS);
     computeBishopMoves(moves->BISHOP_INDEX, moves->BISHOP_MOVES);
     computeBishopBlocks(moves->BISHOP_BLOCKS);
     computeKnightMoves(moves->KNIGHT_MOVES);
@@ -1768,11 +1767,7 @@ void computeRCornerMoves(int square, int* offset, std::vector<MovesStruct>* ROOK
                 square / 8 == 0 ? index-- : index++;
             }
 
-            // Index creation.
-            int rookIndex = (
-                ((pos & rookMasks[square]) * rookMagicNums[square]) >> rookShifts[square]
-            );
-
+            // Index creation
             int move_index = MSB(hOcc) + 7 * MSB(vOcc) + *offset;
 
             if ((*ROOK_MOVES)[move_index].reach == UNSET) {
@@ -1893,11 +1888,6 @@ void computeRLRSideMoves(int square, int* offset, std::vector<MovesStruct>* ROOK
                 }
 
                 // Index creation.
-                uint64_t rookIndex = (
-                    ((pos & rookMasks[square]) * rookMagicNums[square]) >> 
-                            rookShifts[square]
-                );
-
                 int move_index;
                 if (square / 8 == 1) { // A2 H2
                     move_index = MSB(hOcc) + 7 * MSB(vOcc2) + *offset;
@@ -2084,11 +2074,6 @@ void computeRULSideMoves(int square, int* offset, std::vector<MovesStruct>* ROOK
                 }
 
                 // Index creation.
-                uint64_t rookIndex = (
-                    ((pos & rookMasks[square]) * rookMagicNums[square]) >> 
-                            rookShifts[square]
-                );
-
                 int move_index;
                 if (square % 8 == 1) { // B1 B8
                     move_index = MSB(vOcc) + 7 * MSB(hOcc2) + *offset;
@@ -2297,31 +2282,17 @@ void computeRCentreMoves(int square, int* offset, std::vector<MovesStruct>* ROOK
                     }
 
                     // Index creation.
-                    uint64_t rookIndex = (
-                        ((pos & rookMasks[square]) * rookMagicNums[square]) >> 
-                                rookShifts[square]
-                    );
-
                     int move_index;
-                    if (square == B2 || square == B7 || square == G2 || 
-                            square == G7) {
-                        move_index = MSB((h1_occs != 1 ? hOcc1 : hOcc2)) + 
-                                6 * MSB((v1_occs != 1 ? vOcc1 : vOcc2)) + 
+                    if (square == B2 || square == B7 || square == G2 || square == G7) {
+                        move_index = MSB((h1_occs != 1 ? hOcc1 : hOcc2)) + 6 * MSB((v1_occs != 1 ? vOcc1 : vOcc2)) + 
                                 *offset;
                         offset_add = 36;
-                    } else if (square == C2 || square == F2 || square == C7 || 
-                            square == F7 || square == B3 || square == G3 || 
-                            square == B6 || square == G6) {
-                        move_index = MSB(h1_occs == 32 ? hOcc1 : 
-                                    (h2_occs == 32 ? hOcc2 : 
-                                    (v1_occs == 32 ? vOcc1 : vOcc2))) +
-                                6 * MSB(h1_occs == 2 ? hOcc1 : 
-                                    (h2_occs == 2 ? hOcc2 : 
-                                    (v1_occs == 2 ? vOcc1 : vOcc2))) +
-                                12 * MSB(h1_occs == 16 ? hOcc1 : 
-                                    (h2_occs == 16 ? hOcc2 : 
-                                    (v1_occs == 16 ? vOcc1 : vOcc2))) +
-                                *offset;
+                    } else if (square == C2 || square == F2 || square == C7 || square == F7 || square == B3 ||
+                            square == G3 || square == B6 || square == G6) {
+                        move_index = MSB(h1_occs == 32 ? hOcc1 : (h2_occs == 32 ? hOcc2 : (v1_occs == 32 ? vOcc1 :
+                                vOcc2))) + 6 * MSB(h1_occs == 2 ? hOcc1 : (h2_occs == 2 ? hOcc2 : (v1_occs == 2 ?
+                                vOcc1 : vOcc2))) + 12 * MSB(h1_occs == 16 ? hOcc1 : (h2_occs == 16 ? hOcc2 :
+                                (v1_occs == 16 ? vOcc1 : vOcc2))) +*offset;
                         offset_add = 60;
                     } else if (square == D2 || square == E2 || square == B4 || 
                             square == G4 || square == B5 || square == G5 || 
@@ -2619,7 +2590,8 @@ std::vector<std::vector<int>> computeRookIndices() {
  * square.
  * @param ROOK_BLOCKS: A vector of move structs.
  */
-void computeRookBlocks(MovesStruct* ROOK_BLOCKS) {
+std::vector<MovesStruct> computeRookBlocks() {
+    std::vector<MovesStruct> blocks(64);
     std::tuple<int, int> pairs[4] = {
         std::make_tuple(8, 1), std::make_tuple(1, -8), std::make_tuple(-8, -1),
         std::make_tuple(-1, 8)
@@ -2642,7 +2614,7 @@ void computeRookBlocks(MovesStruct* ROOK_BLOCKS) {
                     (direction == 1 ? 8 : -1));
 
             std::unordered_map<uint64_t, std::vector<uint16_t>>* moves = 
-                    &ROOK_BLOCKS[square].checked_moves;
+                    &blocks[square].checked_moves;
             while (start != end_pt) {
                 // moves[pos] = std::vector<uint16_t>(); WHY DOESN'T WORK????
                 uint16_t move = square | start << 6 | NORMAL | pKNIGHT;
@@ -2673,7 +2645,7 @@ void computeRookBlocks(MovesStruct* ROOK_BLOCKS) {
                     (8 * (start2 / 8) + (ray2 == 1 ? 8 : -1));
             
             std::unordered_map<uint64_t, std::vector<uint16_t>>* moves = 
-                    &ROOK_BLOCKS[square].checked_moves;
+                    &blocks[square].checked_moves;
 
             while (start1 != end1) {
                 start2 = square + ray2;
@@ -2689,4 +2661,6 @@ void computeRookBlocks(MovesStruct* ROOK_BLOCKS) {
             };
         };
     }
+
+    return blocks;
 }
