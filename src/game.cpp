@@ -240,6 +240,17 @@ namespace Hashes {
 }
 
 /**
+ * Return true if a square is a dark square, else false.
+ * @param square: The square to check.
+ */
+bool isDark(int square) {
+    if ((square % 2 == 0 && ((square / 8) % 2) == 0) || (square % 2 == 1 && ((square / 8) % 2) == 1)) {
+        return true;
+    }
+    return false;
+}
+
+/**
  * Display all individual game position information.
  * @param game: Pointer to game struct.
  */
@@ -1843,25 +1854,15 @@ bool Pos::isThreeFoldRep() {
  * @param moves_index: Pointer to number of vectors in pos_moves.
  * @return: The appropriate ExitCode.
  */
-ExitCode Pos::isEOG(uint64_t enemy_attacks, int move_index) {
-    // Draw by threefold repetition.
+ExitCode Pos::isEOG(Bitboard enemy_attacks, int move_index) {
     if (this->isThreeFoldRep()) return THREE_FOLD_REPETITION;
-
-    // Draw by fifty-move rule.
     if (this->halfmove == 100) return FIFTY_MOVES_RULE;
-
-    // Draw by insufficient material.
     if (this->insufficientMaterial()) return INSUFFICIENT_MATERIAL;
-
-    // Check for stalemate.
     if (move_index == 0 && !(this->isChecked(enemy_attacks))) return STALEMATE;
-
-    // Check for checkmate.
     if (move_index == 0 && this->isChecked(enemy_attacks)) {
         if (this->turn) return BLACK_WINS;
         return WHITE_WINS;
     }
-
     return NORMAL_PLY;
 }
 
@@ -1875,25 +1876,21 @@ ExitCode Pos::isEOG(uint64_t enemy_attacks, int move_index) {
  * @param pos_moves: Array of vectors pointers of 16 bit unsigned int moves.
  * @return: The number of move sets.
  */
-int Pos::getMoves(uint64_t* enemy_attacks, 
-        std::vector<Move>* pos_moves[MAX_MOVE_SETS]) {
+int Pos::getMoves(Bitboard* enemy_attacks, std::vector<Move>* pos_moves[MAX_MOVE_SETS]) {
     // The pinning rays
     uint64_t rook_pins = 0;
     uint64_t bishop_pins = 0;
     uint64_t kEnemy_attacks = 0;
-    this->getEnemyAttacks(enemy_attacks, &rook_pins, &bishop_pins, 
-            &kEnemy_attacks);
+    this->getEnemyAttacks(enemy_attacks, &rook_pins, &bishop_pins, &kEnemy_attacks);
 
     // Move retrieval for the 3 cases.
     int moves_index = 0;
-    if (isDoubleChecked()) {
+    if (this->isDoubleChecked()) {
         this->getKingMoves(pos_moves, &moves_index, kEnemy_attacks);
     } else if (this->isChecked(*enemy_attacks)) {
-        this->getCheckedMoves(enemy_attacks, &rook_pins, &bishop_pins, 
-                pos_moves, &moves_index, kEnemy_attacks);
+        this->getCheckedMoves(enemy_attacks, &rook_pins, &bishop_pins, pos_moves, &moves_index, kEnemy_attacks);
     } else {
-        this->getNormalMoves(enemy_attacks, &rook_pins, &bishop_pins, 
-                pos_moves, &moves_index, kEnemy_attacks);
+        this->getNormalMoves(enemy_attacks, &rook_pins, &bishop_pins, pos_moves, &moves_index, kEnemy_attacks);
     }
     return moves_index;
 }
@@ -2030,13 +2027,13 @@ void Pos::findAndRemovePiece(PieceType piece, Square square) {
     this->piece_list[piece][taken_index] = this->piece_list[piece][this->
             piece_index[piece]];
     if (piece == W_BISHOP) {
-        if (this->isDark(square)) {
+        if (isDark(square)) {
             this->wdsb_cnt--;
         } else {
             this->wlsb_cnt--;
         }
     } else if (piece == B_BISHOP) {
-        if (this->isDark(square)) {
+        if (isDark(square)) {
             this->bdsb_cnt--;
         } else {
             this->blsb_cnt--;
@@ -2045,18 +2042,6 @@ void Pos::findAndRemovePiece(PieceType piece, Square square) {
         this->knight_cnt--;
     }
     this->piece_cnt--;
-}
-
-/**
- * Return true if a square is a dark square, else false.
- * @param square: The square to check.
- */
-bool Pos::isDark(int square) {
-    if ((square % 2 == 0 && ((square / 8) % 2) == 0) || 
-            (square % 2 == 1 && ((square / 8) % 2) == 1)) {
-        return true;
-    }
-    return false;
 }
 
 /**
@@ -2069,13 +2054,13 @@ void Pos::addPiece(PieceType piece, Square square) {
     this->piece_list[piece][this->piece_index[piece]] = square;
     this->piece_index[piece]++;
     if (piece == W_BISHOP) {
-        if (this->isDark(square)) {
+        if (isDark(square)) {
             this->wdsb_cnt++;
         } else {
             this->wlsb_cnt++;
         }
     } else if (piece == B_BISHOP) {
-        if (this->isDark(square)) {
+        if (isDark(square)) {
             this->bdsb_cnt++;
         } else {
             this->blsb_cnt++;
@@ -2246,17 +2231,15 @@ void Pos::makeKnightMoves(Move move) {
  * Prints a readable version of a move.
  * @param move: The move to be printed.
  */
-void Pos::printMove(Move move, bool extraInfo) {
+void printMove(Move move, bool extraInfo) {
     if (extraInfo) {
-        std::cout << squareName[move & 0b111111] << squareName[(move >> 6) &
-            0b111111] << " " << moveName[(move >> 12) & 0b11] << " " << 
-            promoName[(move >> 14) & 0b11] << '\n';
+        std::cout << squareName[move & 0b111111] << squareName[(move >> 6) & 0b111111] << " " <<
+                moveName[(move >> 12) & 0b11] << " " << promoName[(move >> 14) & 0b11] << '\n';
     } else if ((move >> 12) & 0b11) {
-        std::cout << squareName[move & 0b111111] << squareName[(move >> 6) &
-            0b111111] << promoName[(move >> 14) & 0b11] << '\n';
+        std::cout << squareName[move & 0b111111] << squareName[(move >> 6) &0b111111] <<
+                promoName[(move >> 14) & 0b11] << '\n';
     } else {
-        std::cout << squareName[move & 0b111111] << squareName[(move >> 6) &
-            0b111111] << '\n';
+        std::cout << squareName[move & 0b111111] << squareName[(move >> 6) & 0b111111] << '\n';
     }
 }
 
@@ -2411,7 +2394,7 @@ void Pos::undoNormal() {
         this->bishops |= 1ULL << end;
         addPiece(captured, (Square) end);
         this->piece_cnt++;
-        if (this->isDark(end)) {
+        if (isDark(end)) {
             turn ? this->bdsb_cnt++ : this->wdsb_cnt++;
         } else {
             turn ? this->blsb_cnt++ : this->wlsb_cnt++;
@@ -2712,15 +2695,13 @@ void Pos::makeMove(Move move) {
  * @param moves_index: Pointer to int of number of move vectors in pos_moves.
  * @return: The number of moves in the position.
  */
-int countMoves(Pos* game, std::vector<Move>* pos_moves[MAX_MOVE_SETS], 
-        int* moves_index) {
+int countMoves(Pos* game, std::vector<Move>* pos_moves[MAX_MOVE_SETS], int* moves_index) {
     int count = 0;
     for (int i = 0; i < *moves_index; i++) {
         std::vector<Move>* pointer = pos_moves[i];
         for (Move move : *pointer) {
-            std::cout << squareName[move & 0b111111] << " " << squareName[(
-                    move >> 6) & 0b111111] << " " << moveName[(move >> 12) & 
-                    0b11] << " " << promoName[(move >> 14) & 0b11] << '\n';
+            std::cout << squareName[move & 0b111111] << " " << squareName[(move >> 6) & 0b111111] << " " <<
+                    moveName[(move >> 12) & 0b11] << " " << promoName[(move >> 14) & 0b11] << '\n';
             count++;
         }
     }
@@ -2735,21 +2716,13 @@ int countMoves(Pos* game, std::vector<Move>* pos_moves[MAX_MOVE_SETS],
  * @param moves_index: Int pointer to number of vectors in pos_moves.
  * @return: True if move is valid, else false.
  */
-bool Pos::validMove(Move move, std::vector<Move>* pos_moves[
-        MAX_MOVE_SETS], int* moves_index) {
+bool Pos::validMove(Move move, std::vector<Move>* pos_moves[MAX_MOVE_SETS], int* moves_index) {
     for (int i = 0; i < *moves_index; i++) {
         for (Move move_candidate : *pos_moves[i]) {
             if (move == move_candidate) return true;
         }
     }
     return false;
-}
-
-/**
- * Calls getFEN to get the FEN string of the current position and prints out.
- */
-void Pos::fen() {
-    std::cout << this->getFEN() << '\n';
 }
 
 /**
@@ -2837,23 +2810,23 @@ std::string Pos::getFEN() {
  */
 void Pos::getSquares(std::string move_string, Move* move, uint* start, uint* end) {
     int start_file, start_rank, end_file, end_rank;
-            start_file = move_string[0] - 'a';
-            start_rank = move_string[1] - '1';
-            end_file = move_string[2] - 'a';
-            end_rank = move_string[3] - '1';
-            if (move_string.length() == 5) {
-                *move |= PROMOTION;
-                if (move_string[4] == 'q') {
-                    *move |= pQUEEN;
-                } else if (move_string[4] == 'r') {
-                    *move |= pROOK;
-                } else if (move_string[4] == 'b') {
-                    *move |= pBISHOP;
-                }
-            }
+    start_file = move_string[0] - 'a';
+    start_rank = move_string[1] - '1';
+    end_file = move_string[2] - 'a';
+    end_rank = move_string[3] - '1';
+    if (move_string.length() == 5) {
+        *move |= PROMOTION;
+        if (move_string[4] == 'q') {
+            *move |= pQUEEN;
+        } else if (move_string[4] == 'r') {
+            *move |= pROOK;
+        } else if (move_string[4] == 'b') {
+            *move |= pBISHOP;
+        }
+    }
 
-            *start = 8 * start_rank + start_file;
-            *end = 8 * end_rank + end_file;
+    *start = 8 * start_rank + start_file;
+    *end = 8 * end_rank + end_file;
 }
 
 /**
@@ -2866,29 +2839,23 @@ void Pos::getSquares(std::string move_string, Move* move, uint* start, uint* end
 void Pos::checkCastlingEnPassantMoves(uint start, uint end, Move* move) {
     // Check for castling move.
     if (this->turn && this->piece_list[WHITE][0] == E1) {
-        if (start == E1 && end == G1 && (this->castling & (1 << 
-                WKSC))) {
+        if (start == E1 && end == G1 && (this->castling & (1 << WKSC))) {
             *move |= CASTLING;
-        } else if (start == E1 && end == C1 && (this->castling & (1 << 
-                WQSC))) {
+        } else if (start == E1 && end == C1 && (this->castling & (1 << WQSC))) {
             *move |= CASTLING;
         }
     } else if (!this->turn && this->piece_list[BLACK][0] == E8) {
-        if (start == E8 && end == G8 && (this->castling & (1 << 
-                BKSC))) {
+        if (start == E8 && end == G8 && (this->castling & (1 << BKSC))) {
             *move |= CASTLING;
-        } else if (start == E8 && end == C8 && (this->castling & (1 << 
-                BQSC))) {
+        } else if (start == E8 && end == C8 && (this->castling & (1 << BQSC))) {
             *move |= CASTLING;
         }
     }
 
     // Check for en-passant move.
-    if ((this->turn && start / 8 == 4) || (!this->turn && start / 8 == 
-            3)) {
+    if ((this->turn && start / 8 == 4) || (!this->turn && start / 8 == 3)) {
         PieceType piece = this->pieces[start];
-        if ((piece == W_PAWN || piece == B_PAWN) &&
-                end == this->en_passant) {
+        if ((piece == W_PAWN || piece == B_PAWN) && end == this->en_passant) {
             *move |= EN_PASSANT;
         }
     }
@@ -2903,8 +2870,7 @@ void Pos::checkCastlingEnPassantMoves(uint start, uint end, Move* move) {
  * @param moves_index: Int pointer to number of vectors in pos_moves.
  * @return: The chosen move.
  */
-Move Pos::chooseMove(int white, int black, std::vector<Move>* 
-        pos_moves[MAX_MOVE_SETS], int* moves_index) {
+Move Pos::chooseMove(Player white, Player black, std::vector<Move>* pos_moves[MAX_MOVE_SETS], int* moves_index) {
     Move move = NORMAL | pKNIGHT;
     
     // Recieve and print move.
@@ -2917,7 +2883,7 @@ Move Pos::chooseMove(int white, int black, std::vector<Move>*
             std::cin >> move_string;
 
             if (move_string == "kill") exit(-1);
-            if (move_string == "fen") this->fen();
+            if (move_string == "fen") this->getFEN();
             if (move_string == "undo") return 0;
 
             uint start, end;
@@ -2932,7 +2898,7 @@ Move Pos::chooseMove(int white, int black, std::vector<Move>*
         }
          
     } else {
-        uint64_t enemy_attacks = 0;
+        Bitboard enemy_attacks = 0;
         std::vector<Move>* pos_moves[MAX_MOVE_SETS];
         int moves_index = this->getMoves(&enemy_attacks, pos_moves);
         double value = this->turn ? -1000000 : 1000000;
@@ -2953,7 +2919,7 @@ Move Pos::chooseMove(int white, int black, std::vector<Move>*
             }
         }
         std::cout << "\rComputer move: ";
-        this->printMove(move, true);
+        printMove(move, true);
     }
     
     return move;
@@ -2968,7 +2934,7 @@ Move Pos::chooseMove(int white, int black, std::vector<Move>*
 void Pos::run() {
     ExitCode code = NORMAL_PLY;
     
-    uint64_t enemy_attacks = 0;
+    Bitboard enemy_attacks = 0;
     std::vector<Move>* pos_moves[MAX_MOVE_SETS];
     int moves_index = this->getMoves(&enemy_attacks, pos_moves);
     
@@ -2993,8 +2959,7 @@ void Pos::run() {
  */
 void printPromo(Move move) {
     if ((move & (0b11 << 12)) == PROMOTION) {
-        std::cout << squareName[move & 0b111111] << squareName[(move >> 6) &
-            0b111111];
+        std::cout << squareName[move & 0b111111] << squareName[(move >> 6) & 0b111111];
         if ((move & (0b11 << 14)) == pKNIGHT) {
             std::cout << "n: 1\n";
         } else if ((move & (0b11 << 14)) == pBISHOP) {
@@ -3005,11 +2970,9 @@ void printPromo(Move move) {
             std::cout << "q: 1\n";
         }
     } else if ((move & (0b11 << 12)) == EN_PASSANT) {
-        std::cout << squareName[move & 0b111111] << squareName[(move >> 6) &
-            0b111111] << ": 1\n";
+        std::cout << squareName[move & 0b111111] << squareName[(move >> 6) & 0b111111] << ": 1\n";
     } else {
-        std::cout << squareName[move & 0b111111] << squareName[(move >> 6) &
-            0b111111] << ": 1\n";
+        std::cout << squareName[move & 0b111111] << squareName[(move >> 6) & 0b111111] << ": 1\n";
     }
 }
 
@@ -3022,8 +2985,7 @@ void printPromo(Move move) {
 void printPerft(bool print, Move move, uint64_t* current_nodes) {
     if (print) {
         if ((move & (0b11 << 12)) == PROMOTION) {
-            std::cout << squareName[move & 0b111111] << squareName[(move >> 6) &
-                    0b111111];
+            std::cout << squareName[move & 0b111111] << squareName[(move >> 6) & 0b111111];
             if ((move & (0b11 << 14)) == pKNIGHT) {
                 std::cout << "n: " << *current_nodes << '\n';
             } else if ((move & (0b11 << 14)) == pBISHOP) {
@@ -3034,11 +2996,11 @@ void printPerft(bool print, Move move, uint64_t* current_nodes) {
                 std::cout << "q: " << *current_nodes << '\n';
             }
         } else if ((move & (0b11 << 12)) == EN_PASSANT) {
-            std::cout << squareName[move & 0b111111] << squareName[(move >> 6) &
-                    0b111111] << ": " << *current_nodes << '\n';
+            std::cout << squareName[move & 0b111111] << squareName[(move >> 6) & 0b111111] << ": " << *current_nodes <<
+                    '\n';
         } else {
-            std::cout << squareName[move & 0b111111] << squareName[(move >> 6) &
-                    0b111111] << ": " << *current_nodes << '\n';
+            std::cout << squareName[move & 0b111111] << squareName[(move >> 6) & 0b111111] << ": " << *current_nodes <<
+                    '\n';
         }
     }
 }
@@ -3049,11 +3011,11 @@ void printPerft(bool print, Move move, uint64_t* current_nodes) {
  * @param game: Pointer to game struct.
  * @param print: Boolean to indicate whether or not to print.
  */
-uint64_t perft(int depth, Pos* game, bool print) {
+uint64_t Pos::perft(int depth, bool print) {
     uint64_t nodes = 0;
-    uint64_t enemy_attacks = 0;
+    Bitboard enemy_attacks = 0;
     std::vector<Move>* pos_moves[MAX_MOVE_SETS];
-    int moves_index = game->getMoves(&enemy_attacks, 
+    int moves_index = this->getMoves(&enemy_attacks, 
             pos_moves);
 
     for (int i = 0; i < moves_index; i++) {
@@ -3069,14 +3031,14 @@ uint64_t perft(int depth, Pos* game, bool print) {
                 }
                 break;
             } else {
-                game->makeMove(move);
-                current_nodes = perft(depth - 1, game, false);
+                this->makeMove(move);
+                current_nodes = perft(depth - 1);
             }
 
             printPerft(print, move, &current_nodes);
 
             nodes += current_nodes;
-            game->undoMove();
+            this->undoMove();
         }
     }
     
@@ -3087,7 +3049,7 @@ uint64_t perft(int depth, Pos* game, bool print) {
  * Prepares and makes call to run perft.
  */
 void runPerft(int depth, Pos game) {
-    uint64_t num = perft(depth, &game, true);
+    uint64_t num = game.perft(depth, true);
     std::cout << "\nNodes searched: " << num << "\n\n";
 }
 
@@ -3128,7 +3090,6 @@ void runNormal(std::string input) {
         if (commands[0] == "play") handleGame(pos);
         if (commands[0] == "perft") runPerft(std::stoi(commands[1]), pos);
         if (commands[0] == "set" && commands[1] == "fen") pos.parseFen(concatFEN(commands));
-        if (commands[0] == "fen") pos.fen();
         if (commands[0] == "exit" || commands[0] == "quit" || commands[0] == "q") break;
         std::getline(std::cin, input);
     }
