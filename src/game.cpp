@@ -22,7 +22,7 @@ namespace Moves_ {
 
     /////////////////////////////////////////
 
-    std::vector<MovesStruct> EN_PASSANT_MOVES; // 16
+    std::vector<MovesStruct> EN_PASSANT = computeEnPassantMoves(); // 16
 
     /////////////////////////////////////////
 
@@ -722,13 +722,13 @@ void Pos::getCheckedEp(uint64_t* rook_pins, uint64_t* bishop_pins,
                     (1ULL << attack_sq)) && !((1ULL << attack_sq) & 
                     *rook_pins) && !((1ULL << attack_sq) & *bishop_pins)) {
                 if (attack_sq % 8 < ep % 8) {
-                    std::vector<uint16_t>* move_set = &moves->EN_PASSANT_MOVES[
+                    std::vector<uint16_t>* move_set = &Moves_::EN_PASSANT[
                             attack_sq - 24].move_set[0];
                     if (move_set->size() != 0) {
                         pos_moves[(*moves_index)++] = move_set;
                     }
                 } else {
-                    std::vector<uint16_t>* move_set = &moves->EN_PASSANT_MOVES[
+                    std::vector<uint16_t>* move_set = &Moves_::EN_PASSANT[
                             attack_sq - 24].move_set[1];
                     if (move_set->size() != 0) {
                         pos_moves[(*moves_index)++] = move_set;
@@ -743,13 +743,13 @@ void Pos::getCheckedEp(uint64_t* rook_pins, uint64_t* bishop_pins,
                     (1ULL << attack_sq)) && !((1ULL << attack_sq) & 
                     *rook_pins) && !((1ULL << attack_sq) & *bishop_pins)) {
                 if (attack_sq % 8 < ep % 8) {
-                    std::vector<uint16_t>* move_set = &moves->EN_PASSANT_MOVES[
+                    std::vector<uint16_t>* move_set = &Moves_::EN_PASSANT[
                             attack_sq - 24].move_set[0];
                     if (move_set->size() != 0) {
                         pos_moves[(*moves_index)++] = move_set;
                     }
                 } else {
-                    std::vector<uint16_t>* move_set = &moves->EN_PASSANT_MOVES[
+                    std::vector<uint16_t>* move_set = &Moves_::EN_PASSANT[
                             attack_sq - 24].move_set[1];
                     if (move_set->size() != 0) {
                         pos_moves[(*moves_index)++] = move_set;
@@ -766,13 +766,13 @@ void Pos::getCheckedEp(uint64_t* rook_pins, uint64_t* bishop_pins,
                     attack_sq)) && !((1ULL << attack_sq) & *rook_pins) && 
                     !((1ULL << attack_sq) & *bishop_pins)) {
                 if (attack_sq % 8 < ep % 8) {
-                    std::vector<uint16_t>* move_set = &moves->EN_PASSANT_MOVES[
+                    std::vector<uint16_t>* move_set = &Moves_::EN_PASSANT[
                             attack_sq - 24].move_set[0];
                     if (move_set->size() != 0) {
                         pos_moves[(*moves_index)++] = move_set;
                     }
                 } else {
-                    std::vector<uint16_t>* move_set = &moves->EN_PASSANT_MOVES[
+                    std::vector<uint16_t>* move_set = &Moves_::EN_PASSANT[
                             attack_sq - 24].move_set[1];
                     if (move_set->size() != 0) {
                         pos_moves[(*moves_index)++] = move_set;
@@ -788,13 +788,13 @@ void Pos::getCheckedEp(uint64_t* rook_pins, uint64_t* bishop_pins,
                     attack_sq)) && !((1ULL << attack_sq) & *rook_pins) && 
                     !((1ULL << attack_sq) & *bishop_pins)) {
                 if (attack_sq % 8 < ep % 8) {
-                    std::vector<uint16_t>* move_set = &moves->EN_PASSANT_MOVES[
+                    std::vector<uint16_t>* move_set = &Moves_::EN_PASSANT[
                             attack_sq - 24].move_set[0];
                     if (move_set->size() != 0) {
                         pos_moves[(*moves_index)++] = move_set;
                     }
                 } else {
-                    std::vector<uint16_t>* move_set = &moves->EN_PASSANT_MOVES[
+                    std::vector<uint16_t>* move_set = &Moves_::EN_PASSANT[
                             attack_sq - 24].move_set[1];
                     if (move_set->size() != 0) {
                         pos_moves[(*moves_index)++] = move_set;
@@ -1300,11 +1300,11 @@ void Pos::horizontalPinEp(int king, bool turn, int attacker_sq,
 
     if (!(pawns & pin_ray)) {
         if (attacker_sq % 8 < ep % 8) {
-            std::vector<uint16_t>* move_set = &moves->EN_PASSANT_MOVES[
+            std::vector<uint16_t>* move_set = &Moves_::EN_PASSANT[
                     attacker_sq - 24].move_set[0];
             if (move_set->size() != 0) pos_moves[(*moves_index)++] = move_set;
         } else {
-            std::vector<uint16_t>* move_set = &moves->EN_PASSANT_MOVES[
+            std::vector<uint16_t>* move_set = &Moves_::EN_PASSANT[
                     attacker_sq - 24].move_set[1];
             if (move_set->size() != 0) pos_moves[(*moves_index)++] = move_set;
         }
@@ -1333,13 +1333,13 @@ void Pos::diagonalPinEp(int king, bool turn, int attacker_sq,
         if ((king > attacker_sq && king % 8 < attacker_sq % 8) ||
                 (king < attacker_sq && king % 8 > attacker_sq % 8)) {
             if (attacker_sq % 8 < ep % 8) {
-                std::vector<uint16_t>* move_set = &moves->EN_PASSANT_MOVES[
+                std::vector<uint16_t>* move_set = &Moves_::EN_PASSANT[
                         attacker_sq - 24].move_set[0];
                 if (move_set->size() != 0) {
                     pos_moves[(*moves_index)++] = move_set;
                 }
             } else {
-                std::vector<uint16_t>* move_set = &moves->EN_PASSANT_MOVES[
+                std::vector<uint16_t>* move_set = &Moves_::EN_PASSANT[
                         attacker_sq - 24].move_set[1];
                 if (move_set->size() != 0) {
                     pos_moves[(*moves_index)++] = move_set;
@@ -1350,13 +1350,13 @@ void Pos::diagonalPinEp(int king, bool turn, int attacker_sq,
         if ((king > attacker_sq && king % 8 > attacker_sq % 8) ||
                 (king < attacker_sq && king % 8 < attacker_sq % 8)) {
             if (attacker_sq % 8 < ep % 8) {
-                std::vector<uint16_t>* move_set = &moves->EN_PASSANT_MOVES[
+                std::vector<uint16_t>* move_set = &Moves_::EN_PASSANT[
                         attacker_sq - 24].move_set[0];
                 if (move_set->size() != 0) {
                     pos_moves[(*moves_index)++] = move_set;
                 }
             } else {
-                std::vector<uint16_t>* move_set = &moves->EN_PASSANT_MOVES[
+                std::vector<uint16_t>* move_set = &Moves_::EN_PASSANT[
                         attacker_sq - 24].move_set[1];
                 if (move_set->size() != 0) {
                     pos_moves[(*moves_index)++] = move_set;
@@ -1367,13 +1367,13 @@ void Pos::diagonalPinEp(int king, bool turn, int attacker_sq,
         if ((king < attacker_sq && king % 8 < attacker_sq % 8) ||
                 (king > attacker_sq && king % 8 > attacker_sq % 8)) {
             if (attacker_sq % 8 < ep % 8) {
-                std::vector<uint16_t>* move_set = &moves->EN_PASSANT_MOVES[
+                std::vector<uint16_t>* move_set = &Moves_::EN_PASSANT[
                         attacker_sq - 24].move_set[0];
                 if (move_set->size() != 0) {
                     pos_moves[(*moves_index)++] = move_set;
                 }
             } else {
-                std::vector<uint16_t>* move_set = &moves->EN_PASSANT_MOVES[
+                std::vector<uint16_t>* move_set = &Moves_::EN_PASSANT[
                         attacker_sq - 24].move_set[1];
                 if (move_set->size() != 0) {
                     pos_moves[(*moves_index)++] = move_set;
@@ -1384,13 +1384,13 @@ void Pos::diagonalPinEp(int king, bool turn, int attacker_sq,
         if ((king < attacker_sq && king % 8 > attacker_sq % 8) ||
                 (king > attacker_sq && king % 8 < attacker_sq % 8)) {
             if (attacker_sq % 8 < ep % 8) {
-                std::vector<uint16_t>* move_set = &moves->EN_PASSANT_MOVES[
+                std::vector<uint16_t>* move_set = &Moves_::EN_PASSANT[
                         attacker_sq - 24].move_set[0];
                 if (move_set->size() != 0) {
                     pos_moves[(*moves_index)++] = move_set;
                 }
             } else {
-                std::vector<uint16_t>* move_set = &moves->EN_PASSANT_MOVES[
+                std::vector<uint16_t>* move_set = &Moves_::EN_PASSANT[
                         attacker_sq - 24].move_set[1];
                 if (move_set->size() != 0) {
                     pos_moves[(*moves_index)++] = move_set;

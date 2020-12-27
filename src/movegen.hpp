@@ -19,6 +19,7 @@ struct Computed {
 
 std::vector<std::vector<int>> computeRookIndices();
 std::vector<std::vector<int>> computeBishopIndices();
+std::vector<MovesStruct> computeEnPassantMoves();
 
 typedef uint64_t Bitboard;
 // typedef std::vector<Bitboard> BitBoardSet;

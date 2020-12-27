@@ -1579,6 +1579,32 @@ void computePawnMoves(MovesStruct PAWN_MOVES[][48], MovesStruct EN_PASSANT_MOVES
     }
 }
 
+std::vector<MovesStruct> computeEnPassantMoves() {
+    std::vector<MovesStruct> moves(16);
+    for (int player = BLACK; player <= WHITE; player++) {
+        int left = player == BLACK ? -9 : 7;
+        int right = player == BLACK ? -7 : 9;
+        
+        for (int square = 8; square <= 55; square++) {
+            // En-passant captures
+            if (player == WHITE && square / 8 == 4) { // En-passant.
+                moves[square - 24].move_set.resize(2);
+                std::vector<uint16_t>* r_ep_set = &(moves[square - 24].move_set[0]);
+                std::vector<uint16_t>* l_ep_set = &(moves[square - 24].move_set[1]);
+                r_ep_set->push_back(square | (square + right) << 6 | EN_PASSANT | pKNIGHT);
+                l_ep_set->push_back(square | (square + left) << 6 | EN_PASSANT |pKNIGHT);
+            } else if (player == BLACK && square / 8 == 3) { // En-passant.
+                moves[square - 24].move_set.resize(2);
+                std::vector<uint16_t>* r_ep_set = &(moves[square - 24].move_set[0]);
+                std::vector<uint16_t>* l_ep_set = &(moves[square - 24].move_set[1]);
+                r_ep_set->push_back(square | (square + right) << 6 | EN_PASSANT | pKNIGHT);
+                l_ep_set->push_back(square | (square + left) << 6 | EN_PASSANT |pKNIGHT);
+            }
+        }
+    }
+    return moves;
+}
+
 /**
  * Sets the moves of the rook for a particular square and occupancy (according
  * to MSBs) and creates the moves. This only happens if the family of moves has
