@@ -15,6 +15,7 @@ namespace Moves_ {
     std::vector<MovesStruct> KNIGHT = computeKnightMoves();
     std::vector<MovesStruct> KING = computeKingMoves();
     std::vector<MovesStruct> CASTLING = computeCastling();
+    std::vector<MovesStruct> EN_PASSANT = computeEnPassantMoves();
 
     /////////////////////////////////////////
 
@@ -22,11 +23,10 @@ namespace Moves_ {
 
     /////////////////////////////////////////
 
-    std::vector<MovesStruct> EN_PASSANT = computeEnPassantMoves(); // 16
 
     /////////////////////////////////////////
 
-    std::vector<MovesStruct> DOUBLE_PUSH; // 16
+    std::vector<MovesStruct> DOUBLE_PUSH = computeDoublePushMoves(); // 16
 
     namespace Blocks {
         std::vector<MovesStruct> BISHOP = computeBishopBlocks(); // 64
@@ -582,8 +582,7 @@ void Pos::getCheckedMoves(Computed* moves, uint64_t* enemy_attacks,
         if (((pawn / 8 == 1 && this->turn) || (pawn / 8 == 6 && !this->turn)) && 
                 (1ULL << (pawn + advance)) & check_rays_only && !((1ULL << (
                 pawn + between)) & (this->sides[BLACK] | this->sides[WHITE]))) {
-            MovesStruct* pawn_moves = &moves->DOUBLE_PUSH[pawn - (this->turn ? 8 : 
-                    40)];
+            MovesStruct* pawn_moves = &Moves_::DOUBLE_PUSH[pawn - (this->turn ? 8 : 40)];
             move_set = &pawn_moves->move_set[0];
             if (move_set->size() != 0) pos_moves[(*moves_index)++] = move_set;
         }

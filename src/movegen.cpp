@@ -1605,6 +1605,29 @@ std::vector<MovesStruct> computeEnPassantMoves() {
     return moves;
 }
 
+std::vector<MovesStruct> computeDoublePushMoves() {
+    std::vector<MovesStruct> DOUBLE_PUSH(16);
+    for (int player = BLACK; player <= WHITE; player++) {
+        int left = player == BLACK ? -9 : 7;
+        int right = player == BLACK ? -7 : 9;
+        int double_push = player == BLACK ? - 16 : 16;
+        
+        for (int square = 8; square <= 55; square++) {
+            // Double push blocks
+            if (player == WHITE && square / 8 == 1) {
+                DOUBLE_PUSH[square - 8].move_set.resize(1);
+                std::vector<uint16_t>* move = &(DOUBLE_PUSH[square - 8].move_set[0]);
+                move->push_back(square | (square + 16) << 6 | NORMAL | pKNIGHT);
+            } else if (player == BLACK && square / 8 == 6) {
+                DOUBLE_PUSH[square - 40].move_set.resize(1);
+                std::vector<uint16_t>* move = &(DOUBLE_PUSH[square - 40].move_set[0]);
+                move->push_back(square | (square - 16) << 6 | NORMAL | pKNIGHT);
+            }
+        }
+    }
+    return DOUBLE_PUSH;
+}
+
 /**
  * Sets the moves of the rook for a particular square and occupancy (according
  * to MSBs) and creates the moves. This only happens if the family of moves has
