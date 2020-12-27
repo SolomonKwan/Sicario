@@ -104,7 +104,6 @@ void computeCastling(MovesStruct* CASTLING_MOVES) {
  * @param moves: Pointer to precomputed moves structs.
  */
 void precompute(Computed* moves) {
-    computeBishopMoves(moves->BISHOP_INDEX, moves->BISHOP_MOVES);
     computeBishopBlocks(moves->BISHOP_BLOCKS);
     computeKnightMoves(moves->KNIGHT_MOVES);
     computeKingMoves(moves->KING_MOVES);
@@ -221,16 +220,13 @@ void setBishopMoves(int square, MovesStruct* move_family) {
  *      bishop attack sets are set.
  * @param BISHOP_MOVES: Array of move structs for each bishop move family.
  */
-void computeBCornerMoves(int square, int* offset, 
-        std::vector<int>* BISHOP_INDEX, MovesStruct* BISHOP_MOVES) {
+void computeBCornerMoves(int square, int* offset, std::vector<MovesStruct>* BISHOP_MOVES) {
     // The diagonal start and end squares.
     int start = square + (square / 8 <= 3 ? 8 : -8) + 
             (square % 8 <= 3 ? 1 : -1);
     int end = square + (square / 8 <= 3 ? 48 : -48) + 
             (square % 8 <= 3 ? 6 : -6);
 
-    BISHOP_INDEX[square].resize(64);
-    std::set<int> indices;
     for (int occ = 0; occ < 64; occ++) {
         // Build position.
         int index, change;
@@ -249,22 +245,13 @@ void computeBCornerMoves(int square, int* offset,
         pos |= ((occ >> index) & 1ULL) << end;
 
         // Index creation.
-        int bishopIndex = (
-            ((pos & bishopMasks[square]) * bishopMagicNums[square]) >> 
-                    bishopShifts[square]
-        );
-
         int move_index = MSB(occ) + *offset;
-        BISHOP_INDEX[square][bishopIndex] = move_index;
 
-        indices.insert(move_index);
-        if (BISHOP_MOVES[move_index].reach == UNSET) {
-            BISHOP_MOVES[move_index].block_bits.push_back(
-                square + change * (7 - MSB(occ))
-            );
-            std::sort(BISHOP_MOVES[move_index].block_bits.begin(),
-                    BISHOP_MOVES[move_index].block_bits.end());
-            setBishopMoves(square, &(BISHOP_MOVES[move_index]));
+        if ((*BISHOP_MOVES)[move_index].reach == UNSET) {
+            (*BISHOP_MOVES)[move_index].block_bits.push_back(square + change * (7 - MSB(occ)));
+            std::sort((*BISHOP_MOVES)[move_index].block_bits.begin(),
+                    (*BISHOP_MOVES)[move_index].block_bits.end());
+            setBishopMoves(square, &((*BISHOP_MOVES)[move_index]));
         }
     }
 
@@ -321,26 +308,18 @@ std::vector<int> computeBCornerIndices(int square, int* offset) {
  *      bishop attack sets are set.
  * @param BISHOP_MOVES: Array of move structs for each bishop move family.
  */
-void computeBLRSideMoves(int square, int* offset, 
-        std::vector<int>* BISHOP_INDEX, MovesStruct* BISHOP_MOVES) {
+void computeBLRSideMoves(int square, int* offset, std::vector<MovesStruct>* BISHOP_MOVES) {
     // The diagonal start and end squares.
     int start1 = square % 8 == 0 ? square + 9 : square - 9;
-    int end1 = square + (square % 8 == 0 ? 9 : -9) * (square % 8 == 0 ? 
-            6 - square / 8 : square / 8 - 1);
+    int end1 = square + (square % 8 == 0 ? 9 : -9) * (square % 8 == 0 ? 6 - square / 8 : square / 8 - 1);
     int start2 = square % 8 == 0 ? square - 7 : square + 7;
-    int end2 = square + (square % 8 == 0 ? -7 : 7) * (square % 8 == 0 ? 
-            square / 8 - 1 : 6 - square / 8);
+    int end2 = square + (square % 8 == 0 ? -7 : 7) * (square % 8 == 0 ? square / 8 - 1 : 6 - square / 8);
 
-    BISHOP_INDEX[square].resize(32);
-
-    int bits1 = square % 8 == 0 ? (end1 % 8 - start1 % 8 + 1) : 
-            (start1 % 8 - end1 % 8 + 1);
+    int bits1 = square % 8 == 0 ? (end1 % 8 - start1 % 8 + 1) : (start1 % 8 - end1 % 8 + 1);
     int size1 = std::pow(2, bits1); // Right diagonal.
-    int bits2 = square % 8 == 0 ? (end2 % 8 - start2 % 8 + 1) : 
-            (start2 % 8 - end2 % 8 + 1);
+    int bits2 = square % 8 == 0 ? (end2 % 8 - start2 % 8 + 1) : (start2 % 8 - end2 % 8 + 1);
     int size2 = std::pow(2, bits2); // Left diagonal.
 
-    std::set<int> indices;
     int offset_add;
     for (int occ1 = 0; occ1 < size1; occ1++) {
         for (int occ2 = 0; occ2 < size2; occ2++) {
@@ -370,12 +349,6 @@ void computeBLRSideMoves(int square, int* offset,
                 pos |= ((occ2 >> index) & 1ULL) << end2;
             }
 
-            // Index creation.
-            int bishopIndex = (
-                ((pos & bishopMasks[square]) * bishopMagicNums[square]) >> 
-                        bishopShifts[square]
-            );
-
             int move_index;
             if (square == A2 || square == A7 || square == H2 || square == H7) {
                 move_index = MSB(size1 == 32 ? occ1 : occ2) + *offset;
@@ -391,23 +364,21 @@ void computeBLRSideMoves(int square, int* offset,
                 offset_add = 12;
             }
 
-            BISHOP_INDEX[square][bishopIndex] = move_index;
-            indices.insert(move_index);
-            if (BISHOP_MOVES[move_index].reach == UNSET) {
-                BISHOP_MOVES[move_index].block_bits.push_back( // Right diag.
+            if ((*BISHOP_MOVES)[move_index].reach == UNSET) {
+                (*BISHOP_MOVES)[move_index].block_bits.push_back( // Right diag.
                     square + (square % 8 == 0 ? 9 : -9) * 
                             (square % 8 == 0 ? 7 - square / 8 - MSB(occ1) : 
                             square / 8 - MSB(occ1))
                 );
-                BISHOP_MOVES[move_index].block_bits.push_back( // Left diag.
+                (*BISHOP_MOVES)[move_index].block_bits.push_back( // Left diag.
                     square + (square % 8 == 0 ? -7 : 7) * 
                             (square % 8 == 0 ? square / 8 - MSB(occ2) : 
                             7 - square / 8 - MSB(occ2))
                 );
 
-                std::sort(BISHOP_MOVES[move_index].block_bits.begin(),
-                        BISHOP_MOVES[move_index].block_bits.end());
-                setBishopMoves(square, &(BISHOP_MOVES[move_index]));
+                std::sort((*BISHOP_MOVES)[move_index].block_bits.begin(),
+                        (*BISHOP_MOVES)[move_index].block_bits.end());
+                setBishopMoves(square, &((*BISHOP_MOVES)[move_index]));
             }
         }
     }
@@ -499,17 +470,13 @@ std::vector<int> computeBLRSideIndices(int square, int* offset) {
  *      bishop attack sets are set.
  * @param BISHOP_MOVES: Array of move structs for each bishop move family.
  */
-void computeBULSideMoves(int square, int* offset, 
-        std::vector<int>* BISHOP_INDEX, MovesStruct* BISHOP_MOVES) {
+void computeBULSideMoves(int square, int* offset, std::vector<MovesStruct>* BISHOP_MOVES) {
     // The diagonal start and end squares.
     int start1 = square / 8 == 0 ? square + 9 : square - 9;
-    int end1 = square + (square / 8 == 0 ? 9 : -9) * (square / 8 == 0 ? 
-            6 - square % 8 : square % 8 - 1); // Right diagonal.
+    int end1 = square + (square / 8 == 0 ? 9 : -9) * (square / 8 == 0 ? 6 - square % 8 : square % 8 - 1); // Right diagonal.
     int start2 = square / 8 == 0 ? square + 7 : square - 7;
-    int end2 = square + (square / 8 == 0 ? 7 : -7) * (square / 8 == 0 ? 
-            square % 8 - 1 : 6 - square % 8); // Left diagonal.
+    int end2 = square + (square / 8 == 0 ? 7 : -7) * (square / 8 == 0 ? square % 8 - 1 : 6 - square % 8); // Left diagonal.
 
-    BISHOP_INDEX[square].resize(32);
     int bits1 = square / 8 == 0 ? (end1 / 8 - start1 / 8 + 1) : 
             (start1 / 8 - end1 / 8 + 1);
     int size1 = std::pow(2, bits1); // Right diagonal.
@@ -517,7 +484,6 @@ void computeBULSideMoves(int square, int* offset,
             (start2 / 8 - end2 / 8 + 1);
     int size2 = std::pow(2, bits2); // Left diagonal.
 
-    std::set<int> indices;
     int offset_add;
     for (int occ1 = 0; occ1 < size1; occ1++) {
         for (int occ2 = 0; occ2 < size2; occ2++) {
@@ -547,44 +513,34 @@ void computeBULSideMoves(int square, int* offset,
                 pos |= ((occ2 >> index) & 1ULL) << end2;
             }
 
-            // Index creation.
-            int bishopIndex = (
-                ((pos & bishopMasks[square]) * bishopMagicNums[square]) >> 
-                        bishopShifts[square]
-            );
-
             int move_index;
             if (square == B1 || square == B8 || square == G1 || square == G8) {
                 move_index = MSB(size1 == 32 ? occ1 : occ2) + *offset;
                 offset_add = 6;
             } else if (square == C1 || square == C8 || square == F1 || 
                     square == F8) {
-                move_index = MSB(size1 == 16 ? occ1 : occ2) + 
-                        5 * MSB(size1 == 2 ? occ1 : occ2) + *offset;
+                move_index = MSB(size1 == 16 ? occ1 : occ2) + 5 * MSB(size1 == 2 ? occ1 : occ2) + *offset;
                 offset_add = 10;
             } else {
-                move_index = MSB(size1 == 8 ? occ1 : occ2) + 
-                        4 * MSB(size1 == 4 ? occ1 : occ2) + *offset;
+                move_index = MSB(size1 == 8 ? occ1 : occ2) + 4 * MSB(size1 == 4 ? occ1 : occ2) + *offset;
                 offset_add = 12;
             }
-            BISHOP_INDEX[square][bishopIndex] = move_index;
 
-            indices.insert(move_index);
-            if (BISHOP_MOVES[move_index].reach == UNSET) {
-                BISHOP_MOVES[move_index].block_bits.push_back( // Right diag.
+            if ((*BISHOP_MOVES)[move_index].reach == UNSET) {
+                (*BISHOP_MOVES)[move_index].block_bits.push_back( // Right diag.
                     square + (square / 8 == 0 ? 9 : -9) * 
                             (square / 8 == 0 ? 7 - square % 8 - MSB(occ1) : 
                             square % 8 - MSB(occ1))
                 );
-                BISHOP_MOVES[move_index].block_bits.push_back( // Left diag.
+                (*BISHOP_MOVES)[move_index].block_bits.push_back( // Left diag.
                     square + (square / 8 == 0 ? 7 : -7) * 
                             (square / 8 == 0 ? square % 8 - MSB(occ2) : 
                             7 - square % 8 - MSB(occ2))
                 );
 
-                std::sort(BISHOP_MOVES[move_index].block_bits.begin(),
-                        BISHOP_MOVES[move_index].block_bits.end());
-                setBishopMoves(square, &(BISHOP_MOVES[move_index]));
+                std::sort((*BISHOP_MOVES)[move_index].block_bits.begin(),
+                        (*BISHOP_MOVES)[move_index].block_bits.end());
+                setBishopMoves(square, &((*BISHOP_MOVES)[move_index]));
             }
         }
     }
@@ -677,8 +633,7 @@ std::vector<int> computeBULSideIndices(int square, int* offset) {
  *      bishop attack sets are set.
  * @param BISHOP_MOVES: Array of move structs for each bishop move family.
  */
-void computeBCentreMoves(int sq, int* offset, std::vector<int>* BISHOP_INDEX, 
-        MovesStruct* BISHOP_MOVES) {
+void computeBCentreMoves(int sq, int* offset, std::vector<MovesStruct>* BISHOP_MOVES) {
     int start1 = sq + 9; // Upper right.
     int start2 = sq - 7; // Lower right.
     int start3 = sq - 9; // Lower left.
@@ -714,17 +669,6 @@ void computeBCentreMoves(int sq, int* offset, std::vector<int>* BISHOP_INDEX,
     ind -= 7;
     end4 = ind;
 
-
-    if (sq / 8 == 1 || sq / 8 == 6 || sq % 8 == 1 || sq % 8 == 6) {
-        BISHOP_INDEX[sq].resize(32);
-    } else if (sq / 8 == 2 || sq / 8 == 5 || sq % 8 == 2 || sq % 8 == 5) {
-        BISHOP_INDEX[sq].resize(128);
-    } else {
-        BISHOP_INDEX[sq].resize(512);
-    }
-
-    std::set<int> indices;
-    
     int bits1 = end1 % 8 - start1 % 8 + 1;
     int size1 = std::pow(2, bits1); // Right diagonal.
     int bits2 = end2 % 8 - start2 % 8 + 1;
@@ -796,12 +740,6 @@ void computeBCentreMoves(int sq, int* offset, std::vector<int>* BISHOP_INDEX,
                         }
                     }
                     if (msb4 == -1) msb4 = end4 + 7;
-
-                    // Index creation.
-                    int bishopIndex = (
-                        ((pos & bishopMasks[sq]) * bishopMagicNums[sq]) >> 
-                                bishopShifts[sq]
-                    );
 
                     int move_index;
                     if (sq == B2 || sq == B7 || sq == G2 || 
@@ -891,18 +829,16 @@ void computeBCentreMoves(int sq, int* offset, std::vector<int>* BISHOP_INDEX,
                         }
                         offset_add = 108;
                     }
-                    indices.insert(move_index);
-                    BISHOP_INDEX[sq][bishopIndex] = move_index;
 
-                    if (BISHOP_MOVES[move_index].reach == UNSET) {
-                        BISHOP_MOVES[move_index].block_bits.push_back(msb1);
-                        BISHOP_MOVES[move_index].block_bits.push_back(msb2);
-                        BISHOP_MOVES[move_index].block_bits.push_back(msb3);
-                        BISHOP_MOVES[move_index].block_bits.push_back(msb4);
+                    if ((*BISHOP_MOVES)[move_index].reach == UNSET) {
+                        (*BISHOP_MOVES)[move_index].block_bits.push_back(msb1);
+                        (*BISHOP_MOVES)[move_index].block_bits.push_back(msb2);
+                        (*BISHOP_MOVES)[move_index].block_bits.push_back(msb3);
+                        (*BISHOP_MOVES)[move_index].block_bits.push_back(msb4);
 
-                        std::sort(BISHOP_MOVES[move_index].block_bits.begin(),
-                                BISHOP_MOVES[move_index].block_bits.end());
-                        setBishopMoves(sq, &(BISHOP_MOVES[move_index]));
+                        std::sort((*BISHOP_MOVES)[move_index].block_bits.begin(),
+                                (*BISHOP_MOVES)[move_index].block_bits.end());
+                        setBishopMoves(sq, &((*BISHOP_MOVES)[move_index]));
                     }
                 }
             }
@@ -1154,25 +1090,29 @@ const int bishopIndex(const uint64_t pos, Square square) {
  *      bishop attack sets are set.
  * @param BISHOP_MOVES: Array of bishop move sets to store precomputed moves.
  */
-void computeBishopMoves(std::vector<int>* BISHOP_INDEX, MovesStruct* BISHOP_MOVES) {
+std::vector<MovesStruct> computeBishopMoves() {
+    std::vector<MovesStruct> moves(1428);
+
     // Set initial reach to UNSET.
     for (int i = 0; i < 1428; i++) {
-        BISHOP_MOVES[i].reach = UNSET;
+        moves[i].reach = UNSET;
     }
 
     // Set the moves and reach.
     int offset = 0;
     for (int square = A1; square <= H8; square++) {
         if (square == A1 || square == A8 || square == H1 || square == H8) {
-            computeBCornerMoves(square, &offset, BISHOP_INDEX, BISHOP_MOVES);
+            computeBCornerMoves(square, &offset, &moves);
         } else if (square % 8 == 0 || square % 8 == 7) {
-            computeBLRSideMoves(square, &offset, BISHOP_INDEX, BISHOP_MOVES);
+            computeBLRSideMoves(square, &offset, &moves);
         } else if (square / 8 == 0 || square / 8 == 7) {
-            computeBULSideMoves(square, &offset, BISHOP_INDEX, BISHOP_MOVES);
+            computeBULSideMoves(square, &offset, &moves);
         } else {
-            computeBCentreMoves(square, &offset, BISHOP_INDEX, BISHOP_MOVES);
+            computeBCentreMoves(square, &offset, &moves);
         }
     }
+
+    return moves;
 }
 
 std::vector<std::vector<int>> computeBishopIndices() {

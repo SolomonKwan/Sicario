@@ -5,13 +5,6 @@
 #include "constants.hpp"
 
 struct Computed {
-    // std::vector<int> ROOK_INDEX[64];
-    // MovesStruct ROOK_MOVES[4900];
-    // MovesStruct ROOK_BLOCKS[64];
-
-    /////////////////////////////////////////
-
-    std::vector<int> BISHOP_INDEX[64];
     MovesStruct BISHOP_MOVES[1428];
     MovesStruct BISHOP_BLOCKS[64];
 
@@ -116,7 +109,7 @@ const int bishopIndex(const uint64_t pos, Square square);
  *      bishop attack sets are set.
  * @param BISHOP_MOVES: Array of bishop move sets to store precomputed moves.
  */
-void computeBishopMoves(std::vector<int>* BISHOP_INDEX, MovesStruct* BISHOP_MOVES);
+std::vector<MovesStruct> computeBishopMoves();
 
 /**
  * Computes the blocking moves (and captures in case of check) for bishops on 
