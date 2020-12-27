@@ -81,11 +81,12 @@ int moveSetIndex(uint64_t masked_reach, MovesStruct* move_family) {
  * Compute the castling moves.
  * @param CASTLING_MOVES: Array of move struct pointers.
  */
-void computeCastling(MovesStruct* CASTLING_MOVES) {
+std::vector<MovesStruct> computeCastling() {
+    std::vector<MovesStruct> CASTLING_MOVES(4);
     CASTLING_MOVES[WQSC].move_set.resize(1);
     std::vector<uint16_t>* moves_set = &(CASTLING_MOVES[WQSC].move_set[0]);
     moves_set->push_back(E1 | C1 << 6 | CASTLING | pKNIGHT);
-    
+
     CASTLING_MOVES[WKSC].move_set.resize(1);
     moves_set = &CASTLING_MOVES[WKSC].move_set[0];
     moves_set->push_back(E1 | G1 << 6 | CASTLING | pKNIGHT);
@@ -97,6 +98,8 @@ void computeCastling(MovesStruct* CASTLING_MOVES) {
     CASTLING_MOVES[BKSC].move_set.resize(1);
     moves_set = &CASTLING_MOVES[BKSC].move_set[0];
     moves_set->push_back(E8 | G8 << 6 | CASTLING | pKNIGHT);
+
+    return CASTLING_MOVES;
 }
 
 /**
@@ -104,9 +107,7 @@ void computeCastling(MovesStruct* CASTLING_MOVES) {
  * @param moves: Pointer to precomputed moves structs.
  */
 void precompute(Computed* moves) {
-    computeKingMoves(moves->KING_MOVES);
     computePawnMoves(moves->PAWN_MOVES, moves->EN_PASSANT_MOVES, moves->DOUBLE_PUSH);
-    computeCastling(moves->CASTLING_MOVES);
 }
 
 /**
@@ -1229,55 +1230,56 @@ std::vector<MovesStruct> computeBishopBlocks() {
  * Compute the king moves.
  * @param KING_MOVES: The array of king moves to be computed.
  */
-void computeKingMoves(MovesStruct* KING_MOVES) {
+std::vector<MovesStruct> computeKingMoves() {
+    std::vector<MovesStruct> moves(64);
+
     // Compute the moves and reach.
     for (int square = A1; square <= H8; square++) {
-        KING_MOVES[square].reach = 0;
+        moves[square].reach = 0;
         
         if (square / 8 != 7) {
-            KING_MOVES[square].reach |= 1ULL << (square + 8);
-            KING_MOVES[square].block_bits.push_back(square + 8);
+            moves[square].reach |= 1ULL << (square + 8);
+            moves[square].block_bits.push_back(square + 8);
         }
         if (square / 8 != 7 && square % 8 != 7) {
-            KING_MOVES[square].reach |= 1ULL << (square + 9);
-            KING_MOVES[square].block_bits.push_back(square + 9);
+            moves[square].reach |= 1ULL << (square + 9);
+            moves[square].block_bits.push_back(square + 9);
         }
         if (square % 8 != 7) {
-            KING_MOVES[square].reach |= 1ULL << (square + 1);
-            KING_MOVES[square].block_bits.push_back(square + 1);
+            moves[square].reach |= 1ULL << (square + 1);
+            moves[square].block_bits.push_back(square + 1);
         }
         if (square / 8 != 0 && square % 8 != 7) {
-            KING_MOVES[square].reach |= 1ULL << (square - 7);
-            KING_MOVES[square].block_bits.push_back(square - 7);
+            moves[square].reach |= 1ULL << (square - 7);
+            moves[square].block_bits.push_back(square - 7);
         }
         if (square / 8 != 0) {
-            KING_MOVES[square].reach |= 1ULL << (square - 8);
-            KING_MOVES[square].block_bits.push_back(square - 8);
+            moves[square].reach |= 1ULL << (square - 8);
+            moves[square].block_bits.push_back(square - 8);
         }
         if (square / 8 != 0 && square % 8 != 0) {
-            KING_MOVES[square].reach |= 1ULL << (square - 9);
-            KING_MOVES[square].block_bits.push_back(square - 9);
+            moves[square].reach |= 1ULL << (square - 9);
+            moves[square].block_bits.push_back(square - 9);
         }
         if (square % 8 != 0) {
-            KING_MOVES[square].reach |= 1ULL << (square - 1);
-            KING_MOVES[square].block_bits.push_back(square - 1);
+            moves[square].reach |= 1ULL << (square - 1);
+            moves[square].block_bits.push_back(square - 1);
         }
         if (square / 8 != 7 && square % 8 != 0) {
-            KING_MOVES[square].reach |= 1ULL << (square + 7);
-            KING_MOVES[square].block_bits.push_back(square + 7);
+            moves[square].reach |= 1ULL << (square + 7);
+            moves[square].block_bits.push_back(square + 7);
         }
 
         // Sort the block bits.
-        std::sort(KING_MOVES[square].block_bits.begin(), 
-                KING_MOVES[square].block_bits.end());
+        std::sort(moves[square].block_bits.begin(), moves[square].block_bits.end());
 
         // Set the moves.
-        std::vector<int>* blockers = &(KING_MOVES[square].block_bits);
-        KING_MOVES[square].move_set.resize(std::pow(2, blockers->size()));
+        std::vector<int>* blockers = &(moves[square].block_bits);
+        moves[square].move_set.resize(std::pow(2, blockers->size()));
 
         // Iterate over end occupancies.
         for (int i = 0; i < std::pow(2, blockers->size()); i++) {
-            uint64_t pos = KING_MOVES[square].reach;
+            uint64_t pos = moves[square].reach;
         
             // Create the position with masked ends.
             int index = 0;
@@ -1286,8 +1288,7 @@ void computeKingMoves(MovesStruct* KING_MOVES) {
                 index++;
             }
 
-            std::vector<uint16_t>* moves_set = &(KING_MOVES[square].
-                move_set[moveSetIndex(pos, &KING_MOVES[square])]);
+            std::vector<uint16_t>* moves_set = &(moves[square].move_set[moveSetIndex(pos, &moves[square])]);
             
             // Set the moves.
             for (uint64_t shift = 0; shift < 64; shift++) {
@@ -1297,6 +1298,7 @@ void computeKingMoves(MovesStruct* KING_MOVES) {
             }
         }
     }
+    return moves;
 }
 
 /**

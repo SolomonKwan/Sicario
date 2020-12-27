@@ -10,27 +10,15 @@
 #include "movegen.hpp"
 
 namespace Moves_ {
-    std::vector<MovesStruct> ROOK = computeRookMoves(); // 4900
-
-    /////////////////////////////////////////
-
-    std::vector<MovesStruct> BISHOP = computeBishopMoves(); // 1428
-
-    /////////////////////////////////////////
-
-    std::vector<MovesStruct> KNIGHT = computeKnightMoves(); // 64
-
-    /////////////////////////////////////////
-
-    std::vector<MovesStruct> KING_MOVES; // 64
+    std::vector<MovesStruct> ROOK = computeRookMoves();
+    std::vector<MovesStruct> BISHOP = computeBishopMoves();
+    std::vector<MovesStruct> KNIGHT = computeKnightMoves();
+    std::vector<MovesStruct> KING = computeKingMoves();
+    std::vector<MovesStruct> CASTLING = computeCastling();
 
     /////////////////////////////////////////
 
     std::vector<MovesStruct> PAWN_MOVES[2] = {}; // each 48
-
-    /////////////////////////////////////////
-
-    std::vector<MovesStruct> CASTLING_MOVES; // 4
 
     /////////////////////////////////////////
 
@@ -459,7 +447,7 @@ bool Pos::isChecked(uint64_t enemy_attacks) {
 void Pos::getKingMoves(Computed* computed_moves, 
         std::vector<uint16_t>* pos_moves[MAX_MOVE_SETS], int* moves_index, 
         uint64_t kEnemy_attacks) {
-    MovesStruct* king_family = &computed_moves->KING_MOVES[this->piece_list[this->turn][0]];
+    MovesStruct* king_family = &Moves_::KING[this->piece_list[this->turn][0]];
     std::vector<uint16_t>* move_set = &king_family->move_set[
             moveSetIndex((king_family->reach ^ this->sides[this->turn]) & 
             ~kEnemy_attacks, king_family)];
@@ -1041,8 +1029,7 @@ void Pos::getKnightMoves(Computed* computed_moves, uint64_t rook_pins,
             continue;
         } else {
             MovesStruct* knight_moves = &Moves_::KNIGHT[knight];
-            std::vector<uint16_t>* move_set = &knight_moves->move_set[
-                    moveSetIndex(knight_moves->reach ^ this->sides[
+            std::vector<uint16_t>* move_set = &knight_moves->move_set[moveSetIndex(knight_moves->reach ^ this->sides[
                     this->turn], knight_moves)];
             if (move_set->size() != 0) pos_moves[(*moves_index)++] = move_set;
         }
@@ -1136,7 +1123,7 @@ void Pos::getCastlingMoves(uint64_t enemy_attacks, Computed* moves,
             if (!((1ULL << F1) & enemy_attacks) && !((1ULL << G1) & 
                 enemy_attacks) && !((1ULL << F1) & sides) && !((1ULL << G1) & 
                 sides)) {
-                std::vector<uint16_t>* move_set = &moves->CASTLING_MOVES[WKSC].
+                std::vector<uint16_t>* move_set = &Moves_::CASTLING[WKSC].
                         move_set[0];
                 if (move_set->size() != 0) {
                     pos_moves[(*moves_index)++] = move_set;
@@ -1149,7 +1136,7 @@ void Pos::getCastlingMoves(uint64_t enemy_attacks, Computed* moves,
             if (!((1ULL << D1) & enemy_attacks) && !((1ULL << C1) & 
                 enemy_attacks) && !((1ULL << D1) & sides) && !((1ULL << C1) & 
                 sides) && !((1ULL << B1) & sides)) {
-                std::vector<uint16_t>* move_set = &moves->CASTLING_MOVES[WQSC].
+                std::vector<uint16_t>* move_set = &Moves_::CASTLING[WQSC].
                         move_set[0];
                 if (move_set->size() != 0) {
                     pos_moves[(*moves_index)++] = move_set;
@@ -1161,7 +1148,7 @@ void Pos::getCastlingMoves(uint64_t enemy_attacks, Computed* moves,
             if (!((1ULL << F8) & enemy_attacks) && !((1ULL << G8) & 
                 enemy_attacks) && !((1ULL << F8) & sides) && !((1ULL << G8) & 
                 sides)) {
-                std::vector<uint16_t>* move_set = &moves->CASTLING_MOVES[BKSC].
+                std::vector<uint16_t>* move_set = &Moves_::CASTLING[BKSC].
                         move_set[0];
                 if (move_set->size() != 0) {
                     pos_moves[(*moves_index)++] = move_set;
@@ -1173,7 +1160,7 @@ void Pos::getCastlingMoves(uint64_t enemy_attacks, Computed* moves,
             if (!((1ULL << D8) & enemy_attacks) && !((1ULL << C8) & 
                 enemy_attacks) && !((1ULL << D8) & sides) && !((1ULL << C8) & 
                 sides) && !((1ULL << B8) & sides)) {
-                std::vector<uint16_t>* move_set = &moves->CASTLING_MOVES[BQSC].
+                std::vector<uint16_t>* move_set = &Moves_::CASTLING[BQSC].
                         move_set[0];
                 if (move_set->size() != 0) {
                     pos_moves[(*moves_index)++] = move_set;
@@ -1815,7 +1802,7 @@ void Pos::getEnemyAttacks(Computed* moves, uint64_t* enemy_attacks,
     }
 
     // King attacks.
-    *enemy_attacks |= moves->KING_MOVES[this->piece_list[!turn][0]].reach;
+    *enemy_attacks |= Moves_::KING[this->piece_list[!turn][0]].reach;
     *kEnemy_attacks |= *enemy_attacks;
 }
 
