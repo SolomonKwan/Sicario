@@ -16,17 +16,8 @@ namespace Moves_ {
     std::vector<MovesStruct> KING = computeKingMoves();
     std::vector<MovesStruct> CASTLING = computeCastling();
     std::vector<MovesStruct> EN_PASSANT = computeEnPassantMoves();
-
-    /////////////////////////////////////////
-
-    std::vector<MovesStruct> PAWN_MOVES[2] = {}; // each 48
-
-    /////////////////////////////////////////
-
-
-    /////////////////////////////////////////
-
-    std::vector<MovesStruct> DOUBLE_PUSH = computeDoublePushMoves(); // 16
+    std::vector<MovesStruct> DOUBLE_PUSH = computeDoublePushMoves();
+    std::vector<std::vector<MovesStruct>> PAWN = computePawnMoves();
 
     namespace Blocks {
         std::vector<MovesStruct> BISHOP = computeBishopBlocks(); // 64
@@ -559,7 +550,7 @@ void Pos::getCheckedMoves(Computed* moves, uint64_t* enemy_attacks,
             continue;
         }
         
-        MovesStruct* pawn_move = &moves->PAWN_MOVES[this->turn][pawn - 8];
+        MovesStruct* pawn_move = &Moves_::PAWN[this->turn][pawn - 8];
         int advance = this->turn ? 8 : -8;
         uint64_t masked_reach = (pawn_move->reach & checkers_only) | (1ULL << 
                 (pawn + advance));
@@ -570,7 +561,7 @@ void Pos::getCheckedMoves(Computed* moves, uint64_t* enemy_attacks,
         // Pawn single advance to block check.
         if ((1ULL << (pawn + advance)) & check_rays_only) {
             uint64_t pos = (1ULL << (pawn + advance + advance));
-            MovesStruct* pawn_moves = &moves->PAWN_MOVES[this->turn][pawn - 8];
+            MovesStruct* pawn_moves = &Moves_::PAWN[this->turn][pawn - 8];
             move_set = &pawn_moves->move_set[
                     moveSetIndex(pos, pawn_moves)];
             if (move_set->size() != 0) pos_moves[(*moves_index)++] = move_set;
@@ -1053,7 +1044,7 @@ void Pos::getPawnMoves(Computed* computed_moves, uint64_t rook_pins,
         int pawn = this->piece_list[piece][i];
         if (rook_pins & (1ULL << pawn)) { // Pinned
             if (pawn % 8 == king % 8) {
-                MovesStruct* pawn_moves = &computed_moves->PAWN_MOVES[this->turn][
+                MovesStruct* pawn_moves = &Moves_::PAWN[this->turn][
                         pawn - 8];
                 std::vector<uint16_t>* move_set = &pawn_moves->move_set[
                         moveSetIndex((this->sides[WHITE] | 
@@ -1076,7 +1067,7 @@ void Pos::getPawnMoves(Computed* computed_moves, uint64_t rook_pins,
                 int advance = this->turn ? 8 : -8;
                 uint64_t pos = (1ULL << (pawn + advance)) | (1ULL << (pawn + 
                         ray));
-                MovesStruct* pawn_moves = &computed_moves->PAWN_MOVES[this->turn][
+                MovesStruct* pawn_moves = &Moves_::PAWN[this->turn][
                         pawn - 8];
                 std::vector<uint16_t>* move_set = &pawn_moves->move_set[
                         moveSetIndex(pos, pawn_moves)];
@@ -1085,7 +1076,7 @@ void Pos::getPawnMoves(Computed* computed_moves, uint64_t rook_pins,
                 }
             }
         } else {
-            MovesStruct* pawn_moves = &computed_moves->PAWN_MOVES[this->turn][pawn - 
+            MovesStruct* pawn_moves = &Moves_::PAWN[this->turn][pawn - 
                     8];
             std::vector<uint16_t>* move_set = &pawn_moves->move_set[
                     moveSetIndex(this->pawnMoveArgs((Square) pawn), 
@@ -1201,14 +1192,12 @@ void Pos::getEpMoves(uint64_t rook_pins, uint64_t bishop_pins,
                             captured_pawn, moves, ep, pos_moves, moves_index);
                 } else {
                     if (attacker_sq % 8 < ep % 8) {
-                        std::vector<uint16_t>* move_set = &moves->
-                                EN_PASSANT_MOVES[attacker_sq - 24].move_set[0];
+                        std::vector<uint16_t>* move_set = &Moves_::EN_PASSANT[attacker_sq - 24].move_set[0];
                         if (move_set->size() != 0) {
                             pos_moves[(*moves_index)++] = move_set;
                         }
                     } else {
-                        std::vector<uint16_t>* move_set = &moves->
-                                EN_PASSANT_MOVES[attacker_sq - 24].move_set[1];
+                        std::vector<uint16_t>* move_set = &Moves_::EN_PASSANT[attacker_sq - 24].move_set[1];
                         if (move_set->size() != 0) {
                             pos_moves[(*moves_index)++] = move_set;
                         }
@@ -1229,14 +1218,12 @@ void Pos::getEpMoves(uint64_t rook_pins, uint64_t bishop_pins,
                             captured_pawn, moves, ep, pos_moves, moves_index);
                 } else {
                     if (attacker_sq % 8 < ep % 8) {
-                        std::vector<uint16_t>* move_set = &moves->
-                                EN_PASSANT_MOVES[attacker_sq - 24].move_set[0];
+                        std::vector<uint16_t>* move_set = &Moves_::EN_PASSANT[attacker_sq - 24].move_set[0];
                         if (move_set->size() != 0) {
                             pos_moves[(*moves_index)++] = move_set;
                         }
                     } else {
-                        std::vector<uint16_t>* move_set = &moves->
-                                EN_PASSANT_MOVES[attacker_sq - 24].move_set[1];
+                        std::vector<uint16_t>* move_set = &Moves_::EN_PASSANT[attacker_sq - 24].move_set[1];
                         if (move_set->size() != 0) {
                             pos_moves[(*moves_index)++] = move_set;
                         }
@@ -1713,7 +1700,7 @@ void Pos::getEnemyAttacks(Computed* moves, uint64_t* enemy_attacks,
     // Pawn attacks.
     PieceType piece = turn ? B_PAWN : W_PAWN;
     for (int i = 0; i < this->piece_index[piece]; i++) {
-        *enemy_attacks |= moves->PAWN_MOVES[!turn][this->piece_list[piece][i] -
+        *enemy_attacks |= Moves_::PAWN[!turn][this->piece_list[piece][i] -
                 8].reach;
         *kEnemy_attacks |= *enemy_attacks;
     }

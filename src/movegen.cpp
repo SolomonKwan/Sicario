@@ -107,7 +107,6 @@ std::vector<MovesStruct> computeCastling() {
  * @param moves: Pointer to precomputed moves structs.
  */
 void precompute(Computed* moves) {
-    computePawnMoves(moves->PAWN_MOVES, moves->EN_PASSANT_MOVES, moves->DOUBLE_PUSH);
 }
 
 /**
@@ -1384,7 +1383,8 @@ std::vector<MovesStruct> computeKnightMoves() {
  *  ep.
  * @param DOUBLE_PUSH: An array of moves structs for double pawn push blocks.
  */
-void computePawnMoves(MovesStruct PAWN_MOVES[][48], MovesStruct EN_PASSANT_MOVES[16], MovesStruct DOUBLE_PUSH[16]) {
+std::vector<std::vector<MovesStruct>> computePawnMoves() {
+    std::vector<std::vector<MovesStruct>> PAWN_MOVES = {std::vector<MovesStruct>(48), std::vector<MovesStruct>(48)};
     for (int player = BLACK; player <= WHITE; player++) {
         int left = player == BLACK ? -9 : 7;
         int right = player == BLACK ? -7 : 9;
@@ -1424,32 +1424,6 @@ void computePawnMoves(MovesStruct PAWN_MOVES[][48], MovesStruct EN_PASSANT_MOVES
             // Set the moves.
             std::vector<int>* blockers = &(PAWN_MOVES[player][square - 8].block_bits);
             PAWN_MOVES[player][square - 8].move_set.resize(std::pow(2, blockers->size()));
-            
-            // En-passant captures
-            if (player == WHITE && square / 8 == 4) { // En-passant.
-                EN_PASSANT_MOVES[square - 24].move_set.resize(2);
-                std::vector<uint16_t>* r_ep_set = &(EN_PASSANT_MOVES[square - 24].move_set[0]);
-                std::vector<uint16_t>* l_ep_set = &(EN_PASSANT_MOVES[square - 24].move_set[1]);
-                r_ep_set->push_back(square | (square + right) << 6 | EN_PASSANT | pKNIGHT);
-                l_ep_set->push_back(square | (square + left) << 6 | EN_PASSANT |pKNIGHT);
-            } else if (player == BLACK && square / 8 == 3) { // En-passant.
-                EN_PASSANT_MOVES[square - 24].move_set.resize(2);
-                std::vector<uint16_t>* r_ep_set = &(EN_PASSANT_MOVES[square - 24].move_set[0]);
-                std::vector<uint16_t>* l_ep_set = &(EN_PASSANT_MOVES[square - 24].move_set[1]);
-                r_ep_set->push_back(square | (square + right) << 6 | EN_PASSANT | pKNIGHT);
-                l_ep_set->push_back(square | (square + left) << 6 | EN_PASSANT |pKNIGHT);
-            }
-
-            // Double push blocks
-            if (player == WHITE && square / 8 == 1) {
-                DOUBLE_PUSH[square - 8].move_set.resize(1);
-                std::vector<uint16_t>* move = &(DOUBLE_PUSH[square - 8].move_set[0]);
-                move->push_back(square | (square + 16) << 6 | NORMAL | pKNIGHT);
-            } else if (player == BLACK && square / 8 == 6) {
-                DOUBLE_PUSH[square - 40].move_set.resize(1);
-                std::vector<uint16_t>* move = &(DOUBLE_PUSH[square - 40].move_set[0]);
-                move->push_back(square | (square - 16) << 6 | NORMAL | pKNIGHT);
-            }
 
             // Iterate over occupancies.
             for (int i = 0; i < std::pow(2, blockers->size()); i++) {
@@ -1577,6 +1551,7 @@ void computePawnMoves(MovesStruct PAWN_MOVES[][48], MovesStruct EN_PASSANT_MOVES
             }
         }
     }
+    return PAWN_MOVES;
 }
 
 std::vector<MovesStruct> computeEnPassantMoves() {
@@ -1607,11 +1582,7 @@ std::vector<MovesStruct> computeEnPassantMoves() {
 
 std::vector<MovesStruct> computeDoublePushMoves() {
     std::vector<MovesStruct> DOUBLE_PUSH(16);
-    for (int player = BLACK; player <= WHITE; player++) {
-        int left = player == BLACK ? -9 : 7;
-        int right = player == BLACK ? -7 : 9;
-        int double_push = player == BLACK ? - 16 : 16;
-        
+    for (int player = BLACK; player <= WHITE; player++) {        
         for (int square = 8; square <= 55; square++) {
             // Double push blocks
             if (player == WHITE && square / 8 == 1) {

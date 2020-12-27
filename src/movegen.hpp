@@ -127,7 +127,7 @@ std::vector<MovesStruct> computeKnightMoves();
  *  ep.
  * @param DOUBLE_PUSH: An array of moves structs for double pawn push blocks.
  */
-void computePawnMoves(MovesStruct PAWN_MOVES[][48], MovesStruct EN_PASSANT_MOVES[16], MovesStruct DOUBLE_PUSH[16]);
+std::vector<std::vector<MovesStruct>> computePawnMoves();
 
 /**
  * Returns the index from ROOK_INDEX into ROOK_MOVES based on the square and 
