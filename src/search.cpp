@@ -51,11 +51,10 @@ void Searcher::search() {
 
 double Pos::alphaBeta(int depth, double alpha, double beta, bool max) {
     // Get moves
-    uint64_t enemy_attacks = 0;
     std::vector<Move>* pos_moves[MAX_MOVE_SETS];
-    int moves_index = this->getMoves(&enemy_attacks, pos_moves);
+    int moves_index = this->getMoves(pos_moves);
 
-    ExitCode code = this->isEOG(enemy_attacks, moves_index);
+    ExitCode code = this->isEOG(moves_index);
     if (code == WHITE_WINS) {
         return 10000;
     } else if (code == BLACK_WINS) {

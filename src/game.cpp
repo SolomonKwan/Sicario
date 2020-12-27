@@ -641,8 +641,8 @@ bool Pos::insufficientMaterial() {
  * @param enemy_attacks: Bitboard of squares attacked by enemy pieces.
  * @return: True if in check, else false.
  */
-bool Pos::isChecked(uint64_t enemy_attacks) {
-    return (1ULL << this->piece_list[this->turn][0]) & enemy_attacks;
+bool Pos::isChecked() {
+    return (1ULL << this->piece_list[this->turn][0]) & this->enemy_attacks;
 }
 
 /**
@@ -671,10 +671,8 @@ void Pos::getKingMoves(std::vector<Move>* pos_moves[MAX_MOVE_SETS], int* moves_i
  * @param pos_moves: Array of 16 bit unsigned int move vectors.
  * @param moves_index: Pointer to number of move struct in pos_moves.
  */
-void Pos::getCheckedMoves(uint64_t* enemy_attacks, 
-        uint64_t* rook_pins, uint64_t* bishop_pins,
-        std::vector<Move>* pos_moves[MAX_MOVE_SETS], int* moves_index, 
-        uint64_t kEnemy_attacks) {    
+void Pos::getCheckedMoves(uint64_t* rook_pins, uint64_t* bishop_pins, std::vector<Move>* pos_moves[MAX_MOVE_SETS],
+        int* moves_index, uint64_t kEnemy_attacks) {    
     // MIGHT BE ABLE TO RETRIEVE WHEN CALCULATING THE enemy_attacks
     Square king_sq = this->piece_list[this->turn][0];
     uint64_t checkers_only = 0ULL;
@@ -1044,16 +1042,15 @@ void Pos::initialiseHash() {
  * @param pos_moves: Array of 16 bit unsigned int move vectors.
  * @param moves_index: Pointer to number of move struct in pos_moves.
  */
-void Pos::getNormalMoves(uint64_t* enemy_attacks, 
-        uint64_t* rook_pins, uint64_t* bishop_pins, std::vector<Move>*
-        pos_moves[MAX_MOVE_SETS], int* moves_index, uint64_t kEnemy_attacks) {
+void Pos::getNormalMoves(uint64_t* rook_pins, uint64_t* bishop_pins, std::vector<Move>* pos_moves[MAX_MOVE_SETS],
+        int* moves_index, uint64_t kEnemy_attacks) {
     this->getKingMoves(pos_moves, moves_index, kEnemy_attacks);
     this->getQueenMoves(*rook_pins, *bishop_pins, pos_moves, moves_index);
     this->getRookMoves(*rook_pins, *bishop_pins, pos_moves, moves_index);
     this->getBishopMoves(*rook_pins, *bishop_pins, pos_moves, moves_index);
     this->getKnightMoves(*rook_pins, *bishop_pins, pos_moves, moves_index);
     this->getPawnMoves(*rook_pins, *bishop_pins, pos_moves, moves_index);
-    this->getCastlingMoves(*enemy_attacks, pos_moves, moves_index);
+    this->getCastlingMoves(pos_moves, moves_index);
     this->getEpMoves(*rook_pins, *bishop_pins, pos_moves, moves_index);
 }
 
@@ -1337,7 +1334,7 @@ uint64_t Pos::pawnMoveArgs(Square square) {
  * @param pos_moves: Array of 16 bit unsigned int move vectors.
  * @param moves_index: Pointer to number of move struct in pos_moves.
  */
-void Pos::getCastlingMoves(uint64_t enemy_attacks, std::vector<Move>* pos_moves[MAX_MOVE_SETS], int* moves_index) {
+void Pos::getCastlingMoves(std::vector<Move>* pos_moves[MAX_MOVE_SETS], int* moves_index) {
     uint64_t sides = this->sides[WHITE] | this->sides[BLACK];
     if (this->turn) {
         if (this->castling & (1 << WKSC)) {
@@ -1854,12 +1851,12 @@ bool Pos::isThreeFoldRep() {
  * @param moves_index: Pointer to number of vectors in pos_moves.
  * @return: The appropriate ExitCode.
  */
-ExitCode Pos::isEOG(Bitboard enemy_attacks, int move_index) {
+ExitCode Pos::isEOG(int move_index) {
     if (this->isThreeFoldRep()) return THREE_FOLD_REPETITION;
     if (this->halfmove == 100) return FIFTY_MOVES_RULE;
     if (this->insufficientMaterial()) return INSUFFICIENT_MATERIAL;
-    if (move_index == 0 && !(this->isChecked(enemy_attacks))) return STALEMATE;
-    if (move_index == 0 && this->isChecked(enemy_attacks)) {
+    if (move_index == 0 && !(this->isChecked())) return STALEMATE;
+    if (move_index == 0 && this->isChecked()) {
         if (this->turn) return BLACK_WINS;
         return WHITE_WINS;
     }
@@ -1876,21 +1873,21 @@ ExitCode Pos::isEOG(Bitboard enemy_attacks, int move_index) {
  * @param pos_moves: Array of vectors pointers of 16 bit unsigned int moves.
  * @return: The number of move sets.
  */
-int Pos::getMoves(Bitboard* enemy_attacks, std::vector<Move>* pos_moves[MAX_MOVE_SETS]) {
+int Pos::getMoves(std::vector<Move>* pos_moves[MAX_MOVE_SETS]) {
     // The pinning rays
     uint64_t rook_pins = 0;
     uint64_t bishop_pins = 0;
     uint64_t kEnemy_attacks = 0;
-    this->getEnemyAttacks(enemy_attacks, &rook_pins, &bishop_pins, &kEnemy_attacks);
+    this->getEnemyAttacks(&rook_pins, &bishop_pins, &kEnemy_attacks);
 
     // Move retrieval for the 3 cases.
     int moves_index = 0;
     if (this->isDoubleChecked()) {
         this->getKingMoves(pos_moves, &moves_index, kEnemy_attacks);
-    } else if (this->isChecked(*enemy_attacks)) {
-        this->getCheckedMoves(enemy_attacks, &rook_pins, &bishop_pins, pos_moves, &moves_index, kEnemy_attacks);
+    } else if (this->isChecked()) {
+        this->getCheckedMoves(&rook_pins, &bishop_pins, pos_moves, &moves_index, kEnemy_attacks);
     } else {
-        this->getNormalMoves(enemy_attacks, &rook_pins, &bishop_pins, pos_moves, &moves_index, kEnemy_attacks);
+        this->getNormalMoves(&rook_pins, &bishop_pins, pos_moves, &moves_index, kEnemy_attacks);
     }
     return moves_index;
 }
@@ -1905,8 +1902,8 @@ int Pos::getMoves(Bitboard* enemy_attacks, std::vector<Move>* pos_moves[MAX_MOVE
  * @param bishop_pins: 64 bit unsigned int pointer for bishop pins.
  * @param kEnemy_attacks: 64 bit unsigned int pointer with value 0.
  */
-void Pos::getEnemyAttacks(uint64_t* enemy_attacks, 
-        uint64_t* rook_pins, uint64_t* bishop_pins, uint64_t* kEnemy_attacks) {
+void Pos::getEnemyAttacks(uint64_t* rook_pins, uint64_t* bishop_pins, uint64_t* kEnemy_attacks) {
+    this->enemy_attacks = 0ULL;
     bool turn = this->turn;
     Square king_sq = this->piece_list[turn][0];
     uint64_t pieces = this->sides[WHITE] | this->sides[BLACK];
@@ -1916,16 +1913,15 @@ void Pos::getEnemyAttacks(uint64_t* enemy_attacks,
     // Pawn attacks.
     PieceType piece = turn ? B_PAWN : W_PAWN;
     for (int i = 0; i < this->piece_index[piece]; i++) {
-        *enemy_attacks |= Moves_::PAWN[!turn][this->piece_list[piece][i] -
-                8].reach;
-        *kEnemy_attacks |= *enemy_attacks;
+        this->enemy_attacks |= Moves_::PAWN[!turn][this->piece_list[piece][i] - 8].reach;
+        *kEnemy_attacks |= this->enemy_attacks;
     }
 
     // Knight attacks.
     piece = turn ? B_KNIGHT : W_KNIGHT;
     for (int i = 0; i < this->piece_index[piece]; i++) {
-        *enemy_attacks |= Moves_::KNIGHT[this->piece_list[piece][i]].reach;
-        *kEnemy_attacks |= *enemy_attacks;
+        this->enemy_attacks |= Moves_::KNIGHT[this->piece_list[piece][i]].reach;
+        *kEnemy_attacks |= this->enemy_attacks;
     }
 
     // Bishop attacks.
@@ -1934,9 +1930,8 @@ void Pos::getEnemyAttacks(uint64_t* enemy_attacks,
     piece = turn ? B_BISHOP : W_BISHOP;
     for (int i = 0; i < this->piece_index[piece]; i++) {
         int square = this->piece_list[piece][i];
-        *enemy_attacks |= Moves_::BISHOP[Indices::BISHOP[square]
-                [bishopIndex(pieces ^ (1ULL << this->piece_list[turn][0]), 
-                (Square) square)]].reach;
+        this->enemy_attacks |= Moves_::BISHOP[Indices::BISHOP[square][bishopIndex(pieces ^ (1ULL << 
+                this->piece_list[turn][0]), (Square) square)]].reach;
         *kEnemy_attacks |= Moves_::BISHOP[Indices::BISHOP[square][
                 bishopIndex(masked_king_bb, (Square)square)]].reach;
         
@@ -1956,7 +1951,7 @@ void Pos::getEnemyAttacks(uint64_t* enemy_attacks,
     piece = turn ? B_ROOK : W_ROOK;
     for (int i = 0; i < this->piece_index[piece]; i++) {
         int square = this->piece_list[piece][i];
-        *enemy_attacks |= Moves_::ROOK[Indices::ROOK[square]
+        this->enemy_attacks |= Moves_::ROOK[Indices::ROOK[square]
                 [rookIndex(pieces ^ (1ULL << this->piece_list[turn][0]), 
                 (Square) square)]].reach;
         *kEnemy_attacks |= Moves_::ROOK[Indices::ROOK[square][
@@ -1974,10 +1969,10 @@ void Pos::getEnemyAttacks(uint64_t* enemy_attacks,
     piece = turn ? B_QUEEN : W_QUEEN;
     for (int i = 0; i < this->piece_index[piece]; i++) {
         int square = this->piece_list[piece][i];
-        *enemy_attacks |= Moves_::BISHOP[Indices::BISHOP[square]
+        this->enemy_attacks |= Moves_::BISHOP[Indices::BISHOP[square]
                 [bishopIndex(pieces ^ (1ULL << this->piece_list[turn][0]), 
                 (Square) square)]].reach;
-        *enemy_attacks |= Moves_::ROOK[Indices::ROOK[square]
+        this->enemy_attacks |= Moves_::ROOK[Indices::ROOK[square]
                 [rookIndex(pieces ^ (1ULL << this->piece_list[turn][0]), 
                 (Square) square)]].reach;
         *kEnemy_attacks |= Moves_::BISHOP[Indices::BISHOP[square][
@@ -2004,8 +1999,8 @@ void Pos::getEnemyAttacks(uint64_t* enemy_attacks,
     }
 
     // King attacks.
-    *enemy_attacks |= Moves_::KING[this->piece_list[!turn][0]].reach;
-    *kEnemy_attacks |= *enemy_attacks;
+    this->enemy_attacks |= Moves_::KING[this->piece_list[!turn][0]].reach;
+    *kEnemy_attacks |= this->enemy_attacks;
 }
 
 /**
@@ -2898,9 +2893,8 @@ Move Pos::chooseMove(Player white, Player black, std::vector<Move>* pos_moves[MA
         }
          
     } else {
-        Bitboard enemy_attacks = 0;
         std::vector<Move>* pos_moves[MAX_MOVE_SETS];
-        int moves_index = this->getMoves(&enemy_attacks, pos_moves);
+        int moves_index = this->getMoves(pos_moves);
         double value = this->turn ? -1000000 : 1000000;
         std::cout << "Thinking..." << std::flush;
         for (int i = 0; i < moves_index; i++) {
@@ -2933,21 +2927,19 @@ Move Pos::chooseMove(Player white, Player black, std::vector<Move>* pos_moves[MA
  */
 void Pos::run() {
     ExitCode code = NORMAL_PLY;
-    
-    Bitboard enemy_attacks = 0;
+
     std::vector<Move>* pos_moves[MAX_MOVE_SETS];
-    int moves_index = this->getMoves(&enemy_attacks, pos_moves);
+    int moves_index = this->getMoves(pos_moves);
     
     while (!code) {
         this->display();
 
-        code = this->isEOG(enemy_attacks, moves_index);
+        code = this->isEOG(moves_index);
         if (code) break;
         Move move = this->chooseMove(HUMAN, HUMAN, pos_moves, &moves_index);
         this->makeMove(move);
 
-        enemy_attacks = 0;
-        moves_index = this->getMoves(&enemy_attacks, pos_moves);
+        moves_index = this->getMoves(pos_moves);
     }
 
     this->showEOG(code);
@@ -3013,10 +3005,8 @@ void printPerft(bool print, Move move, uint64_t* current_nodes) {
  */
 uint64_t Pos::perft(int depth, bool print) {
     uint64_t nodes = 0;
-    Bitboard enemy_attacks = 0;
     std::vector<Move>* pos_moves[MAX_MOVE_SETS];
-    int moves_index = this->getMoves(&enemy_attacks, 
-            pos_moves);
+    int moves_index = this->getMoves(pos_moves);
 
     for (int i = 0; i < moves_index; i++) {
         std::vector<Move>* move_set = pos_moves[i];
