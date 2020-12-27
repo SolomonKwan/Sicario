@@ -15,11 +15,10 @@ namespace Moves_ {
     /////////////////////////////////////////
 
     std::vector<MovesStruct> BISHOP = computeBishopMoves(); // 1428
-    std::vector<MovesStruct> BISHOP_BLOCKS; // 64
 
     /////////////////////////////////////////
 
-    std::vector<MovesStruct> KNIGHT_MOVES; // 64
+    std::vector<MovesStruct> KNIGHT = computeKnightMoves(); // 64
 
     /////////////////////////////////////////
 
@@ -42,6 +41,7 @@ namespace Moves_ {
     std::vector<MovesStruct> DOUBLE_PUSH; // 16
 
     namespace Blocks {
+        std::vector<MovesStruct> BISHOP = computeBishopBlocks(); // 64
         std::vector<MovesStruct> ROOK = computeRookBlocks(); // 64
     }
 }
@@ -504,8 +504,7 @@ void Pos::getCheckedMoves(Computed* moves, uint64_t* enemy_attacks,
                         (Square) queen)]];
         uint64_t bishop_index = bishop_move->reach & (check_rays_only | 
                 checkers_only);
-        std::vector<uint16_t>* move_set = &moves->BISHOP_BLOCKS[queen].
-                checked_moves[bishop_index];
+        std::vector<uint16_t>* move_set = &Moves_::Blocks::BISHOP[queen].checked_moves[bishop_index];
         if (move_set->size() != 0) pos_moves[(*moves_index)++] = move_set;
 
         MovesStruct* rook_move = &Moves_::ROOK[Indices::ROOK[queen][
@@ -545,8 +544,7 @@ void Pos::getCheckedMoves(Computed* moves, uint64_t* enemy_attacks,
                 (Square) bishop)]];
         uint64_t bishop_index = bishop_move->reach & (check_rays_only | 
                 checkers_only);
-        std::vector<uint16_t>* move_set = &moves->BISHOP_BLOCKS[bishop].
-                checked_moves[bishop_index];
+        std::vector<uint16_t>* move_set = &Moves_::Blocks::BISHOP[bishop].checked_moves[bishop_index];
         if (move_set->size() != 0) pos_moves[(*moves_index)++] = move_set;
     }
 
@@ -557,7 +555,7 @@ void Pos::getCheckedMoves(Computed* moves, uint64_t* enemy_attacks,
         if ((1ULL << knight) & *rook_pins || (1ULL << knight) & *bishop_pins) {
             continue;
         }
-        MovesStruct * knight_move = &moves->KNIGHT_MOVES[knight];
+        MovesStruct * knight_move = &Moves_::KNIGHT[knight];
         uint64_t masked_reach = knight_move->reach & (check_rays_only | 
                 checkers_only);
         std::vector<uint16_t>* move_set = &knight_move->move_set[moveSetIndex(
@@ -1042,7 +1040,7 @@ void Pos::getKnightMoves(Computed* computed_moves, uint64_t rook_pins,
         if (rook_pins & (1ULL << knight) || bishop_pins & (1ULL << knight)) { // Pinned.
             continue;
         } else {
-            MovesStruct* knight_moves = &computed_moves->KNIGHT_MOVES[knight];
+            MovesStruct* knight_moves = &Moves_::KNIGHT[knight];
             std::vector<uint16_t>* move_set = &knight_moves->move_set[
                     moveSetIndex(knight_moves->reach ^ this->sides[
                     this->turn], knight_moves)];
@@ -1425,7 +1423,7 @@ void Pos::diagonalPinEp(int king, bool turn, int attacker_sq,
  */
 uint64_t Pos::getKnightCheckers(Computed* moves, Square square, uint64_t* checkers_only) {
     uint64_t result = 0;
-    *checkers_only |= moves->KNIGHT_MOVES[square].reach & this->sides[1 - this->turn] & this->knights;
+    *checkers_only |= Moves_::KNIGHT[square].reach & this->sides[1 - this->turn] & this->knights;
     return result;
 }
 
@@ -1446,7 +1444,7 @@ bool Pos::isDoubleChecked(Computed* moves) {
             (rook_attacks & this->queens & this->sides[!turn]) |
             (bishop_attacks & this->queens & this->sides[!turn]);
     
-    attackers |= moves->KNIGHT_MOVES[king].reach & this->knights & this->
+    attackers |= Moves_::KNIGHT[king].reach & this->knights & this->
             sides[!turn];
 
     uint64_t enemy_pawns = this->sides[!turn] & this->pawns;
@@ -1737,7 +1735,7 @@ void Pos::getEnemyAttacks(Computed* moves, uint64_t* enemy_attacks,
     // Knight attacks.
     piece = turn ? B_KNIGHT : W_KNIGHT;
     for (int i = 0; i < this->piece_index[piece]; i++) {
-        *enemy_attacks |= moves->KNIGHT_MOVES[this->piece_list[piece][i]].reach;
+        *enemy_attacks |= Moves_::KNIGHT[this->piece_list[piece][i]].reach;
         *kEnemy_attacks |= *enemy_attacks;
     }
 

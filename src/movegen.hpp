@@ -5,7 +5,6 @@
 #include "constants.hpp"
 
 struct Computed {
-    MovesStruct BISHOP_MOVES[1428];
     MovesStruct BISHOP_BLOCKS[64];
 
     /////////////////////////////////////////
@@ -117,7 +116,7 @@ std::vector<MovesStruct> computeBishopMoves();
  * 
  * @param BISHOP_BLOCKS: A vector of move structs.
  */
-void computeBishopBlocks(MovesStruct* BISHOP_BLOCKS);
+std::vector<MovesStruct> computeBishopBlocks();
 
 /**
  * Compute the king moves.
@@ -129,7 +128,7 @@ void computeKingMoves(MovesStruct* KING_MOVES);
  * Compute the knight moves.
  * @param KNIGHT_MOVES: Array of knight moves to be computed.
  */
-void computeKnightMoves(MovesStruct* KNIGHT_MOVES);
+std::vector<MovesStruct> computeKnightMoves();
 
 /**
  * Computes the pawn moves.

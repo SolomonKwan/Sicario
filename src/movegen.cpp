@@ -104,8 +104,6 @@ void computeCastling(MovesStruct* CASTLING_MOVES) {
  * @param moves: Pointer to precomputed moves structs.
  */
 void precompute(Computed* moves) {
-    computeBishopBlocks(moves->BISHOP_BLOCKS);
-    computeKnightMoves(moves->KNIGHT_MOVES);
     computeKingMoves(moves->KING_MOVES);
     computePawnMoves(moves->PAWN_MOVES, moves->EN_PASSANT_MOVES, moves->DOUBLE_PUSH);
     computeCastling(moves->CASTLING_MOVES);
@@ -1141,7 +1139,8 @@ std::vector<std::vector<int>> computeBishopIndices() {
  * 
  * @param BISHOP_BLOCKS: A vector of move structs.
  */
-void computeBishopBlocks(MovesStruct* BISHOP_BLOCKS) {
+std::vector<MovesStruct> computeBishopBlocks() {
+    std::vector<MovesStruct> blocks(64);
     std::tuple<int, int> pairs[4] = {
         std::make_tuple(9, -7), std::make_tuple(-7, -9), std::make_tuple(-9, 7),
         std::make_tuple(7, 9)
@@ -1168,7 +1167,7 @@ void computeBishopBlocks(MovesStruct* BISHOP_BLOCKS) {
             end_pt += direction;
 
             std::unordered_map<uint64_t, std::vector<uint16_t>>* moves = 
-                    &BISHOP_BLOCKS[square].checked_moves;
+                    &blocks[square].checked_moves;
             while (start != end_pt) {
                 uint16_t move = square | start << 6 | NORMAL | pKNIGHT;
                 std::vector<uint16_t> moveset = {move};
@@ -1206,7 +1205,7 @@ void computeBishopBlocks(MovesStruct* BISHOP_BLOCKS) {
             end2 += ray2;
             
             std::unordered_map<uint64_t, std::vector<uint16_t>>* moves = 
-                    &BISHOP_BLOCKS[square].checked_moves;
+                    &blocks[square].checked_moves;
 
             while (start1 != end1) {
                 start2 = square + ray2;
@@ -1222,6 +1221,8 @@ void computeBishopBlocks(MovesStruct* BISHOP_BLOCKS) {
             };
         };
     }
+
+    return blocks;
 }
 
 /**
@@ -1302,56 +1303,56 @@ void computeKingMoves(MovesStruct* KING_MOVES) {
  * Compute the knight moves.
  * @param KNIGHT_MOVES: Array of knight moves to be computed.
  */
-void computeKnightMoves(MovesStruct* KNIGHT_MOVES) {
+std::vector<MovesStruct> computeKnightMoves() {
+    std::vector<MovesStruct> knight(64);
     // Compute the moves and reach.
     for (int square = A1; square <= H8; square++) {
         // Compute the reach.
-        KNIGHT_MOVES[square].reach = 0;
+        knight[square].reach = 0;
         
         if (square / 8 < 6 && square % 8 < 7) {
-            KNIGHT_MOVES[square].reach |= 1ULL << (square + 17); // NNE.
-            KNIGHT_MOVES[square].block_bits.push_back(square + 17);
+            knight[square].reach |= 1ULL << (square + 17); // NNE.
+            knight[square].block_bits.push_back(square + 17);
         }
         if (square / 8 < 7 && square % 8 < 6) {
-            KNIGHT_MOVES[square].reach |= 1ULL << (square + 10); // ENE.
-            KNIGHT_MOVES[square].block_bits.push_back(square + 10);
+            knight[square].reach |= 1ULL << (square + 10); // ENE.
+            knight[square].block_bits.push_back(square + 10);
         }
         if (square / 8 > 0 && square % 8 < 6) {
-            KNIGHT_MOVES[square].reach |= 1ULL << (square - 6); // ESE.
-            KNIGHT_MOVES[square].block_bits.push_back(square - 6);
+            knight[square].reach |= 1ULL << (square - 6); // ESE.
+            knight[square].block_bits.push_back(square - 6);
         }
         if (square / 8 > 1 && square % 8 < 7) {
-            KNIGHT_MOVES[square].reach |= 1ULL << (square - 15); // SES.
-            KNIGHT_MOVES[square].block_bits.push_back(square - 15);
+            knight[square].reach |= 1ULL << (square - 15); // SES.
+            knight[square].block_bits.push_back(square - 15);
         }
         if (square / 8 > 1 && square % 8 > 0) {
-            KNIGHT_MOVES[square].reach |= 1ULL << (square - 17); // SWS.
-            KNIGHT_MOVES[square].block_bits.push_back(square - 17);
+            knight[square].reach |= 1ULL << (square - 17); // SWS.
+            knight[square].block_bits.push_back(square - 17);
         }
         if (square / 8 > 0 && square % 8 > 1) {
-            KNIGHT_MOVES[square].reach |= 1ULL << (square - 10); // ESE.
-            KNIGHT_MOVES[square].block_bits.push_back(square - 10);
+            knight[square].reach |= 1ULL << (square - 10); // ESE.
+            knight[square].block_bits.push_back(square - 10);
         }
         if (square / 8 < 7 && square % 8 > 1) {
-            KNIGHT_MOVES[square].reach |= 1ULL << (square + 6); // WNW.
-            KNIGHT_MOVES[square].block_bits.push_back(square + 6);
+            knight[square].reach |= 1ULL << (square + 6); // WNW.
+            knight[square].block_bits.push_back(square + 6);
         }
         if (square / 8 < 6 && square % 8 > 0) {
-            KNIGHT_MOVES[square].reach |= 1ULL << (square + 15); // NWN.
-            KNIGHT_MOVES[square].block_bits.push_back(square + 15);
+            knight[square].reach |= 1ULL << (square + 15); // NWN.
+            knight[square].block_bits.push_back(square + 15);
         }
 
         // Sort the block bits.
-        std::sort(KNIGHT_MOVES[square].block_bits.begin(), 
-                KNIGHT_MOVES[square].block_bits.end());
+        std::sort(knight[square].block_bits.begin(), knight[square].block_bits.end());
 
         // Set the moves.
-        std::vector<int>* blockers = &(KNIGHT_MOVES[square].block_bits);
-        KNIGHT_MOVES[square].move_set.resize(std::pow(2, blockers->size()));
+        std::vector<int>* blockers = &(knight[square].block_bits);
+        knight[square].move_set.resize(std::pow(2, blockers->size()));
 
         // Iterate over end occupancies.
         for (int i = 0; i < std::pow(2, blockers->size()); i++) {
-            uint64_t pos = KNIGHT_MOVES[square].reach;
+            uint64_t pos = knight[square].reach;
         
             // Create the position with masked ends.
             int index = 0;
@@ -1360,8 +1361,7 @@ void computeKnightMoves(MovesStruct* KNIGHT_MOVES) {
                 index++;
             }
 
-            std::vector<uint16_t>* moves_set = &(KNIGHT_MOVES[square].
-                move_set[moveSetIndex(pos, &KNIGHT_MOVES[square])]);
+            std::vector<uint16_t>* moves_set = &(knight[square].move_set[moveSetIndex(pos, &knight[square])]);
             
             // Set the moves.
             for (uint64_t shift = 0; shift < 64; shift++) {
@@ -1371,6 +1371,7 @@ void computeKnightMoves(MovesStruct* KNIGHT_MOVES) {
             }
         }
     }
+    return knight;
 }
 
 /**
