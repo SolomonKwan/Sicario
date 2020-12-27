@@ -109,8 +109,7 @@ class Pos {
 };
 
 namespace Play {
-    void init(Pos* game, Computed* moves, CmdLine* args,char *argv[], 
-            std::string input);
+    void init(Pos* game, CmdLine* args,char *argv[], std::string input);
 }
 
 /**

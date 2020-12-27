@@ -6,26 +6,24 @@
 #include "game.hpp"
 
 namespace Run {
-    void init(Pos* game, Computed* moves, CmdLine* args, char *argv[]) {
+    void init(Pos* game, CmdLine* args, char *argv[]) {
         std::string input;
         std::getline(std::cin, input);
         if (input == "uci") {
             // UCI::init(game, moves, args, argv, input);
         } else {
-            Play::init(game, moves, args, argv, input);
+            Play::init(game, args, argv, input);
         }
     }
 }
 
 int main(int argc, char *argv[]) {
     CmdLine args;
-    Computed moves;
     Pos game;
 
     // Initialisation.
-    Compute::init(&moves);
     Args::init(&game, argc, argv, &args);
-    Run::init(&game, &moves, &args, argv);
+    Run::init(&game, &args, argv);
 
     return 0;
 }

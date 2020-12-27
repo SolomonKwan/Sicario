@@ -40,6 +40,8 @@ struct Computed {
     MovesStruct DOUBLE_PUSH[16];
 };
 
+std::vector<std::vector<int>> computeRookIndices();
+
 typedef uint64_t Bitboard;
 // typedef std::vector<Bitboard> BitBoardSet;
 // typedef std::vector<BitBoardSet> BitBoardFamily;
@@ -54,12 +56,6 @@ typedef uint64_t Bitboard;
 namespace Compute {
     void init(Computed* moves);
 }
-
-/**
- * Prints a readable version of a move.
- * @param move: The move to be printed.
- */
-void printMove(uint16_t move, bool extraInfo = false);
 
 /**
  * Calculates the index into the move_set of a particular move family.

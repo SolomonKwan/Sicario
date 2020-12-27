@@ -6,18 +6,6 @@
 #include "game.hpp"
 
 /**
- * Return true if a square is a dark square, else false.
- * @param square: The square to check.
- */
-bool isDark(int square);
-
-/**
- * Get and return the FEN string of the current position.
- * @param game: Pointer to game struct.
- */
-std::string getFEN(Pos* game);
-
-/**
  * Splits a string by a delimeter string and returns vector of results.
  * 
  * @param input: String to split.
