@@ -41,6 +41,7 @@ struct Computed {
 };
 
 std::vector<std::vector<int>> computeRookIndices();
+std::vector<std::vector<int>> computeBishopIndices();
 
 typedef uint64_t Bitboard;
 // typedef std::vector<Bitboard> BitBoardSet;
@@ -163,7 +164,7 @@ const int rookIndex(const uint64_t pos, Square square);
  *      attack sets are set.
  * @param ROOK_MOVES: Move struct to store the moves.
  */
-void computeRookMoves(std::vector<int>* ROOK_INDEX, MovesStruct* ROOK_MOVES);
+std::vector<MovesStruct> computeRookMoves();
 
 /**
  * Computes the blocking moves (and captures in case of check) for rooks on each

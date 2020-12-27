@@ -10,12 +10,11 @@
 #include "movegen.hpp"
 
 namespace Moves_ {
-    std::vector<MovesStruct> ROOK_MOVES; // 4900
+    std::vector<MovesStruct> ROOK = computeRookMoves(); // 4900
     std::vector<MovesStruct> ROOK_BLOCKS; // 64
 
     /////////////////////////////////////////
 
-    std::vector<std::vector<int>> BISHOP_INDEX; // 64
     std::vector<MovesStruct> BISHOP_MOVES; // 1428
     std::vector<MovesStruct> BISHOP_BLOCKS; // 64
 
@@ -46,6 +45,7 @@ namespace Moves_ {
 
 namespace Indices {
     const std::vector<std::vector<int>> ROOK = computeRookIndices();
+    const std::vector<std::vector<int>> BISHOP = computeBishopIndices();
 }
 
 /**
@@ -496,7 +496,7 @@ void Pos::getCheckedMoves(Computed* moves, uint64_t* enemy_attacks,
         if ((1ULL << queen) & *rook_pins || (1ULL << queen) & *bishop_pins) {
             continue;
         }
-        MovesStruct* bishop_move = &moves->BISHOP_MOVES[moves->BISHOP_INDEX[queen][
+        MovesStruct* bishop_move = &moves->BISHOP_MOVES[Indices::BISHOP[queen][
                 bishopIndex(this->sides[BLACK] | this->sides[WHITE], 
                         (Square) queen)]];
         uint64_t bishop_index = bishop_move->reach & (check_rays_only | 
@@ -505,7 +505,7 @@ void Pos::getCheckedMoves(Computed* moves, uint64_t* enemy_attacks,
                 checked_moves[bishop_index];
         if (move_set->size() != 0) pos_moves[(*moves_index)++] = move_set;
 
-        MovesStruct* rook_move = &moves->ROOK_MOVES[Indices::ROOK[queen][
+        MovesStruct* rook_move = &Moves_::ROOK[Indices::ROOK[queen][
                 rookIndex(this->sides[BLACK] | this->sides[WHITE], 
                 (Square) queen)]];
         uint64_t rook_index = rook_move->reach & (check_rays_only | 
@@ -522,7 +522,7 @@ void Pos::getCheckedMoves(Computed* moves, uint64_t* enemy_attacks,
         if ((1ULL << rook) & *rook_pins || (1ULL << rook) & *bishop_pins) {
             continue;
         }
-        MovesStruct* rook_move = &moves->ROOK_MOVES[Indices::ROOK[rook][
+        MovesStruct* rook_move = &Moves_::ROOK[Indices::ROOK[rook][
                 rookIndex(this->sides[BLACK] | this->sides[WHITE], 
                 (Square) rook)]];
         uint64_t rook_index = rook_move->reach & (check_rays_only | 
@@ -540,7 +540,7 @@ void Pos::getCheckedMoves(Computed* moves, uint64_t* enemy_attacks,
             continue;
         }
         // displayBB(checkers_and_rays);
-        MovesStruct* bishop_move = &moves->BISHOP_MOVES[moves->BISHOP_INDEX[bishop][
+        MovesStruct* bishop_move = &moves->BISHOP_MOVES[Indices::BISHOP[bishop][
                 bishopIndex(this->sides[BLACK] | this->sides[WHITE], 
                 (Square) bishop)]];
         uint64_t bishop_index = bishop_move->reach & (check_rays_only | 
@@ -919,7 +919,7 @@ void Pos::getRookPinMoves(Computed* moves, int square,
             friendly |= 1ULL << (square - 8);
         }
     }
-    MovesStruct* rook_moves = &moves->ROOK_MOVES[Indices::ROOK[square][rookIndex(
+    MovesStruct* rook_moves = &Moves_::ROOK[Indices::ROOK[square][rookIndex(
             pos, (Square) square)]];
     std::vector<uint16_t>* move_set = &rook_moves->move_set[moveSetIndex(
             rook_moves->reach ^ (this->sides[this->turn] | friendly), 
@@ -955,7 +955,7 @@ void Pos::getBishopPinMoves (Computed* moves, int square,
             friendly |= 1ULL << (square - 9);
         }
     }
-    MovesStruct* bishop_moves = &moves->BISHOP_MOVES[moves->BISHOP_INDEX[square]
+    MovesStruct* bishop_moves = &moves->BISHOP_MOVES[Indices::BISHOP[square]
             [bishopIndex(pos, (Square) square)]];
     std::vector<uint16_t>* move_set = &bishop_moves->move_set[moveSetIndex(
             bishop_moves->reach ^ (this->sides[this->turn] | friendly), 
@@ -1293,14 +1293,14 @@ void Pos::horizontalPinEp(int king, bool turn, int attacker_sq,
         else if (this->pieces[i] == e_queen) e_queen_sq = i;
     }
 
-    uint64_t king_reach = moves->ROOK_MOVES[Indices::ROOK[king][rookIndex(
+    uint64_t king_reach = Moves_::ROOK[Indices::ROOK[king][rookIndex(
             pieces ^ pawns, (Square) king)]].reach;
     uint64_t pin_ray = 0;
 
     // Ray between rook and king without pawns of interest.
     uint64_t rook_reach = 0;
     if (e_rook_sq != -1) {
-        rook_reach = moves->ROOK_MOVES[Indices::ROOK[e_rook_sq][rookIndex(
+        rook_reach = Moves_::ROOK[Indices::ROOK[e_rook_sq][rookIndex(
                 pieces ^ pawns, (Square) e_rook_sq)]].reach;
         pin_ray |= (king_reach & rook_reach);
     }
@@ -1308,7 +1308,7 @@ void Pos::horizontalPinEp(int king, bool turn, int attacker_sq,
     // Ray between queen and king without pawns of interest.
     uint64_t queen_reach = 0;
     if (e_queen_sq != -1) {
-        queen_reach = moves->ROOK_MOVES[Indices::ROOK[e_queen_sq][rookIndex(
+        queen_reach = Moves_::ROOK[Indices::ROOK[e_queen_sq][rookIndex(
                 pieces ^ pawns, (Square) e_queen_sq)]].reach;
         pin_ray |= (king_reach & queen_reach);
     }
@@ -1472,7 +1472,7 @@ bool Pos::isDoubleChecked(Computed* moves) {
  * @return Pointer to moves struct.
  */
 MovesStruct* Pos::getRookFamily(Computed* moves, Square square) {
-    return &moves->ROOK_MOVES[Indices::ROOK[square][rookIndex(this->sides[BLACK] | this->sides[WHITE], square)]];
+    return &Moves_::ROOK[Indices::ROOK[square][rookIndex(this->sides[BLACK] | this->sides[WHITE], square)]];
 }
 
 /**
@@ -1483,7 +1483,7 @@ MovesStruct* Pos::getRookFamily(Computed* moves, Square square) {
  * @param square: The square on which the bishop is on.
  */
 MovesStruct* Pos::getBishopFamily(Computed* moves, Square square) {
-    return &moves->BISHOP_MOVES[moves->BISHOP_INDEX[square][bishopIndex(this->sides[BLACK] | this->sides[WHITE], square)]];
+    return &moves->BISHOP_MOVES[Indices::BISHOP[square][bishopIndex(this->sides[BLACK] | this->sides[WHITE], square)]];
 }
 
 /**
@@ -1742,21 +1742,21 @@ void Pos::getEnemyAttacks(Computed* moves, uint64_t* enemy_attacks,
     }
 
     // Bishop attacks.
-    uint64_t king_bishop_rays = moves->BISHOP_MOVES[moves->BISHOP_INDEX[
+    uint64_t king_bishop_rays = moves->BISHOP_MOVES[Indices::BISHOP[
             king_sq][bishopIndex(pieces ^ (1ULL << king_sq), king_sq)]].reach;
     piece = turn ? B_BISHOP : W_BISHOP;
     for (int i = 0; i < this->piece_index[piece]; i++) {
         int square = this->piece_list[piece][i];
-        *enemy_attacks |= moves->BISHOP_MOVES[moves->BISHOP_INDEX[square]
+        *enemy_attacks |= moves->BISHOP_MOVES[Indices::BISHOP[square]
                 [bishopIndex(pieces ^ (1ULL << this->piece_list[turn][0]), 
                 (Square) square)]].reach;
-        *kEnemy_attacks |= moves->BISHOP_MOVES[moves->BISHOP_INDEX[square][
+        *kEnemy_attacks |= moves->BISHOP_MOVES[Indices::BISHOP[square][
                 bishopIndex(masked_king_bb, (Square)square)]].reach;
         
         if (std::abs(square % 8 - king_sq % 8) == std::abs(((square / 8) % 
                 8) - ((king_sq / 8) % 8))) {
             // Attacks.
-            uint64_t attacks = moves->BISHOP_MOVES[moves->BISHOP_INDEX[square][
+            uint64_t attacks = moves->BISHOP_MOVES[Indices::BISHOP[square][
                     bishopIndex(pieces ^ (1ULL << square), (Square) square)]].
                     reach;
             *bishop_pins |= king_bishop_rays & attacks;
@@ -1764,19 +1764,19 @@ void Pos::getEnemyAttacks(Computed* moves, uint64_t* enemy_attacks,
     }
 
     // Rook attacks.
-    uint64_t king_rook_rays = moves->ROOK_MOVES[Indices::ROOK[king_sq][
+    uint64_t king_rook_rays = Moves_::ROOK[Indices::ROOK[king_sq][
             rookIndex(pieces ^ (1ULL << king_sq), king_sq)]].reach;
     piece = turn ? B_ROOK : W_ROOK;
     for (int i = 0; i < this->piece_index[piece]; i++) {
         int square = this->piece_list[piece][i];
-        *enemy_attacks |= moves->ROOK_MOVES[Indices::ROOK[square]
+        *enemy_attacks |= Moves_::ROOK[Indices::ROOK[square]
                 [rookIndex(pieces ^ (1ULL << this->piece_list[turn][0]), 
                 (Square) square)]].reach;
-        *kEnemy_attacks |= moves->ROOK_MOVES[Indices::ROOK[square][
+        *kEnemy_attacks |= Moves_::ROOK[Indices::ROOK[square][
                 rookIndex(masked_king_bb, (Square)square)]].reach;
         if (king_sq / 8 == square / 8 || king_sq % 8 == square % 8) {
             // Attacks.
-            uint64_t attacks = moves->ROOK_MOVES[Indices::ROOK[square][
+            uint64_t attacks = Moves_::ROOK[Indices::ROOK[square][
                     rookIndex(pieces ^ (1ULL << square), (Square) square)]].
                     reach;
             *rook_pins |= king_rook_rays & attacks;
@@ -1787,21 +1787,21 @@ void Pos::getEnemyAttacks(Computed* moves, uint64_t* enemy_attacks,
     piece = turn ? B_QUEEN : W_QUEEN;
     for (int i = 0; i < this->piece_index[piece]; i++) {
         int square = this->piece_list[piece][i];
-        *enemy_attacks |= moves->BISHOP_MOVES[moves->BISHOP_INDEX[square]
+        *enemy_attacks |= moves->BISHOP_MOVES[Indices::BISHOP[square]
                 [bishopIndex(pieces ^ (1ULL << this->piece_list[turn][0]), 
                 (Square) square)]].reach;
-        *enemy_attacks |= moves->ROOK_MOVES[Indices::ROOK[square]
+        *enemy_attacks |= Moves_::ROOK[Indices::ROOK[square]
                 [rookIndex(pieces ^ (1ULL << this->piece_list[turn][0]), 
                 (Square) square)]].reach;
-        *kEnemy_attacks |= moves->BISHOP_MOVES[moves->BISHOP_INDEX[square][
+        *kEnemy_attacks |= moves->BISHOP_MOVES[Indices::BISHOP[square][
                 bishopIndex(masked_king_bb, (Square)square)]].reach;
-        *kEnemy_attacks |= moves->ROOK_MOVES[Indices::ROOK[square][
+        *kEnemy_attacks |= Moves_::ROOK[Indices::ROOK[square][
                 rookIndex(masked_king_bb, (Square)square)]].reach;
         
         if (std::abs(square % 8 - king_sq % 8) == std::abs(((square / 8) % 
                 8) - ((king_sq / 8) % 8))) {
             // Attacks.
-            uint64_t attacks = moves->BISHOP_MOVES[moves->BISHOP_INDEX[square][
+            uint64_t attacks = moves->BISHOP_MOVES[Indices::BISHOP[square][
                     bishopIndex(pieces ^ (1ULL << square), (Square) square)]].
                     reach;
             *bishop_pins |= king_bishop_rays & attacks;
@@ -1809,7 +1809,7 @@ void Pos::getEnemyAttacks(Computed* moves, uint64_t* enemy_attacks,
 
         if (king_sq / 8 == square / 8 || king_sq % 8 == square % 8) {
             // Attacks.
-            uint64_t attacks = moves->ROOK_MOVES[Indices::ROOK[square][
+            uint64_t attacks = Moves_::ROOK[Indices::ROOK[square][
                     rookIndex(pieces ^ (1ULL << square), (Square) square)]].
                     reach;
             *rook_pins |= king_rook_rays & attacks;
