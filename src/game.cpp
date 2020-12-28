@@ -1809,14 +1809,10 @@ uint64_t getPosHash(Pos* game) {
  * @param game: Pointer to game struct.
  */
 bool Pos::isThreeFoldRep() {
-    std::unordered_map<uint64_t, int> counts;
-    for (int i = this->ply - 1; i > this->ply - 15; i--) {
-        if (i < 0) break;
-        uint64_t hash = this->history[i].hash;
-        // std::cout << counts[hash] << '\n';
-        if (counts.count(hash) >= 3) return true;
+    auto val = this->hashes.find(this->hash);
+    if (val != this->hashes.end() && val->second >= 3) {
+        return true;
     }
-
     return false;
 }
 
@@ -1830,13 +1826,18 @@ bool Pos::isThreeFoldRep() {
  */
 ExitCode Pos::isEOG(int move_index) {
     if (this->isThreeFoldRep()) return THREE_FOLD_REPETITION;
+
     if (this->halfmove == 100) return FIFTY_MOVES_RULE;
+
     if (this->insufficientMaterial()) return INSUFFICIENT_MATERIAL;
+
     if (move_index == 0 && !(this->isChecked())) return STALEMATE;
+
     if (move_index == 0 && this->isChecked()) {
         if (this->turn) return BLACK_WINS;
         return WHITE_WINS;
     }
+
     return NORMAL_PLY;
 }
 
@@ -2098,7 +2099,9 @@ void Pos::handleCastle() {
     this->sides[this->turn] &= ~(1ULL << start);
     this->sides[this->turn] |= 1ULL << end;
     this->pieces[start] = NO_PIECE;
+    this->hash ^= Hashes::PIECES[rook][start];
     this->pieces[end] = rook;
+    this->hash ^= Hashes::PIECES[rook][end];
 
     this->findAndRemovePiece(rook, (Square) start);
     this->addPiece(rook, (Square) end);
@@ -2257,6 +2260,7 @@ void Pos::makePawnMoves(Move move) {
             this->addPiece(knight, (Square) end);
         }
         this->pieces[end] = piece;
+        this->hash ^= Hashes::PIECES[piece][end];
     } else if (move_type == EN_PASSANT) {
         pawn = true;
         this->addPiece(piece, (Square) end);
@@ -2265,12 +2269,14 @@ void Pos::makePawnMoves(Move move) {
         this->pawns &= ~(1ULL << ep);
         this->sides[1 - this->turn] &= ~(1ULL << ep);
         this->pieces[ep] = NO_PIECE;
+        this->hash ^= Hashes::PIECES[piece][ep];
     } else {
         pawn = true;
         this->addPiece(piece, (Square) end);
         int rank_diff = end / 8 - start / 8;
         if (std::abs(rank_diff) != 1) {
             this->en_passant = (Square) (start + 8 * (rank_diff - (rank_diff > 0 ? 1 : -1)));
+            this->hash ^= Hashes::EN_PASSANT[this->en_passant % 8];
         }
     }
 
@@ -2289,6 +2295,7 @@ void Pos::saveHistory(Move move) {
     this->history[this->ply].halfmove = this->halfmove;
     this->history[this->ply].move = move;
     this->history[this->ply].captured = this->pieces[(move >> 6) & 0b111111];
+    this->history[this->ply].hash = this->hash;
     this->ply++;
 }
 
@@ -2587,6 +2594,7 @@ void Pos::undoMove() {
         return;
     }
 
+    this->decrementHash(this->hash);
     int type = this->history[this->ply - 1].move & (0b11 << 12);
     if (type == NORMAL) {
         this->undoNormal();
@@ -2621,18 +2629,60 @@ void Pos::makeMove(Move move) {
     this->last_move_type = (MoveType) move_type;
     this->piece_captured = this->pieces[end];
     this->piece_moved = this->pieces[start];
-    this->en_passant = NONE;
+
+    // Remove en-passant and its hash
+    if (this->en_passant != NONE) {
+        this->hash ^= Hashes::EN_PASSANT[this->en_passant % 8];
+        this->en_passant = NONE;
+    }
+
     this->sides[this->turn] &= ~(1ULL << start);
     this->sides[this->turn] |= 1ULL << end;
     this->sides[1 - this->turn] &= ~(1ULL << end);
     this->pieces[start] = NO_PIECE;
+    this->hash ^= Hashes::PIECES[this->piece_moved][start];
     this->pieces[end] = this->piece_moved;
+    if (this->piece_captured != NO_PIECE) {
+        this->hash ^= Hashes::PIECES[this->piece_captured][end];
+    }
+    this->hash ^= Hashes::PIECES[this->piece_moved][end];
 
     // Change castling privileges.
-    if (start == H8 || end == H8) this->castling &= ~(1 << BKSC);
-    if (start == A8 || end == A8) this->castling &= ~(1 << BQSC);
-    if (start == A1 || end == A1) this->castling &= ~(1 << WQSC);
-    if (start == H1 || end == H1) this->castling &= ~(1 << WKSC);
+        if (start == E1 && 0b11 & this->castling) {
+        this->hash ^= Hashes::CASTLING[this->castling];
+        this->castling &= 0b1100;
+        this->hash ^= Hashes::CASTLING[this->castling];
+    }
+
+    if (start == E8 && (0b11 << 2) & this->castling) {
+        this->hash ^= Hashes::CASTLING[this->castling];
+        this->castling &= 0b0011;
+        this->hash ^= Hashes::CASTLING[this->castling];
+    }
+
+    if ((start == H1 || end == H1) && this->castling & (1 << WKSC)) {
+        this->hash ^= Hashes::CASTLING[this->castling];
+        this->castling &= ~(1 << WKSC);
+        this->hash ^= Hashes::CASTLING[this->castling];
+    }
+
+    if ((start == A1 || end == A1) && this->castling & (1 << WQSC)) {
+        this->hash ^= Hashes::CASTLING[this->castling];
+        this->castling &= ~(1 << WQSC);
+        this->hash ^= Hashes::CASTLING[this->castling];
+    }
+
+    if ((start == H8 || end == H8) && this->castling & (1 << BKSC)) {
+        this->hash ^= Hashes::CASTLING[this->castling];
+        this->castling &= ~(1 << BKSC);
+        this->hash ^= Hashes::CASTLING[this->castling];
+    }
+
+    if ((start == A8 || end == A8) && this->castling & (1 << BQSC)) {
+        this->hash ^= Hashes::CASTLING[this->castling];
+        this->castling &= ~(1 << BQSC);
+        this->hash ^= Hashes::CASTLING[this->castling];
+    }
 
     PieceType moved = this->piece_moved;
     if (moved == W_KING || moved == B_KING) {
@@ -2648,15 +2698,29 @@ void Pos::makeMove(Move move) {
     } else {
         this->makePawnMoves(move);
     }
-    
-    if (this->turn == BLACK) this->fullmove++;
-    if (moved == W_PAWN || moved == B_PAWN || 
-            this->piece_captured != NO_PIECE) {
+
+    this->turn = 1 - this->turn;
+    if (this->turn == BLACK) {
+        this->fullmove++;
+        this->hash ^= Hashes::TURN;
+    }
+    if (moved == W_PAWN || moved == B_PAWN || this->piece_captured != NO_PIECE) {
         this->halfmove = 0;
     } else {
         this->halfmove++;
     }
-    this->turn = 1 - this->turn;
+
+    // Increment position hash counter
+    this->incrementHash(move);
+}
+
+void Pos::incrementHash(Move move) {
+    auto record = this->hashes.find(this->hash);
+    if (record != this->hashes.end()) {
+        this->hashes[this->hash]++;
+    } else {
+        this->hashes.insert(std::pair<Bitboard, int>(this->hash, 1));
+    }
 }
 
 /**

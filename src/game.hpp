@@ -50,6 +50,7 @@ class Pos {
         PieceType piece_captured;
         MoveType last_move_type;
         History history[MAX_MOVES];
+        std::unordered_map<Bitboard, int> hashes;
         Hash hash;
         int ply;
 
@@ -135,6 +136,8 @@ class Pos {
         void saveHistory(Move move);
         void displayAll() const;
         void zero();
+        void incrementHash(Move move);
+        void decrementHash(Hash hash);
 };
 
 namespace Play {
