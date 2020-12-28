@@ -2585,6 +2585,17 @@ void Pos::undoCastling() {
 }
 
 /**
+ * Decrements the position hash counter for undo moves.
+ * @param hash: The hash to decrement.
+ */
+void Pos::decrementHash(const Bitboard hash) {
+    auto it = this->hashes.find(hash);
+    if (it != this->hashes.end()) {
+        this->hashes[hash]--;
+    }
+}
+
+/**
  * Undo moves.
  * @param game: Pointer to game struct.
  */
@@ -2648,7 +2659,7 @@ void Pos::makeMove(Move move) {
     this->hash ^= Hashes::PIECES[this->piece_moved][end];
 
     // Change castling privileges.
-        if (start == E1 && 0b11 & this->castling) {
+    if (start == E1 && 0b11 & this->castling) {
         this->hash ^= Hashes::CASTLING[this->castling];
         this->castling &= 0b1100;
         this->hash ^= Hashes::CASTLING[this->castling];
