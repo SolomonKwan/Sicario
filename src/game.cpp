@@ -254,7 +254,7 @@ bool isDark(int square) {
  * Display all individual game position information.
  * @param game: Pointer to game struct.
  */
-void Pos::displayAll(Pos* game) {
+void Pos::displayAll() const {
     std::cout << "White";
     displayBB(this->sides[WHITE]);
 
@@ -1689,7 +1689,7 @@ MovesStruct* Pos::getBishopFamily(Square square) {
  * @param game: A pointer to the game struct.
  * @param args: The command line arguments.
  */
-void Pos::display() {
+void Pos::display() const {
     bool light_mode = false;
     std::cout << '\n';
     
@@ -1873,7 +1873,7 @@ ExitCode Pos::isEOG(int move_index) {
  * @param pos_moves: Array of vectors pointers of 16 bit unsigned int moves.
  * @return: The number of move sets.
  */
-int Pos::getMoves(std::vector<Move>* pos_moves[MAX_MOVE_SETS]) {
+void Pos::getMoves(int& moves_index, std::vector<Move>* pos_moves[MAX_MOVE_SETS]) {
     // The pinning rays
     uint64_t rook_pins = 0;
     uint64_t bishop_pins = 0;
@@ -1881,7 +1881,7 @@ int Pos::getMoves(std::vector<Move>* pos_moves[MAX_MOVE_SETS]) {
     this->getEnemyAttacks(&rook_pins, &bishop_pins, &kEnemy_attacks);
 
     // Move retrieval for the 3 cases.
-    int moves_index = 0;
+    moves_index = 0;
     if (this->isDoubleChecked()) {
         this->getKingMoves(pos_moves, &moves_index, kEnemy_attacks);
     } else if (this->isChecked()) {
@@ -1889,7 +1889,6 @@ int Pos::getMoves(std::vector<Move>* pos_moves[MAX_MOVE_SETS]) {
     } else {
         this->getNormalMoves(&rook_pins, &bishop_pins, pos_moves, &moves_index, kEnemy_attacks);
     }
-    return moves_index;
 }
 
 /**
@@ -2865,11 +2864,11 @@ void Pos::checkCastlingEnPassantMoves(uint start, uint end, Move* move) {
  * @param moves_index: Int pointer to number of vectors in pos_moves.
  * @return: The chosen move.
  */
-Move Pos::chooseMove(Player white, Player black, std::vector<Move>* pos_moves[MAX_MOVE_SETS], int* moves_index) {
+Move Pos::chooseMove(std::vector<Move>* pos_moves[MAX_MOVE_SETS], int* moves_index) {
     Move move = NORMAL | pKNIGHT;
-    
+
     // Recieve and print move.
-    if ((this->turn && white == HUMAN) || (!this->turn && black == HUMAN)) {
+    if ((this->turn && this->white == HUMAN) || (!this->turn && this->black == HUMAN)) {
         std::cout << "Enter move: ";
 
         while (true) {
@@ -2894,7 +2893,8 @@ Move Pos::chooseMove(Player white, Player black, std::vector<Move>* pos_moves[MA
          
     } else {
         std::vector<Move>* pos_moves[MAX_MOVE_SETS];
-        int moves_index = this->getMoves(pos_moves);
+        int moves_index;
+        this->getMoves(moves_index, pos_moves);
         double value = this->turn ? -1000000 : 1000000;
         std::cout << "Thinking..." << std::flush;
         for (int i = 0; i < moves_index; i++) {
@@ -2927,19 +2927,19 @@ Move Pos::chooseMove(Player white, Player black, std::vector<Move>* pos_moves[MA
  */
 void Pos::run() {
     ExitCode code = NORMAL_PLY;
-
     std::vector<Move>* pos_moves[MAX_MOVE_SETS];
-    int moves_index = this->getMoves(pos_moves);
+    int moves_index;
+    this->getMoves(moves_index, pos_moves);
     
     while (!code) {
         this->display();
 
         code = this->isEOG(moves_index);
         if (code) break;
-        Move move = this->chooseMove(HUMAN, HUMAN, pos_moves, &moves_index);
+        Move move = this->chooseMove(pos_moves, &moves_index);
         this->makeMove(move);
 
-        moves_index = this->getMoves(pos_moves);
+        this->getMoves(moves_index, pos_moves);
     }
 
     this->showEOG(code);
@@ -3006,7 +3006,8 @@ void printPerft(bool print, Move move, uint64_t* current_nodes) {
 uint64_t Pos::perft(int depth, bool print) {
     uint64_t nodes = 0;
     std::vector<Move>* pos_moves[MAX_MOVE_SETS];
-    int moves_index = this->getMoves(pos_moves);
+    int moves_index;
+    this->getMoves(moves_index, pos_moves);
 
     for (int i = 0; i < moves_index; i++) {
         std::vector<Move>* move_set = pos_moves[i];
@@ -3070,6 +3071,19 @@ std::string concatFEN(std::vector<std::string> strings) {
 }
 
 /**
+ * Sets the position of the pos object.
+ */
+void setFen(std::vector<std::string> commands, Pos& pos) {
+    if (commands[2] == "kiwipete") {
+        pos.parseFen("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1");
+    } else if (commands[2] == "new") {
+        pos.parseFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+    } else {
+        pos.parseFen(concatFEN(commands));
+    }
+}
+
+/**
  * Loop for user input tasks.
  * @param input: The initial user input.
  */
@@ -3079,7 +3093,8 @@ void runNormal(std::string input) {
         std::vector<std::string> commands = split(input, " ");
         if (commands[0] == "play") handleGame(pos);
         if (commands[0] == "perft") runPerft(std::stoi(commands[1]), pos);
-        if (commands[0] == "set" && commands[1] == "fen") pos.parseFen(concatFEN(commands));
+        if (commands[0] == "set" && commands[1] == "fen") setFen(commands, pos);
+        if (commands[0] == "display") pos.display();
         if (commands[0] == "exit" || commands[0] == "quit" || commands[0] == "q") break;
         std::getline(std::cin, input);
     }

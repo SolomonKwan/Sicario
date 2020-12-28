@@ -13,14 +13,10 @@ typedef uint64_t Hash;
 class Pos {
     public:
         Pos(std::string fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
-
-        // Miscellaneous
         void run();
-        void display();
-        void displayAll(Pos* game);
-        ExitCode parseFen(std::string fen);
         uint64_t perft(int depth, bool print = false);
-        void zero();
+        ExitCode parseFen(std::string fen);
+        void display() const;
 
     private:
         // Non-position information
@@ -53,6 +49,9 @@ class Pos {
         History history[MAX_MOVES];
         Hash hash;
         int ply;
+
+        // Miscellaneous info
+        Player white = HUMAN, black = HUMAN;
 
         // AI?
         double alphaBeta(int depth, double alpha, double beta, bool max);
@@ -97,7 +96,7 @@ class Pos {
         void undoEnPassant();
 
         // Move generation
-        int getMoves(std::vector<Move>* pos_moves[MAX_MOVE_SETS]);
+        void getMoves(int& moves_index, std::vector<Move>* pos_moves[MAX_MOVE_SETS]);
         void getEnemyAttacks(uint64_t* rook_pins, uint64_t* bishop_pins, uint64_t* kEnemy_attacks);
         MovesStruct* getRookFamily(Square square);
         MovesStruct* getBishopFamily(Square square);
@@ -123,7 +122,7 @@ class Pos {
         void getCheckedEp(uint64_t* rook_pins, uint64_t* bishop_pins, uint64_t checkers, std::vector<Move>* pos_moves[MAX_MOVE_SETS], int* moves_index);
 
         // Move reading and parsing
-        Move chooseMove(Player white, Player black, std::vector<Move>* pos_moves[MAX_MOVE_SETS], int* moves_index);
+        Move chooseMove(std::vector<Move>* pos_moves[MAX_MOVE_SETS], int* moves_index);
         void getSquares(std::string move_string, Move* move, uint* start, uint* end);
 
         // Miscellaneous
@@ -131,6 +130,8 @@ class Pos {
         void showEOG(ExitCode code);
         std::string getFEN();
         void saveHistory(Move move);
+        void displayAll() const;
+        void zero();
 };
 
 namespace Play {
