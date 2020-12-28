@@ -28,7 +28,10 @@ class Pos {
         // Bitboards
         uint64_t sides[2];
         uint64_t kings, queens, rooks, bishops, knights, pawns;
-        Bitboard enemy_attacks = 0;
+        Bitboard enemy_attacks;
+        Bitboard rook_pins;
+        Bitboard bishop_pins;
+        Bitboard kEnemy_attacks;
 
         // Piece positions
         int piece_index[12];
@@ -97,29 +100,29 @@ class Pos {
 
         // Move generation
         void getMoves(int& moves_index, std::vector<Move>* pos_moves[MAX_MOVE_SETS]);
-        void getEnemyAttacks(uint64_t* rook_pins, uint64_t* bishop_pins, uint64_t* kEnemy_attacks);
+        void getEnemyAttacks();
         MovesStruct* getRookFamily(Square square);
         MovesStruct* getBishopFamily(Square square);
         uint64_t pawnMoveArgs(Square square);
 
         // Normal move generation
-        void getNormalMoves(uint64_t* rook_pins, uint64_t* bishop_pins, std::vector<Move>* pos_moves[MAX_MOVE_SETS], int* moves_index, uint64_t kEnemy_attacks);
-        void getKingMoves(std::vector<Move>* pos_moves[MAX_MOVE_SETS], int* moves_index, uint64_t kEnemy_attacks);
-        void getQueenMoves(uint64_t rook_pins, uint64_t bishop_pins, std::vector<Move>* pos_moves[MAX_MOVE_SETS], int* moves_index);
-        void getRookMoves(uint64_t rook_pins, uint64_t bishop_pins, std::vector<Move>* pos_moves[MAX_MOVE_SETS], int* moves_index);
-        void getBishopMoves(uint64_t rook_pins, uint64_t bishop_pins, std::vector<Move>* pos_moves[MAX_MOVE_SETS], int* moves_index);
-        void getKnightMoves(uint64_t rook_pins, uint64_t bishop_pins, std::vector<Move>* pos_moves[MAX_MOVE_SETS], int* moves_index);
-        void getPawnMoves(uint64_t rook_pins, uint64_t bishop_pins, std::vector<Move>* pos_moves[MAX_MOVE_SETS], int* moves_index);
-        void getRookPinMoves(int square, std::vector<Move>* pos_moves[MAX_MOVE_SETS], int* moves_index);
-        void getBishopPinMoves (int square, std::vector<Move>* pos_moves[MAX_MOVE_SETS], int* moves_index);
-        void getCastlingMoves(std::vector<Move>* pos_moves[MAX_MOVE_SETS], int* moves_index);
-        void getEpMoves(uint64_t rook_pins, uint64_t bishop_pins, std::vector<Move>* pos_moves[MAX_MOVE_SETS], int* moves_index);
-        void horizontalPinEp(int king, bool turn, int attacker_sq, int captured_pawn, int ep, std::vector<Move>* pos_moves[MAX_MOVE_SETS], int* moves_index);
-        void diagonalPinEp(int king, bool turn, int attacker_sq, int captured_pawn, int ep, std::vector<Move>* pos_moves[MAX_MOVE_SETS], int* moves_index);
+        void getNormalMoves(std::vector<Move>* pos_moves[MAX_MOVE_SETS], int& moves_index);
+        void getKingMoves(std::vector<Move>* pos_moves[MAX_MOVE_SETS], int& moves_index);
+        void getQueenMoves(std::vector<Move>* pos_moves[MAX_MOVE_SETS], int& moves_index);
+        void getRookMoves(std::vector<Move>* pos_moves[MAX_MOVE_SETS], int& moves_index);
+        void getBishopMoves(std::vector<Move>* pos_moves[MAX_MOVE_SETS], int& moves_index);
+        void getKnightMoves(std::vector<Move>* pos_moves[MAX_MOVE_SETS], int& moves_index);
+        void getPawnMoves(std::vector<Move>* pos_moves[MAX_MOVE_SETS], int& moves_index);
+        void getRookPinMoves(int square, std::vector<Move>* pos_moves[MAX_MOVE_SETS], int& moves_index);
+        void getBishopPinMoves (int square, std::vector<Move>* pos_moves[MAX_MOVE_SETS], int& moves_index);
+        void getCastlingMoves(std::vector<Move>* pos_moves[MAX_MOVE_SETS], int& moves_index);
+        void getEpMoves(std::vector<Move>* pos_moves[MAX_MOVE_SETS], int& moves_index);
+        void horizontalPinEp(int king, bool turn, int attacker_sq, int captured_pawn, int ep, std::vector<Move>* pos_moves[MAX_MOVE_SETS], int& moves_index);
+        void diagonalPinEp(int king, bool turn, int attacker_sq, int captured_pawn, int ep, std::vector<Move>* pos_moves[MAX_MOVE_SETS], int& moves_index);
 
         // Check move generation
-        void getCheckedMoves(uint64_t* rook_pins, uint64_t* bishop_pins, std::vector<Move>* pos_moves[MAX_MOVE_SETS], int* moves_index, uint64_t kEnemy_attacks);
-        void getCheckedEp(uint64_t* rook_pins, uint64_t* bishop_pins, uint64_t checkers, std::vector<Move>* pos_moves[MAX_MOVE_SETS], int* moves_index);
+        void getCheckedMoves(std::vector<Move>* pos_moves[MAX_MOVE_SETS], int& moves_index);
+        void getCheckedEp(uint64_t checkers, std::vector<Move>* pos_moves[MAX_MOVE_SETS], int& moves_index);
 
         // Move reading and parsing
         Move chooseMove(std::vector<Move>* pos_moves[MAX_MOVE_SETS], int* moves_index);
