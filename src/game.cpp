@@ -2898,27 +2898,20 @@ Move Pos::chooseMove(std::vector<Move>* pos_moves[MAX_MOVE_SETS], int* moves_ind
 
 /**
  * Handles a single game.
- * @param game: Pointer to game struct.
- * @param moves: Pointer to precomputed moves struct.
- * @param args: Pointer to command line arguments struct.
  */
 void Pos::run() {
     ExitCode code = NORMAL_PLY;
     std::vector<Move>* pos_moves[MAX_MOVE_SETS];
     int moves_index;
     this->getMoves(moves_index, pos_moves);
-    
-    while (!code) {
+
+    while (!(code = this->isEOG(moves_index))) {
         this->display();
-
-        code = this->isEOG(moves_index);
-        if (code) break;
-        Move move = this->chooseMove(pos_moves, &moves_index);
-        this->makeMove(move);
-
+        this->makeMove(this->chooseMove(pos_moves, &moves_index));
         this->getMoves(moves_index, pos_moves);
     }
 
+    this->display();
     this->showEOG(code);
 }
 
