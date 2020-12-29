@@ -7,10 +7,7 @@ all: main
 $(OBJ)/movegen.o: movegen.cpp movegen.hpp constants.hpp game.hpp
 	$(FLAGS) -c movegen.cpp -o $(OBJ)/movegen.o
 
-$(OBJ)/fen.o: fen.cpp fen.hpp constants.hpp movegen.hpp
-	$(FLAGS) -c fen.cpp -o $(OBJ)/fen.o
-
-$(OBJ)/game.o: game.cpp game.hpp constants.hpp movegen.hpp fen.hpp
+$(OBJ)/game.o: game.cpp game.hpp constants.hpp movegen.hpp
 	$(FLAGS) -c game.cpp -o $(OBJ)/game.o
 
 $(OBJ)/search.o: search.cpp search.hpp constants.hpp evaluate.hpp
@@ -25,8 +22,8 @@ $(OBJ)/uci.o: uci.cpp uci.hpp
 $(OBJ)/main.o: main.cpp movegen.hpp game.hpp search.hpp evaluate.hpp uci.hpp
 	$(FLAGS) -c main.cpp -o $(OBJ)/main.o
 
-main: $(OBJ)/main.o $(OBJ)/fen.o $(OBJ)/game.o $(OBJ)/movegen.o $(OBJ)/search.o $(OBJ)/evaluate.o $(OBJ)/uci.o
-	$(FLAGS) $(OBJ)/main.o $(OBJ)/fen.o $(OBJ)/game.o $(OBJ)/movegen.o $(OBJ)/search.o $(OBJ)/evaluate.o \
+main: $(OBJ)/main.o $(OBJ)/game.o $(OBJ)/movegen.o $(OBJ)/search.o $(OBJ)/evaluate.o $(OBJ)/uci.o
+	$(FLAGS) $(OBJ)/main.o $(OBJ)/game.o $(OBJ)/movegen.o $(OBJ)/search.o $(OBJ)/evaluate.o \
 			$(OBJ)/uci.o -o tardigrade
 
 clean:

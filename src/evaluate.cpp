@@ -97,25 +97,3 @@ namespace EndGame {
         return false;
     }
 }
-
-
-Evaluator::Evaluator(Pos* game) {
-    this->game = game;
-}
-
-int Evaluator::evaluate(Pos* game) {
-    return material();
-}
-
-/**
- * Computes the raw materials evaluation of the board and returns it.
- */
-double Evaluator::material() {
-    double value = 0;
-    // for (int i = 0; i < 12; i++) {
-    //     for (int j = 0; j < game->piece_index[i]; j++) {
-    //         value += material_value[i];
-    //     }
-    // }
-    return value;
-}

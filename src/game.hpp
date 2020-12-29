@@ -57,10 +57,6 @@ class Pos {
         // Miscellaneous info
         Player white = HUMAN, black = HUMAN;
 
-        // AI?
-        double alphaBeta(int depth, double alpha, double beta, bool max);
-        double evaluate();
-
         // EOG checks
         ExitCode isEOG(int move_index);
         bool insufficientMaterial();

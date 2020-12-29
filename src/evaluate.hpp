@@ -26,19 +26,4 @@ namespace EndGame {
     extern const bool is_phase(Pos* game);
 }
 
-class Evaluator {
-    public:
-        Evaluator(Pos* game);
-    
-    private:
-        Pos* game;
-        double material_value[12] = {
-            0, 0, 9, 5, 3.25, 3, 1, -9, -5, -3.25, -3, -1
-        };
-
-    public:
-        int evaluate(Pos* game);
-        double material();
-};
-
 #endif
