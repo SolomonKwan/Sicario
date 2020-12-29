@@ -4,6 +4,8 @@
 #include "uci.hpp"
 #include "game.hpp"
 
+#include "evaluate.hpp"
+
 namespace Run {
     #define VERSION "(Alpha v1.0.0)"
     #define AUTHOR "S. Kwan"
@@ -44,27 +46,6 @@ namespace Run {
         }
     }
 }
-
-class MoveList {
-    public:
-        MoveList() {}
-
-        Move& operator++() {
-
-        }
-
-        Move* begin() {
-            return &(*this->vecs[0])[0];
-        }
-
-        Move* end() {
-            return &(*this->vecs[this->vec_cnt - 1])[this->vecs[this->vec_cnt - 1]->size()];
-        }
-
-    private:
-        std::vector<Move>* vecs[3];
-        int vec_cnt;
-};
 
 int main(int argc, char *argv[]) {
     Run::init();
