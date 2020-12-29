@@ -2,7 +2,12 @@
 FLAGS = g++ -std=c++17 -g -pedantic -Wall
 OBJ = ../obj
 
-all: main
+all: directories sicario
+
+directories: obj
+
+obj:
+	mkdir $(OBJ)
 
 $(OBJ)/movegen.o: movegen.cpp movegen.hpp constants.hpp game.hpp
 	$(FLAGS) -c movegen.cpp -o $(OBJ)/movegen.o
@@ -22,9 +27,8 @@ $(OBJ)/uci.o: uci.cpp uci.hpp
 $(OBJ)/main.o: main.cpp movegen.hpp game.hpp search.hpp evaluate.hpp uci.hpp
 	$(FLAGS) -c main.cpp -o $(OBJ)/main.o
 
-main: $(OBJ)/main.o $(OBJ)/game.o $(OBJ)/movegen.o $(OBJ)/search.o $(OBJ)/evaluate.o $(OBJ)/uci.o
-	$(FLAGS) $(OBJ)/main.o $(OBJ)/game.o $(OBJ)/movegen.o $(OBJ)/search.o $(OBJ)/evaluate.o \
-			$(OBJ)/uci.o -o sicario
+sicario: $(OBJ)/main.o $(OBJ)/game.o $(OBJ)/movegen.o $(OBJ)/search.o $(OBJ)/evaluate.o $(OBJ)/uci.o
+	$(FLAGS) $(OBJ)/main.o $(OBJ)/game.o $(OBJ)/movegen.o $(OBJ)/search.o $(OBJ)/evaluate.o $(OBJ)/uci.o -o sicario
 
 clean:
-	rm $(OBJ)/*.o sicario
+	rm -rf $(OBJ) sicario
