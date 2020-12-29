@@ -2964,28 +2964,28 @@ Move Pos::chooseMove(std::vector<Move>* pos_moves[MAX_MOVE_SETS], int* moves_ind
         }
          
     } else {
-        std::vector<Move>* pos_moves[MAX_MOVE_SETS];
-        int moves_index;
-        this->getMoves(moves_index, pos_moves);
-        double value = this->turn ? -1000000 : 1000000;
-        std::cout << "Thinking..." << std::flush;
-        for (int i = 0; i < moves_index; i++) {
-            std::vector<Move>* move_set = pos_moves[i];
-            for (Move move_candidate : *move_set) {
-                this->makeMove(move_candidate);
-                double pos_value = this->alphaBeta(4, -100000, 100000, this->turn);
-                if (pos_value > value && !this->turn) {
-                    move = move_candidate;
-                    value = pos_value;
-                } else if (pos_value < value && this->turn) {
-                    move = move_candidate;
-                    value = pos_value;
-                }
-                this->undoMove();
-            }
-        }
-        std::cout << "\rComputer move: ";
-        printMove(move, true);
+        // std::vector<Move>* pos_moves[MAX_MOVE_SETS];
+        // int moves_index;
+        // this->getMoves(moves_index, pos_moves);
+        // double value = this->turn ? -1000000 : 1000000;
+        // std::cout << "Thinking..." << std::flush;
+        // for (int i = 0; i < moves_index; i++) {
+        //     std::vector<Move>* move_set = pos_moves[i];
+        //     for (Move move_candidate : *move_set) {
+        //         this->makeMove(move_candidate);
+        //         double pos_value = this->alphaBeta(4, -100000, 100000, this->turn);
+        //         if (pos_value > value && !this->turn) {
+        //             move = move_candidate;
+        //             value = pos_value;
+        //         } else if (pos_value < value && this->turn) {
+        //             move = move_candidate;
+        //             value = pos_value;
+        //         }
+        //         this->undoMove();
+        //     }
+        // }
+        // std::cout << "\rComputer move: ";
+        // printMove(move, true);
     }
     
     return move;

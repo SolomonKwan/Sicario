@@ -24,7 +24,7 @@ $(OBJ)/main.o: main.cpp movegen.hpp game.hpp search.hpp evaluate.hpp uci.hpp
 
 main: $(OBJ)/main.o $(OBJ)/game.o $(OBJ)/movegen.o $(OBJ)/search.o $(OBJ)/evaluate.o $(OBJ)/uci.o
 	$(FLAGS) $(OBJ)/main.o $(OBJ)/game.o $(OBJ)/movegen.o $(OBJ)/search.o $(OBJ)/evaluate.o \
-			$(OBJ)/uci.o -o tardigrade
+			$(OBJ)/uci.o -o sicario
 
 clean:
-	rm $(OBJ)/*.o tardigrade
+	rm $(OBJ)/*.o sicario
