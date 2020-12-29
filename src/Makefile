@@ -2,9 +2,9 @@
 FLAGS = g++ -std=c++17 -g -pedantic -Wall
 OBJ = ../obj
 
-all: directories sicario
+all: sicario
 
-directories: obj
+dir: obj
 
 obj:
 	mkdir $(OBJ)
@@ -31,4 +31,4 @@ sicario: $(OBJ)/main.o $(OBJ)/game.o $(OBJ)/movegen.o $(OBJ)/search.o $(OBJ)/eva
 	$(FLAGS) $(OBJ)/main.o $(OBJ)/game.o $(OBJ)/movegen.o $(OBJ)/search.o $(OBJ)/evaluate.o $(OBJ)/uci.o -o sicario
 
 clean:
-	rm -rf $(OBJ) sicario
+	rm $(OBJ)/*.o sicario
