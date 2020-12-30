@@ -309,9 +309,15 @@ void Pos::displayAll() const {
     
     std::cout << "Fullmove: " << this->fullmove << "\n\n";
 
+    std::cout << "piece_cnt: " << this->piece_cnt << '\n';
+    std::cout << "knight_cnt: " << this->knight_cnt << '\n';
+    std::cout << "wdsb_cnt: " << this->wdsb_cnt << '\n';
+    std::cout << "wlsb_cnt: " << this->wlsb_cnt << '\n';
+    std::cout << "bdsb_cnt: " << this->bdsb_cnt << '\n';
+    std::cout << "blsb_cnt: " << this->blsb_cnt << "\n\n";
+
     for (int i = 0; i < 12; i++) {
-        std::cout << piece_type_string[i] << " " << this->piece_index[i] << 
-                " :";
+        std::cout << piece_type_string[i] << " " << this->piece_index[i] << " : ";
         for (int j = 0; j < this->piece_index[i]; j++) {
             std::cout << squareName[this->piece_list[i][j]] << " ";
         }
@@ -320,8 +326,7 @@ void Pos::displayAll() const {
     std::cout << '\n';
 
     for (int i = 0; i < 64; i++) {
-        std::cout << squareName[i] << ":" << piece_type_string[this->pieces[i]] 
-                << " ";
+        std::cout << squareName[i] << ":" << piece_type_string[this->pieces[i]] << " ";
         if (i % 8 == 7) std::cout << '\n';
     }
 }
@@ -1687,7 +1692,7 @@ MovesStruct* Pos::getBishopFamily(Square square) {
  * @param args: The command line arguments.
  */
 void Pos::display() const {
-    bool light_mode = false;
+    bool light_mode = true;
     std::cout << '\n';
     
     // Print the pieces
@@ -2949,7 +2954,8 @@ Move Pos::chooseMove(std::vector<Move>* pos_moves[MAX_MOVE_SETS], int* moves_ind
             std::cin >> move_string;
 
             if (move_string == "kill") exit(-1);
-            if (move_string == "fen") this->getFEN();
+            if (move_string == "fen") std::cout << this->getFEN() << '\n';
+            if (move_string == "displayall") this->displayAll();
             if (move_string == "undo") return 0;
 
             uint start, end;
@@ -3159,7 +3165,8 @@ void runNormal(std::string input) {
         if (commands[0] == "play") handleGame(pos);
         if (commands[0] == "perft") runPerft(std::stoi(commands[1]), pos);
         if (commands[0] == "set" && commands[1] == "fen") setFen(commands, pos);
-        if (commands[0] == "display") pos.display();
+        if (commands[0] == "display" && commands.size() == 1) pos.display();
+        if (commands[0] == "display" && commands[1] == "all") pos.displayAll();
         if (commands[0] == "exit" || commands[0] == "quit" || commands[0] == "q") break;
         std::getline(std::cin, input);
     }

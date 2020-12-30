@@ -17,6 +17,11 @@ class Pos {
         uint64_t perft(int depth, bool print = false);
         ExitCode parseFen(std::string fen);
         void display() const;
+        void displayAll() const;
+
+        // Static position evaluation
+        bool isEndGame() const;
+        float psqt() const;
 
     private:
         // Non-position information
@@ -26,8 +31,8 @@ class Pos {
         int halfmove, fullmove;
 
         // Bitboards
-        uint64_t sides[2];
-        uint64_t kings, queens, rooks, bishops, knights, pawns;
+        Bitboard sides[2];
+        Bitboard kings, queens, rooks, bishops, knights, pawns;
         Bitboard enemy_attacks;
         Bitboard rook_pins;
         Bitboard bishop_pins;
@@ -67,11 +72,11 @@ class Pos {
         bool validMove(Move move, std::vector<Move>* pos_moves[MAX_MOVE_SETS], int* moves_index);
         bool isChecked();
         bool isDoubleChecked();
-        uint64_t getBishopCheckRays(Square square, uint64_t* checkers_only);
-        uint64_t getRookCheckRays(Square square, uint64_t* checkers);
-        uint64_t getPawnCheckers(Square square, uint64_t* checkers_only);
-        uint64_t getKnightCheckers(Square square, uint64_t* checkers_only);
-        const int rookBlockIndex(uint64_t pos, Square square);
+        Bitboard getBishopCheckRays(Square square, Bitboard* checkers_only);
+        Bitboard getRookCheckRays(Square square, Bitboard* checkers);
+        Bitboard getPawnCheckers(Square square, Bitboard* checkers_only);
+        Bitboard getKnightCheckers(Square square, Bitboard* checkers_only);
+        const int rookBlockIndex(Bitboard pos, Square square);
 
         // Position updates
         void findAndRemovePiece(PieceType piece, Square square);
@@ -130,7 +135,6 @@ class Pos {
         void showEOG(ExitCode code);
         std::string getFEN();
         void saveHistory(Move move);
-        void displayAll() const;
         void zero();
         void incrementHash(Move move);
         void decrementHash(Hash hash);

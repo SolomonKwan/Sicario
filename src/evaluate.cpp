@@ -1,6 +1,7 @@
 
 #include "constants.hpp"
 #include "evaluate.hpp"
+#include "game.hpp"
 
 namespace PSQT {
     const float PAWN[64] = {
@@ -88,4 +89,85 @@ namespace PSQT {
  */
 Square mirrored(Square square) {
     return (Square) (square ^ 56);
+}
+
+Evaluator::Evaluator(const Pos& pos) : pos(pos) {}
+
+bool isEndGameWithQueen(int rook, int bishop, int knight) {
+    if (rook == 0 && bishop + knight <= 1) return true;
+    return false;
+}
+
+bool Pos::isEndGame() const {
+    if (this->piece_index[W_QUEEN] == 0 && this->piece_index[B_QUEEN] == 0) return true;
+
+    // Every side which has a queen has additionally no other pieces or one minorpiece maximum.
+    if (this->piece_index[W_QUEEN] <= 1 && isEndGameWithQueen(this->piece_index[W_ROOK], this->piece_index[W_BISHOP], 
+            this->piece_index[W_KNIGHT]) && this->piece_index[B_QUEEN] <= 1 && isEndGameWithQueen(
+            this->piece_index[B_ROOK], this->piece_index[B_BISHOP], this->piece_index[B_KNIGHT])) {
+        return true;
+    }
+
+    return false;
+}
+
+float Pos::psqt() const {
+    float value = 0;
+
+    // King value
+    if (this->isEndGame()) {
+        value += PSQT::KING_ENDGAME[this->piece_list[W_KING][0]];
+        value += -1 * PSQT::KING_ENDGAME[mirrored(this->piece_list[B_KING][0])];
+    } else {
+        value += PSQT::KING[this->piece_list[W_KING][0]];
+        value += -1 * PSQT::KING[mirrored(this->piece_list[B_KING][0])];
+    }
+
+    // Queen value
+    for (int i = 0; i < this->piece_index[W_QUEEN]; i++) {
+        value += PSQT::QUEEN[this->piece_list[W_QUEEN][i]];
+    }
+    for (int i = 0; i < this->piece_index[B_QUEEN]; i++) {
+        value += -1 * PSQT::QUEEN[mirrored(this->piece_list[B_QUEEN][i])];
+    }
+
+    // Rook value
+    for (int i = 0; i < this->piece_index[W_ROOK]; i++) {
+        value += PSQT::ROOK[this->piece_list[W_ROOK][i]];
+    }
+    for (int i = 0; i < this->piece_index[B_ROOK]; i++) {
+        value += -1 * PSQT::ROOK[mirrored(this->piece_list[B_ROOK][i])];
+    }
+
+    // Bishop value
+    for (int i = 0; i < this->piece_index[W_BISHOP]; i++) {
+        value += PSQT::BISHOP[this->piece_list[W_BISHOP][i]];
+    }
+    for (int i = 0; i < this->piece_index[B_BISHOP]; i++) {
+        value += -1 * PSQT::BISHOP[mirrored(this->piece_list[B_BISHOP][i])];
+    }
+
+    // Knight value
+    for (int i = 0; i < this->piece_index[W_KNIGHT]; i++) {
+        value += PSQT::KNIGHT[this->piece_list[W_KNIGHT][i]];
+    }
+    for (int i = 0; i < this->piece_index[B_KNIGHT]; i++) {
+        value += -1 * PSQT::KNIGHT[mirrored(this->piece_list[B_KNIGHT][i])];
+    }
+
+    // Pawn value
+    for (int i = 0; i < this->piece_index[W_PAWN]; i++) {
+        value += PSQT::PAWN[this->piece_list[W_PAWN][i]];
+    }
+    for (int i = 0; i < this->piece_index[B_PAWN]; i++) {
+        value += -1 * PSQT::PAWN[mirrored(this->piece_list[B_PAWN][i])];
+    }
+
+    return value;
+}
+
+float Evaluator::evaluate(Pos& pos) {
+    float value = 0;
+    value += this->pos.psqt();
+    return value;
 }
