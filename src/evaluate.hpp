@@ -15,12 +15,30 @@ namespace PSQT {
     extern const float KING_ENDGAME[64];
 }
 
+namespace PieceValue {
+    namespace Opening {
+        const int values[12] = {
+            0, 0, // Kings
+            9100, 4350, 3225, 3100, 600, // Q, R, B, K, P
+            -9100, -4350, -3225, -3100, -600,
+        };
+    }
+
+    namespace EndGame {
+        const int values[12] = {
+            0, 0, // Kings
+            9700, 5475, 3225, 3100, 925, // Q, R, B, K, P
+            -9700, -5475, -3225, -3100, -925,
+        };
+    }
+}
+
 Square mirrored(Square);
 
 class Evaluator {
     public:
         Evaluator(const Pos&);
-        float evaluate(Pos&);
+        float evaluate();
 
     private:
         const Pos& pos;

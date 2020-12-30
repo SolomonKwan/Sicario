@@ -166,8 +166,41 @@ float Pos::psqt() const {
     return value;
 }
 
-float Evaluator::evaluate(Pos& pos) {
+float Pos::material() const {
+    float value = 0;
+
+    if (this->isEndGame()) {
+        value += PieceValue::EndGame::values[W_QUEEN] * this->piece_index[W_QUEEN];
+        value += PieceValue::EndGame::values[W_ROOK] * this->piece_index[W_ROOK];
+        value += PieceValue::EndGame::values[W_BISHOP] * this->piece_index[W_BISHOP];
+        value += PieceValue::EndGame::values[W_KNIGHT] * this->piece_index[W_KNIGHT];
+        value += PieceValue::EndGame::values[W_PAWN] * this->piece_index[W_PAWN];
+
+        value += PieceValue::EndGame::values[B_QUEEN] * this->piece_index[B_QUEEN];
+        value += PieceValue::EndGame::values[B_ROOK] * this->piece_index[B_ROOK];
+        value += PieceValue::EndGame::values[B_BISHOP] * this->piece_index[B_BISHOP];
+        value += PieceValue::EndGame::values[B_KNIGHT] * this->piece_index[B_KNIGHT];
+        value += PieceValue::EndGame::values[B_PAWN] * this->piece_index[B_PAWN];
+    } else {
+        value += PieceValue::Opening::values[W_QUEEN] * this->piece_index[W_QUEEN];
+        value += PieceValue::Opening::values[W_ROOK] * this->piece_index[W_ROOK];
+        value += PieceValue::Opening::values[W_BISHOP] * this->piece_index[W_BISHOP];
+        value += PieceValue::Opening::values[W_KNIGHT] * this->piece_index[W_KNIGHT];
+        value += PieceValue::Opening::values[W_PAWN] * this->piece_index[W_PAWN];
+
+        value += PieceValue::Opening::values[B_QUEEN] * this->piece_index[B_QUEEN];
+        value += PieceValue::Opening::values[B_ROOK] * this->piece_index[B_ROOK];
+        value += PieceValue::Opening::values[B_BISHOP] * this->piece_index[B_BISHOP];
+        value += PieceValue::Opening::values[B_KNIGHT] * this->piece_index[B_KNIGHT];
+        value += PieceValue::Opening::values[B_PAWN] * this->piece_index[B_PAWN];
+    }
+
+    return value;
+}
+
+float Evaluator::evaluate() {
     float value = 0;
     value += this->pos.psqt();
+    value += this->pos.material();
     return value;
 }

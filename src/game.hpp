@@ -22,6 +22,10 @@ class Pos {
         // Static position evaluation
         bool isEndGame() const;
         float psqt() const;
+        float material() const;
+
+        // Tree search
+        Move alphaBeta();
 
     private:
         // Non-position information
