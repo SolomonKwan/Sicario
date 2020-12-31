@@ -24,5 +24,6 @@ the move precomputation (at the price of clarity, maintenance, my time and menta
 <strong>www.chessprogramming.org</strong> - For being my primary source of information and knowledge.</br>
 <strong>Stockfish</strong> - For inspiration and guidance.</br>
 <strong>Bluefeversoft</strong> - For your YouTube tutorials and explanations for concepts I found difficult to grasp.</br>
+There are likely others that I have missed.</br>
 </br>
 And to the one who (to quote Kodaline's <em>All I Want</em>) - <em>"...brought out the best in me, a part of me I'd never seen..."</em>
