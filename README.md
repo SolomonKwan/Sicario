@@ -10,10 +10,12 @@ the move precomputation (at the price of clarity, maintenance, my time and menta
 
 ---
 <ul>
-    <li>In some terminal fonts, the name and logo does not render correctly</li>
-    <li>Need to try detect the terminal type and font type ideally</li>
+    <li>In some terminal fonts, the name and logo does not render correctly.</li>
+    <li>Need to try detect the terminal type and font type ideally.</li>
+    <li>Credit the ascii art.</li>
+    <li>Pass the move arrays as references. In general, remove pointers where possible and replace with references</li>
+    <li>Flush output where necessary.</li>
 </ul>
-</br>
 </br>
 <H2>Acknowledgements</H2>
 
