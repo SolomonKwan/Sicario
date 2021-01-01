@@ -18,6 +18,7 @@ class Pos {
         ExitCode parseFen(std::string fen);
         void display() const;
         void displayAll() const;
+        void setPlayer(int, std::string);
 
         // Static position evaluation
         bool isEndGame() const;
@@ -25,7 +26,7 @@ class Pos {
         float material() const;
 
         // Tree search
-        Move alphaBeta();
+        float alphaBeta(int depth, double alpha, double beta, bool max);
 
     private:
         // Non-position information

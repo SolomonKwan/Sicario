@@ -6,6 +6,7 @@
 #include "game.hpp"
 #include "search.hpp"
 #include "movegen.hpp"
+#include "evaluate.hpp"
 
 namespace Moves {
     std::vector<MovesStruct> ROOK = computeRookMoves();
@@ -2970,31 +2971,78 @@ Move Pos::chooseMove(std::vector<Move>* pos_moves[MAX_MOVE_SETS], int* moves_ind
         }
          
     } else {
-        // std::vector<Move>* pos_moves[MAX_MOVE_SETS];
-        // int moves_index;
-        // this->getMoves(moves_index, pos_moves);
-        // double value = this->turn ? -1000000 : 1000000;
-        // std::cout << "Thinking..." << std::flush;
-        // for (int i = 0; i < moves_index; i++) {
-        //     std::vector<Move>* move_set = pos_moves[i];
-        //     for (Move move_candidate : *move_set) {
-        //         this->makeMove(move_candidate);
-        //         double pos_value = this->alphaBeta(4, -100000, 100000, this->turn);
-        //         if (pos_value > value && !this->turn) {
-        //             move = move_candidate;
-        //             value = pos_value;
-        //         } else if (pos_value < value && this->turn) {
-        //             move = move_candidate;
-        //             value = pos_value;
-        //         }
-        //         this->undoMove();
-        //     }
-        // }
-        // std::cout << "\rComputer move: ";
-        // printMove(move, true);
+        double value = this->turn ? -1000000 : 1000000;
+        std::cout << "Thinking..." << std::flush;
+        for (int i = 0; i < *moves_index; i++) {
+            std::vector<Move>* move_set = pos_moves[i];
+            for (Move move_candidate : *move_set) {
+                this->makeMove(move_candidate);
+                double pos_value = this->alphaBeta(3, -100000, 100000, this->turn);
+                if (pos_value > value && !this->turn) {
+                    move = move_candidate;
+                    value = pos_value;
+                } else if (pos_value < value && this->turn) {
+                    move = move_candidate;
+                    value = pos_value;
+                }
+                this->undoMove();
+            }
+        }
+        std::cout << "\rComputer move: ";
+        printMove(move, true);
     }
     
     return move;
+}
+
+float Pos::alphaBeta(int depth, double alpha, double beta, bool max) {
+    // Get moves
+    std::vector<uint16_t>* pos_moves[MAX_MOVE_SETS];
+    int moves_index;
+    this->getMoves(moves_index, pos_moves);
+
+    ExitCode code = isEOG(moves_index);
+    if (code == WHITE_WINS) {
+        return 10000;
+    } else if (code == BLACK_WINS) {
+        return -10000;
+    } else if (code) {
+        return 0;
+    }
+
+    // Perform search
+    if (depth == 0) {
+        Evaluator evaluator(*this);
+        return evaluator.evaluate();
+    }
+
+    if (max) {
+        double value = -100000;
+        for (int i = 0; i < moves_index; i++) {
+            std::vector<uint16_t>* move_set = pos_moves[i];
+            for (uint16_t move : *move_set) {
+                this->makeMove(move);
+                value = std::fmax(value, alphaBeta(depth - 1, alpha, beta, false));
+                this->undoMove();
+                alpha = std::fmax(alpha, value);
+                if (alpha >= beta) break;
+            }
+        }
+        return value;
+    } else {
+        double value = 100000;
+        for (int i = 0; i < moves_index; i++) {
+            std::vector<uint16_t>* move_set = pos_moves[i];
+            for (uint16_t move : *move_set) {
+                this->makeMove(move);
+                value = std::fmin(value, alphaBeta(depth - 1, alpha, beta, true));
+                this->undoMove();
+                beta = std::fmin(beta, value);
+                if (beta <= alpha) break;
+            }
+        }
+        return value;
+    }
 }
 
 /**
@@ -3154,6 +3202,25 @@ void setFen(std::vector<std::string> commands, Pos& pos) {
     }
 }
 
+void Pos::setPlayer(int player, std::string type) {
+    if (type == "human" || type == "h") {
+        if (player == WHITE) this->white = HUMAN;
+        else this->black = HUMAN;
+    } else if (type == "computer" || type == "c") {
+        if (player == WHITE) this->white = COMPUTER;
+        else this->black = COMPUTER;
+    } else {
+        std::cout << "unknown player type\n";
+    }
+}
+
+void setCommand(std::vector<std::string> commands, Pos& pos) {
+    if (commands[1] == "fen") setFen(commands, pos);
+    else if (commands[1] == "white") pos.setPlayer(WHITE, commands[2]);
+    else if (commands[1] == "black") pos.setPlayer(BLACK, commands[2]);
+    else std::cout << "unknown set option\n";
+}
+
 /**
  * Loop for user input tasks.
  * @param input: The initial user input.
@@ -3164,7 +3231,7 @@ void runNormal(std::string input) {
         std::vector<std::string> commands = split(input, " ");
         if (commands[0] == "play") handleGame(pos);
         if (commands[0] == "perft") runPerft(std::stoi(commands[1]), pos);
-        if (commands[0] == "set" && commands[1] == "fen") setFen(commands, pos);
+        if (commands[0] == "set") setCommand(commands, pos);
         if (commands[0] == "display" && commands.size() == 1) pos.display();
         if (commands[0] == "display" && commands[1] == "all") pos.displayAll();
         if (commands[0] == "exit" || commands[0] == "quit" || commands[0] == "q") break;
