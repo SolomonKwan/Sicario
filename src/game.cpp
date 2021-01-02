@@ -698,12 +698,12 @@ void Pos::getKingMoves(std::vector<Move>* pos_moves[MAX_MOVE_SETS], int& moves_i
 void Pos::getCheckedMoves(std::vector<Move>* pos_moves[MAX_MOVE_SETS], int& moves_index) {    
     // MIGHT BE ABLE TO RETRIEVE WHEN CALCULATING THE enemy_attacks
     Square king_sq = this->piece_list[this->turn][0];
-    uint64_t checkers_only = 0ULL;
-    uint64_t check_rays_only = 
-            this->getBishopCheckRays(king_sq, &checkers_only) | 
-            this->getRookCheckRays(king_sq, &checkers_only) | 
-            this->getPawnCheckers(king_sq, &checkers_only) | 
-            this->getKnightCheckers(king_sq, &checkers_only);
+    Bitboard checkers_only = 0ULL;
+    Bitboard check_rays_only = 
+            this->getBishopCheckRays(king_sq, checkers_only) | 
+            this->getRookCheckRays(king_sq, checkers_only) | 
+            this->getPawnCheckers(king_sq, checkers_only) | 
+            this->getKnightCheckers(king_sq, checkers_only);
     
     // King checked moves.
     this->getKingMoves(pos_moves, moves_index);
@@ -718,16 +718,14 @@ void Pos::getCheckedMoves(std::vector<Move>* pos_moves[MAX_MOVE_SETS], int& move
         MovesStruct* bishop_move = &Moves::BISHOP[Indices::BISHOP[queen][
                 bishopIndex(this->sides[BLACK] | this->sides[WHITE], 
                         (Square) queen)]];
-        uint64_t bishop_index = bishop_move->reach & (check_rays_only | 
-                checkers_only);
+        Bitboard bishop_index = bishop_move->reach & (check_rays_only | checkers_only);
         std::vector<Move>* move_set = &Moves::Blocks::BISHOP[queen].checked_moves[bishop_index];
         if (move_set->size() != 0) pos_moves[(moves_index)++] = move_set;
 
         MovesStruct* rook_move = &Moves::ROOK[Indices::ROOK[queen][
                 rookIndex(this->sides[BLACK] | this->sides[WHITE], 
                 (Square) queen)]];
-        uint64_t rook_index = rook_move->reach & (check_rays_only | 
-                checkers_only);
+        Bitboard rook_index = rook_move->reach & (check_rays_only | checkers_only);
         move_set = &Moves::Blocks::ROOK[queen].checked_moves[rook_index];
         if (move_set->size() != 0) pos_moves[(moves_index)++] = move_set;
     }
@@ -742,7 +740,7 @@ void Pos::getCheckedMoves(std::vector<Move>* pos_moves[MAX_MOVE_SETS], int& move
         MovesStruct* rook_move = &Moves::ROOK[Indices::ROOK[rook][
                 rookIndex(this->sides[BLACK] | this->sides[WHITE], 
                 (Square) rook)]];
-        uint64_t rook_index = rook_move->reach & (check_rays_only | checkers_only);
+        Bitboard rook_index = rook_move->reach & (check_rays_only | checkers_only);
         std::vector<Move>* move_set = &Moves::Blocks::ROOK[rook].checked_moves[rook_index];
         if (move_set->size() != 0) pos_moves[(moves_index)++] = move_set;
     }
@@ -758,8 +756,7 @@ void Pos::getCheckedMoves(std::vector<Move>* pos_moves[MAX_MOVE_SETS], int& move
         MovesStruct* bishop_move = &Moves::BISHOP[Indices::BISHOP[bishop][
                 bishopIndex(this->sides[BLACK] | this->sides[WHITE], 
                 (Square) bishop)]];
-        uint64_t bishop_index = bishop_move->reach & (check_rays_only | 
-                checkers_only);
+        Bitboard bishop_index = bishop_move->reach & (check_rays_only | checkers_only);
         std::vector<Move>* move_set = &Moves::Blocks::BISHOP[bishop].checked_moves[bishop_index];
         if (move_set->size() != 0) pos_moves[(moves_index)++] = move_set;
     }
@@ -772,8 +769,7 @@ void Pos::getCheckedMoves(std::vector<Move>* pos_moves[MAX_MOVE_SETS], int& move
             continue;
         }
         MovesStruct * knight_move = &Moves::KNIGHT[knight];
-        uint64_t masked_reach = knight_move->reach & (check_rays_only | 
-                checkers_only);
+        Bitboard masked_reach = knight_move->reach & (check_rays_only | checkers_only);
         std::vector<Move>* move_set = &knight_move->move_set[moveSetIndex(
                 masked_reach, knight_move)];
         if (move_set->size() != 0) pos_moves[(moves_index)++] = move_set;
@@ -789,15 +785,14 @@ void Pos::getCheckedMoves(std::vector<Move>* pos_moves[MAX_MOVE_SETS], int& move
         
         MovesStruct* pawn_move = &Moves::PAWN[this->turn][pawn - 8];
         int advance = this->turn ? 8 : -8;
-        uint64_t masked_reach = (pawn_move->reach & checkers_only) | (1ULL << 
-                (pawn + advance));
+        Bitboard masked_reach = (pawn_move->reach & checkers_only) | (1ULL << (pawn + advance));
         std::vector<Move>* move_set = &pawn_move->move_set[moveSetIndex(
                 masked_reach, pawn_move)];
         if (move_set->size() != 0) pos_moves[(moves_index)++] = move_set;
 
         // Pawn single advance to block check.
         if ((1ULL << (pawn + advance)) & check_rays_only) {
-            uint64_t pos = (1ULL << (pawn + advance + advance));
+            Bitboard pos = (1ULL << (pawn + advance + advance));
             MovesStruct* pawn_moves = &Moves::PAWN[this->turn][pawn - 8];
             move_set = &pawn_moves->move_set[
                     moveSetIndex(pos, pawn_moves)];
@@ -829,32 +824,26 @@ void Pos::getCheckedMoves(std::vector<Move>* pos_moves[MAX_MOVE_SETS], int& move
  * @param square: The square of the king in check.
  * @param checkers_only: Pointer to bit board of checkers only.
  */
-uint64_t Pos::getBishopCheckRays(Square square, uint64_t* checkers_only) {
-    uint64_t result = 0;
+Bitboard Pos::getBishopCheckRays(Square square, Bitboard& checkers_only) {
+    Bitboard result = 0;
     bool turn = this->turn;
     Square king_sq = this->piece_list[turn][0];
-    uint64_t king_rays = this->getBishopFamily(king_sq)->reach & 
-            ~this->sides[turn];
-    *checkers_only |= (this->queens | this->bishops) & this->sides[!turn] & 
-            king_rays;
+    Bitboard king_rays = this->getBishopFamily(king_sq)->reach & ~this->sides[turn];
+    checkers_only |= (this->queens | this->bishops) & this->sides[!turn] & king_rays;
     PieceType queen = turn ? B_QUEEN : W_QUEEN;
     PieceType bishop = turn ? B_BISHOP : W_BISHOP;
 
     for (int i = 0; i < this->piece_index[queen]; i++) {
         Square piece = this->piece_list[queen][i];
-        if (std::abs(piece % 8 - king_sq % 8) == std::abs(piece / 8 - king_sq / 
-                8)) {
-            result |= (this->getBishopFamily((Square) piece)->reach & 
-                    ~this->sides[!turn] & king_rays);
+        if (std::abs(piece % 8 - king_sq % 8) == std::abs(piece / 8 - king_sq / 8)) {
+            result |= (this->getBishopFamily((Square) piece)->reach & ~this->sides[!turn] & king_rays);
         }
     }
 
     for (int i = 0; i < this->piece_index[bishop]; i++) {
         Square piece = this->piece_list[bishop][i];
-        if (std::abs(piece % 8 - king_sq % 8) == std::abs(piece / 8 - king_sq / 
-                8)) {
-            result |= (this->getBishopFamily((Square) piece)->reach & 
-                    ~this->sides[!turn] & king_rays);
+        if (std::abs(piece % 8 - king_sq % 8) == std::abs(piece / 8 - king_sq / 8)) {
+            result |= (this->getBishopFamily((Square) piece)->reach & ~this->sides[!turn] & king_rays);
         }
     }
 
@@ -870,27 +859,25 @@ uint64_t Pos::getBishopCheckRays(Square square, uint64_t* checkers_only) {
  * @param checkers: Bitboard of checkers.
  * @return: Check rays of rooks and queens.
  */
-uint64_t Pos::getRookCheckRays(Square square, uint64_t* checkers) {
-    uint64_t result = 0;
+Bitboard Pos::getRookCheckRays(Square square, Bitboard& checkers) {
+    Bitboard result = 0;
     Square king_sq = this->piece_list[this->turn][0];
     uint64_t king_rays = this->getRookFamily(king_sq)->reach & ~this->sides[this->turn];
-    *checkers |= (this->queens | this->rooks) & this->sides[1 - this->turn] & king_rays;
+    checkers |= (this->queens | this->rooks) & this->sides[1 - this->turn] & king_rays;
     PieceType queen = this->turn ? B_QUEEN : W_QUEEN;
     PieceType rook = this->turn ? B_ROOK : W_ROOK;
 
     for (int i = 0; i < this->piece_index[queen]; i++) {
         Square queen_sq = this->piece_list[queen][i];
         if (queen_sq % 8 == king_sq % 8 || queen_sq / 8 == king_sq / 8) {
-            result |= (this->getRookFamily((Square) queen_sq)->reach & 
-                    ~this->sides[1 - this->turn] & king_rays);
+            result |= (this->getRookFamily((Square) queen_sq)->reach & ~this->sides[1 - this->turn] & king_rays);
         }
     }
 
     for (int i = 0; i < this->piece_index[rook]; i++) {
         Square rook_sq = this->piece_list[rook][i];
         if (rook_sq % 8 == king_sq % 8 || rook_sq / 8 == king_sq / 8) {
-            result |= (this->getRookFamily((Square) rook_sq)->reach & 
-                    ~this->sides[1 - this->turn] & king_rays);
+            result |= (this->getRookFamily((Square) rook_sq)->reach & ~this->sides[1 - this->turn] & king_rays);
         }
     }
 
@@ -903,22 +890,18 @@ uint64_t Pos::getRookCheckRays(Square square, uint64_t* checkers) {
  * @param square: The square of the king in check.
  * @param checkers_only: Pointer to bit board of checkers only.
  */
-uint64_t Pos::getPawnCheckers(Square square, uint64_t* checkers_only) {
-    uint64_t enemy_pawns = this->sides[1 - this->turn] & this->pawns;
-    uint64_t result = 0;
+Bitboard Pos::getPawnCheckers(Square square, Bitboard& checkers_only) {
+    Bitboard enemy_pawns = this->sides[1 - this->turn] & this->pawns;
+    Bitboard result = 0;
     int rank_offset = this->turn ? 8 : -8;
     if (square % 8 != 0) {
         int pawn_sq = square + rank_offset - 1;
-        if ((1ULL << pawn_sq) & enemy_pawns) {
-            *checkers_only |= 1ULL << pawn_sq;
-        }
+        if ((1ULL << pawn_sq) & enemy_pawns) checkers_only |= 1ULL << pawn_sq;
     }
 
     if (square % 8 != 7) {
         int pawn_sq = square + rank_offset + 1;
-        if ((1ULL << pawn_sq) & enemy_pawns) {
-            *checkers_only |= 1ULL << pawn_sq;
-        }
+        if ((1ULL << pawn_sq) & enemy_pawns) checkers_only |= 1ULL << pawn_sq;
     }
 
     return result;
@@ -945,17 +928,11 @@ void Pos::getCheckedEp(uint64_t checkers, std::vector<Move>* pos_moves[MAX_MOVE_
             if (((1ULL << ep) & checkers) && (own_pawns & (1ULL << attack_sq)) && !((1ULL << attack_sq) &
                     this->rook_pins) && !((1ULL << attack_sq) & this->bishop_pins)) {
                 if (attack_sq % 8 < ep % 8) {
-                    std::vector<Move>* move_set = &Moves::EN_PASSANT[
-                            attack_sq - 24].move_set[0];
-                    if (move_set->size() != 0) {
-                        pos_moves[(moves_index)++] = move_set;
-                    }
+                    std::vector<Move>* move_set = &Moves::EN_PASSANT[attack_sq - 24].move_set[0];
+                    if (move_set->size() != 0) pos_moves[(moves_index)++] = move_set;
                 } else {
-                    std::vector<Move>* move_set = &Moves::EN_PASSANT[
-                            attack_sq - 24].move_set[1];
-                    if (move_set->size() != 0) {
-                        pos_moves[(moves_index)++] = move_set;
-                    }
+                    std::vector<Move>* move_set = &Moves::EN_PASSANT[attack_sq - 24].move_set[1];
+                    if (move_set->size() != 0) pos_moves[(moves_index)++] = move_set;
                 }
             }
         }
@@ -966,17 +943,11 @@ void Pos::getCheckedEp(uint64_t checkers, std::vector<Move>* pos_moves[MAX_MOVE_
                     (1ULL << attack_sq)) && !((1ULL << attack_sq) & 
                     this->rook_pins) && !((1ULL << attack_sq) & this->bishop_pins)) {
                 if (attack_sq % 8 < ep % 8) {
-                    std::vector<Move>* move_set = &Moves::EN_PASSANT[
-                            attack_sq - 24].move_set[0];
-                    if (move_set->size() != 0) {
-                        pos_moves[(moves_index)++] = move_set;
-                    }
+                    std::vector<Move>* move_set = &Moves::EN_PASSANT[attack_sq - 24].move_set[0];
+                    if (move_set->size() != 0) pos_moves[(moves_index)++] = move_set;
                 } else {
-                    std::vector<Move>* move_set = &Moves::EN_PASSANT[
-                            attack_sq - 24].move_set[1];
-                    if (move_set->size() != 0) {
-                        pos_moves[(moves_index)++] = move_set;
-                    }
+                    std::vector<Move>* move_set = &Moves::EN_PASSANT[attack_sq - 24].move_set[1];
+                    if (move_set->size() != 0) pos_moves[(moves_index)++] = move_set;
                 }
             }
         }
@@ -989,17 +960,11 @@ void Pos::getCheckedEp(uint64_t checkers, std::vector<Move>* pos_moves[MAX_MOVE_
                     attack_sq)) && !((1ULL << attack_sq) & this->rook_pins) && 
                     !((1ULL << attack_sq) & this->bishop_pins)) {
                 if (attack_sq % 8 < ep % 8) {
-                    std::vector<Move>* move_set = &Moves::EN_PASSANT[
-                            attack_sq - 24].move_set[0];
-                    if (move_set->size() != 0) {
-                        pos_moves[(moves_index)++] = move_set;
-                    }
+                    std::vector<Move>* move_set = &Moves::EN_PASSANT[attack_sq - 24].move_set[0];
+                    if (move_set->size() != 0) pos_moves[(moves_index)++] = move_set;
                 } else {
-                    std::vector<Move>* move_set = &Moves::EN_PASSANT[
-                            attack_sq - 24].move_set[1];
-                    if (move_set->size() != 0) {
-                        pos_moves[(moves_index)++] = move_set;
-                    }
+                    std::vector<Move>* move_set = &Moves::EN_PASSANT[attack_sq - 24].move_set[1];
+                    if (move_set->size() != 0) pos_moves[(moves_index)++] = move_set;
                 }
             }
         }
@@ -1011,17 +976,11 @@ void Pos::getCheckedEp(uint64_t checkers, std::vector<Move>* pos_moves[MAX_MOVE_
                     attack_sq)) && !((1ULL << attack_sq) & this->rook_pins) && 
                     !((1ULL << attack_sq) & this->bishop_pins)) {
                 if (attack_sq % 8 < ep % 8) {
-                    std::vector<Move>* move_set = &Moves::EN_PASSANT[
-                            attack_sq - 24].move_set[0];
-                    if (move_set->size() != 0) {
-                        pos_moves[(moves_index)++] = move_set;
-                    }
+                    std::vector<Move>* move_set = &Moves::EN_PASSANT[attack_sq - 24].move_set[0];
+                    if (move_set->size() != 0) pos_moves[(moves_index)++] = move_set;
                 } else {
-                    std::vector<Move>* move_set = &Moves::EN_PASSANT[
-                            attack_sq - 24].move_set[1];
-                    if (move_set->size() != 0) {
-                        pos_moves[(moves_index)++] = move_set;
-                    }
+                    std::vector<Move>* move_set = &Moves::EN_PASSANT[attack_sq - 24].move_set[1];
+                    if (move_set->size() != 0) pos_moves[(moves_index)++] = move_set;
                 }
             }
         }
@@ -1093,15 +1052,13 @@ void Pos::getQueenMoves(std::vector<Move>* pos_moves[MAX_MOVE_SETS], int& moves_
             this->getBishopPinMoves(queen, pos_moves, moves_index);
         } else {
             MovesStruct* rook_like_moves = this->getRookFamily((Square) queen);
-            std::vector<Move>* move_set = &rook_like_moves->move_set[
-                    moveSetIndex(rook_like_moves->reach ^ this->sides[
+            std::vector<Move>* move_set = &rook_like_moves->move_set[moveSetIndex(rook_like_moves->reach ^ this->sides[
                     this->turn], rook_like_moves)];
             if (move_set->size() != 0) pos_moves[(moves_index)++] = move_set;
 
             MovesStruct* bishop_like_moves = this->getBishopFamily((Square) queen);
-            move_set = &bishop_like_moves->move_set[
-                    moveSetIndex(bishop_like_moves->reach ^ this->sides[
-                    this->turn], bishop_like_moves)];
+            move_set = &bishop_like_moves->move_set[moveSetIndex(bishop_like_moves->reach ^ this->sides[this->turn],
+                    bishop_like_moves)];
             if (move_set->size() != 0) pos_moves[(moves_index)++] = move_set;
         }
     }
@@ -1205,9 +1162,8 @@ void Pos::getRookMoves(std::vector<Move>* pos_moves[MAX_MOVE_SETS], int& moves_i
             continue;
         } else {
             MovesStruct* rook_like_moves = this->getRookFamily((Square) rook);
-            std::vector<Move>* move_set = &rook_like_moves->move_set[
-                    moveSetIndex(rook_like_moves->reach ^ this->
-                    sides[this->turn], rook_like_moves)];
+            std::vector<Move>* move_set = &rook_like_moves->move_set[moveSetIndex(rook_like_moves->reach ^
+                    this->sides[this->turn], rook_like_moves)];
             if (move_set->size() != 0) pos_moves[(moves_index)++] = move_set;
         }
     }
@@ -1232,9 +1188,8 @@ void Pos::getBishopMoves(std::vector<Move>* pos_moves[MAX_MOVE_SETS], int& moves
             this->getBishopPinMoves(bishop, pos_moves, moves_index);
         } else {
             MovesStruct* bishop_like_moves = this->getBishopFamily((Square) bishop);
-            std::vector<Move>* move_set = &bishop_like_moves->move_set[
-                    moveSetIndex(bishop_like_moves->reach ^ this->sides[
-                    this->turn], bishop_like_moves)];
+            std::vector<Move>* move_set = &bishop_like_moves->move_set[moveSetIndex(bishop_like_moves->reach ^
+                    this->sides[this->turn], bishop_like_moves)];
             if (move_set->size() != 0) pos_moves[(moves_index)++] = move_set;
         }
     }
@@ -1280,42 +1235,27 @@ void Pos::getPawnMoves(std::vector<Move>* pos_moves[MAX_MOVE_SETS], int& moves_i
         int pawn = this->piece_list[piece][i];
         if (rook_pins & (1ULL << pawn)) { // Pinned
             if (pawn % 8 == king % 8) {
-                MovesStruct* pawn_moves = &Moves::PAWN[this->turn][
-                        pawn - 8];
-                std::vector<Move>* move_set = &pawn_moves->move_set[
-                        moveSetIndex((this->sides[WHITE] | 
+                MovesStruct* pawn_moves = &Moves::PAWN[this->turn][pawn - 8];
+                std::vector<Move>* move_set = &pawn_moves->move_set[moveSetIndex((this->sides[WHITE] |
                         this->sides[BLACK]) & files[pawn % 8], pawn_moves)];
-                if (move_set->size() != 0) {
-                    pos_moves[(moves_index)++] = move_set;
-                }
+                if (move_set->size() != 0) pos_moves[(moves_index)++] = move_set;
             } else continue;
         } else if (bishop_pins & (1ULL << pawn)) { // Pinned
-            int ray = pawn > king ? (pawn % 8 < king % 8 ? 7 : 9) : (pawn % 8 < 
-                    king % 8 ? -9 : -7) ;
-            if ((this->turn == BLACK && ray > 0) || (this->turn == WHITE && 
-                    ray < 0)) {
-                continue;
-            }
+            int ray = pawn > king ? (pawn % 8 < king % 8 ? 7 : 9) : (pawn % 8 < king % 8 ? -9 : -7);
+            if ((this->turn == BLACK && ray > 0) || (this->turn == WHITE && ray < 0)) continue;
             int square = (Square) pawn + ray;
             uint64_t enemies = this->sides[1 - this->turn];
 
             if (enemies & (1ULL << square)) {
                 int advance = this->turn ? 8 : -8;
-                uint64_t pos = (1ULL << (pawn + advance)) | (1ULL << (pawn + 
-                        ray));
-                MovesStruct* pawn_moves = &Moves::PAWN[this->turn][
-                        pawn - 8];
-                std::vector<Move>* move_set = &pawn_moves->move_set[
-                        moveSetIndex(pos, pawn_moves)];
-                if (move_set->size() != 0) {
-                    pos_moves[(moves_index)++] = move_set;
-                }
+                uint64_t pos = (1ULL << (pawn + advance)) | (1ULL << (pawn + ray));
+                MovesStruct* pawn_moves = &Moves::PAWN[this->turn][pawn - 8];
+                std::vector<Move>* move_set = &pawn_moves->move_set[moveSetIndex(pos, pawn_moves)];
+                if (move_set->size() != 0) pos_moves[(moves_index)++] = move_set;
             }
         } else {
-            MovesStruct* pawn_moves = &Moves::PAWN[this->turn][pawn - 
-                    8];
-            std::vector<Move>* move_set = &pawn_moves->move_set[
-                    moveSetIndex(this->pawnMoveArgs((Square) pawn), 
+            MovesStruct* pawn_moves = &Moves::PAWN[this->turn][pawn - 8];
+            std::vector<Move>* move_set = &pawn_moves->move_set[moveSetIndex(this->pawnMoveArgs((Square) pawn),
                     pawn_moves)];
             if (move_set->size() != 0) pos_moves[(moves_index)++] = move_set;
         }
@@ -1345,51 +1285,35 @@ void Pos::getCastlingMoves(std::vector<Move>* pos_moves[MAX_MOVE_SETS], int& mov
     uint64_t sides = this->sides[WHITE] | this->sides[BLACK];
     if (this->turn) {
         if (this->castling & (1 << WKSC)) {
-            if (!((1ULL << F1) & enemy_attacks) && !((1ULL << G1) & 
-                enemy_attacks) && !((1ULL << F1) & sides) && !((1ULL << G1) & 
-                sides)) {
-                std::vector<Move>* move_set = &Moves::CASTLING[WKSC].
-                        move_set[0];
-                if (move_set->size() != 0) {
-                    pos_moves[(moves_index)++] = move_set;
-                }
+            if (!((1ULL << F1) & enemy_attacks) && !((1ULL << G1) & enemy_attacks) && !((1ULL << F1) & sides) &&
+                    !((1ULL << G1) & sides)) {
+                std::vector<Move>* move_set = &Moves::CASTLING[WKSC].move_set[0];
+                if (move_set->size() != 0) pos_moves[(moves_index)++] = move_set;
             }
         }
 
         if (this->castling & (1 << WQSC)) {
             // CmdLineArgs args;
-            if (!((1ULL << D1) & enemy_attacks) && !((1ULL << C1) & 
-                enemy_attacks) && !((1ULL << D1) & sides) && !((1ULL << C1) & 
-                sides) && !((1ULL << B1) & sides)) {
-                std::vector<Move>* move_set = &Moves::CASTLING[WQSC].
-                        move_set[0];
-                if (move_set->size() != 0) {
-                    pos_moves[(moves_index)++] = move_set;
-                }
+            if (!((1ULL << D1) & enemy_attacks) && !((1ULL << C1) & enemy_attacks) && !((1ULL << D1) & sides) &&
+                    !((1ULL << C1) & sides) && !((1ULL << B1) & sides)) {
+                std::vector<Move>* move_set = &Moves::CASTLING[WQSC].move_set[0];
+                if (move_set->size() != 0) pos_moves[(moves_index)++] = move_set;
             }
         }
     } else {
         if (this->castling & (1 << BKSC)) {
-            if (!((1ULL << F8) & enemy_attacks) && !((1ULL << G8) & 
-                enemy_attacks) && !((1ULL << F8) & sides) && !((1ULL << G8) & 
-                sides)) {
-                std::vector<Move>* move_set = &Moves::CASTLING[BKSC].
-                        move_set[0];
-                if (move_set->size() != 0) {
-                    pos_moves[(moves_index)++] = move_set;
-                }
+            if (!((1ULL << F8) & enemy_attacks) && !((1ULL << G8) & enemy_attacks) && !((1ULL << F8) & sides) &&
+                    !((1ULL << G8) & sides)) {
+                std::vector<Move>* move_set = &Moves::CASTLING[BKSC].move_set[0];
+                if (move_set->size() != 0) pos_moves[(moves_index)++] = move_set;
             }
         }
 
         if (this->castling & (1 << BQSC)) {
-            if (!((1ULL << D8) & enemy_attacks) && !((1ULL << C8) & 
-                enemy_attacks) && !((1ULL << D8) & sides) && !((1ULL << C8) & 
-                sides) && !((1ULL << B8) & sides)) {
-                std::vector<Move>* move_set = &Moves::CASTLING[BQSC].
-                        move_set[0];
-                if (move_set->size() != 0) {
-                    pos_moves[(moves_index)++] = move_set;
-                }
+            if (!((1ULL << D8) & enemy_attacks) && !((1ULL << C8) & enemy_attacks) && !((1ULL << D8) & sides) &&
+                    !((1ULL << C8) & sides) && !((1ULL << B8) & sides)) {
+                std::vector<Move>* move_set = &Moves::CASTLING[BQSC].move_set[0];
+                if (move_set->size() != 0) pos_moves[(moves_index)++] = move_set;
             }
         }
     }
@@ -1424,14 +1348,10 @@ void Pos::getEpMoves(std::vector<Move>* pos_moves[MAX_MOVE_SETS], int& moves_ind
                 } else {
                     if (attacker_sq % 8 < ep % 8) {
                         std::vector<Move>* move_set = &Moves::EN_PASSANT[attacker_sq - 24].move_set[0];
-                        if (move_set->size() != 0) {
-                            pos_moves[(moves_index)++] = move_set;
-                        }
+                        if (move_set->size() != 0) pos_moves[(moves_index)++] = move_set;
                     } else {
                         std::vector<Move>* move_set = &Moves::EN_PASSANT[attacker_sq - 24].move_set[1];
-                        if (move_set->size() != 0) {
-                            pos_moves[(moves_index)++] = move_set;
-                        }
+                        if (move_set->size() != 0) pos_moves[(moves_index)++] = move_set;
                     }
                 }
             }
@@ -1450,14 +1370,10 @@ void Pos::getEpMoves(std::vector<Move>* pos_moves[MAX_MOVE_SETS], int& moves_ind
                 } else {
                     if (attacker_sq % 8 < ep % 8) {
                         std::vector<Move>* move_set = &Moves::EN_PASSANT[attacker_sq - 24].move_set[0];
-                        if (move_set->size() != 0) {
-                            pos_moves[(moves_index)++] = move_set;
-                        }
+                        if (move_set->size() != 0) pos_moves[(moves_index)++] = move_set;
                     } else {
                         std::vector<Move>* move_set = &Moves::EN_PASSANT[attacker_sq - 24].move_set[1];
-                        if (move_set->size() != 0) {
-                            pos_moves[(moves_index)++] = move_set;
-                        }
+                        if (move_set->size() != 0) pos_moves[(moves_index)++] = move_set;
                     }
                 }
             }
@@ -1624,9 +1540,9 @@ void Pos::diagonalPinEp(int king, bool turn, int attacker_sq,
  * @param checkers_only: A pointer to a bit board of checkers only.
  * @return: Bitboard of knight checkers.
  */
-uint64_t Pos::getKnightCheckers(Square square, uint64_t* checkers_only) {
-    uint64_t result = 0;
-    *checkers_only |= Moves::KNIGHT[square].reach & this->sides[1 - this->turn] & this->knights;
+Bitboard Pos::getKnightCheckers(Square square, Bitboard& checkers_only) {
+    Bitboard result = 0;
+    checkers_only |= Moves::KNIGHT[square].reach & this->sides[1 - this->turn] & this->knights;
     return result;
 }
 
@@ -1639,10 +1555,10 @@ uint64_t Pos::getKnightCheckers(Square square, uint64_t* checkers_only) {
 bool Pos::isDoubleChecked() {
     bool turn = this->turn;
     Square king = this->piece_list[turn][0];
-    uint64_t rook_attacks = this->getRookFamily(king)->reach;
-    uint64_t bishop_attacks = this->getBishopFamily(king)->reach;
+    Bitboard rook_attacks = this->getRookFamily(king)->reach;
+    Bitboard bishop_attacks = this->getBishopFamily(king)->reach;
 
-    uint64_t attackers = (rook_attacks & this->rooks & this->sides[!turn]) | 
+    Bitboard attackers = (rook_attacks & this->rooks & this->sides[!turn]) | 
             (bishop_attacks & this->bishops & this->sides[!turn]) |
             (rook_attacks & this->queens & this->sides[!turn]) |
             (bishop_attacks & this->queens & this->sides[!turn]);
@@ -1650,7 +1566,7 @@ bool Pos::isDoubleChecked() {
     attackers |= Moves::KNIGHT[king].reach & this->knights & this->
             sides[!turn];
 
-    uint64_t enemy_pawns = this->sides[!turn] & this->pawns;
+    Bitboard enemy_pawns = this->sides[!turn] & this->pawns;
     int rank_offset = turn ? 8 : -8;
     if (king % 8 != 0) {
         int pawn_sq = king + rank_offset - 1;
@@ -1783,53 +1699,6 @@ void Pos::display() const {
 }
 
 /**
- * Computes and returns the hash of the current position.
- * @param game: Pointer to game struct.
- */
-uint64_t getPosHash(Pos* game) {
-    uint64_t hash = 0ULL;
-    // if (game->ply == 0) { // Start of game, loop through all pieces.
-    //     for (int sq = A1; sq <= H8; sq++) {
-    //         if (game->pieces[sq] == W_KING) {
-    //             hash ^= ZOBRIST_WKING[sq];
-    //         } else if (game->pieces[sq] == W_QUEEN) {
-    //             hash ^= ZOBRIST_WQUEEN[sq];
-    //         } else if (game->pieces[sq] == W_ROOK) {
-    //             hash ^= ZOBRIST_WROOK[sq];
-    //         } else if (game->pieces[sq] == W_BISHOP) {
-    //             hash ^= ZOBRIST_WBISHOP[sq];
-    //         } else if (game->pieces[sq] == W_KNIGHT) {
-    //             hash ^= ZOBRIST_WKNIGHT[sq];
-    //         } else if (game->pieces[sq] == W_PAWN) {
-    //             hash ^= ZOBRIST_WPAWN[sq];
-    //         } else if (game->pieces[sq] == B_KING) {
-    //             hash ^= ZOBRIST_BKING[sq];
-    //         } else if (game->pieces[sq] == B_QUEEN) {
-    //             hash ^= ZOBRIST_BQUEEN[sq];
-    //         } else if (game->pieces[sq] == B_ROOK) {
-    //             hash ^= ZOBRIST_BROOK[sq];
-    //         } else if (game->pieces[sq] == B_BISHOP) {
-    //             hash ^= ZOBRIST_BBISHOP[sq];
-    //         } else if (game->pieces[sq] == B_KNIGHT) {
-    //             hash ^= ZOBRIST_BKNIGHT[sq];
-    //         } else if (game->pieces[sq] == B_PAWN) {
-    //             hash ^= ZOBRIST_BPAWN[sq];
-    //         }
-    //     }
-
-    //     hash ^= ZOBRIST_CASTLING[game->castling];
-    //     // if (!game->turn) hash ^= ZOBRIST_BLACK;
-    //     if (game->en_passant != NONE) {
-    //         hash ^= ZOBRIST_EP[game->en_passant % 8];
-    //     }
-    // } else {
-
-    // }
-
-    return hash;
-}
-
-/**
  * Checks if a three fold repetition occured. If so, return true, else false.
  * Also performs the hash updates for the history.
  * @param game: Pointer to game struct.
@@ -1909,9 +1778,8 @@ void Pos::getEnemyAttacks() {
     this->enemy_attacks = 0ULL;
     bool turn = this->turn;
     Square king_sq = this->piece_list[turn][0];
-    uint64_t pieces = this->sides[WHITE] | this->sides[BLACK];
-    uint64_t masked_king_bb = (this->sides[WHITE] | this->sides[BLACK]) ^ 
-            (1ULL << king_sq);
+    Bitboard pieces = this->sides[WHITE] | this->sides[BLACK];
+    Bitboard masked_king_bb = (this->sides[WHITE] | this->sides[BLACK]) ^ (1ULL << king_sq);
 
     // Pawn attacks.
     PieceType piece = turn ? B_PAWN : W_PAWN;
@@ -1928,8 +1796,8 @@ void Pos::getEnemyAttacks() {
     }
 
     // Bishop attacks.
-    uint64_t king_bishop_rays = Moves::BISHOP[Indices::BISHOP[
-            king_sq][bishopIndex(pieces ^ (1ULL << king_sq), king_sq)]].reach;
+    Bitboard king_bishop_rays = Moves::BISHOP[Indices::BISHOP[king_sq][bishopIndex(pieces ^ (1ULL << king_sq),
+            king_sq)]].reach;
     piece = turn ? B_BISHOP : W_BISHOP;
     for (int i = 0; i < this->piece_index[piece]; i++) {
         int square = this->piece_list[piece][i];
@@ -1941,7 +1809,7 @@ void Pos::getEnemyAttacks() {
         if (std::abs(square % 8 - king_sq % 8) == std::abs(((square / 8) % 
                 8) - ((king_sq / 8) % 8))) {
             // Attacks.
-            uint64_t attacks = Moves::BISHOP[Indices::BISHOP[square][
+            Bitboard attacks = Moves::BISHOP[Indices::BISHOP[square][
                     bishopIndex(pieces ^ (1ULL << square), (Square) square)]].
                     reach;
             this->bishop_pins |= king_bishop_rays & attacks;
@@ -1949,7 +1817,7 @@ void Pos::getEnemyAttacks() {
     }
 
     // Rook attacks.
-    uint64_t king_rook_rays = Moves::ROOK[Indices::ROOK[king_sq][
+    Bitboard king_rook_rays = Moves::ROOK[Indices::ROOK[king_sq][
             rookIndex(pieces ^ (1ULL << king_sq), king_sq)]].reach;
     piece = turn ? B_ROOK : W_ROOK;
     for (int i = 0; i < this->piece_index[piece]; i++) {
@@ -1986,7 +1854,7 @@ void Pos::getEnemyAttacks() {
         if (std::abs(square % 8 - king_sq % 8) == std::abs(((square / 8) % 
                 8) - ((king_sq / 8) % 8))) {
             // Attacks.
-            uint64_t attacks = Moves::BISHOP[Indices::BISHOP[square][
+            Bitboard attacks = Moves::BISHOP[Indices::BISHOP[square][
                     bishopIndex(pieces ^ (1ULL << square), (Square) square)]].
                     reach;
             this->bishop_pins |= king_bishop_rays & attacks;
@@ -1994,7 +1862,7 @@ void Pos::getEnemyAttacks() {
 
         if (king_sq / 8 == square / 8 || king_sq % 8 == square % 8) {
             // Attacks.
-            uint64_t attacks = Moves::ROOK[Indices::ROOK[square][
+            Bitboard attacks = Moves::ROOK[Indices::ROOK[square][
                     rookIndex(pieces ^ (1ULL << square), (Square) square)]].
                     reach;
             this->rook_pins |= king_rook_rays & attacks;
@@ -2323,6 +2191,10 @@ void Pos::saveHistory(Move move) {
     this->history[this->ply].captured = this->pieces[(move >> 6) & 0b111111];
     this->history[this->ply].hash = this->hash;
     this->ply++;
+
+    if (this->ply >= MAX_MOVES) {
+        this->history.resize(2 * MAX_MOVES);
+    }
 }
 
 /**
@@ -2414,7 +2286,7 @@ void Pos::undoNormal() {
     }
 
     // Undo fullmove and History struct information
-    if (!turn) this->fullmove--;
+    if (turn) this->fullmove--;
     this->castling = previous_pos.castling;
     this->en_passant = previous_pos.en_passant;
     this->halfmove = previous_pos.halfmove;
@@ -2483,7 +2355,7 @@ void Pos::undoPromotion() {
     this->pieces[start] = pawn;
 
     // Undo fullmove and History struct information
-    if (!turn) this->fullmove--;
+    if (turn) this->fullmove--;
     this->castling = previous_pos.castling;
     this->en_passant = previous_pos.en_passant;
     this->halfmove = previous_pos.halfmove;
@@ -2522,7 +2394,7 @@ void Pos::undoEnPassant() {
     this->pawns |= 1ULL << captured_sq;
 
     // Undo fullmove and History struct information
-    if (!turn) this->fullmove--;
+    if (turn) this->fullmove--;
     this->castling = previous_pos.castling;
     this->en_passant = previous_pos.en_passant;
     this->halfmove = previous_pos.halfmove;
@@ -2591,7 +2463,7 @@ void Pos::undoCastling() {
     this->rooks |= 1ULL << rook_start;
 
     // Undo fullmove and History struct information (some is not necessary i think? Done out of principle)
-    if (!turn) this->fullmove--;
+    if (turn) this->fullmove--;
     this->castling = previous_pos.castling;
     this->en_passant = previous_pos.en_passant;
     this->halfmove = previous_pos.halfmove;
@@ -2788,8 +2660,8 @@ int countMoves(Pos* game, std::vector<Move>* pos_moves[MAX_MOVE_SETS], int* move
  * @param moves_index: Int pointer to number of vectors in pos_moves.
  * @return: True if move is valid, else false.
  */
-bool Pos::validMove(Move move, std::vector<Move>* pos_moves[MAX_MOVE_SETS], int* moves_index) {
-    for (int i = 0; i < *moves_index; i++) {
+bool Pos::validMove(Move move, std::vector<Move>* pos_moves[MAX_MOVE_SETS], int& moves_index) {
+    for (int i = 0; i < moves_index; i++) {
         for (Move move_candidate : *pos_moves[i]) {
             if (move == move_candidate) return true;
         }
@@ -2880,25 +2752,25 @@ std::string Pos::getFEN() {
  * @param start: Pointer to unsigned int for start square.
  * @param end: Pointer to unsigned int for end square.
  */
-void Pos::getSquares(std::string move_string, Move* move, uint* start, uint* end) {
+void Pos::getSquares(std::string move_string, Move& move, uint& start, uint& end) {
     int start_file, start_rank, end_file, end_rank;
     start_file = move_string[0] - 'a';
     start_rank = move_string[1] - '1';
     end_file = move_string[2] - 'a';
     end_rank = move_string[3] - '1';
     if (move_string.length() == 5) {
-        *move |= PROMOTION;
+        move |= PROMOTION;
         if (move_string[4] == 'q') {
-            *move |= pQUEEN;
+            move |= pQUEEN;
         } else if (move_string[4] == 'r') {
-            *move |= pROOK;
+            move |= pROOK;
         } else if (move_string[4] == 'b') {
-            *move |= pBISHOP;
+            move |= pBISHOP;
         }
     }
 
-    *start = 8 * start_rank + start_file;
-    *end = 8 * end_rank + end_file;
+    start = 8 * start_rank + start_file;
+    end = 8 * end_rank + end_file;
 }
 
 /**
@@ -2908,19 +2780,19 @@ void Pos::getSquares(std::string move_string, Move* move, uint* start, uint* end
  * @param end: The end square.
  * @param move: Pointer to the integer representing the move.
  */
-void Pos::checkCastlingEnPassantMoves(uint start, uint end, Move* move) {
+void Pos::checkCastlingEnPassantMoves(uint start, uint end, Move& move) {
     // Check for castling move.
     if (this->turn && this->piece_list[WHITE][0] == E1) {
         if (start == E1 && end == G1 && (this->castling & (1 << WKSC))) {
-            *move |= CASTLING;
+            move |= CASTLING;
         } else if (start == E1 && end == C1 && (this->castling & (1 << WQSC))) {
-            *move |= CASTLING;
+            move |= CASTLING;
         }
     } else if (!this->turn && this->piece_list[BLACK][0] == E8) {
         if (start == E8 && end == G8 && (this->castling & (1 << BKSC))) {
-            *move |= CASTLING;
+            move |= CASTLING;
         } else if (start == E8 && end == C8 && (this->castling & (1 << BQSC))) {
-            *move |= CASTLING;
+            move |= CASTLING;
         }
     }
 
@@ -2928,7 +2800,7 @@ void Pos::checkCastlingEnPassantMoves(uint start, uint end, Move* move) {
     if ((this->turn && start / 8 == 4) || (!this->turn && start / 8 == 3)) {
         PieceType piece = this->pieces[start];
         if ((piece == W_PAWN || piece == B_PAWN) && end == this->en_passant) {
-            *move |= EN_PASSANT;
+            move |= EN_PASSANT;
         }
     }
 }
@@ -2942,11 +2814,12 @@ void Pos::checkCastlingEnPassantMoves(uint start, uint end, Move* move) {
  * @param moves_index: Int pointer to number of vectors in pos_moves.
  * @return: The chosen move.
  */
-Move Pos::chooseMove(std::vector<Move>* pos_moves[MAX_MOVE_SETS], int* moves_index) {
+Move Pos::chooseMove(std::vector<Move>* pos_moves[MAX_MOVE_SETS], int& moves_index) {
     Move move = NORMAL | pKNIGHT;
 
     // Recieve and print move.
     if ((this->turn && this->white == HUMAN) || (!this->turn && this->black == HUMAN)) {
+        std::cout << std::flush;
         std::cout << "Enter move: ";
 
         while (true) {
@@ -2960,8 +2833,8 @@ Move Pos::chooseMove(std::vector<Move>* pos_moves[MAX_MOVE_SETS], int* moves_ind
             if (move_string == "undo") return 0;
 
             uint start, end;
-            this->getSquares(move_string, &move, &start, &end);
-            this->checkCastlingEnPassantMoves(start, end, &move);
+            this->getSquares(move_string, move, start, end);
+            this->checkCastlingEnPassantMoves(start, end, move);
 
             move |= start;
             move |= (end << 6);
@@ -2969,15 +2842,14 @@ Move Pos::chooseMove(std::vector<Move>* pos_moves[MAX_MOVE_SETS], int* moves_ind
                 std::cout << "Invalid move, enter again: ";
             } else break;
         }
-         
     } else {
         double value = this->turn ? -1000000 : 1000000;
         std::cout << "Thinking..." << std::flush;
-        for (int i = 0; i < *moves_index; i++) {
+        for (int i = 0; i < moves_index; i++) {
             std::vector<Move>* move_set = pos_moves[i];
             for (Move move_candidate : *move_set) {
                 this->makeMove(move_candidate);
-                double pos_value = this->alphaBeta(3, -100000, 100000, this->turn);
+                double pos_value = this->alphaBeta(this->depth, -100000, 100000, this->turn);
                 if (pos_value > value && !this->turn) {
                     move = move_candidate;
                     value = pos_value;
@@ -2991,7 +2863,7 @@ Move Pos::chooseMove(std::vector<Move>* pos_moves[MAX_MOVE_SETS], int* moves_ind
         std::cout << "\rComputer move: ";
         printMove(move, true);
     }
-    
+
     return move;
 }
 
@@ -3056,7 +2928,7 @@ void Pos::run() {
 
     while (!(code = this->isEOG(moves_index))) {
         this->display();
-        this->makeMove(this->chooseMove(pos_moves, &moves_index));
+        this->makeMove(this->chooseMove(pos_moves, moves_index));
         this->getMoves(moves_index, pos_moves);
     }
 
@@ -3173,7 +3045,7 @@ void handleGame(Pos pos) {
 /**
  * Pos class constructor.
  */
-Pos::Pos(std::string fen) {
+Pos::Pos(std::string fen) : history(MAX_MOVES) {
     this->parseFen(fen);
     this->initialiseHash();
 }
@@ -3202,7 +3074,7 @@ void setFen(std::vector<std::string> commands, Pos& pos) {
     }
 }
 
-void Pos::setPlayer(int player, std::string type) {
+void Pos::setPlayer(Player player, std::string type) {
     if (type == "human" || type == "h") {
         if (player == WHITE) this->white = HUMAN;
         else this->black = HUMAN;
@@ -3214,10 +3086,15 @@ void Pos::setPlayer(int player, std::string type) {
     }
 }
 
+void Pos::setDepth(int depth) {
+    this->depth = depth;
+}
+
 void setCommand(std::vector<std::string> commands, Pos& pos) {
     if (commands[1] == "fen") setFen(commands, pos);
     else if (commands[1] == "white") pos.setPlayer(WHITE, commands[2]);
     else if (commands[1] == "black") pos.setPlayer(BLACK, commands[2]);
+    else if (commands[1] == "depth") pos.setDepth(std::stoi(commands[2]));
     else std::cout << "unknown set option\n";
 }
 
@@ -3233,8 +3110,9 @@ void runNormal(std::string input) {
         if (commands[0] == "perft") runPerft(std::stoi(commands[1]), pos);
         if (commands[0] == "set") setCommand(commands, pos);
         if (commands[0] == "display" && commands.size() == 1) pos.display();
-        if (commands[0] == "display" && commands[1] == "all") pos.displayAll();
+        if (commands[0] == "display" && commands.size() != 1 && commands[1] == "all") pos.displayAll();
         if (commands[0] == "exit" || commands[0] == "quit" || commands[0] == "q") break;
+        std::cout << std::flush;
         std::getline(std::cin, input);
     }
 }

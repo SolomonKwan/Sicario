@@ -24,7 +24,7 @@ void displayBB(uint64_t pos) {
         std::cout << line << '\n';
     }
 
-    std::cout << '\n';
+    std::cout << '\n' << std::flush;
 }
 
 /**

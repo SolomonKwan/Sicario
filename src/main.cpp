@@ -38,6 +38,7 @@ namespace Run {
     void init() {
         showLogo();
         showStartUp();
+        std::cout << std::flush;
         std::string input;
         std::getline(std::cin, input);
         if (input == "uci") {

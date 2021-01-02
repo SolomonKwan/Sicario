@@ -9,10 +9,8 @@
 #include <random>
 
 #define UNSET 0xFFFFFFFFFFFFFFFF
-#define BLACK 0
-#define WHITE 1
 #define STANDARD_GAME "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
-#define MAX_MOVES 600
+#define MAX_MOVES 500
 #define MAX_MOVE_SETS 50
 #define MAX_THREADS 4
 
@@ -78,7 +76,7 @@ enum ExitCode {
     INVALID_ARGS
 };
 
-enum Player {
+enum PlayerType {
     HUMAN, COMPUTER
 };
 

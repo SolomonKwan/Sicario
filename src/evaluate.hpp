@@ -17,18 +17,18 @@ namespace PSQT {
 
 namespace PieceValue {
     namespace Opening {
-        const int values[12] = {
+        const float values[12] = {
             0, 0, // Kings
-            9100, 4350, 3225, 3100, 600, // Q, R, B, K, P
-            -9100, -4350, -3225, -3100, -600,
+            91.00, 43.50, 32.25, 31.00, 6.00, // Q, R, B, K, P
+            -91.00, -43.50, -32.25, -31.00, -6.00,
         };
     }
 
     namespace EndGame {
-        const int values[12] = {
+        const float values[12] = {
             0, 0, // Kings
-            9700, 5475, 3225, 3100, 925, // Q, R, B, K, P
-            -9700, -5475, -3225, -3100, -925,
+            97.00, 54.75, 32.25, 31.00, 9.25, // Q, R, B, K, P
+            -97.00, -54.75, -32.25, -31.00, -9.25,
         };
     }
 }

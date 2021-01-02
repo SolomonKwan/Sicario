@@ -18,7 +18,7 @@ class Pos {
         ExitCode parseFen(std::string fen);
         void display() const;
         void displayAll() const;
-        void setPlayer(int, std::string);
+        void setPlayer(Player, std::string);
 
         // Static position evaluation
         bool isEndGame() const;
@@ -27,6 +27,7 @@ class Pos {
 
         // Tree search
         float alphaBeta(int depth, double alpha, double beta, bool max);
+        void setDepth(int depth);
 
     private:
         // Non-position information
@@ -59,13 +60,16 @@ class Pos {
         PieceType piece_moved;
         PieceType piece_captured;
         MoveType last_move_type;
-        History history[MAX_MOVES];
+        std::vector<History> history;
         std::unordered_map<Bitboard, int> hashes;
         Hash hash;
         int ply;
 
         // Miscellaneous info
-        Player white = HUMAN, black = HUMAN;
+        PlayerType white = COMPUTER, black = COMPUTER;
+
+        // Evaluation and search
+        int depth = 3;
 
         // EOG checks
         ExitCode isEOG(int move_index);
@@ -73,14 +77,14 @@ class Pos {
         bool isThreeFoldRep();
 
         // Game logic
-        void checkCastlingEnPassantMoves(uint start, uint end, Move* move);
-        bool validMove(Move move, std::vector<Move>* pos_moves[MAX_MOVE_SETS], int* moves_index);
+        void checkCastlingEnPassantMoves(uint start, uint end, Move& move);
+        bool validMove(Move move, std::vector<Move>* pos_moves[MAX_MOVE_SETS], int& moves_index);
         bool isChecked();
         bool isDoubleChecked();
-        Bitboard getBishopCheckRays(Square square, Bitboard* checkers_only);
-        Bitboard getRookCheckRays(Square square, Bitboard* checkers);
-        Bitboard getPawnCheckers(Square square, Bitboard* checkers_only);
-        Bitboard getKnightCheckers(Square square, Bitboard* checkers_only);
+        Bitboard getBishopCheckRays(Square square, Bitboard& checkers_only);
+        Bitboard getRookCheckRays(Square square, Bitboard& checkers);
+        Bitboard getPawnCheckers(Square square, Bitboard& checkers_only);
+        Bitboard getKnightCheckers(Square square, Bitboard& checkers_only);
         const int rookBlockIndex(Bitboard pos, Square square);
 
         // Position updates
@@ -110,7 +114,7 @@ class Pos {
         void getEnemyAttacks();
         MovesStruct* getRookFamily(Square square);
         MovesStruct* getBishopFamily(Square square);
-        uint64_t pawnMoveArgs(Square square);
+        Bitboard pawnMoveArgs(Square square);
 
         // Normal move generation
         void getNormalMoves(std::vector<Move>* pos_moves[MAX_MOVE_SETS], int& moves_index);
@@ -129,11 +133,11 @@ class Pos {
 
         // Check move generation
         void getCheckedMoves(std::vector<Move>* pos_moves[MAX_MOVE_SETS], int& moves_index);
-        void getCheckedEp(uint64_t checkers, std::vector<Move>* pos_moves[MAX_MOVE_SETS], int& moves_index);
+        void getCheckedEp(Bitboard checkers, std::vector<Move>* pos_moves[MAX_MOVE_SETS], int& moves_index);
 
         // Move reading and parsing
-        Move chooseMove(std::vector<Move>* pos_moves[MAX_MOVE_SETS], int* moves_index);
-        void getSquares(std::string move_string, Move* move, uint* start, uint* end);
+        Move chooseMove(std::vector<Move>* pos_moves[MAX_MOVE_SETS], int& moves_index);
+        void getSquares(std::string move_string, Move& move, uint& start, uint& end);
 
         // Miscellaneous
         void initialiseHash();

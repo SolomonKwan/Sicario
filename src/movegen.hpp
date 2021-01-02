@@ -7,6 +7,10 @@
 typedef uint16_t Move;
 typedef uint64_t Bitboard;
 
+enum Player {
+    BLACK, WHITE
+};
+
 /**
  * A struct holding the move families. 
  * 

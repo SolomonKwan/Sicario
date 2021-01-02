@@ -13,7 +13,7 @@
  * @param communication: The communication message to be sent to UCI GUI.
  */
 void communicate(std::string communication) {
-    std::cout << communication << '\n';
+    std::cout << communication << '\n' << std::flush;
 }
 
 /**

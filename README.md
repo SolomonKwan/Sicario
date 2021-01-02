@@ -6,6 +6,13 @@ works quite well. Plus, the time I absolutely wasted on micro-memory optimizatio
 the move precomputation (at the price of clarity, maintenance, my time and mental sanity), so...
 </br>
 </br>
+<h2>Bugs/Problems</h2>
+<ul>
+    <li>Currently, the history array is initialised to hold 500 entries and is increased to 1000 when needed. It is
+    theoretically possible that the number of moves will exceed even 1000, which would cause a segfault or stack
+    smashing.</li>
+</ul>
+</br>
 <H2>To dos</H2>
 
 ---
@@ -13,13 +20,6 @@ the move precomputation (at the price of clarity, maintenance, my time and menta
     <li>In some terminal fonts, the name and logo does not render correctly.</li>
     <li>Need to try detect the terminal type and font type ideally.</li>
     <li>Credit the ascii art.</li>
-    <li>Pass the move arrays as references. In general, remove pointers where possible and replace with references</li>
-    <li>Flush output where necessary.</li>
-    <li>Change the player types everywhere to use an enum instead of int.</li>
-    <li>C vs C bugs everywhere. Fullmove counter is wrong. Does not detect threefold repetition. Possible segfault
-    issues? (might be related to three-fold repetition issue). Misses mate in 1 (I think this is to do with the piece
-    values being over-inflated).
-    <li>Only add move vector to movelist if it is non-empty.</li>
 </ul>
 </br>
 <H2>Acknowledgements</H2>
