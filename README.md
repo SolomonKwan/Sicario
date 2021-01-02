@@ -22,6 +22,7 @@ the move precomputation (at the price of clarity, maintenance, my time and menta
     <li>Credit the ascii art.</li>
     <li>The PV table may have collisions due to different positions having the same hash. Very unlikely but possible.
     May need some kind of check</li>
+    <li>Need to create some kind of wrapper data structure for the move vectors for easier iteration.</li>
 </ul>
 </br>
 <H2>Acknowledgements</H2>

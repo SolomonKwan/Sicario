@@ -3043,7 +3043,7 @@ void handleGame(Pos pos) {
 /**
  * Pos class constructor.
  */
-Pos::Pos(std::string fen) : history(MAX_MOVES), searcher(DEFAULT_HASH_SIZE) {
+Pos::Pos(std::string fen) : history(MAX_MOVES), searchInfo(DEFAULT_HASH_SIZE) {
     this->parseFen(fen);
     this->initialiseHash();
 }
@@ -3089,7 +3089,7 @@ void Pos::setDepth(int depth) {
 }
 
 void Pos::setHashSize(int size) {
-    this->searcher.setHashSize(size);
+    this->searchInfo.setHashSize(size);
 }
 
 void setCommand(std::vector<std::string> commands, Pos& pos) {

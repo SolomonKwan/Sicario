@@ -3,7 +3,6 @@
 #define EVALUATE_HPP
 
 #include "constants.hpp"
-#include "game.hpp"
 
 namespace PSQT {
     extern const float PAWN[64];
@@ -35,6 +34,7 @@ namespace PieceValue {
 
 Square mirrored(Square);
 
+class Pos;
 class Evaluator {
     public:
         Evaluator(const Pos&);

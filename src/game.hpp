@@ -6,6 +6,8 @@
 #include "movegen.hpp"
 #include "search.hpp"
 
+class SearchInfo;
+
 /**
  * A struct representing the current board position.
  */
@@ -69,7 +71,7 @@ class Pos {
         PlayerType white = COMPUTER, black = COMPUTER;
 
         // Evaluation and search
-        Searcher searcher;
+        SearchInfo searchInfo;
         int depth = 3;
 
         // EOG checks

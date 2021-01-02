@@ -3,6 +3,7 @@
 #define SEARCH_HPP
 
 #include "constants.hpp"
+#include "evaluate.hpp"
 #include "movegen.hpp"
 #include <unordered_map>
 
@@ -11,9 +12,9 @@ struct PV {
     float score;
 };
 
-class Searcher {
+class SearchInfo {
     public:
-        Searcher(int hashSize);
+        SearchInfo(int hashSize);
         void setHashSize(int hashSize);
 
     private:
@@ -22,5 +23,8 @@ class Searcher {
 
         void clearTable();
 };
+
+class Pos;
+Move search(Pos&);
 
 #endif
