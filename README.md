@@ -20,6 +20,8 @@ the move precomputation (at the price of clarity, maintenance, my time and menta
     <li>In some terminal fonts, the name and logo does not render correctly.</li>
     <li>Need to try detect the terminal type and font type ideally.</li>
     <li>Credit the ascii art.</li>
+    <li>The PV table may have collisions due to different positions having the same hash. Very unlikely but possible.
+    May need some kind of check</li>
 </ul>
 </br>
 <H2>Acknowledgements</H2>

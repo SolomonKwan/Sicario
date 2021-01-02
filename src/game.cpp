@@ -1,7 +1,8 @@
 
 #include <iostream>
-#include <unordered_map>
 #include <bitset>
+#include <vector>
+#include <cmath>
 
 #include "game.hpp"
 #include "search.hpp"
@@ -2807,9 +2808,6 @@ void Pos::checkCastlingEnPassantMoves(uint start, uint end, Move& move) {
 
 /**
  * Process human move choice or generate random move choice for computer.
- * @param game: Pointer to game move struct.
- * @param white: The type of player for white.
- * @param black: The type of player for black.
  * @param pos_moves: Array of 16 bit unsigned int move vectors.
  * @param moves_index: Int pointer to number of vectors in pos_moves.
  * @return: The chosen move.
@@ -3045,7 +3043,7 @@ void handleGame(Pos pos) {
 /**
  * Pos class constructor.
  */
-Pos::Pos(std::string fen) : history(MAX_MOVES) {
+Pos::Pos(std::string fen) : history(MAX_MOVES), searcher(DEFAULT_HASH_SIZE) {
     this->parseFen(fen);
     this->initialiseHash();
 }
@@ -3090,11 +3088,16 @@ void Pos::setDepth(int depth) {
     this->depth = depth;
 }
 
+void Pos::setHashSize(int size) {
+    this->searcher.setHashSize(size);
+}
+
 void setCommand(std::vector<std::string> commands, Pos& pos) {
     if (commands[1] == "fen") setFen(commands, pos);
     else if (commands[1] == "white") pos.setPlayer(WHITE, commands[2]);
     else if (commands[1] == "black") pos.setPlayer(BLACK, commands[2]);
     else if (commands[1] == "depth") pos.setDepth(std::stoi(commands[2]));
+    else if (commands[1] == "hash") pos.setHashSize(std::stoi(commands[2]));
     else std::cout << "unknown set option\n";
 }
 

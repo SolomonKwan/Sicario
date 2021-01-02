@@ -6,10 +6,10 @@ all: sicario
 movegen.o: movegen.cpp movegen.hpp constants.hpp game.hpp
 	$(FLAGS) -c movegen.cpp -o movegen.o
 
-game.o: game.cpp game.hpp constants.hpp movegen.hpp
+game.o: game.cpp game.hpp constants.hpp movegen.hpp search.hpp
 	$(FLAGS) -c game.cpp -o game.o
 
-search.o: search.cpp search.hpp constants.hpp
+search.o: search.cpp search.hpp constants.hpp movegen.hpp
 	$(FLAGS) -c search.cpp -o search.o
 
 evaluate.o: evaluate.cpp evaluate.hpp constants.hpp

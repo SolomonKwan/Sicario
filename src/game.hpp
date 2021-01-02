@@ -4,15 +4,14 @@
 
 #include "constants.hpp"
 #include "movegen.hpp"
-
-typedef uint64_t Hash;
+#include "search.hpp"
 
 /**
  * A struct representing the current board position.
  */
 class Pos {
     public:
-        Pos(std::string fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+        Pos(std::string fen = STANDARD_GAME);
         void run();
         uint64_t perft(int depth, bool print = false);
         ExitCode parseFen(std::string fen);
@@ -28,6 +27,7 @@ class Pos {
         // Tree search
         float alphaBeta(int depth, double alpha, double beta, bool max);
         void setDepth(int depth);
+        void setHashSize(int size);
 
     private:
         // Non-position information
@@ -69,6 +69,7 @@ class Pos {
         PlayerType white = COMPUTER, black = COMPUTER;
 
         // Evaluation and search
+        Searcher searcher;
         int depth = 3;
 
         // EOG checks
@@ -128,8 +129,10 @@ class Pos {
         void getBishopPinMoves (int square, std::vector<Move>* pos_moves[MAX_MOVE_SETS], int& moves_index);
         void getCastlingMoves(std::vector<Move>* pos_moves[MAX_MOVE_SETS], int& moves_index);
         void getEpMoves(std::vector<Move>* pos_moves[MAX_MOVE_SETS], int& moves_index);
-        void horizontalPinEp(int king, bool turn, int attacker_sq, int captured_pawn, int ep, std::vector<Move>* pos_moves[MAX_MOVE_SETS], int& moves_index);
-        void diagonalPinEp(int king, bool turn, int attacker_sq, int captured_pawn, int ep, std::vector<Move>* pos_moves[MAX_MOVE_SETS], int& moves_index);
+        void horizontalPinEp(int king, bool turn, int attacker_sq, int captured_pawn, int ep,
+                std::vector<Move>* pos_moves[MAX_MOVE_SETS], int& moves_index);
+        void diagonalPinEp(int king, bool turn, int attacker_sq, int captured_pawn, int ep,
+                std::vector<Move>* pos_moves[MAX_MOVE_SETS], int& moves_index);
 
         // Check move generation
         void getCheckedMoves(std::vector<Move>* pos_moves[MAX_MOVE_SETS], int& moves_index);

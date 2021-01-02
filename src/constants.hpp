@@ -3,16 +3,15 @@
 #define CONSTANTS_HPP
 
 #include <string>
-#include <vector>
-#include <unordered_map>
-#include <array>
-#include <random>
 
 #define UNSET 0xFFFFFFFFFFFFFFFF
 #define STANDARD_GAME "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
 #define MAX_MOVES 500
 #define MAX_MOVE_SETS 50
 #define MAX_THREADS 4
+#define DEFAULT_HASH_SIZE 16
+
+typedef uint64_t Hash;
 
 /**
  * The squares of the board and their associated numbers. NONE (64) used as

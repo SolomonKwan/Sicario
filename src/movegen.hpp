@@ -2,6 +2,8 @@
 #ifndef MOVEGEN_HPP
 #define MOVEGEN_HPP
 
+#include <vector>
+#include <unordered_map>
 #include "constants.hpp"
 
 typedef uint16_t Move;
