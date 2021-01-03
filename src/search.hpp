@@ -24,7 +24,4 @@ class SearchInfo {
         void clearTable();
 };
 
-class Pos;
-Move search(Pos&);
-
 #endif

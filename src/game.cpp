@@ -2261,29 +2261,18 @@ void Pos::undoNormal() {
     } else if (captured == B_PAWN || captured == W_PAWN) {
         this->pawns |= 1ULL << end;
         this->addPiece(captured, (Square) end);
-        this->piece_cnt++;
     } else if (captured == B_KNIGHT || captured == W_KNIGHT) {
         this->knights |= 1ULL << end;
         this->addPiece(captured, (Square) end);
-        this->piece_cnt++;
-        this->knight_cnt++;
     } else if (captured == B_BISHOP || captured == W_BISHOP) {
         this->bishops |= 1ULL << end;
         addPiece(captured, (Square) end);
-        this->piece_cnt++;
-        if (isDark(end)) {
-            turn ? this->bdsb_cnt++ : this->wdsb_cnt++;
-        } else {
-            turn ? this->blsb_cnt++ : this->wlsb_cnt++;
-        }
     } else if (captured == B_ROOK || captured == W_ROOK) {
         this->rooks |= 1ULL << end;
         this->addPiece(captured, (Square) end);
-        this->piece_cnt++;
     } else {
         this->queens |= 1ULL << end;
         this->addPiece(captured, (Square) end);
-        this->piece_cnt++;
     }
 
     // Undo fullmove and History struct information
@@ -2405,7 +2394,6 @@ void Pos::undoEnPassant() {
     this->findAndRemovePiece(moved, (Square) end);
     this->addPiece(moved, (Square) start);
     this->addPiece(captured, (Square) captured_sq);
-    this->piece_cnt++;
 
     // Update pieces array
     this->pieces[start] = moved;
@@ -2841,78 +2829,14 @@ Move Pos::chooseMove(std::vector<Move>* pos_moves[MAX_MOVE_SETS], int& moves_ind
             } else break;
         }
     } else {
-        double value = this->turn ? -1000000 : 1000000;
-        std::cout << "Thinking..." << std::flush;
-        for (int i = 0; i < moves_index; i++) {
-            std::vector<Move>* move_set = pos_moves[i];
-            for (Move move_candidate : *move_set) {
-                this->makeMove(move_candidate);
-                double pos_value = this->alphaBeta(this->depth, -100000, 100000, this->turn);
-                if (pos_value > value && !this->turn) {
-                    move = move_candidate;
-                    value = pos_value;
-                } else if (pos_value < value && this->turn) {
-                    move = move_candidate;
-                    value = pos_value;
-                }
-                this->undoMove();
-            }
-        }
-        std::cout << "\rComputer move: ";
-        printMove(move, true);
+        move = this->search(pos_moves, moves_index);
     }
 
     return move;
 }
 
-float Pos::alphaBeta(int depth, double alpha, double beta, bool max) {
-    // Get moves
-    std::vector<uint16_t>* pos_moves[MAX_MOVE_SETS];
-    int moves_index;
-    this->getMoves(moves_index, pos_moves);
-
-    ExitCode code = isEOG(moves_index);
-    if (code == WHITE_WINS) {
-        return 10000;
-    } else if (code == BLACK_WINS) {
-        return -10000;
-    } else if (code) {
-        return 0;
-    }
-
-    // Perform search
-    if (depth == 0) {
-        Evaluator evaluator(*this);
-        return evaluator.evaluate();
-    }
-
-    if (max) {
-        double value = -100000;
-        for (int i = 0; i < moves_index; i++) {
-            std::vector<uint16_t>* move_set = pos_moves[i];
-            for (uint16_t move : *move_set) {
-                this->makeMove(move);
-                value = std::fmax(value, alphaBeta(depth - 1, alpha, beta, false));
-                this->undoMove();
-                alpha = std::fmax(alpha, value);
-                if (alpha >= beta) break;
-            }
-        }
-        return value;
-    } else {
-        double value = 100000;
-        for (int i = 0; i < moves_index; i++) {
-            std::vector<uint16_t>* move_set = pos_moves[i];
-            for (uint16_t move : *move_set) {
-                this->makeMove(move);
-                value = std::fmin(value, alphaBeta(depth - 1, alpha, beta, true));
-                this->undoMove();
-                beta = std::fmin(beta, value);
-                if (beta <= alpha) break;
-            }
-        }
-        return value;
-    }
+float Pos::quiesence(double alpha, double beta) {
+    return 0;
 }
 
 /**

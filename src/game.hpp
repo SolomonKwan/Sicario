@@ -6,6 +6,8 @@
 #include "movegen.hpp"
 #include "search.hpp"
 
+void printMove(Move move, bool extraInfo);
+
 class SearchInfo;
 
 /**
@@ -27,9 +29,11 @@ class Pos {
         float material() const;
 
         // Tree search
+        Move search(std::vector<Move>* pos_moves[MAX_MOVE_SETS], int& moves_index);
         float alphaBeta(int depth, double alpha, double beta, bool max);
         void setDepth(int depth);
         void setHashSize(int size);
+        float quiesence(double alpha, double beta);
 
     private:
         // Non-position information
