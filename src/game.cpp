@@ -3072,18 +3072,17 @@ void setCommand(std::vector<std::string> commands, Pos& pos) {
  */
 void runNormal(std::string input) {
     Pos pos;
-    handleGame(pos);
-    // while (input != "exit" && input != "quit" && input != "q") {
-    //     std::vector<std::string> commands = split(input, " ");
-    //     if (commands[0] == "play") handleGame(pos);
-    //     if (commands[0] == "perft") runPerft(std::stoi(commands[1]), pos);
-    //     if (commands[0] == "set") setCommand(commands, pos);
-    //     if (commands[0] == "display" && commands.size() == 1) pos.display();
-    //     if (commands[0] == "display" && commands.size() != 1 && commands[1] == "all") pos.displayAll();
-    //     if (commands[0] == "exit" || commands[0] == "quit" || commands[0] == "q") break;
-    //     std::cout << std::flush;
-    //     std::getline(std::cin, input);
-    // }
+    while (input != "exit" && input != "quit" && input != "q") {
+        std::vector<std::string> commands = split(input, " ");
+        if (commands[0] == "play") handleGame(pos);
+        if (commands[0] == "perft") runPerft(std::stoi(commands[1]), pos);
+        if (commands[0] == "set") setCommand(commands, pos);
+        if (commands[0] == "display" && commands.size() == 1) pos.display();
+        if (commands[0] == "display" && commands.size() != 1 && commands[1] == "all") pos.displayAll();
+        if (commands[0] == "exit" || commands[0] == "quit" || commands[0] == "q") break;
+        std::cout << std::flush;
+        std::getline(std::cin, input);
+    }
 }
 
 void Play::init(std::string input) {
