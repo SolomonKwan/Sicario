@@ -2839,23 +2839,109 @@ float Pos::quiesence(double alpha, double beta) {
     return 0;
 }
 
+class MoveList {
+    public:
+        MoveList(Pos& pos) {
+            pos.getMoves(vec_cnt, moves);
+        }
+
+        struct Iterator {
+            Iterator(int vec_cnt, int curr_vec, int curr_move, std::vector<Move>** moves) {
+                this->ptr = &(*moves[curr_vec])[curr_move];
+                this->vec_cnt = vec_cnt;
+                this->curr_vec = curr_vec;
+                this->curr_move = curr_move;
+                this->moves = moves;
+                // this->moves[0] = moves[0];
+                // this->moves[1] = moves[1];
+            }
+
+            Move& operator*() const {
+                return *ptr;
+            }
+
+            Move* operator->() {
+                return ptr;
+            }
+
+            Iterator& operator++() { // Prefix increment
+                if (this->curr_vec == vec_cnt - 1 && this->curr_move == (int) this->moves[this->curr_vec]->size() - 1) {
+                    (this->curr_move)++;
+                    ptr = &(*moves[this->curr_vec])[this->curr_move];
+                } else if (this->curr_move == (int) this->moves[this->curr_vec]->size() - 1) {
+                    this->curr_vec++;
+                    this->curr_move = 0;
+                    ptr = &(*moves[this->curr_vec])[this->curr_move];
+                } else {
+                    this->curr_move++;
+                    ptr = &(*moves[this->curr_vec])[this->curr_move];
+                }
+                return *this;
+            }
+
+            Iterator operator++(int) { // Postfix increment
+                Iterator tmp = *this;
+                ++(*this);
+                return tmp;
+            }
+
+            friend bool operator== (const Iterator& a, const Iterator& b) {
+                return a.ptr == b.ptr;
+            }
+
+            friend bool operator!= (const Iterator& a, const Iterator& b) {
+                return a.ptr != b.ptr;
+            }
+
+            private:
+                Move* ptr;
+                std::vector<Move>** moves;
+                int vec_cnt, curr_vec, curr_move;
+        };
+
+        Iterator begin() {
+            return Iterator(vec_cnt, 0, 0, moves);
+        }
+
+        Iterator end() {
+            return Iterator(vec_cnt, vec_cnt - 1, moves[vec_cnt - 1]->size(), moves);
+        }
+
+        std::vector<Move>* moves[MAX_MOVE_SETS];
+        int vec_cnt;
+};
+
 /**
  * Handles a single game.
  */
 void Pos::run() {
-    ExitCode code = NORMAL_PLY;
-    std::vector<Move>* pos_moves[MAX_MOVE_SETS];
-    int moves_index;
-    this->getMoves(moves_index, pos_moves);
-
-    while (!(code = this->isEOG(moves_index))) {
-        this->display();
-        this->makeMove(this->chooseMove(pos_moves, moves_index));
-        this->getMoves(moves_index, pos_moves);
+    for (Move move : MoveList(*this)) {
+        printMove(move, true);
     }
+    // MoveList moves = MoveList(*this);
+    // MoveList::Iterator curr = moves.begin();
+    // printMove(*curr, true);
+    // ++curr;
+    // printMove(*curr, true);
+    // curr++;
+    // printMove(*curr, true);
+    // curr++;
+    // printMove(*curr, true);
 
-    this->display();
-    this->showEOG(code);
+
+    // ExitCode code = NORMAL_PLY;
+    // std::vector<Move>* pos_moves[MAX_MOVE_SETS];
+    // int moves_index;
+    // this->getMoves(moves_index, pos_moves);
+
+    // while (!(code = this->isEOG(moves_index))) {
+    //     this->display();
+    //     this->makeMove(this->chooseMove(pos_moves, moves_index));
+    //     this->getMoves(moves_index, pos_moves);
+    // }
+
+    // this->display();
+    // this->showEOG(code);
 }
 
 /**
@@ -3031,17 +3117,18 @@ void setCommand(std::vector<std::string> commands, Pos& pos) {
  */
 void runNormal(std::string input) {
     Pos pos;
-    while (input != "exit" && input != "quit" && input != "q") {
-        std::vector<std::string> commands = split(input, " ");
-        if (commands[0] == "play") handleGame(pos);
-        if (commands[0] == "perft") runPerft(std::stoi(commands[1]), pos);
-        if (commands[0] == "set") setCommand(commands, pos);
-        if (commands[0] == "display" && commands.size() == 1) pos.display();
-        if (commands[0] == "display" && commands.size() != 1 && commands[1] == "all") pos.displayAll();
-        if (commands[0] == "exit" || commands[0] == "quit" || commands[0] == "q") break;
-        std::cout << std::flush;
-        std::getline(std::cin, input);
-    }
+    handleGame(pos);
+    // while (input != "exit" && input != "quit" && input != "q") {
+    //     std::vector<std::string> commands = split(input, " ");
+    //     if (commands[0] == "play") handleGame(pos);
+    //     if (commands[0] == "perft") runPerft(std::stoi(commands[1]), pos);
+    //     if (commands[0] == "set") setCommand(commands, pos);
+    //     if (commands[0] == "display" && commands.size() == 1) pos.display();
+    //     if (commands[0] == "display" && commands.size() != 1 && commands[1] == "all") pos.displayAll();
+    //     if (commands[0] == "exit" || commands[0] == "quit" || commands[0] == "q") break;
+    //     std::cout << std::flush;
+    //     std::getline(std::cin, input);
+    // }
 }
 
 void Play::init(std::string input) {

@@ -35,6 +35,9 @@ class Pos {
         void setHashSize(int size);
         float quiesence(double alpha, double beta);
 
+        // Move generation
+        void getMoves(int& moves_index, std::vector<Move>* pos_moves[MAX_MOVE_SETS]);
+
     private:
         // Non-position information
         bool turn;
@@ -117,7 +120,6 @@ class Pos {
         void undoEnPassant();
 
         // Move generation
-        void getMoves(int& moves_index, std::vector<Move>* pos_moves[MAX_MOVE_SETS]);
         void getEnemyAttacks();
         MovesStruct* getRookFamily(Square square);
         MovesStruct* getBishopFamily(Square square);
