@@ -240,6 +240,47 @@ namespace Hashes {
     };
 }
 
+MoveList::MoveList(Pos& pos) {
+    pos.getMoves(vec_cnt, moves);
+}
+
+MoveList::Iterator::Iterator(int vec_cnt, int curr_vec, int curr_move, std::vector<Move>** moves) {
+    this->ptr = &(*moves[curr_vec])[curr_move];
+    this->vec_cnt = vec_cnt;
+    this->curr_vec = curr_vec;
+    this->curr_move = curr_move;
+    this->moves = moves;
+}
+
+Move& MoveList::Iterator::Iterator::operator*() const {
+    return *ptr;
+}
+
+Move* MoveList::Iterator::Iterator::operator->() {
+    return ptr;
+}
+
+MoveList::Iterator& MoveList::Iterator::operator++() { // Prefix increment
+    if (this->curr_vec == vec_cnt - 1 && this->curr_move == (int) this->moves[this->curr_vec]->size() - 1) {
+        (this->curr_move)++;
+        ptr = &(*moves[this->curr_vec])[this->curr_move];
+    } else if (this->curr_move == (int) this->moves[this->curr_vec]->size() - 1) {
+        this->curr_vec++;
+        this->curr_move = 0;
+        ptr = &(*moves[this->curr_vec])[this->curr_move];
+    } else {
+        this->curr_move++;
+        ptr = &(*moves[this->curr_vec])[this->curr_move];
+    }
+    return *this;
+}
+
+MoveList::Iterator MoveList::Iterator::operator++(int) { // Postfix increment
+    Iterator tmp = *this;
+    ++(*this);
+    return tmp;
+}
+
 /**
  * Return true if a square is a dark square, else false.
  * @param square: The square to check.
@@ -2839,109 +2880,23 @@ float Pos::quiesence(double alpha, double beta) {
     return 0;
 }
 
-class MoveList {
-    public:
-        MoveList(Pos& pos) {
-            pos.getMoves(vec_cnt, moves);
-        }
-
-        struct Iterator {
-            Iterator(int vec_cnt, int curr_vec, int curr_move, std::vector<Move>** moves) {
-                this->ptr = &(*moves[curr_vec])[curr_move];
-                this->vec_cnt = vec_cnt;
-                this->curr_vec = curr_vec;
-                this->curr_move = curr_move;
-                this->moves = moves;
-                // this->moves[0] = moves[0];
-                // this->moves[1] = moves[1];
-            }
-
-            Move& operator*() const {
-                return *ptr;
-            }
-
-            Move* operator->() {
-                return ptr;
-            }
-
-            Iterator& operator++() { // Prefix increment
-                if (this->curr_vec == vec_cnt - 1 && this->curr_move == (int) this->moves[this->curr_vec]->size() - 1) {
-                    (this->curr_move)++;
-                    ptr = &(*moves[this->curr_vec])[this->curr_move];
-                } else if (this->curr_move == (int) this->moves[this->curr_vec]->size() - 1) {
-                    this->curr_vec++;
-                    this->curr_move = 0;
-                    ptr = &(*moves[this->curr_vec])[this->curr_move];
-                } else {
-                    this->curr_move++;
-                    ptr = &(*moves[this->curr_vec])[this->curr_move];
-                }
-                return *this;
-            }
-
-            Iterator operator++(int) { // Postfix increment
-                Iterator tmp = *this;
-                ++(*this);
-                return tmp;
-            }
-
-            friend bool operator== (const Iterator& a, const Iterator& b) {
-                return a.ptr == b.ptr;
-            }
-
-            friend bool operator!= (const Iterator& a, const Iterator& b) {
-                return a.ptr != b.ptr;
-            }
-
-            private:
-                Move* ptr;
-                std::vector<Move>** moves;
-                int vec_cnt, curr_vec, curr_move;
-        };
-
-        Iterator begin() {
-            return Iterator(vec_cnt, 0, 0, moves);
-        }
-
-        Iterator end() {
-            return Iterator(vec_cnt, vec_cnt - 1, moves[vec_cnt - 1]->size(), moves);
-        }
-
-        std::vector<Move>* moves[MAX_MOVE_SETS];
-        int vec_cnt;
-};
-
 /**
  * Handles a single game.
  */
 void Pos::run() {
-    for (Move move : MoveList(*this)) {
-        printMove(move, true);
+    ExitCode code = NORMAL_PLY;
+    std::vector<Move>* pos_moves[MAX_MOVE_SETS];
+    int moves_index;
+    this->getMoves(moves_index, pos_moves);
+
+    while (!(code = this->isEOG(moves_index))) {
+        this->display();
+        this->makeMove(this->chooseMove(pos_moves, moves_index));
+        this->getMoves(moves_index, pos_moves);
     }
-    // MoveList moves = MoveList(*this);
-    // MoveList::Iterator curr = moves.begin();
-    // printMove(*curr, true);
-    // ++curr;
-    // printMove(*curr, true);
-    // curr++;
-    // printMove(*curr, true);
-    // curr++;
-    // printMove(*curr, true);
 
-
-    // ExitCode code = NORMAL_PLY;
-    // std::vector<Move>* pos_moves[MAX_MOVE_SETS];
-    // int moves_index;
-    // this->getMoves(moves_index, pos_moves);
-
-    // while (!(code = this->isEOG(moves_index))) {
-    //     this->display();
-    //     this->makeMove(this->chooseMove(pos_moves, moves_index));
-    //     this->getMoves(moves_index, pos_moves);
-    // }
-
-    // this->display();
-    // this->showEOG(code);
+    this->display();
+    this->showEOG(code);
 }
 
 /**
