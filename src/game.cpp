@@ -240,46 +240,46 @@ namespace Hashes {
     };
 }
 
-MoveList::MoveList(Pos& pos) {
-    pos.getMoves(vec_cnt, moves);
-}
+// MoveList::MoveList(Pos& pos) {
+//     pos.getMoves(vec_cnt, moves);
+// }
 
-MoveList::Iterator::Iterator(int vec_cnt, int curr_vec, int curr_move, std::vector<Move>** moves) {
-    this->ptr = &(*moves[curr_vec])[curr_move];
-    this->vec_cnt = vec_cnt;
-    this->curr_vec = curr_vec;
-    this->curr_move = curr_move;
-    this->moves = moves;
-}
+// MoveList::Iterator::Iterator(int vec_cnt, int curr_vec, int curr_move, std::vector<Move>** moves) {
+//     this->ptr = &(*moves[curr_vec])[curr_move];
+//     this->vec_cnt = vec_cnt;
+//     this->curr_vec = curr_vec;
+//     this->curr_move = curr_move;
+//     this->moves = moves;
+// }
 
-Move& MoveList::Iterator::Iterator::operator*() const {
-    return *ptr;
-}
+// Move& MoveList::Iterator::Iterator::operator*() const {
+//     return *ptr;
+// }
 
-Move* MoveList::Iterator::Iterator::operator->() {
-    return ptr;
-}
+// Move* MoveList::Iterator::Iterator::operator->() {
+//     return ptr;
+// }
 
-MoveList::Iterator& MoveList::Iterator::operator++() { // Prefix increment
-    if (this->curr_vec == vec_cnt - 1 && this->curr_move == (int) this->moves[this->curr_vec]->size() - 1) {
-        (this->curr_move)++;
-        ptr = &(*moves[this->curr_vec])[this->curr_move];
-    } else if (this->curr_move == (int) this->moves[this->curr_vec]->size() - 1) {
-        this->curr_vec++;
-        this->curr_move = 0;
-        ptr = &(*moves[this->curr_vec])[this->curr_move];
-    } else {
-        this->curr_move++;
-        ptr = &(*moves[this->curr_vec])[this->curr_move];
-    }
-    return *this;
-}
+// MoveList::Iterator& MoveList::Iterator::operator++() { // Prefix increment
+//     if (this->curr_vec == vec_cnt - 1 && this->curr_move == (int) this->moves[this->curr_vec]->size() - 1) {
+//         (this->curr_move)++;
+//         ptr = &(*moves[this->curr_vec])[this->curr_move];
+//     } else if (this->curr_move == (int) this->moves[this->curr_vec]->size() - 1) {
+//         this->curr_vec++;
+//         this->curr_move = 0;
+//         ptr = &(*moves[this->curr_vec])[this->curr_move];
+//     } else {
+//         this->curr_move++;
+//         ptr = &(*moves[this->curr_vec])[this->curr_move];
+//     }
+//     return *this;
+// }
 
-MoveList::Iterator MoveList::Iterator::operator++(int) { // Postfix increment
-    Iterator tmp = *this;
-    ++(*this);
-    return tmp;
-}
+// MoveList::Iterator MoveList::Iterator::operator++(int) { // Postfix increment
+//     Iterator tmp = *this;
+//     ++(*this);
+//     return tmp;
+// }
 
 /**
  * Return true if a square is a dark square, else false.
@@ -2951,6 +2951,97 @@ void printPerft(bool print, Move move, uint64_t* current_nodes) {
     }
 }
 
+class MoveList {
+    public:
+        MoveList(Pos& pos) {
+            pos.getMoves(moves_index, moves);
+        }
+
+        uint64_t bulkCount() {
+            uint64_t count = 0;
+            for (int i = 0; i < this->moves_index; i++) {
+                count += this->moves[i]->size();
+            }
+            return count;
+        }
+
+        struct Iterator {
+            Iterator(int vec_cnt, int i, int j, std::vector<Move>** moves, Move& endMove) {
+                this->ptr = &(*moves[i])[j];
+                this->vec_cnt = vec_cnt;
+                this->i = i;
+                this->j = j;
+                this->moves = moves;
+
+                // End iterator
+                this->endAddr = &endMove;
+                if (vec_cnt == -1) {
+                    this->ptr = this->endAddr;
+                }
+            }
+
+            Move& operator*() const {
+                return *ptr;
+            }
+
+            Move* operator->() {
+                return ptr;
+            }
+
+            Iterator& operator++() { // Prefix increment
+                if (this->j < (int) this->moves[i]->size() - 1) {
+                    this->j++;
+                } else {
+                    this->i++;
+                    this->j = 0;
+                }
+
+                if (this->i != this->vec_cnt) {
+                    this->ptr = &(*this->moves[this->i])[this->j];
+                } else { // Point to endAddr
+                    this->ptr = this->endAddr;
+                }
+                return *this;
+            }
+
+            Iterator operator++(int) { // Postfix increment
+                Iterator tmp = *this;
+                // std::cout << "here4\n";
+                ++(*this);
+                // std::cout << "here5\n";
+                return tmp;
+            }
+
+            friend bool operator== (const Iterator& a, const Iterator& b) {
+                return a.ptr == b.ptr;
+            }
+
+            friend bool operator!= (const Iterator& a, const Iterator& b) {
+                return a.ptr != b.ptr;
+            }
+
+            private:
+                Move* ptr;
+                std::vector<Move>** moves;
+                int vec_cnt, i, j;
+                Move* endAddr;
+        };
+
+        Iterator begin() {
+            // std::cout << "here3\n";
+            return Iterator(moves_index, 0, 0, moves, endMove);
+        }
+
+        Iterator end() {
+            // std::cout << "here6\n";
+            return Iterator(-1, -1, -1, moves, endMove);
+        }
+
+        std::vector<Move>* moves[MAX_MOVE_SETS];
+        int moves_index;
+        Move endMove;
+};
+
 /**
  * Runs perft testing.
  * @param depth: The depth to search to (not including current depth).
@@ -2959,32 +3050,24 @@ void printPerft(bool print, Move move, uint64_t* current_nodes) {
  */
 uint64_t Pos::perft(int depth, bool print) {
     uint64_t nodes = 0;
-    std::vector<Move>* pos_moves[MAX_MOVE_SETS];
-    int moves_index;
-    this->getMoves(moves_index, pos_moves);
+    if (depth == 1) {
+        return MoveList(*this).bulkCount();
+    }
 
-    for (int i = 0; i < moves_index; i++) {
-        std::vector<Move>* move_set = pos_moves[i];
-        for (Move move : *move_set) {
-            uint64_t current_nodes = 0;
-            if (depth == 1) {
-                nodes += move_set->size();
-                if (print) {
-                    for (Move move2 : *move_set) {
-                        printPromo(move2);
-                    }
-                }
-                break;
-            } else {
-                this->makeMove(move);
-                current_nodes = perft(depth - 1);
-            }
+    // for (int i = 0; i < moves_index; i++) {
+        // for (int j = 0; j < (int) pos_moves[i]->size(); j++) {
+    MoveList moves = MoveList(*this);
+    // std::cout << "here1\n";
+    moves.end();
+    // std::cout << "here2\n";
+    for (auto move = moves.begin(); move != moves.end(); move++) {
+        uint64_t current_nodes = 0;
+        this->makeMove(*move);
+        current_nodes = perft(depth - 1);
+        nodes += current_nodes;
+        this->undoMove();
 
-            printPerft(print, move, &current_nodes);
-
-            nodes += current_nodes;
-            this->undoMove();
-        }
+        if (print) printPerft(print, *move, &current_nodes);
     }
     
     return nodes;

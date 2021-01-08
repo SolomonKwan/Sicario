@@ -160,46 +160,46 @@ class Pos {
         void decrementHash(Hash hash);
 };
 
-class MoveList {
-    public:
-        MoveList(Pos&);
+// class MoveList {
+//     public:
+//         MoveList(Pos&);
 
-        struct Iterator {
-            Iterator(int, int, int, std::vector<Move>**);
+//         struct Iterator {
+//             Iterator(int, int, int, std::vector<Move>**);
 
-            Move& operator*() const;
+//             Move& operator*() const;
 
-            Move* operator->();
+//             Move* operator->();
 
-            Iterator& operator++(); // Prefix increment
+//             Iterator& operator++(); // Prefix increment
 
-            Iterator operator++(int); // Postfix increment
+//             Iterator operator++(int); // Postfix increment
 
-            friend bool operator== (const Iterator& a, const Iterator& b) {
-                return a.ptr == b.ptr;
-            }
+//             friend bool operator== (const Iterator& a, const Iterator& b) {
+//                 return a.ptr == b.ptr;
+//             }
 
-            friend bool operator!= (const Iterator& a, const Iterator& b) {
-                return a.ptr != b.ptr;
-            }
+//             friend bool operator!= (const Iterator& a, const Iterator& b) {
+//                 return a.ptr != b.ptr;
+//             }
 
-            private:
-                Move* ptr;
-                std::vector<Move>** moves;
-                int vec_cnt, curr_vec, curr_move;
-        };
+//             private:
+//                 Move* ptr;
+//                 std::vector<Move>** moves;
+//                 int vec_cnt, curr_vec, curr_move;
+//         };
 
-        Iterator begin() {
-            return Iterator(vec_cnt, 0, 0, moves);
-        }
+//         Iterator begin() {
+//             return Iterator(vec_cnt, 0, 0, moves);
+//         }
 
-        Iterator end() {
-            return Iterator(vec_cnt, vec_cnt - 1, moves[vec_cnt - 1]->size(), moves);
-        }
+//         Iterator end() {
+//             return Iterator(vec_cnt, vec_cnt - 1, moves[vec_cnt - 1]->size(), moves);
+//         }
 
-        std::vector<Move>* moves[MAX_MOVE_SETS];
-        int vec_cnt;
-};
+//         std::vector<Move>* moves[MAX_MOVE_SETS];
+//         int vec_cnt;
+// };
 
 namespace Play {
     void init(std::string input);
