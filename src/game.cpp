@@ -2144,12 +2144,11 @@ void Pos::makeKnightMoves(Move move) {
 void printMove(Move move, bool extraInfo) {
     if (extraInfo) {
         std::cout << squareName[move & 0b111111] << squareName[(move >> 6) & 0b111111] << " " <<
-                moveName[(move >> 12) & 0b11] << " " << promoName[(move >> 14) & 0b11] << '\n';
-    } else if ((move >> 12) & 0b11) {
-        std::cout << squareName[move & 0b111111] << squareName[(move >> 6) &0b111111] <<
-                promoName[(move >> 14) & 0b11] << '\n';
+                moveName[(move >> 12) & 0b11] << " " << promoName[(move >> 14) & 0b11];
+    } else if ((move & (0b11 << 12)) == PROMOTION) {
+        std::cout << squareName[move & 0b111111] << squareName[(move >> 6) &0b111111] << promoName[(move >> 14) & 0b11];
     } else {
-        std::cout << squareName[move & 0b111111] << squareName[(move >> 6) & 0b111111] << '\n';
+        std::cout << squareName[move & 0b111111] << squareName[(move >> 6) & 0b111111];
     }
 }
 
@@ -2922,125 +2921,74 @@ void printPromo(Move move) {
     }
 }
 
-/**
- * Prints the perft move divide.
- * @param print: Boolean to indicate whether or not to print.
- * @param move: Move to print for.
- * @param current_nodes: Number of leaf nodes from playing move.
- */
-void printPerft(bool print, Move move, uint64_t* current_nodes) {
-    if (print) {
-        if ((move & (0b11 << 12)) == PROMOTION) {
-            std::cout << squareName[move & 0b111111] << squareName[(move >> 6) & 0b111111];
-            if ((move & (0b11 << 14)) == pKNIGHT) {
-                std::cout << "n: " << *current_nodes << '\n';
-            } else if ((move & (0b11 << 14)) == pBISHOP) {
-                std::cout << "b: " << *current_nodes << '\n';
-            } else if ((move & (0b11 << 14)) == pROOK) {
-                std::cout << "r: " << *current_nodes << '\n';
-            } else {
-                std::cout << "q: " << *current_nodes << '\n';
-            }
-        } else if ((move & (0b11 << 12)) == EN_PASSANT) {
-            std::cout << squareName[move & 0b111111] << squareName[(move >> 6) & 0b111111] << ": " << *current_nodes <<
-                    '\n';
-        } else {
-            std::cout << squareName[move & 0b111111] << squareName[(move >> 6) & 0b111111] << ": " << *current_nodes <<
-                    '\n';
-        }
-    }
+MoveList::MoveList(Pos& pos) {
+    pos.getMoves(moves_index, moves);
 }
 
-class MoveList {
-    public:
-        MoveList(Pos& pos) {
-            pos.getMoves(moves_index, moves);
-        }
+uint64_t MoveList::bulkCount() {
+    uint64_t count = 0;
+    for (int i = 0; i < this->moves_index; i++) {
+        count += this->moves[i]->size();
+    }
+    return count;
+}
 
-        uint64_t bulkCount() {
-            uint64_t count = 0;
-            for (int i = 0; i < this->moves_index; i++) {
-                count += this->moves[i]->size();
-            }
-            return count;
-        }
+MoveList::Iterator::Iterator(int vec_cnt, int i, int j, std::vector<Move>** moves, Move& endMove) {
+    // End iterator
+    this->endAddr = &endMove;
+    if (vec_cnt <= 0) {
+        this->ptr = this->endAddr;
+        return;
+    }
 
-        struct Iterator {
-            Iterator(int vec_cnt, int i, int j, std::vector<Move>** moves, Move& endMove) {
-                // End iterator
-                this->endAddr = &endMove;
-                if (vec_cnt <= 0) {
-                    this->ptr = this->endAddr;
-                    return;
-                }
+    this->ptr = &(*moves[i])[j];
+    this->vec_cnt = vec_cnt;
+    this->i = i;
+    this->j = j;
+    this->moves = moves;
+}
 
-                this->ptr = &(*moves[i])[j];
-                this->vec_cnt = vec_cnt;
-                this->i = i;
-                this->j = j;
-                this->moves = moves;
-            }
+Move& MoveList::Iterator::operator*() const {
+    return *ptr;
+}
 
-            Move& operator*() const {
-                return *ptr;
-            }
+Move* MoveList::Iterator::operator->() {
+    return ptr;
+}
 
-            Move* operator->() {
-                return ptr;
-            }
+MoveList::Iterator& MoveList::Iterator::operator++() { // Prefix increment
+    this->j++;
+    if (this->j >= (int) this->moves[i]->size()) {
+        this->i++;
+        this->j = 0;
+    }
 
-            Iterator& operator++() { // Prefix increment
-                this->j++;
-                if (this->j >= (int) this->moves[i]->size()) {
-                    this->i++;
-                    this->j = 0;
-                }
+    if (this->i != this->vec_cnt) {
+        this->ptr = &(*this->moves[this->i])[this->j];
+    } else { // Point to end of iterator
+        this->ptr = this->endAddr;
+    }
+    return *this;
+}
 
-                if (this->i != this->vec_cnt) {
-                    this->ptr = &(*this->moves[this->i])[this->j];
-                } else { // Point to endAddr
-                    this->ptr = this->endAddr;
-                }
-                return *this;
-            }
+MoveList::Iterator MoveList::Iterator::operator++(int) { // Postfix increment
+    Iterator tmp = *this;
+    ++(*this);
+    return tmp;
+}
 
-            Iterator operator++(int) { // Postfix increment
-                Iterator tmp = *this;
-                // std::cout << "here4\n";
-                ++(*this);
-                // std::cout << "here5\n";
-                return tmp;
-            }
+MoveList::Iterator MoveList::begin() {
+    return MoveList::Iterator(moves_index, 0, 0, moves, endMove);
+}
 
-            friend bool operator== (const Iterator& a, const Iterator& b) {
-                return a.ptr == b.ptr;
-            }
+MoveList::Iterator MoveList::end() {
+    return MoveList::Iterator(-1, -1, -1, moves, endMove);
+}
 
-            friend bool operator!= (const Iterator& a, const Iterator& b) {
-                return a.ptr != b.ptr;
-            }
-
-            private:
-                Move* ptr;
-                std::vector<Move>** moves;
-                int vec_cnt, i, j;
-                Move* endAddr;
-        };
-
-        Iterator begin() {
-            // std::cout << "here3\n";
-            return Iterator(moves_index, 0, 0, moves, endMove);
-        }
-
-        Iterator end() {
-            // std::cout << "here6\n";
-            return Iterator(-1, -1, -1, moves, endMove);
-        }
-
-        std::vector<Move>* moves[MAX_MOVE_SETS];
-        int moves_index;
-        Move endMove;
-};
+void printPerft(Move move, uint64_t nodes) {
+    printMove(move, false);
+    std::cout << ": " << nodes << '\n';
+}
 
 /**
  * Runs perft testing.
@@ -3054,22 +3002,14 @@ uint64_t Pos::perft(int depth, bool print) {
         return MoveList(*this).bulkCount();
     }
 
-    // for (int i = 0; i < moves_index; i++) {
-        // for (int j = 0; j < (int) pos_moves[i]->size(); j++) {
-    MoveList moves = MoveList(*this);
-    // std::cout << "here1\n";
-    moves.end();
-    // std::cout << "here2\n";
     for (Move move : MoveList(*this)) {
-        uint64_t current_nodes = 0;
         this->makeMove(move);
-        current_nodes = perft(depth - 1);
-        nodes += current_nodes;
+        uint64_t current_nodes = perft(depth - 1);
         this->undoMove();
-
-        if (print) printPerft(print, move, &current_nodes);
+        nodes += current_nodes;
+        if (print) printPerft(move, current_nodes);
     }
-    
+
     return nodes;
 }
 
