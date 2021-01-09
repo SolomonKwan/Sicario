@@ -2170,11 +2170,9 @@ void Pos::makePawnMoves(Move move) {
 
     if (move_type == PROMOTION) {
         if (this->turn) {
-            piece = promo == pQUEEN ? W_QUEEN : promo == pROOK ? 
-                W_ROOK : promo == pBISHOP ? W_BISHOP : W_KNIGHT;
+            piece = promo == pQUEEN ? W_QUEEN : promo == pROOK ? W_ROOK : promo == pBISHOP ? W_BISHOP : W_KNIGHT;
         } else {
-            piece = promo == pQUEEN ? B_QUEEN : promo == pROOK ? 
-                B_ROOK : promo == pBISHOP ? B_BISHOP : B_KNIGHT;
+            piece = promo == pQUEEN ? B_QUEEN : promo == pROOK ? B_ROOK : promo == pBISHOP ? B_BISHOP : B_KNIGHT;
         }
 
         if (promo == pQUEEN) {

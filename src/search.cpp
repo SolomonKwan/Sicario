@@ -99,6 +99,7 @@ Move Pos::search(std::vector<Move>* pos_moves[MAX_MOVE_SETS], int& moves_index) 
         }
     }
     std::cout << "\rComputer move: ";
-    printMove(move, true);
+    printMove(move, false);
+    std::cout << '\n';
     return move;
 }
