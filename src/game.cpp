@@ -2967,17 +2967,18 @@ class MoveList {
 
         struct Iterator {
             Iterator(int vec_cnt, int i, int j, std::vector<Move>** moves, Move& endMove) {
+                // End iterator
+                this->endAddr = &endMove;
+                if (vec_cnt <= 0) {
+                    this->ptr = this->endAddr;
+                    return;
+                }
+
                 this->ptr = &(*moves[i])[j];
                 this->vec_cnt = vec_cnt;
                 this->i = i;
                 this->j = j;
                 this->moves = moves;
-
-                // End iterator
-                this->endAddr = &endMove;
-                if (vec_cnt == -1) {
-                    this->ptr = this->endAddr;
-                }
             }
 
             Move& operator*() const {
@@ -2989,9 +2990,8 @@ class MoveList {
             }
 
             Iterator& operator++() { // Prefix increment
-                if (this->j < (int) this->moves[i]->size() - 1) {
-                    this->j++;
-                } else {
+                this->j++;
+                if (this->j >= (int) this->moves[i]->size()) {
                     this->i++;
                     this->j = 0;
                 }
@@ -3060,14 +3060,14 @@ uint64_t Pos::perft(int depth, bool print) {
     // std::cout << "here1\n";
     moves.end();
     // std::cout << "here2\n";
-    for (auto move = moves.begin(); move != moves.end(); move++) {
+    for (Move move : MoveList(*this)) {
         uint64_t current_nodes = 0;
-        this->makeMove(*move);
+        this->makeMove(move);
         current_nodes = perft(depth - 1);
         nodes += current_nodes;
         this->undoMove();
 
-        if (print) printPerft(print, *move, &current_nodes);
+        if (print) printPerft(print, move, &current_nodes);
     }
     
     return nodes;
