@@ -32,22 +32,22 @@ clean() {
 	rm ~/Sicario/tests/sc_result_vd ~/Sicario/tests/sf_result_vd
 }
 
-record_result() {
-    echo "Recording result" "$1"
-	local entry=$line
-	for i in {1..6}; do
-		local val=$(stockfish_value "$1" $i)
-		entry=$entry' ;D'$i' '$val
-	done
-	echo "$entry" >> perftsuite.epd
-}
-
 stockfish_value() {
     ~/Stockfish/src/stockfish > ~/Sicario/tests/sf_result <<-EOF
 		position fen "$1"
 		go perft $2
 	EOF
 	echo $(cut -d ":" -f2- <<< $(tail -n 2 ~/Sicario/tests/sf_result))
+}
+
+record_result() {
+    echo "Recording result" "$1"
+	local entry=$1
+	for i in {1..6}; do
+		local val=$(stockfish_value "$1" "$i")
+		entry=$entry' ;D'$i' '$val
+	done
+	echo "$entry" >> perftsuite.epd
 }
 
 record_file() {
