@@ -5,10 +5,7 @@ main() {
 			perft "$2" "$3"
 			;;
 		perft_suite)
-			echo "perft_suite"
-			;;
-		ep_suite)
-			echo "ep_suite"
+			perft_suite
 			;;
 		record_result)
 			record_result "$2"
@@ -23,6 +20,32 @@ main() {
 			echo "invalid command"
 			;;
 	esac
+}
+
+sicario_value() {
+	~/Sicario/src/sicario > ~/Sicario/tests/sc_result <<-EOF
+		set fen $1
+		perft $2
+		exit
+	EOF
+	echo $(cut -d ":" -f2- <<< $(tail -n 2 ~/Sicario/tests/sc_result))
+}
+
+perft_suite() {
+	echo "Running perft suite"
+	make -C ~/Sicario/src/ -s
+	while IFS= read -r line; do
+		local FEN="${line%%;*}"
+		val=$(sicario_value "$FEN" 6)
+		actualVal=$(echo "$line" | grep -o "D6 .*" | cut -c 4-)
+		if [[ $val -eq $actualVal ]]
+		then
+			echo "[ PASSED ] " "$FEN"
+		else
+			echo "[ FAILED ] " "$FEN"
+		fi
+    done < perftsuite.epd
+	rm sc_result
 }
 
 clean() {
