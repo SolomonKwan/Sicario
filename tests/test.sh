@@ -13,6 +13,9 @@ main() {
         record_file)
             record_file "$2"
             ;;
+        check)
+            check
+            ;;
 		clean)
 			clean
 			;;
@@ -23,6 +26,7 @@ main() {
 }
 
 sicario_value() {
+    make -C ~/Sicario/src/ -s
 	~/Sicario/src/sicario > ~/Sicario/tests/sc_result <<-EOF
 		set fen $1
 		perft $2
@@ -33,7 +37,6 @@ sicario_value() {
 
 perft_suite() {
 	echo "Running perft suite"
-	make -C ~/Sicario/src/ -s
 	while IFS= read -r line; do
 		local FEN="${line%%;*}"
 		val=$(sicario_value "$FEN" 6)
@@ -61,6 +64,30 @@ stockfish_value() {
 		go perft $2
 	EOF
 	echo $(cut -d ":" -f2- <<< $(tail -n 2 ~/Sicario/tests/sf_result))
+}
+
+# Quick check of perft 5 on the original and kiwipete position.
+check() {
+    echo "Performing quick check..."
+    local original="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+    val=$(sicario_value "$original" 5)
+    actualVal=$(stockfish_value "$original" 5)
+    if [[ $val -eq $actualVal ]]
+    then
+        echo "[ PASSED ] Original position"
+    else
+        echo "[ FAILED ] Original position"
+    fi
+
+    local kiwipete="r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1"
+    val=$(sicario_value "$kiwipete" 5)
+    actualVal=$(stockfish_value "$kiwipete" 5)
+    if [[ $val -eq $actualVal ]]
+    then
+        echo "[ PASSED ] Kiwipete position"
+    else
+        echo "[ FAILED ] Kiwipete position"
+    fi
 }
 
 record_result() {

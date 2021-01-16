@@ -1761,16 +1761,16 @@ bool Pos::isThreeFoldRep() {
  * @param moves_index: Pointer to number of vectors in pos_moves.
  * @return: The appropriate ExitCode.
  */
-ExitCode Pos::isEOG(int move_index) {
+ExitCode Pos::isEOG(MoveList& move_list) {
     if (this->isThreeFoldRep()) return THREE_FOLD_REPETITION;
 
     if (this->halfmove == 100) return FIFTY_MOVES_RULE;
 
     if (this->insufficientMaterial()) return INSUFFICIENT_MATERIAL;
 
-    if (move_index == 0 && !(this->isChecked())) return STALEMATE;
+    if (move_list.moves_index == 0 && !(this->isChecked())) return STALEMATE;
 
-    if (move_index == 0 && this->isChecked()) {
+    if (move_list.moves_index == 0 && this->isChecked()) {
         if (this->turn) return BLACK_WINS;
         return WHITE_WINS;
     }
@@ -2687,9 +2687,9 @@ int countMoves(Pos* game, std::vector<Move>* pos_moves[MAX_MOVE_SETS], int* move
  * @param moves_index: Int pointer to number of vectors in pos_moves.
  * @return: True if move is valid, else false.
  */
-bool Pos::validMove(Move move, std::vector<Move>* pos_moves[MAX_MOVE_SETS], int& moves_index) {
-    for (int i = 0; i < moves_index; i++) {
-        for (Move move_candidate : *pos_moves[i]) {
+bool Pos::validMove(Move move, MoveList& move_list) {
+    for (int i = 0; i < move_list.moves_index; i++) {
+        for (Move move_candidate : *move_list.moves[i]) {
             if (move == move_candidate) return true;
         }
     }
@@ -2838,7 +2838,7 @@ void Pos::checkCastlingEnPassantMoves(uint start, uint end, Move& move) {
  * @param moves_index: Int pointer to number of vectors in pos_moves.
  * @return: The chosen move.
  */
-Move Pos::chooseMove(std::vector<Move>* pos_moves[MAX_MOVE_SETS], int& moves_index) {
+Move Pos::chooseMove(MoveList& moves) {
     Move move = NORMAL | pKNIGHT;
 
     // Recieve and print move.
@@ -2862,12 +2862,12 @@ Move Pos::chooseMove(std::vector<Move>* pos_moves[MAX_MOVE_SETS], int& moves_ind
 
             move |= start;
             move |= (end << 6);
-            if (!this->validMove(move, pos_moves, moves_index)) {
+            if (!this->validMove(move, moves)) {
                 std::cout << "Invalid move, enter again: ";
             } else break;
         }
     } else {
-        move = this->search(pos_moves, moves_index);
+        move = this->search(moves);
     }
 
     return move;
@@ -2882,14 +2882,12 @@ float Pos::quiesence(double alpha, double beta) {
  */
 void Pos::run() {
     ExitCode code = NORMAL_PLY;
-    std::vector<Move>* pos_moves[MAX_MOVE_SETS];
-    int moves_index;
-    this->getMoves(moves_index, pos_moves);
+    MoveList moves = MoveList(*this);
 
-    while (!(code = this->isEOG(moves_index))) {
+    while (!(code = this->isEOG(moves))) {
         this->display();
-        this->makeMove(this->chooseMove(pos_moves, moves_index));
-        this->getMoves(moves_index, pos_moves);
+        this->makeMove(this->chooseMove(moves));
+        moves = MoveList(*this);
     }
 
     this->display();
@@ -3050,9 +3048,9 @@ std::string concatFEN(std::vector<std::string> strings) {
  */
 void setFen(std::vector<std::string> commands, Pos& pos) {
     if (commands[2] == "kiwipete") {
-        pos.parseFen("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1");
+        pos.parseFen(KIWIPETE);
     } else if (commands[2] == "new") {
-        pos.parseFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+        pos.parseFen(STANDARD_GAME);
     } else {
         pos.parseFen(concatFEN(commands));
     }

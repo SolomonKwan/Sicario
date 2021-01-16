@@ -8,7 +8,11 @@
 
 void printMove(Move move, bool extraInfo);
 
+/**
+ * Forward declarations.
+ */
 class SearchInfo;
+class MoveList;
 
 /**
  * A struct representing the current board position.
@@ -29,7 +33,7 @@ class Pos {
         float material() const;
 
         // Tree search
-        Move search(std::vector<Move>* pos_moves[MAX_MOVE_SETS], int& moves_index);
+        Move search(MoveList&);
         float alphaBeta(int depth, double alpha, double beta, bool max);
         void setDepth(int depth);
         void setHashSize(int size);
@@ -81,14 +85,17 @@ class Pos {
         SearchInfo searchInfo;
         int depth = 3;
 
+        // Perft hashing
+        std::unordered_map<Bitboard, uint64_t> perft_hash;
+
         // EOG checks
-        ExitCode isEOG(int move_index);
+        ExitCode isEOG(MoveList& move_list);
         bool insufficientMaterial();
         bool isThreeFoldRep();
 
         // Game logic
         void checkCastlingEnPassantMoves(uint start, uint end, Move& move);
-        bool validMove(Move move, std::vector<Move>* pos_moves[MAX_MOVE_SETS], int& moves_index);
+        bool validMove(Move move, MoveList&);
         bool isChecked();
         bool isDoubleChecked();
         Bitboard getBishopCheckRays(Square square, Bitboard& checkers_only);
@@ -147,7 +154,7 @@ class Pos {
         void getCheckedEp(Bitboard checkers, std::vector<Move>* pos_moves[MAX_MOVE_SETS], int& moves_index);
 
         // Move reading and parsing
-        Move chooseMove(std::vector<Move>* pos_moves[MAX_MOVE_SETS], int& moves_index);
+        Move chooseMove(MoveList&);
         void getSquares(std::string move_string, Move& move, uint& start, uint& end);
 
         // Miscellaneous
