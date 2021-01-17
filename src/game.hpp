@@ -56,6 +56,8 @@ class Pos {
         Bitboard rook_pins;
         Bitboard bishop_pins;
         Bitboard kEnemy_attacks;
+        Bitboard check_rays;
+        Bitboard checkers;
 
         // Piece positions
         int piece_index[12];
@@ -79,7 +81,7 @@ class Pos {
         int ply;
 
         // Miscellaneous info
-        PlayerType white = COMPUTER, black = COMPUTER;
+        PlayerType white = HUMAN, black = HUMAN;
 
         // Evaluation and search
         SearchInfo searchInfo;
@@ -103,6 +105,13 @@ class Pos {
         Bitboard getPawnCheckers(Square square, Bitboard& checkers_only);
         Bitboard getKnightCheckers(Square square, Bitboard& checkers_only);
         const int rookBlockIndex(Bitboard pos, Square square);
+        Bitboard isAttacked(const Square, const bool);
+        Bitboard isOccupied(const Square);
+        void setBitboards();
+        bool oneBitSet(Bitboard bits);
+        Bitboard getKingAttackers(const Square, const bool) const;
+        void setCheckers();
+        Bitboard getKingAttackBitBoard() const;
 
         // Position updates
         void findAndRemovePiece(PieceType piece, Square square);

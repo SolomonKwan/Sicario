@@ -54,6 +54,8 @@ std::vector<std::vector<int>> computeRookIndices();
 std::vector<std::vector<int>> computeBishopIndices();
 std::vector<MovesStruct> computeEnPassantMoves();
 std::vector<MovesStruct> computeDoublePushMoves();
+std::vector<std::vector<Bitboard>> computeLevelRays();
+std::vector<std::vector<Bitboard>> computeDiagonalRays();
 
 /**
  * Calculates the index into the move_set of a particular move family.

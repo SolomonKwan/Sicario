@@ -1369,46 +1369,46 @@ std::vector<MovesStruct> computeKnightMoves() {
  * @param DOUBLE_PUSH: An array of moves structs for double pawn push blocks.
  */
 std::vector<std::vector<MovesStruct>> computePawnMoves() {
-    std::vector<std::vector<MovesStruct>> PAWN_MOVES = {std::vector<MovesStruct>(48), std::vector<MovesStruct>(48)};
+    std::vector<std::vector<MovesStruct>> PAWN_MOVES = {std::vector<MovesStruct>(64), std::vector<MovesStruct>(64)};
     for (int player = BLACK; player <= WHITE; player++) {
         int left = player == BLACK ? -9 : 7;
         int right = player == BLACK ? -7 : 9;
         int forward_push = player == BLACK ?  -8 : 8;
         int double_push = player == BLACK ? - 16 : 16;
         
-        for (int square = 8; square <= 55; square++) {
+        for (int square = A1; square <= H8; square++) {
             uint64_t pos = 0; // The position for move generation.
-            PAWN_MOVES[player][square - 8].reach = 0;
+            PAWN_MOVES[player][square].reach = 0;
 
             // Create the attack reach.
             if (square % 8 != 0) {
-                PAWN_MOVES[player][square - 8].reach |= 1ULL << (square + left);
-                PAWN_MOVES[player][square - 8].block_bits.push_back(square + left);
+                PAWN_MOVES[player][square].reach |= 1ULL << (square + left);
+                PAWN_MOVES[player][square].block_bits.push_back(square + left);
                 pos |= 1ULL << (square + left);
             }
             if (square % 8 != 7) {
-                PAWN_MOVES[player][square - 8].reach |= 1ULL << (square + right);
-                PAWN_MOVES[player][square - 8].block_bits.push_back(square + right);
+                PAWN_MOVES[player][square].reach |= 1ULL << (square + right);
+                PAWN_MOVES[player][square].block_bits.push_back(square + right);
                 pos |= 1ULL << (square + right);
             }
 
             // Add one push block bit.
-            PAWN_MOVES[player][square - 8].block_bits.push_back(square + forward_push);
+            PAWN_MOVES[player][square].block_bits.push_back(square + forward_push);
             pos |= 1ULL << (square + forward_push);
 
             // Add two push block bit.
             if ((player == WHITE && square / 8 == 1) || (player == BLACK && square / 8 == 6)) {
-                PAWN_MOVES[player][square - 8].block_bits.push_back(square + double_push);
+                PAWN_MOVES[player][square].block_bits.push_back(square + double_push);
                 pos |= 1ULL << (square + double_push);
             }
             
             // Sort the block bits.
-            std::sort(PAWN_MOVES[player][square - 8].block_bits.begin(), PAWN_MOVES[player][square - 8].block_bits
+            std::sort(PAWN_MOVES[player][square].block_bits.begin(), PAWN_MOVES[player][square].block_bits
                     .end());
 
             // Set the moves.
-            std::vector<int>* blockers = &(PAWN_MOVES[player][square - 8].block_bits);
-            PAWN_MOVES[player][square - 8].move_set.resize(std::pow(2, blockers->size()));
+            std::vector<int>* blockers = &(PAWN_MOVES[player][square].block_bits);
+            PAWN_MOVES[player][square].move_set.resize(std::pow(2, blockers->size()));
 
             // Iterate over occupancies.
             for (int i = 0; i < std::pow(2, blockers->size()); i++) {
@@ -1419,8 +1419,8 @@ std::vector<std::vector<MovesStruct>> computePawnMoves() {
                     index++;
                 }
 
-                std::vector<Move>* moves_set = &(PAWN_MOVES[player][square -8].move_set[moveSetIndex(pos,
-                        &PAWN_MOVES[player][square - 8])]);
+                std::vector<Move>* moves_set = &(PAWN_MOVES[player][square].move_set[moveSetIndex(pos,
+                        &PAWN_MOVES[player][square])]);
 
                 if (player == WHITE) {
                     if (square % 8 != 7 && square / 8 == 6) { // Right promo.
@@ -1563,6 +1563,47 @@ std::vector<MovesStruct> computeEnPassantMoves() {
         }
     }
     return moves;
+}
+
+std::vector<std::vector<Bitboard>> computeLevelRays() {
+    std::vector<std::vector<Bitboard>> rays;
+    for (int king = A1; king <= H8; king++) {
+        std::vector<Bitboard> rays2;
+        for (int piece = A1; piece <= H8; piece++) {
+            Bitboard ray = 0ULL;
+            if (king % 8 == piece % 8) {
+                for (int i = piece; i != king;  king > piece ? i += 8 : i -= 8) {
+                    ray |= 1ULL << i;
+                }
+            } else if (king / 8 == piece / 8) {
+                for (int i = piece; i != king;  king > piece ? i++ : i--) {
+                    ray |= 1ULL << i;
+                }
+            }
+            rays2.push_back(ray);
+        }
+        rays.push_back(rays2);
+    }
+    return rays;
+}
+
+std::vector<std::vector<Bitboard>> computeDiagonalRays() {
+    std::vector<std::vector<Bitboard>> rays;
+    for (int king = A1; king <= H8; king++) {
+        std::vector<Bitboard> rays2;
+        for (int piece = A1; piece <= H8; piece++) {
+            Bitboard ray = 0ULL;
+            if (std::abs(king / 8 - piece / 8) == std::abs(king % 8 - piece % 8) && king != piece) {
+                int inc = king > piece ? (king % 8 > piece % 8 ? 9 : 7) : (king % 8 > piece % 8 ? -7 : -9);
+                for (int i = piece; i != king; i += inc) {
+                    ray |= 1ULL << i;
+                }
+            }
+            rays2.push_back(ray);
+        }
+        rays.push_back(rays2);
+    }
+    return rays;
 }
 
 std::vector<MovesStruct> computeDoublePushMoves() {
