@@ -714,8 +714,7 @@ bool Pos::insufficientMaterial() {
  * @return: True if in check, else false.
  */
 bool Pos::isChecked() {
-    return (1ULL << this->piece_list[this->turn][0]) & this->enemy_attacks;
-    // return this->checkers;
+    return this->checkers;
 }
 
 /**
@@ -733,8 +732,6 @@ Bitboard Pos::getKingAttackBitBoard() const {
 
 /**
  * Sets all the legal moves a king can make in a given position.
- * @param game: Pointer to game struct.
- * @param computed_moves: Pointer to precomputed moves struct.
  * @param pos_moves: Array of 16 bit unsigned int move vectors.
  * @param moves_index: Pointer to number of move struct in pos_moves.
  * @todo split between cases of less than or greater than number of potential attackers.
@@ -748,22 +745,10 @@ void Pos::getKingMoves(std::vector<Move>* pos_moves[MAX_MOVE_SETS], int& moves_i
 
 /**
  * Retrieves the legal moves for when the king is in check.
- * @param game: A game struct pointer.
- * @param moves: Precomputed moves struct pointer.
- * @param rook_pins: 64 bit unsigned int pointer for rook pins.
- * @param bishop_pins: 64 bit unsigned int pointer for bishop pins.
  * @param pos_moves: Array of 16 bit unsigned int move vectors.
  * @param moves_index: Pointer to number of move struct in pos_moves.
  */
 void Pos::getCheckedMoves(std::vector<Move>* pos_moves[MAX_MOVE_SETS], int& moves_index) {
-    Square king_sq = this->piece_list[this->turn][0];
-    Bitboard checkers_only = 0ULL;
-    Bitboard check_rays_only = 
-            this->getBishopCheckRays(king_sq, checkers_only) | 
-            this->getRookCheckRays(king_sq, checkers_only) | 
-            this->getPawnCheckers(king_sq, checkers_only) | 
-            this->getKnightCheckers(king_sq, checkers_only);
-    
     // King checked moves.
     this->getKingMoves(pos_moves, moves_index);
 
@@ -777,14 +762,14 @@ void Pos::getCheckedMoves(std::vector<Move>* pos_moves[MAX_MOVE_SETS], int& move
         MovesStruct* bishop_move = &Moves::BISHOP[Indices::BISHOP[queen][
                 bishopIndex(this->sides[BLACK] | this->sides[WHITE], 
                         (Square) queen)]];
-        Bitboard bishop_index = bishop_move->reach & (check_rays_only | checkers_only);
+        Bitboard bishop_index = bishop_move->reach & (this->check_rays | this->checkers);
         std::vector<Move>* move_set = &Moves::Blocks::BISHOP[queen].checked_moves[bishop_index];
         if (move_set->size() != 0) pos_moves[(moves_index)++] = move_set;
 
         MovesStruct* rook_move = &Moves::ROOK[Indices::ROOK[queen][
                 rookIndex(this->sides[BLACK] | this->sides[WHITE], 
                 (Square) queen)]];
-        Bitboard rook_index = rook_move->reach & (check_rays_only | checkers_only);
+        Bitboard rook_index = rook_move->reach & (this->check_rays | this->checkers);
         move_set = &Moves::Blocks::ROOK[queen].checked_moves[rook_index];
         if (move_set->size() != 0) pos_moves[(moves_index)++] = move_set;
     }
@@ -799,7 +784,7 @@ void Pos::getCheckedMoves(std::vector<Move>* pos_moves[MAX_MOVE_SETS], int& move
         MovesStruct* rook_move = &Moves::ROOK[Indices::ROOK[rook][
                 rookIndex(this->sides[BLACK] | this->sides[WHITE], 
                 (Square) rook)]];
-        Bitboard rook_index = rook_move->reach & (check_rays_only | checkers_only);
+        Bitboard rook_index = rook_move->reach & (this->check_rays | this->checkers);
         std::vector<Move>* move_set = &Moves::Blocks::ROOK[rook].checked_moves[rook_index];
         if (move_set->size() != 0) pos_moves[(moves_index)++] = move_set;
     }
@@ -815,7 +800,7 @@ void Pos::getCheckedMoves(std::vector<Move>* pos_moves[MAX_MOVE_SETS], int& move
         MovesStruct* bishop_move = &Moves::BISHOP[Indices::BISHOP[bishop][
                 bishopIndex(this->sides[BLACK] | this->sides[WHITE], 
                 (Square) bishop)]];
-        Bitboard bishop_index = bishop_move->reach & (check_rays_only | checkers_only);
+        Bitboard bishop_index = bishop_move->reach & (this->check_rays | this->checkers);
         std::vector<Move>* move_set = &Moves::Blocks::BISHOP[bishop].checked_moves[bishop_index];
         if (move_set->size() != 0) pos_moves[(moves_index)++] = move_set;
     }
@@ -828,7 +813,7 @@ void Pos::getCheckedMoves(std::vector<Move>* pos_moves[MAX_MOVE_SETS], int& move
             continue;
         }
         MovesStruct * knight_move = &Moves::KNIGHT[knight];
-        Bitboard masked_reach = knight_move->reach & (check_rays_only | checkers_only);
+        Bitboard masked_reach = knight_move->reach & (this->check_rays | this->checkers);
         std::vector<Move>* move_set = &knight_move->move_set[moveSetIndex(
                 masked_reach, knight_move)];
         if (move_set->size() != 0) pos_moves[(moves_index)++] = move_set;
@@ -844,13 +829,13 @@ void Pos::getCheckedMoves(std::vector<Move>* pos_moves[MAX_MOVE_SETS], int& move
         
         MovesStruct* pawn_move = &Moves::PAWN[this->turn][pawn];
         int advance = this->turn ? 8 : -8;
-        Bitboard masked_reach = (pawn_move->reach & checkers_only) | (1ULL << (pawn + advance));
+        Bitboard masked_reach = (pawn_move->reach & this->checkers) | (1ULL << (pawn + advance));
         std::vector<Move>* move_set = &pawn_move->move_set[moveSetIndex(
                 masked_reach, pawn_move)];
         if (move_set->size() != 0) pos_moves[(moves_index)++] = move_set;
 
         // Pawn single advance to block check.
-        if ((1ULL << (pawn + advance)) & check_rays_only) {
+        if ((1ULL << (pawn + advance)) & (this->check_rays & ~this->checkers)) {
             Bitboard pos = (1ULL << (pawn + advance + advance));
             MovesStruct* pawn_moves = &Moves::PAWN[this->turn][pawn];
             move_set = &pawn_moves->move_set[
@@ -862,7 +847,7 @@ void Pos::getCheckedMoves(std::vector<Move>* pos_moves[MAX_MOVE_SETS], int& move
         advance = this->turn ? 16 : -16;
         int between = this->turn ? 8 : -8;
         if (((pawn / 8 == 1 && this->turn) || (pawn / 8 == 6 && !this->turn)) && 
-                (1ULL << (pawn + advance)) & check_rays_only && !((1ULL << (
+                (1ULL << (pawn + advance)) & (this->check_rays & ~this->checkers) && !((1ULL << (
                 pawn + between)) & (this->sides[BLACK] | this->sides[WHITE]))) {
             MovesStruct* pawn_moves = &Moves::DOUBLE_PUSH[pawn - (this->turn ? 8 : 40)];
             move_set = &pawn_moves->move_set[0];
@@ -871,7 +856,7 @@ void Pos::getCheckedMoves(std::vector<Move>* pos_moves[MAX_MOVE_SETS], int& move
     }
 
     // En-passant moves.
-    this->getCheckedEp(checkers_only, pos_moves, moves_index);
+    this->getCheckedEp(this->checkers, pos_moves, moves_index);
 }
 
 /**
@@ -1104,9 +1089,9 @@ void Pos::getQueenMoves(std::vector<Move>* pos_moves[MAX_MOVE_SETS], int& moves_
     PieceType piece = this->turn ? W_QUEEN : B_QUEEN;
     for (int i = 0; i < this->piece_index[piece]; i++) {
         int queen = this->piece_list[piece][i];
-        if (rook_pins & (1ULL << queen)) { // Pinned.
+        if (this->rook_pins & (1ULL << queen)) { // Pinned.
             this->getRookPinMoves(queen, pos_moves, moves_index);
-        } else if (bishop_pins & (1ULL << queen)) { // Pinned.
+        } else if (this->bishop_pins & (1ULL << queen)) { // Pinned.
             this->getBishopPinMoves(queen, pos_moves, moves_index);
         } else {
             MovesStruct* rook_like_moves = this->getRookFamily((Square) queen);
@@ -1159,11 +1144,9 @@ void Pos::getRookPinMoves(int square, std::vector<Move>* pos_moves[MAX_MOVE_SETS
             friendly |= 1ULL << (square - 8);
         }
     }
-    MovesStruct* rook_moves = &Moves::ROOK[Indices::ROOK[square][rookIndex(
-            pos, (Square) square)]];
-    std::vector<Move>* move_set = &rook_moves->move_set[moveSetIndex(
-            rook_moves->reach ^ (this->sides[this->turn] | friendly), 
-            rook_moves)];
+    MovesStruct* rook_moves = &Moves::ROOK[Indices::ROOK[square][rookIndex(pos, (Square) square)]];
+    std::vector<Move>* move_set = &rook_moves->move_set[moveSetIndex(rook_moves->reach ^
+            (this->sides[this->turn] | friendly), rook_moves)];
     if (move_set->size() != 0) pos_moves[(moves_index)++] = move_set;
 }
 
@@ -1179,12 +1162,10 @@ void Pos::getBishopPinMoves (int square, std::vector<Move>* pos_moves[MAX_MOVE_S
     int king = this->piece_list[this->turn][0];
     uint64_t pos = this->sides[BLACK] | this->sides[WHITE];
     uint64_t friendly = 0;
-    if (square / 8 == 0 || square / 8 == 7 || square % 8 == 0 || 
-            square % 8 == 7) {
+    if (square / 8 == 0 || square / 8 == 7 || square % 8 == 0 || square % 8 == 7) {
         return;
     } else {
-        if ((king > square && (king % 8) > (square % 8)) || (king < square && 
-                (king % 8) < (square % 8))) { // [/] pin
+        if ((king > square && (king % 8) > (square % 8)) || (king < square && (king % 8) < (square % 8))) { // [/] pin
             pos |= 1ULL << (square + 7) | 1ULL << (square - 7);
             friendly |= 1ULL << (square + 7);
             friendly |= 1ULL << (square - 7);
@@ -1194,8 +1175,7 @@ void Pos::getBishopPinMoves (int square, std::vector<Move>* pos_moves[MAX_MOVE_S
             friendly |= 1ULL << (square - 9);
         }
     }
-    MovesStruct* bishop_moves = &Moves::BISHOP[Indices::BISHOP[square]
-            [bishopIndex(pos, (Square) square)]];
+    MovesStruct* bishop_moves = &Moves::BISHOP[Indices::BISHOP[square][bishopIndex(pos, (Square) square)]];
     std::vector<Move>* move_set = &bishop_moves->move_set[moveSetIndex(bishop_moves->reach ^ (this->sides[this->turn] |
             friendly), bishop_moves)];
     if (move_set->size() != 0) pos_moves[(moves_index)++] = move_set;
@@ -1613,33 +1593,33 @@ Bitboard Pos::getKnightCheckers(Square square, Bitboard& checkers_only) {
  * @return: True if in double-check, else false.
  */
 bool Pos::isDoubleChecked() {
-    // return (this->checkers & (this->checkers - 1)) != 0;
-    bool turn = this->turn;
-    Square king = this->piece_list[turn][0];
-    Bitboard rook_attacks = this->getRookFamily(king)->reach;
-    Bitboard bishop_attacks = this->getBishopFamily(king)->reach;
+    return (this->checkers & (this->checkers - 1)) != 0;
+    // bool turn = this->turn;
+    // Square king = this->piece_list[turn][0];
+    // Bitboard rook_attacks = this->getRookFamily(king)->reach;
+    // Bitboard bishop_attacks = this->getBishopFamily(king)->reach;
 
-    Bitboard attackers = (rook_attacks & this->rooks & this->sides[!turn]) | 
-            (bishop_attacks & this->bishops & this->sides[!turn]) |
-            (rook_attacks & this->queens & this->sides[!turn]) |
-            (bishop_attacks & this->queens & this->sides[!turn]);
+    // Bitboard attackers = (rook_attacks & this->rooks & this->sides[!turn]) | 
+    //         (bishop_attacks & this->bishops & this->sides[!turn]) |
+    //         (rook_attacks & this->queens & this->sides[!turn]) |
+    //         (bishop_attacks & this->queens & this->sides[!turn]);
     
-    attackers |= Moves::KNIGHT[king].reach & this->knights & this->
-            sides[!turn];
+    // attackers |= Moves::KNIGHT[king].reach & this->knights & this->
+    //         sides[!turn];
 
-    Bitboard enemy_pawns = this->sides[!turn] & this->pawns;
-    int rank_offset = turn ? 8 : -8;
-    if (king % 8 != 0) {
-        int pawn_sq = king + rank_offset - 1;
-        attackers |= (1ULL << pawn_sq) & enemy_pawns;
-    }
+    // Bitboard enemy_pawns = this->sides[!turn] & this->pawns;
+    // int rank_offset = turn ? 8 : -8;
+    // if (king % 8 != 0) {
+    //     int pawn_sq = king + rank_offset - 1;
+    //     attackers |= (1ULL << pawn_sq) & enemy_pawns;
+    // }
 
-    if (king % 8 != 7) {
-        int pawn_sq = king + rank_offset + 1;
-        attackers |= (1ULL << pawn_sq) & enemy_pawns;
-    }
+    // if (king % 8 != 7) {
+    //     int pawn_sq = king + rank_offset + 1;
+    //     attackers |= (1ULL << pawn_sq) & enemy_pawns;
+    // }
 
-    return (attackers & (attackers - 1)) != 0;
+    // return (attackers & (attackers - 1)) != 0;
 }
 
 /**
@@ -1841,25 +1821,15 @@ void Pos::setCheckers() {
  * @return: The number of move sets.
  */
 void Pos::getMoves(int& moves_index, std::vector<Move>* pos_moves[MAX_MOVE_SETS]) {
-    // The pinning rays
-    this->rook_pins = 0ULL;
-    this->bishop_pins = 0ULL;
-    this-> kEnemy_attacks = 0ULL;
-    this->getEnemyAttacks();
-
-    // this->setCheckers();
-    // this->setBitboards();
+    this->setBitboards();
 
     // Move retrieval for the 3 cases.
     moves_index = 0;
     if (this->isDoubleChecked()) {
-        // std::cout << "double check\n";
         this->getKingMoves(pos_moves, moves_index);
     } else if (this->isChecked()) {
-        // std::cout << "adsfasdf";
         this->getCheckedMoves(pos_moves, moves_index);
     } else {
-        // std::cout << "rgreg";
         this->getNormalMoves(pos_moves, moves_index);
     }
 }
@@ -2945,6 +2915,8 @@ bool Pos::oneBitSet(Bitboard bits) {
  * position. Need to do further computation to check that king does not move into check. 
  */
 void Pos::setBitboards() {
+    this->setCheckers();
+
     this->rook_pins = 0ULL;
     this->bishop_pins = 0ULL;
     this->check_rays = 0ULL;
@@ -2961,7 +2933,7 @@ void Pos::setBitboards() {
             this->bishop_pins |= ray;
         }
         if (this->oneBitSet(ray & pieces)) { // Check ray
-            this->bishop_pins |= ray;
+            this->check_rays |= ray;
         }
 
         ray = Rays::LEVEL[king_sq][this->piece_list[eQueen][i]];

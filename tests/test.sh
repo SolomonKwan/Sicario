@@ -47,7 +47,7 @@ perft_suite() {
 		else
 			echo "[ FAILED ] " "$FEN"
 		fi
-    done < perftsuite.epd
+    done < ~/Sicario/tests/perftsuite.epd
 	rm sc_result
 }
 
