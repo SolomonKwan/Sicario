@@ -54,8 +54,10 @@ perft_suite() {
 clean() {
 	echo "Removing files:"
 	echo "    sc_result_vd"
+    echo "    sc_result"
 	echo "    sf_result_vd"
-	rm ~/Sicario/tests/sc_result_vd ~/Sicario/tests/sf_result_vd
+    echo "    sf_result"
+	rm ~/Sicario/tests/sc_result_vd ~/Sicario/tests/sf_result_vd ~/Sicario/tests/sf_result ~/Sicario/tests/sc_result
 }
 
 stockfish_value() {

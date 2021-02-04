@@ -9,6 +9,9 @@
 #include "movegen.hpp"
 #include "evaluate.hpp"
 
+/**
+ * Precomputed move information.
+ */
 namespace Moves {
     std::vector<MovesStruct> ROOK = computeRookMoves();
     std::vector<MovesStruct> BISHOP = computeBishopMoves();
@@ -25,11 +28,17 @@ namespace Moves {
     }
 }
 
+/**
+ * Vector of indices for rook and bishop indexing.
+ */
 namespace Indices {
     const std::vector<std::vector<int>> ROOK = computeRookIndices();
     const std::vector<std::vector<int>> BISHOP = computeBishopIndices();
 }
 
+/**
+ * Rays bitboards from start (exlusive) to end (inclusive).
+ */
 namespace Rays {
     const std::vector<std::vector<Bitboard>> LEVEL = computeLevelRays();
     const std::vector<std::vector<Bitboard>> DIAGONAL = computeDiagonalRays();
@@ -244,47 +253,6 @@ namespace Hashes {
         0x97dd3bd5ae77b4a4, 0xedff8a0d047310af, 0xac6b72801c49744c
     };
 }
-
-// MoveList::MoveList(Pos& pos) {
-//     pos.getMoves(vec_cnt, moves);
-// }
-
-// MoveList::Iterator::Iterator(int vec_cnt, int curr_vec, int curr_move, std::vector<Move>** moves) {
-//     this->ptr = &(*moves[curr_vec])[curr_move];
-//     this->vec_cnt = vec_cnt;
-//     this->curr_vec = curr_vec;
-//     this->curr_move = curr_move;
-//     this->moves = moves;
-// }
-
-// Move& MoveList::Iterator::Iterator::operator*() const {
-//     return *ptr;
-// }
-
-// Move* MoveList::Iterator::Iterator::operator->() {
-//     return ptr;
-// }
-
-// MoveList::Iterator& MoveList::Iterator::operator++() { // Prefix increment
-//     if (this->curr_vec == vec_cnt - 1 && this->curr_move == (int) this->moves[this->curr_vec]->size() - 1) {
-//         (this->curr_move)++;
-//         ptr = &(*moves[this->curr_vec])[this->curr_move];
-//     } else if (this->curr_move == (int) this->moves[this->curr_vec]->size() - 1) {
-//         this->curr_vec++;
-//         this->curr_move = 0;
-//         ptr = &(*moves[this->curr_vec])[this->curr_move];
-//     } else {
-//         this->curr_move++;
-//         ptr = &(*moves[this->curr_vec])[this->curr_move];
-//     }
-//     return *this;
-// }
-
-// MoveList::Iterator MoveList::Iterator::operator++(int) { // Postfix increment
-//     Iterator tmp = *this;
-//     ++(*this);
-//     return tmp;
-// }
 
 /**
  * Return true if a square is a dark square, else false.
@@ -568,6 +536,9 @@ ExitCode Pos::parseFen(std::string fen) {
     return NORMAL_PLY;
 }
 
+/**
+ * Zeros out the position information.
+ */
 void Pos::zero() {
     this->sides[WHITE] = 0ULL;
     this->sides[BLACK] = 0ULL;
@@ -1310,6 +1281,11 @@ uint64_t Pos::pawnMoveArgs(Square square) {
     return (this->sides[!turn] | (this->sides[turn] & files[square % 8]));
 }
 
+/**
+ * Check if sq is occupied by a piece.
+ * @param sq: Square to check.
+ * @return: True if occupied, else false.
+ */
 Bitboard Pos::isOccupied(const Square sq) {
     return ((this->sides[WHITE] | this->sides[BLACK]) & (1ULL << sq));
 }
@@ -1498,8 +1474,7 @@ void Pos::horizontalPinEp(int king, bool turn, int attacker_sq, int captured_paw
  * @param pos_moves: Array of 16 bit unsigned int move vectors.
  * @param moves_index: Pointer to number of move struct in pos_moves.
  */
-void Pos::diagonalPinEp(int king, bool turn, int attacker_sq, 
-        int captured_pawn, int ep, std::vector<Move>* 
+void Pos::diagonalPinEp(int king, bool turn, int attacker_sq, int captured_pawn, int ep, std::vector<Move>* 
         pos_moves[MAX_MOVE_SETS], int& moves_index) {
     if (ep > attacker_sq && ep % 8 < attacker_sq % 8) { // Upper left.
         if ((king > attacker_sq && king % 8 < attacker_sq % 8) ||
@@ -1588,44 +1563,14 @@ Bitboard Pos::getKnightCheckers(Square square, Bitboard& checkers_only) {
 
 /**
  * Checks if king of current player is in double-check.
- * @param game: Pointer to game struct.
- * @param moves: Pointer to precomputed moves struct.
  * @return: True if in double-check, else false.
  */
 bool Pos::isDoubleChecked() {
     return (this->checkers & (this->checkers - 1)) != 0;
-    // bool turn = this->turn;
-    // Square king = this->piece_list[turn][0];
-    // Bitboard rook_attacks = this->getRookFamily(king)->reach;
-    // Bitboard bishop_attacks = this->getBishopFamily(king)->reach;
-
-    // Bitboard attackers = (rook_attacks & this->rooks & this->sides[!turn]) | 
-    //         (bishop_attacks & this->bishops & this->sides[!turn]) |
-    //         (rook_attacks & this->queens & this->sides[!turn]) |
-    //         (bishop_attacks & this->queens & this->sides[!turn]);
-    
-    // attackers |= Moves::KNIGHT[king].reach & this->knights & this->
-    //         sides[!turn];
-
-    // Bitboard enemy_pawns = this->sides[!turn] & this->pawns;
-    // int rank_offset = turn ? 8 : -8;
-    // if (king % 8 != 0) {
-    //     int pawn_sq = king + rank_offset - 1;
-    //     attackers |= (1ULL << pawn_sq) & enemy_pawns;
-    // }
-
-    // if (king % 8 != 7) {
-    //     int pawn_sq = king + rank_offset + 1;
-    //     attackers |= (1ULL << pawn_sq) & enemy_pawns;
-    // }
-
-    // return (attackers & (attackers - 1)) != 0;
 }
 
 /**
  * Finds and returns a pointer to a rook move family.
- * @param game: A pointer to a game struct representing the state of the game.
- * @param moves: A struct of the precomputed moves.
  * @param square: The square on which the rook is on.
  * @return Pointer to moves struct.
  */
