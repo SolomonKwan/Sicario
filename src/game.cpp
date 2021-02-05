@@ -266,27 +266,6 @@ bool isDark(int square) {
 }
 
 /**
- * Splits a string by a delimeter string and returns vector of results.
- * 
- * @param input: String to split.
- * @param delim: String delimiter.
- * 
- * @return: Vector of input split by delim.
- */
-std::vector<std::string> split(std::string input, std::string delim) {
-    std::vector<std::string> result;
-    std::size_t pos;
-
-    while ((pos = input.find(delim)) != std::string::npos) {
-        result.push_back(input.substr(0, pos));
-        input = input.substr(pos + delim.length(), input.length() - 1);
-    }
-    result.push_back(input.substr(0, pos));
-
-    return result;
-}
-
-/**
  * Display all individual game position information.
  * @param game: Pointer to game struct.
  */
@@ -3143,11 +3122,11 @@ void runNormal(std::string input) {
     while (input != "exit" && input != "quit" && input != "q") {
         std::vector<std::string> commands = split(input, " ");
         if (commands[0] == "play") handleGame(pos);
-        if (commands[0] == "perft") runPerft(std::stoi(commands[1]), pos);
-        if (commands[0] == "set") setCommand(commands, pos);
-        if (commands[0] == "display" && commands.size() == 1) pos.display();
-        if (commands[0] == "display" && commands.size() != 1 && commands[1] == "all") pos.displayAll();
-        if (commands[0] == "exit" || commands[0] == "quit" || commands[0] == "q") break;
+        else if (commands[0] == "perft") runPerft(std::stoi(commands[1]), pos);
+        else if (commands[0] == "set") setCommand(commands, pos);
+        else if (commands[0] == "display" && commands.size() == 1) pos.display();
+        else if (commands[0] == "display" && commands.size() != 1 && commands[1] == "all") pos.displayAll();
+        else if (commands[0] == "exit" || commands[0] == "quit" || commands[0] == "q") break;
         std::cout << std::flush;
         std::getline(std::cin, input);
     }

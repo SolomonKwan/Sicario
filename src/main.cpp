@@ -4,15 +4,7 @@
 #include "uci.hpp"
 #include "game.hpp"
 
-#include "evaluate.hpp"
-
 namespace Run {
-    #define VERSION "(Alpha v1.0.0)"
-    #define AUTHOR "S. Kwan"
-    #define CHESS_PROGRAMMING "www.chessprogramming.org"
-    #define STOCKFISH "Stockfish"
-    #define BLUE_FEVER_SOFT "bluefeversoft"
-
     void showStartUp() {
         std::cout << "\nSicario " << VERSION << '\n';
         std::cout << "By " << AUTHOR << '\n';
@@ -42,7 +34,7 @@ namespace Run {
         std::string input;
         std::getline(std::cin, input);
         if (input == "uci") {
-            // UCI::init(input);
+            UCI::init(input);
         } else {
             Play::init(input);
         }

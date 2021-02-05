@@ -58,6 +58,16 @@ std::vector<std::vector<Bitboard>> computeLevelRays();
 std::vector<std::vector<Bitboard>> computeDiagonalRays();
 
 /**
+ * Splits a string by a delimeter string and returns vector of results.
+ * 
+ * @param input: String to split.
+ * @param delim: String delimiter.
+ * 
+ * @return: Vector of input split by delim.
+ */
+std::vector<std::string> split(std::string input, std::string delim);
+
+/**
  * Calculates the index into the move_set of a particular move family.
  * 
  * @param masked_reach: A bitboard of the reach of the piece with own pieces masked out.
