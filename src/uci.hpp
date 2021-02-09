@@ -21,6 +21,8 @@ class UCI_Instance {
         void handlePonderHit();
 
         void sendInitialResponse();
+        void sendIds();
+        void options();
         void sendReadyOk();
         void sendBestMove();
         void sendCopyProtection();

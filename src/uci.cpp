@@ -17,13 +17,21 @@ void communicate(std::string communication) {
     std::cout << communication << '\n' << std::flush;
 }
 
+void UCI_Instance::sendIds() {
+    communicate("id name " + (std::string) VERSION);
+    communicate("id author " + (std::string) AUTHOR);
+}
+
+void UCI_Instance::options() {
+    
+}
+
 /**
  * Sends the response to the UCI engine after recieving the initial uci command.
  */
 void UCI_Instance::sendInitialResponse() {
-    communicate("id name " + (std::string) VERSION);
-    communicate("id author " + (std::string) AUTHOR);
-    // communicate("options");
+    this->sendIds();
+    this->options();
     communicate("uciok");
 }
 
