@@ -33,11 +33,8 @@ class Pos {
         float material() const;
 
         // Tree search
-        Move search(MoveList&);
-        float alphaBeta(int depth, double alpha, double beta, bool max);
         void setDepth(int depth);
         void setHashSize(int size);
-        float quiesence(double alpha, double beta);
 
         // Move generation
         void getMoves(int& moves_index, std::vector<Move>* pos_moves[MAX_MOVE_SETS]);

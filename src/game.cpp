@@ -1738,9 +1738,6 @@ void Pos::setCheckers() {
 
 /**
  * Retrives all legal moves of the current position.
- * 
- * @param game: Pointer to Pos struct of the current position.
- * @param moves: Pointer to the precomputed moves struct.
  * @param pos_moves: Array of vectors pointers of 16 bit unsigned int moves.
  * @return: The number of move sets.
  */
@@ -2817,14 +2814,10 @@ Move Pos::chooseMove(MoveList& moves) {
             } else break;
         }
     } else {
-        move = this->search(moves);
+        
     }
 
     return move;
-}
-
-float Pos::quiesence(double alpha, double beta) {
-    return 0;
 }
 
 /**

@@ -12,6 +12,10 @@ struct PV {
     float score;
 };
 
+struct SearchParams {
+    int time = 5000; // 5 seconds for dev. Default shall be infinite.
+};
+
 class SearchInfo {
     public:
         SearchInfo(int hashSize);

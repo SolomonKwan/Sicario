@@ -2,10 +2,17 @@
 
 The code for the move prcomputation and generation is absolutely janked. When I first started, it was my first time
 coding in C++ and doing an engine so it was done in an absolutely convoluted and confusing way. But... it works... and
-works quite well. Plus, the time I absolutely wasted on micro-memory optimization means it uses very little memory for
-the move precomputation (at the price of clarity, maintenance, my time and mental sanity), so...
+works reasonably well. Plus, the time I absolutely wasted on micro-memory optimization means it uses very little memory 
+for the move precomputation (at the price of clarity, maintenance, my time and mental sanity), so...
 </br>
 </br>
+<h1>Search</h1>
+</br>
+</br>
+<h1>Evaluation</h1>
+</br>
+</br>
+<h1>Notes</h1>
 <h2>Bugs/Problems</h2>
 <ul>
     <li>Currently, the history array is initialised to hold 500 entries and is increased to 1000 when needed. It is
@@ -28,6 +35,7 @@ the move precomputation (at the price of clarity, maintenance, my time and menta
     squares. This could be improved by splitting between the cases where there are less than or greater than 8
     potential attackers left on the board.</li>
     <li>En-passant move generation may be checking invalid positions.</li>
+    <li>Revise and update the function docstrings.</li>
 </ul>
 </br>
 <H2>Acknowledgements</H2>
@@ -36,4 +44,3 @@ the move precomputation (at the price of clarity, maintenance, my time and menta
 <strong>Bluefeversoft</strong> - For your YouTube tutorials and explanations for concepts I found difficult to grasp.</br>
 There are likely others that I have missed.</br>
 </br>
-And to the one who (to quote Kodaline's <em>All I Want</em>) - <em>"...brought out the best in me, a part of me I'd never seen..."</em>
