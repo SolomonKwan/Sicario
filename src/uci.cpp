@@ -100,7 +100,10 @@ void UCI_Instance::handlePosition(std::vector<std::string> inputs) {
 }
 
 void UCI_Instance::handleGo(std::vector<std::string> inputs) {
-    communicate("handle go");
+    communicate("Handling go command. For now, assuming a go infinite command");
+    SearchParams foo; // Dummy for now
+    MoveList moves(this->pos);
+    this->pos.search(foo, moves);
 }
 
 void UCI_Instance::handleStop() {

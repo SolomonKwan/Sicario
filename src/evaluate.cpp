@@ -3,8 +3,11 @@
 #include "evaluate.hpp"
 #include "game.hpp"
 
+/**
+ * Piece square tables in the view of white.
+ */
 namespace PSQT {
-    const float PAWN[64] = {
+    const int PAWN[64] = {
         0,  0,  0,  0,  0,  0,  0,  0,
         50, 50, 50, 50, 50, 50, 50, 50,
         10, 10, 20, 30, 30, 20, 10, 10,
@@ -15,7 +18,7 @@ namespace PSQT {
         0,  0,  0,  0,  0,  0,  0,  0
     };
 
-    const float KNIGHT[64] = {
+    const int KNIGHT[64] = {
         -50,-40,-30,-30,-30,-30,-40,-50,
         -40,-20,  0,  0,  0,  0,-20,-40,
         -30,  0, 10, 15, 15, 10,  0,-30,
@@ -26,7 +29,7 @@ namespace PSQT {
         -50,-40,-30,-30,-30,-30,-40,-50
     };
 
-    const float BISHOP[64] = {
+    const int BISHOP[64] = {
         -20,-10,-10,-10,-10,-10,-10,-20,
         -10,  0,  0,  0,  0,  0,  0,-10,
         -10,  0,  5, 10, 10,  5,  0,-10,
@@ -37,7 +40,7 @@ namespace PSQT {
         -20,-10,-10,-10,-10,-10,-10,-20
     };
 
-    const float ROOK[64] = {
+    const int ROOK[64] = {
          0,  0,  0,  0,  0,  0,  0,  0,
          5, 10, 10, 10, 10, 10, 10,  5,
         -5,  0,  0,  0,  0,  0,  0, -5,
@@ -48,7 +51,7 @@ namespace PSQT {
          0,  0,  0,  5,  5,  0,  0,  0
     };
 
-    const float QUEEN[64] = {
+    const int QUEEN[64] = {
         -20,-10,-10, -5, -5,-10,-10,-20,
         -10,  0,  0,  0,  0,  0,  0,-10,
         -10,  0,  5,  5,  5,  5,  0,-10,
@@ -59,7 +62,7 @@ namespace PSQT {
         -20,-10,-10, -5, -5,-10,-10,-20
     };
 
-    const float KING[64] = {
+    const int KING[64] = {
         -30,-40,-40,-50,-50,-40,-40,-30,
         -30,-40,-40,-50,-50,-40,-40,-30,
         -30,-40,-40,-50,-50,-40,-40,-30,
@@ -70,7 +73,7 @@ namespace PSQT {
          20, 30, 10,  0,  0, 10, 30, 20
     };
 
-    const float KING_ENDGAME[64] = {
+    const int KING_ENDGAME[64] = {
         -50,-40,-30,-20,-20,-30,-40,-50,
         -30,-20,-10,  0,  0,-10,-20,-30,
         -30,-10, 20, 30, 30, 20,-10,-30,
@@ -111,8 +114,8 @@ bool Pos::isEndGame() const {
     return false;
 }
 
-float Pos::psqt() const {
-    float value = 0;
+int Pos::psqt() const {
+    int value = 0;
 
     // King value
     if (this->isEndGame()) {
@@ -166,8 +169,8 @@ float Pos::psqt() const {
     return value;
 }
 
-float Pos::material() const {
-    float value = 0;
+int Pos::material() const {
+    int value = 0;
 
     if (this->isEndGame()) {
         value += PieceValue::EndGame::values[W_QUEEN] * this->piece_index[W_QUEEN];
@@ -198,8 +201,8 @@ float Pos::material() const {
     return value;
 }
 
-float Evaluator::evaluate() {
-    float value = 0;
+int Evaluator::evaluate() {
+    int value = 0;
     value += this->pos.psqt();
     value += this->pos.material();
     return value;

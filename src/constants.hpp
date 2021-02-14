@@ -4,7 +4,7 @@
 
 #include <string>
 
-#define VERSION "(Alpha v1.0.0)"
+#define VERSION "Sicario (Alpha v1.0.0)"
 #define AUTHOR "S. Kwan"
 #define CHESS_PROGRAMMING "www.chessprogramming.org"
 #define STOCKFISH "Stockfish"

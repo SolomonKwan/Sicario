@@ -29,12 +29,13 @@ class Pos {
 
         // Static position evaluation
         bool isEndGame() const;
-        float psqt() const;
-        float material() const;
+        int psqt() const;
+        int material() const;
 
         // Tree search
         void setDepth(int depth);
         void setHashSize(int size);
+        void search(SearchParams, MoveList&);
 
         // Move generation
         void getMoves(int& moves_index, std::vector<Move>* pos_moves[MAX_MOVE_SETS]);
@@ -83,6 +84,13 @@ class Pos {
         // Evaluation and search
         SearchInfo searchInfo;
         int depth = 3;
+        std::vector<Move> orderMoves(SearchParams, MoveList&);
+        void mcst(std::vector<Move>, SearchParams);
+
+        // Move ordering
+        int scoreMove(Move);
+        int kingSafety(Move);
+        int captures(Move);
 
         // Perft hashing
         std::unordered_map<Bitboard, uint64_t> perft_hash;

@@ -5,29 +5,29 @@
 #include "constants.hpp"
 
 namespace PSQT {
-    extern const float PAWN[64];
-    extern const float KNIGHT[64];
-    extern const float BISHOP[64];
-    extern const float ROOK[64];
-    extern const float QUEEN[64];
-    extern const float KING[64];
-    extern const float KING_ENDGAME[64];
+    extern const int PAWN[64];
+    extern const int KNIGHT[64];
+    extern const int BISHOP[64];
+    extern const int ROOK[64];
+    extern const int QUEEN[64];
+    extern const int KING[64];
+    extern const int KING_ENDGAME[64];
 }
 
 namespace PieceValue {
     namespace Opening {
-        const float values[12] = {
+        const int values[12] = {
             0, 0, // Kings
-            91.00, 43.50, 32.25, 31.00, 6.00, // Q, R, B, K, P
-            -91.00, -43.50, -32.25, -31.00, -6.00,
+            900, 500, 325, 300, 100, // Q, R, B, N, P
+            -900, -500, -325, -300, -100, // Q, R, B, N, P
         };
     }
 
     namespace EndGame {
-        const float values[12] = {
+        const int values[12] = {
             0, 0, // Kings
-            97.00, 54.75, 32.25, 31.00, 9.25, // Q, R, B, K, P
-            -97.00, -54.75, -32.25, -31.00, -9.25,
+            960, 511, 325, 300, 250, // Q, R, B, N, P
+            -960, -511, -325, -300, -250,
         };
     }
 }
@@ -38,7 +38,7 @@ class Pos;
 class Evaluator {
     public:
         Evaluator(const Pos&);
-        float evaluate();
+        int evaluate();
 
     private:
         const Pos& pos;

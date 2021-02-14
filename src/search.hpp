@@ -14,6 +14,11 @@ struct PV {
 
 struct SearchParams {
     int time = 5000; // 5 seconds for dev. Default shall be infinite.
+    int children_to_search = 5; // Default to 5 child nodes for each node in the tree.
+};
+
+struct Node {
+    
 };
 
 class SearchInfo {
