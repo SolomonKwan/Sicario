@@ -7,6 +7,38 @@
 #include <vector>
 #include <algorithm>
 
+namespace Moves {
+    extern std::vector<MovesStruct> ROOK;
+    extern std::vector<MovesStruct> BISHOP;
+    extern std::vector<MovesStruct> KNIGHT;
+    extern std::vector<MovesStruct> KING;
+    extern std::vector<MovesStruct> CASTLING;
+    extern std::vector<MovesStruct> EN_PASSANT;
+    extern std::vector<MovesStruct> DOUBLE_PUSH;
+    extern std::vector<std::vector<MovesStruct>> PAWN;
+
+    namespace Blocks {
+        extern std::vector<MovesStruct> BISHOP;
+        extern std::vector<MovesStruct> ROOK;
+    }
+}
+
+/**
+ * Vector of indices for rook and bishop indexing.
+ */
+namespace Indices {
+    extern const std::vector<std::vector<int>> ROOK;
+    extern const std::vector<std::vector<int>> BISHOP;
+}
+
+/**
+ * Rays bitboards from start (exlusive) to end (inclusive).
+ */
+namespace Rays {
+    extern const std::vector<std::vector<Bitboard>> LEVEL;
+    extern const std::vector<std::vector<Bitboard>> DIAGONAL;
+}
+
 /**
  * @param hashSize: Hash table size in megabytes.
  */
@@ -35,8 +67,8 @@ void SearchInfo::clearTable() {
  * Search the current position.
  */
 void Pos::search(SearchParams params, MoveList& moves) {
-    std::vector<Move> movesToConsider = this->orderMoves(params, moves);
-    this->mcst(movesToConsider, params);
+    std::vector<std::pair<int, Move>> ordered_moves = this->orderMoves(params, moves);
+    this->mcst(ordered_moves, params);
 }
 
 /**
@@ -45,38 +77,32 @@ void Pos::search(SearchParams params, MoveList& moves) {
  * 
  * TODO: Need to make the ordering algorithm cleaner. Somekind of ordering while iterating the first time.
  */
-std::vector<Move> Pos::orderMoves(SearchParams, MoveList& moves) {
+std::vector<std::pair<int, Move>> Pos::orderMoves(SearchParams, MoveList& moves) {
     std::vector<std::pair<int, Move>> ordering;
     for (Move move : moves) {
         ordering.push_back(std::make_pair(this->scoreMove(move), move));
     }
     std::sort(ordering.begin(), ordering.end());
-
-    std::vector<Move> chosenMoves;
-    for (std::pair<int, Move> move : ordering) {
-        chosenMoves.push_back(move.second);
-    }
-
-    return chosenMoves;
+    return ordering;
 }
 
 /**
- * Gives a guess of the score of a move.
- * @param move: Move to guess the score of.
- * @return: Returns a positive integer indicating the score of the move. The higher the score, the more preferred the
- * move.
+ * Gives a rank for the move.
+ * @param move: Move to give the rank of.
  */
 int Pos::scoreMove(Move move) {
-    int score = 0;
+    ////////////////////// Modify below //////////////////////
     // PV move
-    score += this->kingSafety(move); // King safety
-    score += this->captures(move);// Captures
+    if (type(move) == CASTLING) return 2; // King safety
+    if (this->pieces[end(move)] != NO_PIECE) return 3; // Captures
+    if ((start(move) / 8 == 0 || start(move) / 8 == 7) && this->fullmove <= 10) return 4; // Developement
+    else return 5;
     // Checks
     // Passed pawns
     // X-rays
     // Mobility
     // PSQT
-    return score;
+    //////////////////////////////////////////////////////////
 }
 
 /**
@@ -84,20 +110,24 @@ int Pos::scoreMove(Move move) {
  * @param move: Move to guess the score of.
  */
 int Pos::kingSafety(Move move) {
-    int score = 0;
-    return score;
+
+}
+
+int Pos::scoreCastlingSafety(Move move) {
+
+}
+
+int Pos::scoreKingSafety(Move move) {
+
 }
 
 /**
  * Gives a preferential score to certain captures first.
  */
 int Pos::captures(Move move) {
-    int score = 0;
-    int start = move & 0b111111, end = (move >> 6) & 0b111111;
-    PieceType moved = this->pieces[start], captured = this->pieces[end];
-    return score;
+
 }
 
-void Pos::mcst(std::vector<Move>, SearchParams) {
+void Pos::mcst(std::vector<std::pair<int, Move>> scores, SearchParams sp) {
     
 }

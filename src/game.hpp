@@ -7,6 +7,10 @@
 #include "search.hpp"
 
 void printMove(Move move, bool extraInfo);
+MoveType type(Move move);
+Square end(Move move);
+Square start(Move move);
+Promotion promo(Move move);
 
 /**
  * Forward declarations.
@@ -84,12 +88,14 @@ class Pos {
         // Evaluation and search
         SearchInfo searchInfo;
         int depth = 3;
-        std::vector<Move> orderMoves(SearchParams, MoveList&);
-        void mcst(std::vector<Move>, SearchParams);
+        std::vector<std::pair<int, Move>> orderMoves(SearchParams, MoveList&);
+        void mcst(std::vector<std::pair<int, Move>>, SearchParams);
 
         // Move ordering
         int scoreMove(Move);
         int kingSafety(Move);
+        int scoreCastlingSafety(Move);
+        int scoreKingSafety(Move);
         int captures(Move);
 
         // Perft hashing

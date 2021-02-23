@@ -265,6 +265,22 @@ bool isDark(int square) {
     return false;
 }
 
+MoveType type(Move move) {
+    return (MoveType)(move & (0b11 << 12));
+}
+
+Square end(Move move) {
+    return (Square)((move >> 6) & 0b111111);
+}
+
+Square start(Move move) {
+    return (Square)(move & 0b111111);
+}
+
+Promotion promo(Move move) {
+    return (Promotion)(move & (0b11 << 14));
+}
+
 /**
  * Display all individual game position information.
  * @param game: Pointer to game struct.
