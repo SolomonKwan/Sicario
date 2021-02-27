@@ -1,5 +1,6 @@
 
 #include <iostream>
+#include <thread>
 
 #include "game.hpp"
 #include "uci.hpp"
@@ -102,8 +103,8 @@ void UCI_Instance::handlePosition(std::vector<std::string> inputs) {
 void UCI_Instance::handleGo(std::vector<std::string> inputs) {
     communicate("Handling go command. For now, assuming a go infinite command");
     SearchParams foo; // Dummy for now
-    MoveList moves(this->pos);
-    this->pos.search(foo, moves);
+    std::thread searchThread(&Pos::search, &this->pos, foo);
+    searchThread.detach();
 }
 
 void UCI_Instance::handleStop() {

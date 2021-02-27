@@ -66,7 +66,9 @@ void SearchInfo::clearTable() {
 /**
  * Search the current position.
  */
-void Pos::search(SearchParams params, MoveList& moves) {
+void Pos::search(SearchParams params) {
+    std::cout << "executing search\n" << std::flush;
+    MoveList moves(*this);
     std::vector<std::pair<int, Move>> ordered_moves = this->orderMoves(params, moves);
     this->mcst(ordered_moves, params);
 }
@@ -127,7 +129,17 @@ int Pos::scoreKingSafety(Move move) {
 int Pos::captures(Move move) {
 
 }
-
+#include<unistd.h>
 void Pos::mcst(std::vector<std::pair<int, Move>> scores, SearchParams sp) {
-    
+    while (true) {
+        unsigned int microsecond = 1000000;
+        std::cout << "\33[2K\rsearching   " << std::flush;
+        usleep(0.5 * microsecond);
+        std::cout << "\33[2K\rsearching.  " << std::flush;
+        usleep(0.5 * microsecond);
+        std::cout << "\33[2K\rsearching.. " << std::flush;
+        usleep(0.5 * microsecond);
+        std::cout << "\33[2K\rsearching..." << std::flush;
+        usleep(0.5 * microsecond);
+    }
 }

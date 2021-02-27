@@ -1,5 +1,5 @@
 
-FLAGS = g++ -std=c++17 -g -pedantic -Wall -O3
+FLAGS = g++ -std=c++17 -g -pedantic -Wall -O3 -pthread
 
 all: sicario
 

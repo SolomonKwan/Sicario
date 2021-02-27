@@ -39,7 +39,7 @@ class Pos {
         // Tree search
         void setDepth(int depth);
         void setHashSize(int size);
-        void search(SearchParams, MoveList&);
+        void search(SearchParams);
 
         // Move generation
         void getMoves(int& moves_index, std::vector<Move>* pos_moves[MAX_MOVE_SETS]);
