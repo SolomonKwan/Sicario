@@ -2,6 +2,8 @@
 #ifndef GAME_HPP
 #define GAME_HPP
 
+#include <atomic>
+
 #include "constants.hpp"
 #include "movegen.hpp"
 #include "search.hpp"
@@ -39,7 +41,7 @@ class Pos {
         // Tree search
         void setDepth(int depth);
         void setHashSize(int size);
-        void search(SearchParams);
+        void search(SearchParams, std::atomic_bool&);
 
         // Move generation
         void getMoves(int& moves_index, std::vector<Move>* pos_moves[MAX_MOVE_SETS]);
@@ -89,7 +91,7 @@ class Pos {
         SearchInfo searchInfo;
         int depth = 3;
         std::vector<std::pair<int, Move>> orderMoves(SearchParams, MoveList&);
-        void mcst(std::vector<std::pair<int, Move>>, SearchParams);
+        void mcst(std::vector<std::pair<int, Move>>, SearchParams, std::atomic_bool&);
 
         // Move ordering
         int scoreMove(Move);

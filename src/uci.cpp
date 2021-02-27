@@ -1,6 +1,8 @@
 
 #include <iostream>
 #include <thread>
+#include <atomic>
+#include <functional>
 
 #include "game.hpp"
 #include "uci.hpp"
@@ -100,15 +102,17 @@ void UCI_Instance::handlePosition(std::vector<std::string> inputs) {
     communicate("handle position");
 }
 
-void UCI_Instance::handleGo(std::vector<std::string> inputs) {
+void UCI_Instance::handleGo(std::vector<std::string> inputs, std::atomic_bool& stop) {
     communicate("Handling go command. For now, assuming a go infinite command");
-    SearchParams foo; // Dummy for now
-    std::thread searchThread(&Pos::search, &this->pos, foo);
+    stop = false;
+    SearchParams params; // Dummy for now
+    std::thread searchThread(&Pos::search, &this->pos, params, std::ref(stop));
     searchThread.detach();
 }
 
-void UCI_Instance::handleStop() {
+void UCI_Instance::handleStop(std::atomic_bool& stop) {
     communicate("handle stop");
+    stop = true;
 }
 
 void UCI_Instance::handlePonderHit() {
@@ -128,6 +132,8 @@ void UCI_Instance::handlePonderHit() {
 void runUCI(std::string input) {
     UCI_Instance uci_game;
     uci_game.sendInitialResponse();
+    std::atomic_bool stop;
+    stop = true;
     while (input != "quit" && input != "exit" && input != "q") {
         std::vector<std::string> commands = split(input, " ");
         if (commands[0] == "isready") uci_game.handleIsReady();
@@ -137,8 +143,8 @@ void runUCI(std::string input) {
         else if (commands[0] == "register") uci_game.handleRegister(commands);
         else if (commands[0] == "ucinewgame") uci_game.handleUCI_NewGame();
         else if (commands[0] == "position") uci_game.handlePosition(commands);
-        else if (commands[0] == "go") uci_game.handleGo(commands);
-        else if (commands[0] == "stop") uci_game.handleStop();
+        else if (commands[0] == "go") uci_game.handleGo(commands, stop);
+        else if (commands[0] == "stop") uci_game.handleStop(stop);
         else if (commands[0] == "ponderhit") uci_game.handlePonderHit();
         std::cout << std::flush;
         std::getline(std::cin, input);

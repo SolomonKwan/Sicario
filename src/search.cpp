@@ -6,6 +6,7 @@
 #include <cmath>
 #include <vector>
 #include <algorithm>
+#include <atomic>
 
 namespace Moves {
     extern std::vector<MovesStruct> ROOK;
@@ -66,11 +67,12 @@ void SearchInfo::clearTable() {
 /**
  * Search the current position.
  */
-void Pos::search(SearchParams params) {
+void Pos::search(SearchParams params, std::atomic_bool& stop) {
     std::cout << "executing search\n" << std::flush;
     MoveList moves(*this);
     std::vector<std::pair<int, Move>> ordered_moves = this->orderMoves(params, moves);
-    this->mcst(ordered_moves, params);
+    this->mcst(ordered_moves, params, stop);
+    std::cout << "ending search\n" << std::flush;
 }
 
 /**
@@ -130,8 +132,8 @@ int Pos::captures(Move move) {
 
 }
 #include<unistd.h>
-void Pos::mcst(std::vector<std::pair<int, Move>> scores, SearchParams sp) {
-    while (true) {
+void Pos::mcst(std::vector<std::pair<int, Move>> scores, SearchParams sp, std::atomic_bool& stop) {
+    while (!stop) {
         unsigned int microsecond = 1000000;
         std::cout << "\33[2K\rsearching   " << std::flush;
         usleep(0.5 * microsecond);

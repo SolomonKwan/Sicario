@@ -16,8 +16,8 @@ class UCI_Instance {
         void handleRegister(std::vector<std::string>);
         void handleUCI_NewGame();
         void handlePosition(std::vector<std::string>);
-        void handleGo(std::vector<std::string>);
-        void handleStop();
+        void handleGo(std::vector<std::string>, std::atomic_bool&);
+        void handleStop(std::atomic_bool&);
         void handlePonderHit();
 
         void sendInitialResponse();
