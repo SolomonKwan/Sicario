@@ -238,9 +238,9 @@ void computeBCornerMoves(int square, int* offset, std::vector<MovesStruct>* BISH
             
         // Retrieve and set bits.
         if (square == A1) change = 9;
-        if (square == A8) change = -7;
-        if (square == H1) change = 7;
-        if (square == H8) change = -9;
+        else if (square == A8) change = -7;
+        else if (square == H1) change = 7;
+        else change = -9;
         index = 5;
         for (int k = start; k != end; k += change) {
             pos |= ((occ >> index) & 1ULL) << k;
@@ -278,9 +278,9 @@ std::vector<int> computeBCornerIndices(int square, int* offset) {
             
         // Retrieve and set bits.
         if (square == A1) change = 9;
-        if (square == A8) change = -7;
-        if (square == H1) change = 7;
-        if (square == H8) change = -9;
+        else if (square == A8) change = -7;
+        else if (square == H1) change = 7;
+        else change = -9;
         index = 5;
         for (int k = start; k != end; k += change) {
             pos |= ((occ >> index) & 1ULL) << k;
@@ -324,7 +324,7 @@ void computeBLRSideMoves(int square, int* offset, std::vector<MovesStruct>* BISH
     int bits2 = square % 8 == 0 ? (end2 % 8 - start2 % 8 + 1) : (start2 % 8 - end2 % 8 + 1);
     int size2 = std::pow(2, bits2); // Left diagonal.
 
-    int offset_add;
+    int offset_add = 0;
     for (int occ1 = 0; occ1 < size1; occ1++) {
         for (int occ2 = 0; occ2 < size2; occ2++) {
             // Build position.
@@ -409,7 +409,7 @@ std::vector<int> computeBLRSideIndices(int square, int* offset) {
             (start2 % 8 - end2 % 8 + 1);
     int size2 = std::pow(2, bits2); // Left diagonal.
 
-    int offset_add;
+    int offset_add = 0;
     for (int occ1 = 0; occ1 < size1; occ1++) {
         for (int occ2 = 0; occ2 < size2; occ2++) {
             // Build position.
@@ -488,7 +488,7 @@ void computeBULSideMoves(int square, int* offset, std::vector<MovesStruct>* BISH
             (start2 / 8 - end2 / 8 + 1);
     int size2 = std::pow(2, bits2); // Left diagonal.
 
-    int offset_add;
+    int offset_add = 0;
     for (int occ1 = 0; occ1 < size1; occ1++) {
         for (int occ2 = 0; occ2 < size2; occ2++) {
             // Build position.
@@ -570,7 +570,7 @@ std::vector<int> computeBULSideIndices(int square, int* offset) {
             (start2 / 8 - end2 / 8 + 1);
     int size2 = std::pow(2, bits2); // Left diagonal.
 
-    int offset_add;
+    int offset_add = 0;
     for (int occ1 = 0; occ1 < size1; occ1++) {
         for (int occ2 = 0; occ2 < size2; occ2++) {
             // Build position.
@@ -682,7 +682,7 @@ void computeBCentreMoves(int sq, int* offset, std::vector<MovesStruct>* BISHOP_M
     int bits4 = start4 % 8 - end4 % 8 + 1;
     int size4 = std::pow(2, bits4); // Left diagonal.
 
-    int offset_add;
+    int offset_add = 0;
 
     for (int occ1 = 0; occ1 < size1; occ1++) {
         for (int occ2 = 0; occ2 < size2; occ2++) {
@@ -908,7 +908,7 @@ std::vector<int> computeBCentreIndices(int sq, int* offset) {
     int bits4 = start4 % 8 - end4 % 8 + 1;
     int size4 = std::pow(2, bits4); // Left diagonal.
 
-    int offset_add;
+    int offset_add = 0;
 
     for (int occ1 = 0; occ1 < size1; occ1++) {
         for (int occ2 = 0; occ2 < size2; occ2++) {
@@ -1863,7 +1863,7 @@ void computeRLRSideMoves(int square, int* offset, std::vector<MovesStruct>* ROOK
     int v1_occs = std::pow(2, (v1_End - v1_Start) / 8 + 1);
     int v2_occs = std::pow(2, (v2_End - v2_Start) / 8 + 1);
 
-    int offset_add;
+    int offset_add = 0;
 
     for (int hOcc = 0; hOcc < 64; hOcc++) {
         for (int vOcc1 = 0; vOcc1 < v1_occs; vOcc1++) {
@@ -1957,7 +1957,7 @@ std::vector<int> computeRLRSideIndices(int square, int* offset) {
     int v1_occs = std::pow(2, (v1_End - v1_Start) / 8 + 1);
     int v2_occs = std::pow(2, (v2_End - v2_Start) / 8 + 1);
 
-    int offset_add;
+    int offset_add = 0;
 
     for (int hOcc = 0; hOcc < 64; hOcc++) {
         for (int vOcc1 = 0; vOcc1 < v1_occs; vOcc1++) {
@@ -2049,7 +2049,7 @@ void computeRULSideMoves(int square, int* offset, std::vector<MovesStruct>* ROOK
     int h1_occs = std::pow(2, h1_End - h1_Start + 1);
     int h2_occs = std::pow(2, h2_End - h2_Start + 1);
 
-    int offset_add;
+    int offset_add = 0;
 
     for (int vOcc = 0; vOcc < 64; vOcc++) {
         for (int hOcc1 = 0; hOcc1 < h1_occs; hOcc1++) {
@@ -2143,7 +2143,7 @@ std::vector<int> computeRULSideIndices(int square, int* offset) {
     int h1_occs = std::pow(2, h1_End - h1_Start + 1);
     int h2_occs = std::pow(2, h2_End - h2_Start + 1);
 
-    int offset_add;
+    int offset_add = 0;
 
     for (int vOcc = 0; vOcc < 64; vOcc++) {
         for (int hOcc1 = 0; hOcc1 < h1_occs; hOcc1++) {
@@ -2246,7 +2246,7 @@ void computeRCentreMoves(int square, int* offset, std::vector<MovesStruct>* ROOK
     int v1_occs = std::pow(2, (v1_End - v1_Start) / 8 + 1);
     int v2_occs = std::pow(2, (v2_End - v2_Start) / 8 + 1);
 
-    int offset_add;
+    int offset_add = 0;
     for (int hOcc1 = 0; hOcc1 < h1_occs; hOcc1++) {
         for (int hOcc2 = 0; hOcc2 < h2_occs; hOcc2++) {
             for (int vOcc1 = 0; vOcc1 < v1_occs; vOcc1++) {
@@ -2398,7 +2398,7 @@ std::vector<int> computeRCentreIndices(int square, int* offset) {
     int v1_occs = std::pow(2, (v1_End - v1_Start) / 8 + 1);
     int v2_occs = std::pow(2, (v2_End - v2_Start) / 8 + 1);
 
-    int offset_add;
+    int offset_add = 0;
     for (int hOcc1 = 0; hOcc1 < h1_occs; hOcc1++) {
         for (int hOcc2 = 0; hOcc2 < h2_occs; hOcc2++) {
             for (int vOcc1 = 0; vOcc1 < v1_occs; vOcc1++) {
