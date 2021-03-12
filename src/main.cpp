@@ -31,12 +31,14 @@ namespace Run {
         showLogo();
         showStartUp();
         std::cout << std::flush;
-        std::string input;
-        std::getline(std::cin, input);
-        if (input == "uci") {
-            UCI::init(input);
-        } else {
-            Play::init(input);
+        std::string input("");
+        while (input != "uci" && input != "nouci") {
+            std::getline(std::cin, input);
+            if (input == "uci") {
+                UCI::init(input);
+            } else if (input == "nouci") {
+                Play::init(input);
+            }
         }
     }
 }
