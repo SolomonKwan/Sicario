@@ -46,6 +46,9 @@ class Pos {
         // Move generation
         void getMoves(int& moves_index, std::vector<Move>* pos_moves[MAX_MOVE_SETS]);
 
+        // Accessors
+        Hash getHash();
+
     private:
         // Non-position information
         bool turn;

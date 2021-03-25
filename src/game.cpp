@@ -1771,6 +1771,10 @@ void Pos::getMoves(int& moves_index, std::vector<Move>* pos_moves[MAX_MOVE_SETS]
     }
 }
 
+Hash Pos::getHash() {
+    return this->hash;
+}
+
 /**
  * Gets the squares attacked by an enemy piece.
  * 
