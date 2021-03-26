@@ -3,9 +3,14 @@
 #define UCI_HPP
 
 #include "game.hpp"
-class UCI_Instance {
+#include "search.hpp"
+class UCI {
     public:
+        static void init(std::string input);
+        void runUCI(std::string input);
+
         Pos pos;
+        SearchParams params;
 
         bool debug_mode = false;
 
@@ -29,8 +34,5 @@ class UCI_Instance {
         void sendRegistration();
         void sendInfo();
 };
-namespace UCI {
-    void init(std::string input);
-}
 
 #endif

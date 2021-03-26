@@ -20,19 +20,19 @@ void communicate(std::string communication) {
     std::cout << communication << '\n' << std::flush;
 }
 
-void UCI_Instance::sendIds() {
+void UCI::sendIds() {
     communicate("id name " + (std::string) VERSION);
     communicate("id author " + (std::string) AUTHOR);
 }
 
-void UCI_Instance::options() {
+void UCI::options() {
     
 }
 
 /**
  * Sends the response to the UCI engine after recieving the initial uci command.
  */
-void UCI_Instance::sendInitialResponse() {
+void UCI::sendInitialResponse() {
     this->sendIds();
     this->options();
     communicate("uciok");
@@ -41,23 +41,23 @@ void UCI_Instance::sendInitialResponse() {
 /**
  * Sends the is readyok.
  */
-void UCI_Instance::sendReadyOk() {
+void UCI::sendReadyOk() {
     communicate("readyok");
 }
 
-void UCI_Instance::sendBestMove() {
+void UCI::sendBestMove() {
 
 }
 
-void UCI_Instance::sendCopyProtection() {
+void UCI::sendCopyProtection() {
 
 }
 
-void UCI_Instance::sendRegistration() {
+void UCI::sendRegistration() {
     
 }
 
-void UCI_Instance::sendInfo() {
+void UCI::sendInfo() {
 
 }
 
@@ -69,15 +69,15 @@ void UCI_Instance::sendInfo() {
 /**********************************************************************************************************************/
 /***************************************** Interface to engine commands ***********************************************/
 
-void UCI_Instance::handleIsReady() {
+void UCI::handleIsReady() {
     this->sendReadyOk();
 }
 
-void UCI_Instance::handleSetOption() {
+void UCI::handleSetOption() {
     communicate("handle set option");
 }
 
-void UCI_Instance::handleDebug(std::vector<std::string> inputs) {
+void UCI::handleDebug(std::vector<std::string> inputs) {
     communicate("handle debug");
     if (inputs.size() == 2 && inputs[1] == "on") {
 
@@ -86,36 +86,36 @@ void UCI_Instance::handleDebug(std::vector<std::string> inputs) {
     }
 }
 
-void UCI_Instance::handleSetOption(std::vector<std::string> inputs) {
+void UCI::handleSetOption(std::vector<std::string> inputs) {
     communicate("handle set options");
 }
 
-void UCI_Instance::handleRegister(std::vector<std::string> inputs) {
+void UCI::handleRegister(std::vector<std::string> inputs) {
     communicate("handle register");
 }
 
-void UCI_Instance::handleUCI_NewGame() {
+void UCI::handleUCI_NewGame() {
     communicate("handle ucinewgame");
 }
 
-void UCI_Instance::handlePosition(std::vector<std::string> inputs) {
+void UCI::handlePosition(std::vector<std::string> inputs) {
     communicate("handle position");
 }
 
-void UCI_Instance::handleGo(std::vector<std::string> inputs, std::atomic_bool& stop) {
+void UCI::handleGo(std::vector<std::string> inputs, std::atomic_bool& stop) {
     communicate("Handling go command. For now, assuming a go infinite command");
     stop = false;
-    SearchParams params; // Dummy for now
-    std::thread searchThread(&Pos::search, &this->pos, params, std::ref(stop));
+    std::thread searchThread(&Pos::search, &this->pos, this->params, std::ref(stop));
     searchThread.detach();
 }
 
-void UCI_Instance::handleStop(std::atomic_bool& stop) {
+void UCI::handleStop(std::atomic_bool& stop) {
     communicate("handle stop");
     stop = true;
+    // Print best move/variation here.
 }
 
-void UCI_Instance::handlePonderHit() {
+void UCI::handlePonderHit() {
     communicate("handle ponderhit");
 }
 
@@ -129,23 +129,21 @@ void UCI_Instance::handlePonderHit() {
  * handle different parts of program.
  * @param input: THe initial input string.
  */
-void runUCI(std::string input) {
-    UCI_Instance uci_game;
-    uci_game.sendInitialResponse();
-    std::atomic_bool stop;
-    stop = true;
+void UCI::runUCI(std::string input) {
+    this->sendInitialResponse();
+    std::atomic_bool stop(true);
     while (input != "quit" && input != "exit" && input != "q") {
         std::vector<std::string> commands = split(input, " ");
-        if (commands[0] == "isready") uci_game.handleIsReady();
-        else if (commands[0] == "setoption") uci_game.handleSetOption();
-        else if (commands[0] == "debug") uci_game.handleDebug(commands);
-        else if (commands[0] == "setoption") uci_game.handleSetOption(commands);
-        else if (commands[0] == "register") uci_game.handleRegister(commands);
-        else if (commands[0] == "ucinewgame") uci_game.handleUCI_NewGame();
-        else if (commands[0] == "position") uci_game.handlePosition(commands);
-        else if (commands[0] == "go") uci_game.handleGo(commands, stop);
-        else if (commands[0] == "stop") uci_game.handleStop(stop);
-        else if (commands[0] == "ponderhit") uci_game.handlePonderHit();
+        if (commands[0] == "isready") this->handleIsReady();
+        else if (commands[0] == "setoption") this->handleSetOption();
+        else if (commands[0] == "debug") this->handleDebug(commands);
+        else if (commands[0] == "setoption") this->handleSetOption(commands);
+        else if (commands[0] == "register") this->handleRegister(commands);
+        else if (commands[0] == "ucinewgame") this->handleUCI_NewGame();
+        else if (commands[0] == "position") this->handlePosition(commands);
+        else if (commands[0] == "go") this->handleGo(commands, stop);
+        else if (commands[0] == "stop") this->handleStop(stop);
+        else if (commands[0] == "ponderhit") this->handlePonderHit();
         std::cout << std::flush;
         std::getline(std::cin, input);
     }
@@ -157,5 +155,6 @@ void runUCI(std::string input) {
  * @param input: THe initial input string.
  */
 void UCI::init(std::string input) {
-    runUCI(input);
+    UCI game_instance;
+    game_instance.runUCI(input);
 }
