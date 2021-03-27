@@ -6,7 +6,7 @@
 
 namespace Run {
     void showStartUp() {
-        std::cout << "\nSicario " << VERSION << '\n';
+        std::cout << '\n' << VERSION << '\n';
         std::cout << "By " << AUTHOR << '\n';
         std::cout << "Acknowledgments:\n";
         std::cout << "    " << CHESS_PROGRAMMING << '\n';
@@ -32,7 +32,7 @@ namespace Run {
         showStartUp();
         std::cout << std::flush;
         std::string input("");
-        while (input != "uci" && input != "nouci") {
+        while (input != "uci" && input != "nouci" && input != "q" && input != "quit" && input != "exit") {
             std::getline(std::cin, input);
             if (input == "uci") {
                 UCI::init(input);
