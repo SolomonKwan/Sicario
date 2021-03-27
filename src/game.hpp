@@ -93,8 +93,8 @@ class Pos {
         // Evaluation and search
         SearchInfo searchInfo;
         int depth = 3;
-        std::vector<std::pair<int, Move>> orderMoves(SearchParams, MoveList&);
-        void mcst(std::vector<std::pair<int, Move>>, SearchParams, std::atomic_bool&);
+        std::vector<std::pair<int, Move>> scoreMoves(SearchParams, MoveList&);
+        void mcst(SearchParams, std::atomic_bool&);
 
         // Move ordering
         int scoreMove(Move);

@@ -69,9 +69,7 @@ void SearchInfo::clearTable() {
  */
 void Pos::search(SearchParams params, std::atomic_bool& stop) {
     std::cout << "executing search\n" << std::flush;
-    MoveList moves(*this);
-    std::vector<std::pair<int, Move>> ordered_moves = this->orderMoves(params, moves);
-    this->mcst(ordered_moves, params, stop);
+    this->mcst(params, stop);
     std::cout << "ending search\n" << std::flush;
 }
 
@@ -81,7 +79,7 @@ void Pos::search(SearchParams params, std::atomic_bool& stop) {
  * 
  * TODO: Need to make the ordering algorithm cleaner. Somekind of ordering while iterating the first time.
  */
-std::vector<std::pair<int, Move>> Pos::orderMoves(SearchParams, MoveList& moves) {
+std::vector<std::pair<int, Move>> Pos::scoreMoves(SearchParams, MoveList& moves) {
     std::vector<std::pair<int, Move>> ordering;
     for (Move move : moves) {
         ordering.push_back(std::make_pair(this->scoreMove(move), move));
