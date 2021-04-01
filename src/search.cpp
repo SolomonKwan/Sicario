@@ -112,20 +112,20 @@ int Pos::scoreMove(Move move) {
  * @param move: Move to guess the score of.
  */
 int Pos::kingSafety(Move move) {
-
+    return 0;
 }
 
 int Pos::scoreCastlingSafety(Move move) {
-
+    return 0;
 }
 
 int Pos::scoreKingSafety(Move move) {
-
+    return 0;
 }
 
 /**
  * Gives a preferential score to certain captures first.
  */
 int Pos::captures(Move move) {
-
+    return 0;
 }

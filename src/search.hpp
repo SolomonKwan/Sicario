@@ -17,10 +17,6 @@ struct SearchParams {
     int children_to_search = 5; // Default to 5 child nodes for each node in the tree.
 };
 
-struct Node {
-    
-};
-
 class SearchInfo {
     public:
         SearchInfo(int hashSize);
