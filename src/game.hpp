@@ -48,6 +48,7 @@ class Pos {
 
         // Accessors
         Hash getHash();
+        bool getTurn();
 
     private:
         // Non-position information

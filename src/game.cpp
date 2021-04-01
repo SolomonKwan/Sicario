@@ -860,6 +860,10 @@ Bitboard Pos::getBishopCheckRays(Square square, Bitboard& checkers_only) {
     return result;
 }
 
+bool Pos::getTurn() {
+    return this->turn;
+}
+
 /**
  * Gets a bitboard of the rays between the rook (queen) checkers and the king
  * being checked.
