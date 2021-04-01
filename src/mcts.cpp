@@ -1,10 +1,14 @@
 
 #include <iostream>
 #include <algorithm>
+#include <stack>
 
 #include "mcts.hpp"
 
-Node::Node(Pos& pos, bool root) : pos(pos) {
+int Node::totalVisits = 0;
+
+Node::Node(Pos& pos, bool root) {
+    this->hash = pos.getHash();
     this->isRoot = root;
 }
 
@@ -12,25 +16,32 @@ float Node::UCB1() const {
     return 0.0;
 }
 
-Node& Node::select() {
+Node& Node::select(Pos& pos, std::stack<Move>& moveStack) {
     if (this->children.size() == 0) {
         return *this;
     }
 
-    Node* node;
-    auto comp = [](const Node& a, const Node& b) {
-        return a.UCB1() < b.UCB1();
+    auto comp = [](const std::pair<Node, Edge>& a, const std::pair<Node, Edge>& b) {
+        return a.first.UCB1() < b.first.UCB1();
     };
-    std::vector<Node>::iterator start = this->children.begin(), end = this->children.end();
-    if (this->pos.getTurn() == WHITE) {
-        node = &*std::max_element(start, end, comp);
+    std::vector<std::pair<Node, Edge>>::iterator start = this->children.begin(), end = this->children.end();
+
+    Node* node;
+    if (pos.getTurn() == WHITE) {
+        auto pair = std::max_element(start, end, comp);
+        node = &(pair->first);
+        pos.makeMove(pair->second);
+        moveStack.push(pair->second);
     } else {
-        node = &*std::min_element(start, end, comp);
+        auto pair = std::min_element(start, end, comp);
+        node = &(pair->first);
+        pos.makeMove(pair->second);
+        moveStack.push(pair->second);
     }
-    return node->select();
+    return node->select(pos, moveStack);
 }
 
-void Node::expand() {
+Node& Node::expand() {
     
 }
 
@@ -42,14 +53,18 @@ void Node::rollback() {
 
 }
 
-void Pos::mcst(SearchParams sp, std::atomic_bool& stop) {
-    Node root = Node(*this, true);
-    // std::cout << "Root hash: " << root.pos.getHash() << "\n";
+Node initialise(Pos& pos) {
+    Node root = Node(pos, true);
+    return root;
+}
+
+void mcts(Pos& pos, SearchParams sp, std::atomic_bool& stop) {
+    std::stack<Move> moveStack;
+    Node root = initialise(pos);
     while (!stop) {
-        Node leaf = root.select();
-        // std::cout << "Chosen node hash: " << leaf.pos.getHash() << "\n";
+        Node leaf = root.select(pos, moveStack);
+        leaf = leaf.expand();
         leaf.simulate();
         leaf.rollback();
-        break;
     }
 }

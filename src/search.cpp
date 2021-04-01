@@ -1,6 +1,7 @@
 
 #include "game.hpp"
 #include "search.hpp"
+#include "mcts.hpp"
 
 #include <iostream>
 #include <cmath>
@@ -69,7 +70,7 @@ void SearchInfo::clearTable() {
  */
 void Pos::search(SearchParams params, std::atomic_bool& stop) {
     std::cout << "executing search\n" << std::flush;
-    this->mcst(params, stop);
+    mcts(*this, params, stop);
     std::cout << "ending search\n" << std::flush;
 }
 

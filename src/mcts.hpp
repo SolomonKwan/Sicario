@@ -4,21 +4,27 @@
 
 #include "game.hpp"
 
+typedef Move Edge;
+
 class Node {
     public:
-        Node(Pos&, bool root = false);
+        Node(Pos&, bool = false);
 
-        Pos& pos;
-        std::vector<Node> parents;
-        std::vector<Node> children; // Ordered
+        std::vector<std::pair<Node, Edge>> parents;
+        std::vector<std::pair<Node, Edge>> children;
         bool isRoot;
-        float value;
+        float value = 0;
+        int visits = 0;
+        static int totalVisits;
+        Hash hash;
 
-        Node& select();
-        void expand();
+        Node& select(Pos&, std::stack<Move>&);
+        Node& expand();
         float simulate();
         void rollback();
         float UCB1() const;
 };
+
+void mcts(Pos& pos, SearchParams sp, std::atomic_bool& stop);
 
 #endif

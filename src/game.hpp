@@ -42,6 +42,7 @@ class Pos {
         void setDepth(int depth);
         void setHashSize(int size);
         void search(SearchParams, std::atomic_bool&);
+        void makeMove(Move move);
 
         // Move generation
         void getMoves(int& moves_index, std::vector<Move>* pos_moves[MAX_MOVE_SETS]);
@@ -95,7 +96,6 @@ class Pos {
         SearchInfo searchInfo;
         int depth = 3;
         std::vector<std::pair<int, Move>> scoreMoves(SearchParams, MoveList&);
-        void mcst(SearchParams, std::atomic_bool&);
 
         // Move ordering
         int scoreMove(Move);
@@ -136,7 +136,6 @@ class Pos {
         void removePiece();
 
         // Make move
-        void makeMove(Move move);
         void makeKingMoves(Move move);
         void makeQueenMoves(Move move);
         void makeRookMoves(Move move);
