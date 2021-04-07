@@ -25,10 +25,10 @@ class MoveList;
  */
 class Pos {
     public:
-        Pos(std::string fen = STANDARD_GAME);
+        Pos(std::string = STANDARD_GAME);
         void run();
-        uint64_t perft(int depth, bool print = false);
-        ExitCode parseFen(std::string fen);
+        uint64_t perft(int, bool = false);
+        ExitCode parseFen(std::string);
         void display() const;
         void displayAll() const;
         void setPlayer(Player, std::string);
@@ -39,13 +39,14 @@ class Pos {
         int material() const;
 
         // Tree search
-        void setDepth(int depth);
-        void setHashSize(int size);
+        void setDepth(int);
+        void setHashSize(int);
         void search(SearchParams, std::atomic_bool&);
-        void makeMove(Move move);
+        void makeMove(Move);
+        void undoMove();
 
         // Move generation
-        void getMoves(int& moves_index, std::vector<Move>* pos_moves[MAX_MOVE_SETS]);
+        void getMoves(int&, std::vector<Move>*[MAX_MOVE_SETS]);
 
         // Accessors
         Hash getHash();
@@ -92,6 +93,9 @@ class Pos {
         // Miscellaneous info
         PlayerType white = HUMAN, black = HUMAN;
 
+        // Perft hashing
+        std::unordered_map<Bitboard, uint64_t> perft_hash;
+
         // Evaluation and search
         SearchInfo searchInfo;
         int depth = 3;
@@ -104,92 +108,86 @@ class Pos {
         int scoreKingSafety(Move);
         int captures(Move);
 
-        // Perft hashing
-        std::unordered_map<Bitboard, uint64_t> perft_hash;
-
         // EOG checks
-        ExitCode isEOG(MoveList& move_list);
+        ExitCode isEOG(MoveList&);
         bool insufficientMaterial();
         bool isThreeFoldRep();
 
         // Game logic
-        void checkCastlingEnPassantMoves(uint start, uint end, Move& move);
-        bool validMove(Move move, MoveList&);
+        void checkCastlingEnPassantMoves(uint, uint, Move&);
+        bool validMove(Move, MoveList&);
         bool isChecked();
         bool isDoubleChecked();
-        Bitboard getBishopCheckRays(Square square, Bitboard& checkers_only);
-        Bitboard getRookCheckRays(Square square, Bitboard& checkers);
-        Bitboard getPawnCheckers(Square square, Bitboard& checkers_only);
-        Bitboard getKnightCheckers(Square square, Bitboard& checkers_only);
-        const int rookBlockIndex(Bitboard pos, Square square);
+        Bitboard getBishopCheckRays(Square, Bitboard&);
+        Bitboard getRookCheckRays(Square, Bitboard&);
+        Bitboard getPawnCheckers(Square, Bitboard&);
+        Bitboard getKnightCheckers(Square, Bitboard&);
+        const int rookBlockIndex(Bitboard, Square);
         Bitboard isAttacked(const Square, const bool);
         Bitboard isOccupied(const Square);
         void setBitboards();
-        bool oneBitSet(Bitboard bits);
+        bool oneBitSet(Bitboard);
         Bitboard getKingAttackers(const Square, const bool) const;
         void setCheckers();
         Bitboard getKingAttackBitBoard() const;
 
         // Position updates
-        void findAndRemovePiece(PieceType piece, Square square);
-        void addPiece(PieceType piece, Square square);
+        void findAndRemovePiece(PieceType, Square);
+        void addPiece(PieceType, Square);
         void removePiece();
 
         // Make move
-        void makeKingMoves(Move move);
-        void makeQueenMoves(Move move);
-        void makeRookMoves(Move move);
-        void makeBishopMoves(Move move);
-        void makeKnightMoves(Move move);
-        void makePawnMoves(Move move);
+        void makeKingMoves(Move);
+        void makeQueenMoves(Move);
+        void makeRookMoves(Move);
+        void makeBishopMoves(Move );
+        void makeKnightMoves(Move);
+        void makePawnMoves(Move);
         void handleCastle();
 
         // Undo
         void undoNormal();
-        void undoMove();
         void undoCastling();
         void undoPromotion();
         void undoEnPassant();
 
         // Move generation
         void getEnemyAttacks();
-        MovesStruct* getRookFamily(Square square);
-        MovesStruct* getBishopFamily(Square square);
-        Bitboard pawnMoveArgs(Square square);
+        MovesStruct* getRookFamily(Square);
+        MovesStruct* getBishopFamily(Square);
+        Bitboard pawnMoveArgs(Square);
 
         // Normal move generation
-        void getNormalMoves(std::vector<Move>* pos_moves[MAX_MOVE_SETS], int& moves_index);
-        void getKingMoves(std::vector<Move>* pos_moves[MAX_MOVE_SETS], int& moves_index);
-        void getQueenMoves(std::vector<Move>* pos_moves[MAX_MOVE_SETS], int& moves_index);
-        void getRookMoves(std::vector<Move>* pos_moves[MAX_MOVE_SETS], int& moves_index);
-        void getBishopMoves(std::vector<Move>* pos_moves[MAX_MOVE_SETS], int& moves_index);
-        void getKnightMoves(std::vector<Move>* pos_moves[MAX_MOVE_SETS], int& moves_index);
-        void getPawnMoves(std::vector<Move>* pos_moves[MAX_MOVE_SETS], int& moves_index);
-        void getRookPinMoves(int square, std::vector<Move>* pos_moves[MAX_MOVE_SETS], int& moves_index);
-        void getBishopPinMoves (int square, std::vector<Move>* pos_moves[MAX_MOVE_SETS], int& moves_index);
-        void getCastlingMoves(std::vector<Move>* pos_moves[MAX_MOVE_SETS], int& moves_index);
-        void getEpMoves(std::vector<Move>* pos_moves[MAX_MOVE_SETS], int& moves_index);
-        void horizontalPinEp(int king, bool turn, int attacker_sq, int captured_pawn, int ep,
-                std::vector<Move>* pos_moves[MAX_MOVE_SETS], int& moves_index);
-        void diagonalPinEp(int king, bool turn, int attacker_sq, int captured_pawn, int ep,
-                std::vector<Move>* pos_moves[MAX_MOVE_SETS], int& moves_index);
+        void getNormalMoves(std::vector<Move>*[MAX_MOVE_SETS], int&);
+        void getKingMoves(std::vector<Move>*[MAX_MOVE_SETS], int&);
+        void getQueenMoves(std::vector<Move>*[MAX_MOVE_SETS], int&);
+        void getRookMoves(std::vector<Move>*[MAX_MOVE_SETS], int&);
+        void getBishopMoves(std::vector<Move>*[MAX_MOVE_SETS], int&);
+        void getKnightMoves(std::vector<Move>*[MAX_MOVE_SETS], int&);
+        void getPawnMoves(std::vector<Move>*[MAX_MOVE_SETS], int&);
+        void getRookPinMoves(int, std::vector<Move>*[MAX_MOVE_SETS], int&);
+        void getBishopPinMoves (int, std::vector<Move>*[MAX_MOVE_SETS], int&);
+        void getCastlingMoves(std::vector<Move>*[MAX_MOVE_SETS], int&);
+        void getEpMoves(std::vector<Move>*[MAX_MOVE_SETS], int&);
+        void horizontalPinEp(int, bool, int, int, int, std::vector<Move>*[MAX_MOVE_SETS], int&);
+        void diagonalPinEp(int, bool, int, int, int, std::vector<Move>*[MAX_MOVE_SETS], int&);
 
         // Check move generation
-        void getCheckedMoves(std::vector<Move>* pos_moves[MAX_MOVE_SETS], int& moves_index);
-        void getCheckedEp(Bitboard checkers, std::vector<Move>* pos_moves[MAX_MOVE_SETS], int& moves_index);
+        void getCheckedMoves(std::vector<Move>*[MAX_MOVE_SETS], int&);
+        void getCheckedEp(Bitboard, std::vector<Move>*[MAX_MOVE_SETS], int&);
 
         // Move reading and parsing
         Move chooseMove(MoveList&);
-        void getSquares(std::string move_string, Move& move, uint& start, uint& end);
+        void getSquares(std::string, Move&, uint&, uint&);
 
         // Miscellaneous
         void initialiseHash();
-        void showEOG(ExitCode code);
+        void showEOG(ExitCode);
         std::string getFEN();
-        void saveHistory(Move move);
+        void saveHistory(Move);
         void zero();
-        void incrementHash(Move move);
-        void decrementHash(Hash hash);
+        void incrementHash(Move);
+        void decrementHash(Hash);
 };
 
 class MoveList {
@@ -230,7 +228,7 @@ class MoveList {
 };
 
 namespace Play {
-    void init(std::string input);
+    void init(std::string);
 }
 
 #endif
