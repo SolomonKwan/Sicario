@@ -7,13 +7,12 @@
 
 int Node::totalVisits = 0;
 
-Node::Node(Pos& pos, bool root) {
-    this->hash = pos.getHash();
+Node::Node(bool root) {
     this->isRoot = root;
 }
 
 float Node::UCB1() const {
-    return 0.0;
+    return (this->value / this->visits) + this->c * std::sqrt(std::log(Node::totalVisits) / this->visits);
 }
 
 Node& Node::select(Pos& pos, std::stack<Move>& moveStack) {
@@ -41,8 +40,31 @@ Node& Node::select(Pos& pos, std::stack<Move>& moveStack) {
     return node->select(pos, moveStack);
 }
 
-Node& Node::expand() {
-    
+Node& Node::expand(Pos& pos, std::stack<Move>& moveStack, std::unordered_map<Hash, Node>& nodeMap) {
+    if (this->visits == 0) {
+        return *this;
+    }
+
+    // Expand the node
+    MoveList moves = MoveList(pos);
+    for (Move move : moves) {
+        pos.makeMove(move);
+
+        auto pair = nodeMap.find(pos.getHash());
+        if (pair != nodeMap.end()) {
+            this->children.push_back(std::make_pair(pair->second, (Edge) move));
+            pair->second.parents.push_back(std::make_pair(*this, (Edge) move));
+        } else {
+            Node newNode = Node();
+            this->children.push_back(std::make_pair(newNode, (Edge) move));
+            newNode.parents.push_back(std::make_pair(*this, (Edge) move));
+        }
+
+        pos.undoMove();
+    }
+
+    // Return the best node. For now, choose first one
+    return this->children[0].first;
 }
 
 float Node::simulate() {
@@ -53,18 +75,25 @@ void Node::rollback() {
 
 }
 
-Node initialise(Pos& pos) {
-    Node root = Node(pos, true);
+Node initialise(Pos& pos, std::unordered_map<Hash, Node>& nodeMap) {
+    Node root = Node(true);
+    nodeMap.insert(std::make_pair(pos.getHash(), root));
     return root;
 }
 
+void Node::resetTotalCount() {
+    Node::totalVisits = 0;
+}
+
 void mcts(Pos& pos, SearchParams sp, std::atomic_bool& stop) {
+    Node::resetTotalCount();
     std::stack<Move> moveStack;
-    Node root = initialise(pos);
+    std::unordered_map<Hash, Node> nodeMap;
+    Node root = initialise(pos, nodeMap);
     while (!stop) {
         Node leaf = root.select(pos, moveStack);
-        leaf = leaf.expand();
+        leaf = leaf.expand(pos, moveStack, nodeMap);
         leaf.simulate();
-        leaf.rollback();
+    //     leaf.rollback();
     }
 }
