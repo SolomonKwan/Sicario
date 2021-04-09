@@ -584,6 +584,7 @@ void showUsage(char *argv[]) {
  * @param argv: Array of command line arguments.
  */
 void Pos::showEOG(ExitCode code) {
+    if (this->quiteMode) return;
     switch (code) {
         case NORMAL_PLY:
             std::cout << "Debugging: normal\n";
@@ -1595,6 +1596,7 @@ MovesStruct* Pos::getBishopFamily(Square square) {
  * @param args: The command line arguments.
  */
 void Pos::display() const {
+    if (this->quiteMode) return;
     bool light_mode = true;
     std::cout << '\n';
     
@@ -2840,9 +2842,11 @@ Move Pos::chooseMove(MoveList& moves) {
         }
     } else {
         move = moves.randomMove();
-        std::cout << "Computer move: ";
-        printMove(move, false);
-        std::cout << "\n";
+        if (!this->quiteMode) {
+            std::cout << "Computer move: ";
+            printMove(move, false);
+            std::cout << "\n";
+        }
     }
 
     return move;
@@ -2916,7 +2920,7 @@ void Pos::setBitboards() {
 /**
  * Handles a single game.
  */
-void Pos::run() {
+ExitCode Pos::run() {
     ExitCode code = NORMAL_PLY;
     MoveList moves = MoveList(*this);
 
@@ -2928,6 +2932,7 @@ void Pos::run() {
 
     this->display();
     this->showEOG(code);
+    return code;
 }
 
 /**
@@ -3080,8 +3085,8 @@ void runPerft(int depth, Pos game) {
 /**
  * Makes call to run a game instance. Takes pos by value to simplify runNormal loop.
  */
-void handleGame(Pos pos) {
-    pos.run();
+ExitCode handleGame(Pos pos) {
+    return pos.run();
 }
 
 /**
@@ -3136,13 +3141,34 @@ void Pos::setHashSize(int size) {
     this->searchInfo.setHashSize(size);
 }
 
+void Pos::toggleQuiet() {
+    this->quiteMode = !this->quiteMode;
+}
+
 void setCommand(std::vector<std::string> commands, Pos& pos) {
     if (commands[1] == "fen") setFen(commands, pos);
     else if (commands[1] == "white") pos.setPlayer(WHITE, commands[2]);
     else if (commands[1] == "black") pos.setPlayer(BLACK, commands[2]);
     else if (commands[1] == "depth") pos.setDepth(std::stoi(commands[2]));
     else if (commands[1] == "hash") pos.setHashSize(std::stoi(commands[2]));
+    else if (commands[1] == "quiet") pos.toggleQuiet();
     else std::cout << "unknown set option\n";
+}
+
+void runSample(Pos pos, int num) {
+    std::unordered_map<ExitCode, int> results;
+    for (int i = 0; i < num; i++) {
+        Pos newPos = pos;
+        ExitCode code = handleGame(pos);
+        results[code]++;
+    }
+    std::cout << "White wins: " << results[WHITE_WINS] << '\n';
+    std::cout << "Black wins: " << results[BLACK_WINS] << '\n';
+    std::cout << "Stalemate: " << results[STALEMATE] << '\n';
+    std::cout << "Three fold repetition: " << results[THREE_FOLD_REPETITION] << '\n';
+    std::cout << "Fifty move rules: " << results[FIFTY_MOVES_RULE] << '\n';
+    std::cout << "Insufficient material: " << results[INSUFFICIENT_MATERIAL] << '\n';
+    std::cout << "Total: " << num << "\n\n";
 }
 
 /**
@@ -3154,6 +3180,7 @@ void runNormal(std::string input) {
     while (input != "exit" && input != "quit" && input != "q") {
         std::vector<std::string> commands = split(input, " ");
         if (commands[0] == "play") handleGame(pos);
+        else if (commands[0] == "sample") runSample(pos, std::stoi(commands[1]));
         else if (commands[0] == "perft") runPerft(std::stoi(commands[1]), pos);
         else if (commands[0] == "set") setCommand(commands, pos);
         else if (commands[0] == "display" && commands.size() == 1) pos.display();

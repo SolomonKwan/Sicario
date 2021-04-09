@@ -26,12 +26,13 @@ class MoveList;
 class Pos {
     public:
         Pos(std::string = STANDARD_GAME);
-        void run();
+        ExitCode run();
         uint64_t perft(int, bool = false);
         ExitCode parseFen(std::string);
         void display() const;
         void displayAll() const;
         void setPlayer(Player, std::string);
+        void toggleQuiet();
 
         // Static position evaluation
         bool isEndGame() const;
@@ -96,6 +97,7 @@ class Pos {
         // Miscellaneous info
         PlayerType white = COMPUTER, black = COMPUTER;
         bool unicodeMode = true;
+        bool quiteMode = false;
 
         // Perft hashing
         std::unordered_map<Bitboard, uint64_t> perft_hash;
