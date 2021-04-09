@@ -91,9 +91,9 @@ void mcts(Pos& pos, SearchParams sp, std::atomic_bool& stop) {
     std::unordered_map<Hash, Node> nodeMap;
     Node root = initialise(pos, nodeMap);
     while (!stop) {
-        Node leaf = root.select(pos, moveStack);
+        Node& leaf = root.select(pos, moveStack);
         leaf = leaf.expand(pos, moveStack, nodeMap);
         leaf.simulate();
-    //     leaf.rollback();
+        leaf.rollback();
     }
 }

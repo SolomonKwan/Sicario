@@ -2838,7 +2838,7 @@ Move Pos::chooseMove(MoveList& moves) {
             } else break;
         }
     } else {
-        
+        move = moves.randomMove();
     }
 
     return move;
@@ -2959,6 +2959,11 @@ uint64_t MoveList::bulkCount() {
         count += this->moves[i]->size();
     }
     return count;
+}
+
+Move MoveList::randomMove() {
+    int i = std::rand() % (this->moves_index);
+    return (*this->moves[i])[std::rand() % (this->moves[i]->size())];
 }
 
 MoveList::Iterator::Iterator(int vec_cnt, int i, int j, std::vector<Move>** moves, Move& endMove) {

@@ -194,6 +194,7 @@ class MoveList {
     public:
         MoveList(Pos&);
         uint64_t bulkCount();
+        Move randomMove();
 
         struct Iterator {
             Iterator(int, int, int, std::vector<Move>**, Move&);
