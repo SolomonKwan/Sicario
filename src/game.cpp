@@ -3,6 +3,7 @@
 #include <bitset>
 #include <vector>
 #include <cmath>
+#include <random>
 
 #include "game.hpp"
 #include "search.hpp"
@@ -1607,39 +1608,39 @@ void Pos::display() const {
             PieceType piece = this->pieces[square];
             if (piece == W_KING || piece == B_KING) {
                 if (this->sides[WHITE] & (1ULL << square)) {
-                    rank_string += (light_mode ? "\u265A " : "\u2654 ");
+                    rank_string += this->unicodeMode ? "K " : (light_mode ? "\u265A " : "\u2654 ");
                 } else {
-                    rank_string += (light_mode ? "\u2654 " : "\u265A ");
+                    rank_string += this->unicodeMode ? "k " : (light_mode ? "\u2654 " : "\u265A ");
                 }
             } else if (piece == W_QUEEN || piece == B_QUEEN) {
                 if (this->sides[WHITE] & (1ULL << square)) {
-                    rank_string += (light_mode ? "\u265B " : "\u2655 ");
+                    rank_string += this->unicodeMode ? "Q " : (light_mode ? "\u265B " : "\u2655 ");
                 } else {
-                    rank_string += (light_mode ? "\u2655 " : "\u265B ");
+                    rank_string += this->unicodeMode ? "q " : (light_mode ? "\u2655 " : "\u265B ");
                 }
             } else if (piece == W_ROOK || piece == B_ROOK) {
                 if (this->sides[WHITE] & (1ULL << square)) {
-                    rank_string += (light_mode ? "\u265C " : "\u2656 ");
+                    rank_string += this->unicodeMode ? "R " : (light_mode ? "\u265C " : "\u2656 ");
                 } else {
-                    rank_string += (light_mode ? "\u2656 " : "\u265C ");
+                    rank_string += this->unicodeMode ? "r " : (light_mode ? "\u2656 " : "\u265C ");
                 }
             } else if (piece == W_BISHOP || piece == B_BISHOP) {
                 if (this->sides[WHITE] & (1ULL << square)) {
-                    rank_string += (light_mode ? "\u265D " : "\u2657 ");
+                    rank_string += this->unicodeMode ? "B " : (light_mode ? "\u265D " : "\u2657 ");
                 } else {
-                    rank_string += (light_mode ? "\u2657 " : "\u265D ");
+                    rank_string += this->unicodeMode ? "b " : (light_mode ? "\u2657 " : "\u265D ");
                 }
             } else if (piece == W_KNIGHT || piece == B_KNIGHT) {
                 if (this->sides[WHITE] & (1ULL << square)) {
-                    rank_string += (light_mode ? "\u265E " : "\u2658 ");
+                    rank_string += this->unicodeMode ? "N " : (light_mode ? "\u265E " : "\u2658 ");
                 } else {
-                    rank_string += (light_mode ? "\u2658 " : "\u265E ");
+                    rank_string += this->unicodeMode ? "n " : (light_mode ? "\u2658 " : "\u265E ");
                 }
             } else if (piece == W_PAWN || piece == B_PAWN) {
                 if (this->sides[WHITE] & (1ULL << square)) {
-                    rank_string += (light_mode ? "\u265F " : "\u2659 ");
+                    rank_string += this->unicodeMode ? "P " : (light_mode ? "\u265F" : "\u2659 ");
                 } else {
-                    rank_string += (light_mode ? "\u2659 " : "\u265F ");
+                    rank_string += this->unicodeMode ? "p " : (light_mode ? "\u2659 " : "\u265F ");
                 }
             } else {
                 rank_string += "  ";
@@ -2839,6 +2840,9 @@ Move Pos::chooseMove(MoveList& moves) {
         }
     } else {
         move = moves.randomMove();
+        std::cout << "Computer move: ";
+        printMove(move, false);
+        std::cout << "\n";
     }
 
     return move;
@@ -2962,8 +2966,14 @@ uint64_t MoveList::bulkCount() {
 }
 
 Move MoveList::randomMove() {
-    int i = std::rand() % (this->moves_index);
-    return (*this->moves[i])[std::rand() % (this->moves[i]->size())];
+    std::random_device dev;
+    std::mt19937 rng(dev());
+    std::uniform_int_distribution<> dist1(0, this->moves_index - 1);
+    int i = dist1(rng);
+    std::uniform_int_distribution<> dist2(0, this->moves[i]->size() - 1);
+    int j = dist2(rng);
+
+    return (*this->moves[i])[j];
 }
 
 MoveList::Iterator::Iterator(int vec_cnt, int i, int j, std::vector<Move>** moves, Move& endMove) {

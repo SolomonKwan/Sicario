@@ -28,6 +28,7 @@ main() {
 sicario_value() {
     make -C ~/Sicario/src/ -s
 	~/Sicario/src/sicario > ~/Sicario/tests/sc_result <<-EOF
+		nouci
 		set fen $1
 		perft $2
 		exit
@@ -125,6 +126,7 @@ perft() {
 	# Run sicario perft
 	make -C ~/Sicario/src/ -s
 	~/Sicario/src/sicario > ~/Sicario/tests/sc_result <<-EOF
+		nouci
 		set fen $FEN
 		perft $1
 		exit

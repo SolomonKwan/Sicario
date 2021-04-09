@@ -52,6 +52,9 @@ class Pos {
         Hash getHash();
         bool getTurn();
 
+        // Checkers
+        ExitCode isEOG(MoveList&);
+
     private:
         // Non-position information
         bool turn;
@@ -91,7 +94,8 @@ class Pos {
         int ply;
 
         // Miscellaneous info
-        PlayerType white = HUMAN, black = HUMAN;
+        PlayerType white = COMPUTER, black = COMPUTER;
+        bool unicodeMode = true;
 
         // Perft hashing
         std::unordered_map<Bitboard, uint64_t> perft_hash;
@@ -109,7 +113,6 @@ class Pos {
         int captures(Move);
 
         // EOG checks
-        ExitCode isEOG(MoveList&);
         bool insufficientMaterial();
         bool isThreeFoldRep();
 

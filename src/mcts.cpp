@@ -67,12 +67,32 @@ Node& Node::expand(Pos& pos, std::stack<Move>& moveStack, std::unordered_map<Has
     return this->children[0].first;
 }
 
-float Node::simulate() {
-    return 0;
+float Node::simulate(Pos& pos) {
+    int moveCount = 0;
+    MoveList moves = MoveList(pos);
+    ExitCode code;
+    while (!(code = pos.isEOG(moves))) {
+        pos.makeMove(moves.randomMove());
+        moveCount++;
+        moves = MoveList(pos);
+    }
+
+    while (moveCount != 0) {
+        pos.undoMove();
+        moveCount--;
+    }
+
+    if (code == BLACK_WINS) {
+        return -1.0;
+    } else if (code == WHITE_WINS) {
+        return 1.0;
+    }
+    return 0.0;
 }
 
-void Node::rollback() {
-
+void Node::rollback(float val) {
+    this->visits += 1;
+    this->value += val;
 }
 
 Node initialise(Pos& pos, std::unordered_map<Hash, Node>& nodeMap) {
@@ -93,7 +113,7 @@ void mcts(Pos& pos, SearchParams sp, std::atomic_bool& stop) {
     while (!stop) {
         Node& leaf = root.select(pos, moveStack);
         leaf = leaf.expand(pos, moveStack, nodeMap);
-        leaf.simulate();
-        leaf.rollback();
+        float val = leaf.simulate(pos);
+        leaf.rollback(val);
     }
 }
