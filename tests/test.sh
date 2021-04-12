@@ -10,12 +10,12 @@ main() {
 		record_result)
 			record_result "$2"
 			;;
-        record_file)
-            record_file "$2"
-            ;;
-        check)
-            check
-            ;;
+		record_file)
+			record_file "$2"
+			;;
+		check)
+			check
+			;;
 		clean)
 			clean
 			;;
@@ -26,7 +26,7 @@ main() {
 }
 
 sicario_value() {
-    make -C ~/Sicario/src/ -s
+	make -C ~/Sicario/src/ -s
 	~/Sicario/src/sicario > ~/Sicario/tests/sc_result <<-EOF
 		nouci
 		set fen $1
@@ -48,21 +48,21 @@ perft_suite() {
 		else
 			echo "[ FAILED ] " "$FEN"
 		fi
-    done < ~/Sicario/tests/perftsuite.epd
+	done < ~/Sicario/tests/perftsuite.epd
 	rm sc_result
 }
 
 clean() {
 	echo "Removing files:"
-	echo "    sc_result_vd"
-    echo "    sc_result"
-	echo "    sf_result_vd"
-    echo "    sf_result"
+	echo "	sc_result_vd"
+	echo "	sc_result"
+	echo "	sf_result_vd"
+	echo "	sf_result"
 	rm ~/Sicario/tests/sc_result_vd ~/Sicario/tests/sf_result_vd ~/Sicario/tests/sf_result ~/Sicario/tests/sc_result
 }
 
 stockfish_value() {
-    ~/Stockfish/src/stockfish > ~/Sicario/tests/sf_result <<-EOF
+	~/Stockfish/src/stockfish > ~/Sicario/tests/sf_result <<-EOF
 		position fen "$1"
 		go perft $2
 	EOF
@@ -71,30 +71,30 @@ stockfish_value() {
 
 # Quick check of perft 5 on the original and kiwipete position.
 check() {
-    echo "Performing quick check..."
-    local original="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
-    val=$(sicario_value "$original" 5)
-    actualVal=$(stockfish_value "$original" 5)
-    if [[ $val -eq $actualVal ]]
-    then
-        echo "[ PASSED ] Original position"
-    else
-        echo "[ FAILED ] Original position"
-    fi
+	echo "Performing quick check..."
+	local original="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+	val=$(sicario_value "$original" 5)
+	actualVal=$(stockfish_value "$original" 5)
+	if [[ $val -eq $actualVal ]]
+	then
+		echo "[ PASSED ] Original position"
+	else
+		echo "[ FAILED ] Original position"
+	fi
 
-    local kiwipete="r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1"
-    val=$(sicario_value "$kiwipete" 5)
-    actualVal=$(stockfish_value "$kiwipete" 5)
-    if [[ $val -eq $actualVal ]]
-    then
-        echo "[ PASSED ] Kiwipete position"
-    else
-        echo "[ FAILED ] Kiwipete position"
-    fi
+	local kiwipete="r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1"
+	val=$(sicario_value "$kiwipete" 5)
+	actualVal=$(stockfish_value "$kiwipete" 5)
+	if [[ $val -eq $actualVal ]]
+	then
+		echo "[ PASSED ] Kiwipete position"
+	else
+		echo "[ FAILED ] Kiwipete position"
+	fi
 }
 
 record_result() {
-    echo "Recording result" "$1"
+	echo "Recording result" "$1"
 	local entry=$1
 	for i in {1..6}; do
 		local val=$(stockfish_value "$1" "$i")
@@ -104,9 +104,9 @@ record_result() {
 }
 
 record_file() {
-    while IFS= read -r line; do
+	while IFS= read -r line; do
 		record_result "$line"
-    done < $1
+	done < $1
 	rm ~/Sicario/tests/sf_result
 }
 
