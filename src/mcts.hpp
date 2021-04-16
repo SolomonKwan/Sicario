@@ -23,7 +23,7 @@ class Node {
         Node& select(Pos&, std::stack<Move>&);
         Node& expand(Pos&, std::stack<Move>&, std::unordered_map<Hash, Node>&);
         float simulate(Pos&);
-        void rollback(float);
+        void rollback(float, Pos&);
         float UCB1() const;
         static void resetTotalCount();
 };
