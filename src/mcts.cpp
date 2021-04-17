@@ -6,7 +6,7 @@
 
 #include "mcts.hpp"
 
-float Node::totalVisits = 0;
+Player Node::rootPlayer = WHITE;
 
 Node::Node(Move incoming_move, bool root, Hash hash) {
     this->isRoot = root;
@@ -15,7 +15,8 @@ Node::Node(Move incoming_move, bool root, Hash hash) {
 }
 
 float Node::UCB1() const {
-    return (this->value / this->visits) + this->c * std::sqrt(std::log(Node::totalVisits) / this->visits);
+    if (this->visits == 0) return INFINITY;
+    return (this->value / this->visits) + this->c * std::sqrt(std::log(this->parent->visits) / this->visits);
 }
 
 Node* Node::select(Pos& pos) {
@@ -23,20 +24,25 @@ Node* Node::select(Pos& pos) {
         return this;
     }
 
-    auto comp = [](const Node* a, const Node* b) {
-        return a->UCB1() < b->UCB1();
-    };
-    std::vector<Node*>::iterator start = this->children.begin(), end = this->children.end();
-
-    Node* node;
-    if (pos.getTurn() == WHITE) {
-        node = *std::max_element(start, end, comp);
-        pos.makeMove(node->incoming_move);
-    } else {
-        node = *std::min_element(start, end, comp);
-        pos.makeMove(node->incoming_move);
+    float max_val = -INFINITY;
+    std::vector<Node*> maximal_nodes;
+    for (Node* node : this->children) {
+        float val = node->UCB1();
+        if (val > max_val) {
+            maximal_nodes.clear();
+            max_val = val;
+            maximal_nodes.push_back(node);
+        } else if (val == max_val) {
+            maximal_nodes.push_back(node);
+        }
     }
-    return node->select(pos);
+
+    std::random_device dev;
+    std::mt19937 rng(dev());
+    std::uniform_int_distribution<> randomIndex(0, maximal_nodes.size() - 1);
+    int index = randomIndex(rng);
+    pos.makeMove(maximal_nodes[index]->incoming_move);
+    return maximal_nodes[index]->select(pos);
 }
 
 Node* Node::expand(Pos& pos) {
@@ -77,10 +83,10 @@ float Node::simulate(Pos& pos) {
         moveCount--;
     }
 
-    if (code == BLACK_WINS) {
-        return -1.0;
-    } else if (code == WHITE_WINS) {
+    if ((Node::rootPlayer == WHITE && code == WHITE_WINS) || (Node::rootPlayer == BLACK && code == BLACK_WINS)) {
         return 1.0;
+    } else if ((Node::rootPlayer == BLACK && code == WHITE_WINS) || (Node::rootPlayer == WHITE && code == BLACK_WINS)) {
+        return -1.0;
     }
     return 0.0;
 }
@@ -89,13 +95,12 @@ void Node::rollback(float val, Pos& pos) {
     Node* curr = this;
     while (!curr->isRoot) {
         curr->visits += 1;
-        curr->value += val;
+        curr->value += (pos.getTurn() == Node::rootPlayer ? -1.0 * val : val);
         curr = curr->parent;
         pos.undoMove();
     }
     curr->visits += 1;
-    curr->value += val;
-    Node::totalVisits += 1;
+    curr->value += (pos.getTurn() == Node::rootPlayer ? -1.0 * val : val);
 }
 
 Node* initialise(Pos& pos) {
@@ -106,15 +111,12 @@ Node* initialise(Pos& pos) {
         root->children.push_back(newNode);
         newNode->parent = root;
     }
+    Node::rootPlayer = pos.getTurn() == WHITE ? WHITE : BLACK;
     return root;
 }
 
-void Node::resetTotalCount() {
-    Node::totalVisits = 0;
-}
-
 void mcts(Pos& pos, SearchParams sp, std::atomic_bool& stop) {
-    Node::resetTotalCount();
+    pos.parseFen("k7/pp6/8/8/8/8/8/4K2R w - - 0 1");
     Node* root = initialise(pos);
     while (!stop) {
         Node* leaf = root->select(pos);
@@ -143,43 +145,6 @@ void mcts(Pos& pos, SearchParams sp, std::atomic_bool& stop) {
         printMove(node->incoming_move, false);
         std::cout << " " << node->UCB1() << " " << node->value << " " << node->visits << "\n";
     }
-
-    std::cout << "\n" << root->children.size() << "\n";
-
-    // float i = 0, j = 0;
-    // float nan = i / j;
-    // std::cout << nan << "\n";
-
-    // i = -1;
-    // j = 0;
-    // float ninf = i / j;
-    // std::cout << ninf << "\n";
-
-    // i = 1;
-    // j = 0;
-    // float inf = i / j;
-    // std::cout << inf << "\n";
-
-    // i = 0;
-    // j = 1;
-    // float z = i / j;
-    // std::cout << z << "\n";
-
-    // i = 0;
-    // j = -1;
-    // float nz = i / j;
-    // std::cout << nz << "\n\n";
-
-    // std::cout << (nan + 0.0) << "\n";
-    // std::cout << (nan + 2.0) << "\n";
-
-    // // std::cout << (result1 < result2) << "\n";
-    // // std::cout << (result2 < result3) << "\n";
-    // // std::cout << (result1 < result3) << "\n";
-
-    // // std::cout << (result1 > result2) << "\n";
-    // // std::cout << (result2 > result3) << "\n";
-    // // std::cout << (result1 > result3) << "\n";
 
     // NEED TO FREE ALL THE MEMORY FOR THE NODES
 }

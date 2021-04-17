@@ -17,11 +17,11 @@ class Node {
         Move incoming_move;
         Node* parent;
         std::vector<Node*> children;
+        static Player rootPlayer;
 
         float value = 0;
         float visits = 0;
         float c = std::sqrt(2);
-        static float totalVisits;
 
         Node* select(Pos&);
         Node* expand(Pos&);
@@ -29,7 +29,6 @@ class Node {
         void rollback(float, Pos&);
 
         float UCB1() const;
-        static void resetTotalCount();
 };
 
 void mcts(Pos& pos, SearchParams sp, std::atomic_bool& stop);
