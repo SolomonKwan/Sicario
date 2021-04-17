@@ -12,7 +12,7 @@ class Node {
     public:
         Node(Move, bool = false, Hash = 0ULL);
 
-        bool isRoot;
+        bool is_root;
         Hash hash;
         Move incoming_move;
         Node* parent;
@@ -24,7 +24,7 @@ class Node {
         float c = std::sqrt(2);
 
         Node* select(Pos&);
-        Node* expand(Pos&);
+        Node* expand(Pos&, std::vector<Node*>&);
         float simulate(Pos&);
         void rollback(float, Pos&);
 
