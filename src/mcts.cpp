@@ -98,8 +98,14 @@ void Node::rollback(float val, Pos& pos) {
     Node::totalVisits += 1;
 }
 
-Node initialise(Pos& pos) {
-    Node root = Node(0, true);
+Node* initialise(Pos& pos) {
+    Node* root = new Node(0, true);
+    MoveList moves = MoveList(pos);
+    for (Move move : moves) {
+        Node* newNode = new Node(move);
+        root->children.push_back(newNode);
+        newNode->parent = root;
+    }
     return root;
 }
 
@@ -109,10 +115,9 @@ void Node::resetTotalCount() {
 
 void mcts(Pos& pos, SearchParams sp, std::atomic_bool& stop) {
     Node::resetTotalCount();
-    pos.parseFen("4k3/3ppp2/8/8/8/8/8/4K2R w - - 0 1");
-    Node root = initialise(pos);
+    Node* root = initialise(pos);
     while (!stop) {
-        Node* leaf = root.select(pos);
+        Node* leaf = root->select(pos);
         leaf = leaf->expand(pos);
         float val = leaf->simulate(pos);
         leaf->rollback(val, pos);
@@ -122,7 +127,7 @@ void mcts(Pos& pos, SearchParams sp, std::atomic_bool& stop) {
     auto comp = [](const Node* a, const Node* b) {
         return a->UCB1() < b->UCB1();
     };
-    std::vector<Node*>::iterator start = root.children.begin(), end = root.children.end();
+    std::vector<Node*>::iterator start = root->children.begin(), end = root->children.end();
 
     Node* node;
     if (pos.getTurn() == WHITE) {
@@ -134,12 +139,12 @@ void mcts(Pos& pos, SearchParams sp, std::atomic_bool& stop) {
     }
     std::cout << "\n\n";
 
-    for (Node* node : root.children) {
+    for (Node* node : root->children) {
         printMove(node->incoming_move, false);
         std::cout << " " << node->UCB1() << " " << node->value << " " << node->visits << "\n";
     }
 
-    std::cout << "\n" << root.children.size() << "\n";
+    std::cout << "\n" << root->children.size() << "\n";
 
     // float i = 0, j = 0;
     // float nan = i / j;
