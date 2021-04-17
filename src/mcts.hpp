@@ -10,20 +10,24 @@ typedef Move Edge;
 
 class Node {
     public:
-        Node(bool = false);
+        Node(Move, bool = false, Hash = 0ULL);
 
-        std::vector<std::pair<Node, Edge>> parents;
-        std::vector<std::pair<Node, Edge>> children;
         bool isRoot;
-        float value = 0;
-        int visits = 0;
-        float c = std::sqrt(2);
-        static int totalVisits;
+        Hash hash;
+        Move incoming_move;
+        Node* parent;
+        std::vector<Node*> children;
 
-        Node& select(Pos&, std::stack<Move>&);
-        Node& expand(Pos&, std::stack<Move>&, std::unordered_map<Hash, Node>&);
+        float value = 0;
+        float visits = 0;
+        float c = std::sqrt(2);
+        static float totalVisits;
+
+        Node* select(Pos&);
+        Node* expand(Pos&);
         float simulate(Pos&);
-        void rollback(float);
+        void rollback(float, Pos&);
+
         float UCB1() const;
         static void resetTotalCount();
 };
