@@ -99,7 +99,9 @@ void UCI::handleUCI_NewGame() {
 }
 
 void UCI::handlePosition(std::vector<std::string> inputs) {
-    communicate("handle position");
+    // Insert dummy command at start to use concatFEN
+    inputs.insert(inputs.begin(), "set");
+    this->pos.parseFen(concatFEN(inputs));
 }
 
 void UCI::handleGo(std::vector<std::string> inputs, std::atomic_bool& stop) {

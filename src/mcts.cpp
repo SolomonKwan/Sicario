@@ -182,15 +182,8 @@ void mcts(Pos& pos, SearchParams sp, std::atomic_bool& stop) {
         return a->UCB1() < b->UCB1();
     };
     std::vector<Node*>::iterator start = root->children.begin(), end = root->children.end();
-
-    Node* node;
-    if (pos.getTurn() == WHITE) {
-        node = *std::max_element(start, end, comp);
-        printMove(node->incoming_move, false);
-    } else {
-        node = *std::min_element(start, end, comp);
-        printMove(node->incoming_move, false);
-    }
+    Node* node = *std::max_element(start, end, comp);
+    printMove(node->incoming_move, false);
     std::cout << "\n\n";
 
     for (Node* node : root->children) {

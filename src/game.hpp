@@ -233,6 +233,8 @@ class MoveList {
         Move endMove; // Dummy move for end of iterator. Just need the address.
 };
 
+std::string concatFEN(std::vector<std::string> strings);
+
 namespace Play {
     void init(std::string);
 }
