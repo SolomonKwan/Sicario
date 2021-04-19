@@ -77,6 +77,7 @@ for the move precomputation (at the price of clarity, maintenance, my time and m
     <li>Still need to implement UCI.</li>
     <li>Research into CPU architecture and their effects on the program.</li>
     <li>Utilise more in-depth C++ features.</li>
+    <li>Handle exiting the program during a search and releasing the necessary memory at that point.</li>
 </ul>
 </br>
 <H2>Acknowledgements</H2>

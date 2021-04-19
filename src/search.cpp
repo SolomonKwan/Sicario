@@ -69,9 +69,7 @@ void SearchInfo::clearTable() {
  * Search the current position.
  */
 void Pos::search(SearchParams params, std::atomic_bool& stop) {
-    std::cout << "executing search\n" << std::flush;
     mcts(*this, params, stop);
-    std::cout << "ending search\n" << std::flush;
 }
 
 /**

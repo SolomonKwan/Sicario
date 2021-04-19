@@ -161,6 +161,34 @@ Node* initialise(Pos& pos, std::vector<Node*>& allocated_nodes) {
     return root;
 }
 
+void printInfo() {
+
+}
+
+/**
+ * Print the best move after end of search.
+ */
+void printBestMove(Node* root) {
+    // Print the bestmove
+    std::cout << "bestmove ";
+    auto comp = [](const Node* a, const Node* b) {
+        return a->UCB1() < b->UCB1();
+    };
+    std::vector<Node*>::iterator start = root->children.begin(), end = root->children.end();
+    Node* node = *std::max_element(start, end, comp);
+    printMove(node->incoming_move, false);
+
+    // Print debug stuff
+    // for (Node* node : root->children) {
+    //     printMove(node->incoming_move, false);
+    //     std::cout << " " << node->UCB1() << " " << node->value << " " << node->visits << "\n";
+    // }
+
+    // Print pondermove
+
+    std::cout << "\n";
+}
+
 /**
  * Performs monte carlo tree search on the current position.
  * @param pos: Position on which to perform monte carlo tree search.
@@ -175,26 +203,12 @@ void mcts(Pos& pos, SearchParams sp, std::atomic_bool& stop) {
         leaf = leaf->expand(pos, allocated_nodes);
         float val = leaf->simulate(pos);
         leaf->rollback(val, pos);
+        printInfo();
     }
-
-    std::cout << "Best move is ";
-    auto comp = [](const Node* a, const Node* b) {
-        return a->UCB1() < b->UCB1();
-    };
-    std::vector<Node*>::iterator start = root->children.begin(), end = root->children.end();
-    Node* node = *std::max_element(start, end, comp);
-    printMove(node->incoming_move, false);
-    std::cout << "\n\n";
-
-    for (Node* node : root->children) {
-        printMove(node->incoming_move, false);
-        std::cout << " " << node->UCB1() << " " << node->value << " " << node->visits << "\n";
-    }
+    printBestMove(root);
 
     // Free the allocated nodes.
     for (Node* node : allocated_nodes) {
         delete node;
     }
-
-    // NEED TO FREE ALL THE MEMORY FOR THE NODES
 }

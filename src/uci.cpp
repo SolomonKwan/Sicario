@@ -112,9 +112,7 @@ void UCI::handleGo(std::vector<std::string> inputs, std::atomic_bool& stop) {
 }
 
 void UCI::handleStop(std::atomic_bool& stop) {
-    communicate("handle stop");
     stop = true;
-    // Print best move/variation here.
 }
 
 void UCI::handlePonderHit() {
@@ -136,19 +134,20 @@ void UCI::runUCI(std::string input) {
     std::atomic_bool stop(true);
     while (input != "quit" && input != "exit" && input != "q") {
         std::vector<std::string> commands = split(input, " ");
-        if (commands[0] == "isready") this->handleIsReady();
-        else if (commands[0] == "setoption") this->handleSetOption();
-        else if (commands[0] == "debug") this->handleDebug(commands);
-        else if (commands[0] == "setoption") this->handleSetOption(commands);
-        else if (commands[0] == "register") this->handleRegister(commands);
-        else if (commands[0] == "ucinewgame") this->handleUCI_NewGame();
-        else if (commands[0] == "position") this->handlePosition(commands);
-        else if (commands[0] == "go") this->handleGo(commands, stop);
-        else if (commands[0] == "stop") this->handleStop(stop);
-        else if (commands[0] == "ponderhit") this->handlePonderHit();
+        if (commands[0] == "isready")           this->handleIsReady();
+        else if (commands[0] == "setoption")    this->handleSetOption();
+        else if (commands[0] == "debug")        this->handleDebug(commands);
+        else if (commands[0] == "setoption")    this->handleSetOption(commands);
+        else if (commands[0] == "register")     this->handleRegister(commands);
+        else if (commands[0] == "ucinewgame")   this->handleUCI_NewGame();
+        else if (commands[0] == "position")     this->handlePosition(commands);
+        else if (commands[0] == "go")           this->handleGo(commands, stop);
+        else if (commands[0] == "stop")         this->handleStop(stop);
+        else if (commands[0] == "ponderhit")    this->handlePonderHit();
         std::cout << std::flush;
         std::getline(std::cin, input);
     }
+    this->handleStop(stop);
 }
 
 /**
