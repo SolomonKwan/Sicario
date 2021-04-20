@@ -39,26 +39,9 @@ Node* Node::select(Pos& pos) {
     if (this->children.size() == 0) {
         return this;
     }
-
-    float max_val = -INFINITY;
-    std::vector<Node*> maximal_nodes;
-    for (Node* node : this->children) {
-        float val = node->UCB1();
-        if (val > max_val) {
-            maximal_nodes.clear();
-            max_val = val;
-            maximal_nodes.push_back(node);
-        } else if (val == max_val) {
-            maximal_nodes.push_back(node);
-        }
-    }
-
-    std::random_device dev;
-    std::mt19937 rng(dev());
-    std::uniform_int_distribution<> randomIndex(0, maximal_nodes.size() - 1);
-    int index = randomIndex(rng);
-    pos.makeMove(maximal_nodes[index]->incoming_move);
-    return maximal_nodes[index]->select(pos);
+    Node* bestChild = this->bestChild();
+    pos.makeMove(bestChild->incoming_move);
+    return bestChild->select(pos);
 }
 
 /**
@@ -176,8 +159,46 @@ Node* initialise(Pos& pos, std::unordered_map<Hash, std::unordered_set<Node*>>& 
     return root;
 }
 
-void printInfo() {
+Node* Node::bestChild() {
+    float max_val = -INFINITY;
+    std::vector<Node*> maximal_nodes;
+    for (Node* node : this->children) {
+        float val = node->UCB1();
+        if (val > max_val) {
+            maximal_nodes.clear();
+            max_val = val;
+            maximal_nodes.push_back(node);
+        } else if (val == max_val) {
+            maximal_nodes.push_back(node);
+        }
+    }
 
+    std::random_device dev;
+    std::mt19937 rng(dev());
+    std::uniform_int_distribution<> randomIndex(0, maximal_nodes.size() - 1);
+    return maximal_nodes[randomIndex(rng)];
+}
+
+/**
+ * Prints the info of the search information.
+ */
+void printInfo(Node* root, Info info) {
+    // Move bestMove = root->bestChild()->incoming_move;
+    // if (bestMove != info.bestMove) {
+    //     std::cout <<
+    //             "info depth " << info.depth <<
+    //             " seldepth " << info.seldepth <<
+    //             " multipv " << info.multipv <<
+    //             " score cp " << info.cp <<
+    //             " nodes " << info.nodes <<
+    //             " nps " << info.nps <<
+    //             " tbhits " << info.tbhits <<
+    //             " time " << info.time <<
+    //             " pv ";
+    //     printMove(bestMove, false);
+    //     std::cout << "\n";
+    //     info.bestMove = bestMove;
+    // }
 }
 
 /**
@@ -186,12 +207,7 @@ void printInfo() {
 void printBestMove(Node* root) {
     // Print the bestmove
     std::cout << "bestmove ";
-    auto comp = [](const Node* a, const Node* b) {
-        return a->UCB1() < b->UCB1();
-    };
-    std::vector<Node*>::iterator start = root->children.begin(), end = root->children.end();
-    Node* node = *std::max_element(start, end, comp);
-    printMove(node->incoming_move, false);
+    printMove(root->bestChild()->incoming_move, false);
     std::cout << "\n";
 
     // Print debug stuff
@@ -212,6 +228,7 @@ void printBestMove(Node* root) {
  * @param stop: Boolean indicating whether or not to continue the search.
  */
 void mcts(Pos& pos, SearchParams sp, std::atomic_bool& stop) {
+    Info info;
     std::unordered_map<Hash, std::unordered_set<Node*>> nodes;
     Node* root = initialise(pos, nodes);
     while (!stop) {
@@ -219,7 +236,7 @@ void mcts(Pos& pos, SearchParams sp, std::atomic_bool& stop) {
         leaf = leaf->expand(pos, nodes);
         float val = leaf->simulate(pos);
         leaf->rollback(val, pos, nodes);
-        printInfo();
+        printInfo(root, info);
     }
     printBestMove(root);
 

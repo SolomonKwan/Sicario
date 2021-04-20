@@ -9,6 +9,18 @@
 
 typedef Move Edge;
 
+struct Info {
+    int depth = 0;
+    int seldepth = 0;
+    int multipv = 0;
+    int cp = 0;
+    int nodes = 0;
+    int nps = 0;
+    int tbhits = 0;
+    int time = 0;
+    Move bestMove = 0U;
+};
+
 class Node {
     public:
         Node(Move, bool, Hash, bool);
@@ -31,6 +43,7 @@ class Node {
         void rollback(float, Pos&, std::unordered_map<Hash, std::unordered_set<Node*>>&);
 
         float UCB1() const;
+        Node* bestChild();
 };
 
 void mcts(Pos& pos, SearchParams sp, std::atomic_bool& stop);
