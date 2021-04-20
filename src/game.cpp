@@ -2827,6 +2827,7 @@ Move Pos::chooseMove(MoveList& moves) {
 
             if (move_string == "kill") exit(-1);
             if (move_string == "fen") std::cout << this->getFEN() << '\n';
+            if (move_string == "hash") std::cout << this->hash << "\n";
             if (move_string == "displayall") this->displayAll();
             if (move_string == "undo") return 0;
 

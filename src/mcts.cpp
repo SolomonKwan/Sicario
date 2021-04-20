@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <stack>
 #include <random>
+#include <unordered_set>
 
 #include "mcts.hpp"
 
@@ -15,10 +16,11 @@ Player Node::rootPlayer = WHITE;
  * @param root: Boolean indicating whether this is the root node.
  * @param hash: Hash of the current position.
  */
-Node::Node(Move incoming_move, bool is_root, Hash hash) {
+Node::Node(Move incoming_move, bool is_root, Hash hash, bool turn) {
     this->is_root = is_root;
     this->hash = hash;
     this->incoming_move = incoming_move;
+    this->turn = turn;
 }
 
 /**
@@ -62,9 +64,9 @@ Node* Node::select(Pos& pos) {
 /**
  * Performs the expansion phase of monte carlo tree search.
  * @param pos: Position to expand from.
- * @param allocated_nodes: Vector to add allocated node pointers.
+ * @param nodes: Set of all nodes with the same hashes.
  */
-Node* Node::expand(Pos& pos, std::vector<Node*>& allocated_nodes) {
+Node* Node::expand(Pos& pos, std::unordered_map<Hash, std::unordered_set<Node*>>& nodes) {
     MoveList moves = MoveList(pos);
     if (this->visits == 0 || pos.isEOG(moves)) {
         return this;
@@ -73,8 +75,8 @@ Node* Node::expand(Pos& pos, std::vector<Node*>& allocated_nodes) {
     // Expand the node
     for (Move move : moves) {
         pos.makeMove(move);
-        Node* newNode = new Node(move);
-        allocated_nodes.push_back(newNode);
+        Node* newNode = new Node(move, false, pos.getHash(), pos.getTurn());
+        nodes[pos.getHash()].insert(newNode);
         this->children.push_back(newNode);
         newNode->parent = this;
         pos.undoMove();
@@ -123,37 +125,50 @@ float Node::simulate(Pos& pos) {
  * Performs rollback step of the monte carlo tree search.
  * @param val: The result to propagate back to the root.
  * @param pos: Position from which the simulation was made.
+ * @param nodes: Set of all nodes with the same hashes.
  */
-void Node::rollback(float val, Pos& pos) {
+void Node::rollback(float val, Pos& pos, std::unordered_map<Hash, std::unordered_set<Node*>>& nodes) {
+    Hash hash = pos.getHash();
+
+    // Save current hash then undo move back to root.
     Node* curr = this;
     while (!curr->is_root) {
-        curr->visits += 1;
-        curr->value += (pos.getTurn() == Node::rootPlayer ? -1.0 * val : val);
         curr = curr->parent;
         pos.undoMove();
     }
 
-    // Update the root node itself.
-    curr->visits += 1;
-    curr->value += (pos.getTurn() == Node::rootPlayer ? -1.0 * val : val);
+    // Rollback the value through every occurence of the hash position.
+    for (Node* node : nodes[hash]) {
+        while (!node->is_root) {
+            node->visits += 1;
+            node->value += (node->turn == Node::rootPlayer ? -1.0 * val : val);
+            node = node->parent;
+        }
+
+        // Update the root node itself.
+        node->visits += 1;
+        node->value += (node->turn == Node::rootPlayer ? -1.0 * val : val);
+    }
 }
 
 /**
  * Creates the initial root node of the search and expands the root to its children.
  * @param pos: Position that is at the root node.
- * @param allocated_nodes: Vector to add allocated node pointers.
+ * @param nodes: Set of all nodes with the same hashes.
  */
-Node* initialise(Pos& pos, std::vector<Node*>& allocated_nodes) {
-    Node* root = new Node(0, true);
-    allocated_nodes.push_back(root);
+Node* initialise(Pos& pos, std::unordered_map<Hash, std::unordered_set<Node*>>& nodes) {
+    Node* root = new Node(0, true, pos.getHash(), pos.getTurn());
+    nodes[pos.getHash()].insert(root);
     MoveList moves = MoveList(pos);
 
     // Expand the root node.
     for (Move move : moves) {
-        Node* newNode = new Node(move);
-        allocated_nodes.push_back(newNode);
+        pos.makeMove(move);
+        Node* newNode = new Node(move, false, pos.getHash(), pos.getTurn());
+        nodes[pos.getHash()].insert(newNode);
         root->children.push_back(newNode);
         newNode->parent = root;
+        pos.undoMove();
     }
 
     // Set the root node player for rollback phase.
@@ -177,12 +192,13 @@ void printBestMove(Node* root) {
     std::vector<Node*>::iterator start = root->children.begin(), end = root->children.end();
     Node* node = *std::max_element(start, end, comp);
     printMove(node->incoming_move, false);
+    std::cout << "\n";
 
     // Print debug stuff
-    // for (Node* node : root->children) {
-    //     printMove(node->incoming_move, false);
-    //     std::cout << " " << node->UCB1() << " " << node->value << " " << node->visits << "\n";
-    // }
+    for (Node* node : root->children) {
+        printMove(node->incoming_move, false);
+        std::cout << " " << node->UCB1() << " " << node->value << " " << node->visits << "\n";
+    }
 
     // Print pondermove
 
@@ -196,19 +212,21 @@ void printBestMove(Node* root) {
  * @param stop: Boolean indicating whether or not to continue the search.
  */
 void mcts(Pos& pos, SearchParams sp, std::atomic_bool& stop) {
-    std::vector<Node*> allocated_nodes;
-    Node* root = initialise(pos, allocated_nodes);
+    std::unordered_map<Hash, std::unordered_set<Node*>> nodes;
+    Node* root = initialise(pos, nodes);
     while (!stop) {
         Node* leaf = root->select(pos);
-        leaf = leaf->expand(pos, allocated_nodes);
+        leaf = leaf->expand(pos, nodes);
         float val = leaf->simulate(pos);
-        leaf->rollback(val, pos);
+        leaf->rollback(val, pos, nodes);
         printInfo();
     }
     printBestMove(root);
 
     // Free the allocated nodes.
-    for (Node* node : allocated_nodes) {
-        delete node;
+    for (auto set : nodes) {
+        for (Node* node : set.second) {
+            delete node;
+        }
     }
 }
