@@ -207,3 +207,22 @@ int Evaluator::evaluate() {
     value += this->pos.material();
     return value;
 }
+
+Move Pos::pseudoRandomMove(MoveList& moves) {
+    Move bestMove = 0;
+    int bestValue = 0;
+    for (Move move : moves) {
+        this->makeMove(move);
+
+        int value = this->psqt();
+        value += this->material();
+        if ((this->turn == WHITE && value <= bestValue) || (this->turn == BLACK && value >= bestValue)) {
+            bestValue = value;
+            bestMove = move;
+        }
+
+        this->undoMove();
+    }
+
+    return bestMove;
+}

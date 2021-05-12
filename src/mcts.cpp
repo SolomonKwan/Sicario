@@ -16,11 +16,12 @@ Player Node::rootPlayer = WHITE;
  * @param root: Boolean indicating whether this is the root node.
  * @param hash: Hash of the current position.
  */
-Node::Node(Move incoming_move, bool is_root, Hash hash, bool turn) {
+Node::Node(Move incoming_move, bool is_root, Hash hash, bool turn, int depth) {
     this->is_root = is_root;
     this->hash = hash;
     this->incoming_move = incoming_move;
     this->turn = turn;
+    this->depth = depth;
 }
 
 /**
@@ -58,7 +59,7 @@ Node* Node::expand(Pos& pos, std::unordered_map<Hash, std::unordered_set<Node*>>
     // Expand the node
     for (Move move : moves) {
         pos.makeMove(move);
-        Node* newNode = new Node(move, false, pos.getHash(), pos.getTurn());
+        Node* newNode = new Node(move, false, pos.getHash(), pos.getTurn(), this->depth + 1);
         nodes[pos.getHash()].insert(newNode);
         this->children.push_back(newNode);
         newNode->parent = this;
@@ -85,7 +86,7 @@ float Node::simulate(Pos& pos) {
 
     // Perform the simulation.
     while (!(code = pos.isEOG(moves))) {
-        pos.makeMove(moves.randomMove());
+        pos.makeMove(pos.pseudoRandomMove(moves));
         moveCount++;
         moves = MoveList(pos);
     }
@@ -140,14 +141,14 @@ void Node::rollback(float val, Pos& pos, std::unordered_map<Hash, std::unordered
  * @param nodes: Set of all nodes with the same hashes.
  */
 Node* initialise(Pos& pos, std::unordered_map<Hash, std::unordered_set<Node*>>& nodes) {
-    Node* root = new Node(0, true, pos.getHash(), pos.getTurn());
+    Node* root = new Node(0, true, pos.getHash(), pos.getTurn(), 0);
     nodes[pos.getHash()].insert(root);
     MoveList moves = MoveList(pos);
 
     // Expand the root node.
     for (Move move : moves) {
         pos.makeMove(move);
-        Node* newNode = new Node(move, false, pos.getHash(), pos.getTurn());
+        Node* newNode = new Node(move, false, pos.getHash(), pos.getTurn(), 1);
         nodes[pos.getHash()].insert(newNode);
         root->children.push_back(newNode);
         newNode->parent = root;
@@ -172,6 +173,7 @@ Node* Node::bestChild() {
             maximal_nodes.push_back(node);
         }
     }
+    if (maximal_nodes.size() == 0) return nullptr;
 
     std::random_device dev;
     std::mt19937 rng(dev());
@@ -207,7 +209,12 @@ void printInfo(Node* root, Info info) {
 void printBestMove(Node* root) {
     // Print the bestmove
     std::cout << "bestmove ";
-    printMove(root->bestChild()->incoming_move, false);
+    Node* bestNode = root->bestChild();
+    if (bestNode == nullptr) {
+        std::cout << "(None)" << "\n";
+    } else {
+        printMove(bestNode->incoming_move, false);
+    }
     std::cout << "\n";
 
     // Print debug stuff
@@ -239,6 +246,7 @@ void mcts(Pos& pos, SearchParams sp, std::atomic_bool& stop) {
         printInfo(root, info);
     }
     printBestMove(root);
+    stop = true;
 
     // Free the allocated nodes.
     for (auto set : nodes) {

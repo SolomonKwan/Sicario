@@ -45,6 +45,7 @@ class Pos {
         void search(SearchParams, std::atomic_bool&);
         void makeMove(Move);
         void undoMove();
+        Move pseudoRandomMove(MoveList&);
 
         // Move generation
         void getMoves(int&, std::vector<Move>*[MAX_MOVE_SETS]);

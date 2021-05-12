@@ -23,7 +23,7 @@ struct Info {
 
 class Node {
     public:
-        Node(Move, bool, Hash, bool);
+        Node(Move, bool, Hash, bool, int);
 
         bool is_root;
         Hash hash;
@@ -32,6 +32,7 @@ class Node {
         std::vector<Node*> children;
         static Player rootPlayer;
         bool turn;
+        int depth;
 
         float value = 0;
         float visits = 0;

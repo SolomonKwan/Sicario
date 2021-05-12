@@ -2842,7 +2842,7 @@ Move Pos::chooseMove(MoveList& moves) {
             } else break;
         }
     } else {
-        move = moves.randomMove();
+        move = this->pseudoRandomMove(moves);
         if (!this->quiteMode) {
             std::cout << "Computer move: ";
             printMove(move, false);
