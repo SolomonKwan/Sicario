@@ -42,11 +42,14 @@ perft_suite() {
 		local FEN="${line%%;*}"
 		val=$(sicario_value "$FEN" 6)
 		actualVal=$(echo "$line" | grep -o "D6 .*" | cut -c 4-)
+        GREEN='\033[0;32m'
+        RED='\033[0;31m'
+        NC='\033[0m'
 		if [[ $val -eq $actualVal ]]
 		then
-			echo "[ PASSED ] " "$FEN"
+			echo -e "${GREEN}[ PASSED ]${NC} " "$FEN"
 		else
-			echo "[ FAILED ] " "$FEN"
+			echo -e "${RED}[ FAILED ]${NC} " "$FEN"
 		fi
 	done < ~/Sicario/tests/perftsuite.epd
 	rm sc_result
