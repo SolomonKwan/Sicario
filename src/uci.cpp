@@ -7,7 +7,7 @@
 #include "game.hpp"
 #include "uci.hpp"
 
-# define NULL_MOVE 0000
+#define NULL_MOVE 0000
 
 /**********************************************************************************************************************/
 /***************************************** Engine to interface commands ***********************************************/
@@ -21,7 +21,7 @@ void communicate(std::string communication) {
 }
 
 void UCI::sendIds() {
-    communicate("id name " + (std::string) VERSION);
+    communicate("id name " + (std::string) NAME + " (" + (std::string) VERSION + ")");
     communicate("id author " + (std::string) AUTHOR);
 }
 

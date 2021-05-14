@@ -4,7 +4,8 @@
 
 #include <string>
 
-#define VERSION "Sicario (Alpha v1.0.0)"
+#define NAME "Sicario"
+#define VERSION "Genesis v1.0.0-alpha"
 #define AUTHOR "S. Kwan"
 #define CHESS_PROGRAMMING "www.chessprogramming.org"
 #define STOCKFISH "Stockfish"
@@ -19,10 +20,10 @@
 #define DEFAULT_HASH_SIZE 16
 
 typedef uint64_t Hash;
+typedef uint64_t Bitboard;
 
 /**
- * The squares of the board and their associated numbers. NONE (64) used as
- * sentinel value.
+ * The squares of the board and their associated numbers. NONE (64) used as a sentinel value.
  */
 enum Square {
     A1, B1, C1, D1, E1, F1, G1, H1,
@@ -40,35 +41,29 @@ enum Square {
  * The piece types.
  */
 enum PieceType {
-    B_KING, W_KING, 
-    
+    B_KING, W_KING,
     W_QUEEN, W_ROOK, W_BISHOP, W_KNIGHT, W_PAWN,
     B_QUEEN, B_ROOK, B_BISHOP, B_KNIGHT, B_PAWN,
-
     NO_PIECE
 };
 
 /**
- * The promotion piece types. In the format for move hashes (i.e. left shifted
- * by 14 bits).
+ * The promotion piece types. In the format for move hashes (i.e. left shifted by 14 bits).
  */
 enum Promotion {
-    pKNIGHT = 0,
-    pBISHOP = 1 << 14,
-    pROOK = 2 << 14,
-    pQUEEN = 3 << 14
+    pKNIGHT = 0, pBISHOP = 1 << 14, pROOK = 2 << 14, pQUEEN = 3 << 14
 };
 
 /**
  * The move types. In the format for move hashes (i.e. left shifted by 12 bits).
  */
 enum MoveType {
-    NORMAL = 0,
-    PROMOTION = 1 << 12,
-    EN_PASSANT = 2 << 12,
-    CASTLING = 3 << 12
+    NORMAL = 0, PROMOTION = 1 << 12, EN_PASSANT = 2 << 12, CASTLING = 3 << 12
 };
 
+/**
+ * Exit codes for the game or parsing.
+ */
 enum ExitCode {
     NORMAL_PLY,
     WHITE_WINS,
@@ -82,10 +77,16 @@ enum ExitCode {
     INVALID_ARGS
 };
 
+/**
+ * Player types.
+ */
 enum PlayerType {
     HUMAN, COMPUTER
 };
 
+/**
+ * Castling options.
+ */
 enum Castling {
     WKSC, WQSC, BKSC, BQSC
 };
@@ -93,18 +94,17 @@ enum Castling {
 /**
  * Bitboard of files with bits set.
  */
-const uint64_t files[64] = {
-    72340172838076673ULL, 144680345676153346ULL, 289360691352306692ULL,
-    578721382704613384ULL, 1157442765409226768ULL, 2314885530818453536ULL,
-    4629771061636907072ULL, 9259542123273814144ULL
+const Bitboard files[64] = {
+    72340172838076673ULL, 144680345676153346ULL, 289360691352306692ULL, 578721382704613384ULL, 1157442765409226768ULL,
+    2314885530818453536ULL, 4629771061636907072ULL, 9259542123273814144ULL
 };
 
 /**
  * Bitboards of ranks with bits set.
  */
-const uint64_t ranks[64] = {
-    255ULL, 65280ULL, 16711680ULL, 4278190080ULL, 1095216660480ULL, 
-    280375465082880ULL, 71776119061217280ULL, 18374686479671623680ULL
+const Bitboard ranks[64] = {
+    255ULL, 65280ULL, 16711680ULL, 4278190080ULL, 1095216660480ULL, 280375465082880ULL, 71776119061217280ULL,
+    18374686479671623680ULL
 };
 
 /**
@@ -136,26 +136,20 @@ const std::string piece_type_string[13] = {
  * Promotion piece strings.
  */
 const std::string promoName[4] = {
-    "n",
-    "b",
-    "r",
-    "q"
+    "n", "b", "r", "q"
 };
 
 /**
  * Move type strings.
  */
 const std::string moveName[4] = {
-    "Normal",
-    "Promotion",
-    "En-passant",
-    "Castling"
+    "Normal", "Promotion", "En-passant", "Castling"
 };
 
 /**
  * Magic numbers for vertical and horizontal rook attacks.
  */
-const uint64_t rookMagicNums[64] = {
+const Bitboard rookMagicNums[64] = {
     0x80001020400080ULL, 0x40004020001000ULL, 0x80300008802000ULL, 0x80100080040800ULL, 0x80040102800800ULL,
     0x80012400800200ULL, 0x806A0000800900ULL, 0x80002040800100ULL, 0x0A002081410200ULL, 0x4A002201054081ULL,
     0x43002001001040ULL, 0x01005000B90120ULL, 0x80800C00080080ULL, 0x07808004000A00ULL, 0x04001842100184ULL,
@@ -174,7 +168,7 @@ const uint64_t rookMagicNums[64] = {
 /** 
  * Masks for vertical and horizontal rook attacks. 
  */
-const uint64_t rookMasks[64] = {
+const Bitboard rookMasks[64] = {
     0x000101010101017EULL, 0x000202020202027CULL, 0x000404040404047AULL, 0x0008080808080876ULL, 0x001010101010106EULL,
     0x002020202020205EULL, 0x004040404040403EULL, 0x008080808080807EULL, 0x0001010101017E00ULL, 0x0002020202027C00ULL,
     0x0004040404047A00ULL, 0x0008080808087600ULL, 0x0010101010106E00ULL, 0x0020202020205E00ULL, 0x0040404040403E00ULL,
@@ -207,7 +201,7 @@ const int rookShifts[64] = {
 /** 
  * Magic numbers for diagonal attacks. 
  */
-const uint64_t bishopMagicNums[64] = {
+const Bitboard bishopMagicNums[64] = {
     0x04081001020051, 0x10010842808000, 0x10010045020008, 0x18204040080000, 0x21104008000008, 0x6088200A00B954,
     0x04010410040000, 0x30220802080200, 0x00400808008280, 0x02200803010030, 0x00084283020080, 0x00040408808000,
     0x40011040040000, 0x00160904200040, 0xC9510082202100, 0x03004208A46000, 0x41022008068080, 0x08003102008400,
@@ -224,7 +218,7 @@ const uint64_t bishopMagicNums[64] = {
 /** 
  * Masks for diagonal attacks. 
  */
-const uint64_t bishopMasks[64] = {
+const Bitboard bishopMasks[64] = {
     0x40201008040200, 0x00402010080400, 0x00004020100A00, 0x00000040221400, 0x00000002442800, 0x00000204085000,
     0x00020408102000, 0x02040810204000, 0x20100804020000, 0x40201008040000, 0x004020100A0000, 0x00004022140000,
     0x00000244280000, 0x00020408500000, 0x02040810200000, 0x04081020400000, 0x10080402000200, 0x20100804000400,

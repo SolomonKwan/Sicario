@@ -32,8 +32,6 @@ namespace PieceValue {
     }
 }
 
-Square mirrored(Square);
-
 class Pos;
 class Evaluator {
     public:

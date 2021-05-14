@@ -90,22 +90,32 @@ namespace PSQT {
  * @param square: The desired square to convert.
  * @note The PSQT value will still need to be multiplied by -1.
  */
-Square mirrored(Square square) {
+inline Square mirrored(Square square) {
     return (Square) (square ^ 56);
 }
 
 Evaluator::Evaluator(const Pos& pos) : pos(pos) {}
 
-bool isEndGameWithQueen(int rook, int bishop, int knight) {
-    if (rook == 0 && bishop + knight <= 1) return true;
-    return false;
+/**
+ * Returns true if it is an endgame with queens, else false.
+ * @param rookCnt: The count of rooks.
+ * @param bishopCnt: The count of bishops.
+ * @param knightCnt: The count of the knights.
+ * @return: True, if an endgame with queens, else false.
+ */
+inline bool isEndGameWithQueen(int rookCnt, int bishopCnt, int knightCnt) {
+    return (rookCnt == 0 && bishopCnt + knightCnt <= 1) ? true : false;
 }
 
+/**
+ * Returns true if it is an endgame, else false.
+ * @return bool.
+ */
 bool Pos::isEndGame() const {
     if (this->piece_index[W_QUEEN] == 0 && this->piece_index[B_QUEEN] == 0) return true;
 
     // Every side which has a queen has additionally no other pieces or one minorpiece maximum.
-    if (this->piece_index[W_QUEEN] <= 1 && isEndGameWithQueen(this->piece_index[W_ROOK], this->piece_index[W_BISHOP], 
+    if (this->piece_index[W_QUEEN] <= 1 && isEndGameWithQueen(this->piece_index[W_ROOK], this->piece_index[W_BISHOP],
             this->piece_index[W_KNIGHT]) && this->piece_index[B_QUEEN] <= 1 && isEndGameWithQueen(
             this->piece_index[B_ROOK], this->piece_index[B_BISHOP], this->piece_index[B_KNIGHT])) {
         return true;
@@ -114,6 +124,10 @@ bool Pos::isEndGame() const {
     return false;
 }
 
+/**
+ * Returns a piece square table value representation of the board.
+ * @param int: A value representing the value of the board.
+ */
 int Pos::psqt() const {
     int value = 0;
 
@@ -169,6 +183,10 @@ int Pos::psqt() const {
     return value;
 }
 
+/**
+ * Returns a material representation of the board.
+ * @param int: An integer representing the piece value of the table.
+ */
 int Pos::material() const {
     int value = 0;
 
@@ -201,6 +219,10 @@ int Pos::material() const {
     return value;
 }
 
+/**
+ * Returns a integer representing the value of the board.
+ * @param int: An integer value representation of the board.
+ */
 int Evaluator::evaluate() {
     int value = 0;
     value += this->pos.psqt();
@@ -208,6 +230,11 @@ int Evaluator::evaluate() {
     return value;
 }
 
+/**
+ * Returns a pseudorandom move from the provided MoveList based off of various heuristics.
+ * @param moves: MoveList of the legal moves in the postion.
+ * @return: A pseudorandom move.
+ */
 Move Pos::pseudoRandomMove(MoveList& moves) {
     Move bestMove = 0;
     int bestValue = 0;

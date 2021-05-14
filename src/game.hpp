@@ -9,10 +9,22 @@
 #include "search.hpp"
 
 void printMove(Move move, bool extraInfo);
-MoveType type(Move move);
-Square end(Move move);
-Square start(Move move);
-Promotion promo(Move move);
+
+inline MoveType type(Move move) {
+    return (MoveType)(move & (0b11 << 12));
+}
+
+inline Square end(Move move) {
+    return (Square)((move >> 6) & 0b111111);
+}
+
+inline Square start(Move move) {
+    return (Square)(move & 0b111111);
+}
+
+inline Promotion promo(Move move) {
+    return (Promotion)(move & (0b11 << 14));
+}
 
 /**
  * Forward declarations.

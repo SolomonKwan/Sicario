@@ -6,7 +6,7 @@
 
 namespace Run {
     void showStartUp() {
-        std::cout << '\n' << VERSION << '\n';
+        std::cout << '\n' << NAME << " (" << VERSION << ")\n";
         std::cout << "By " << AUTHOR << '\n';
         std::cout << "Acknowledgments:\n";
         std::cout << "    " << CHESS_PROGRAMMING << '\n';
@@ -24,7 +24,7 @@ namespace Run {
         std::cout << "       ) |    | |    | |       | (    ) | | (\\ (        | |    | |   | |\n";
         std::cout << " /\\____) |  __) (__  | (____/\\ | )    ( | | ) \\ \\___ ___) (___ | (___) |\n";
         std::cout << " \\_______) /_______\\ (_______/ |/      \\| |/   \\___/ )_______( (_______)\n";
-        std::cout << "\n ============================ Alpha v1.0.0 =============================\n\n";
+        std::cout << "\n ======================== Genesis v1.0.0-alpha =========================\n\n";
     }
 
     void init() {

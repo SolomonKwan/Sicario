@@ -7,7 +7,6 @@
 #include "constants.hpp"
 
 typedef uint16_t Move;
-typedef uint64_t Bitboard;
 
 enum Player {
     BLACK, WHITE

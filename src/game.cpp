@@ -11,7 +11,7 @@
 #include "evaluate.hpp"
 
 /**
- * Precomputed move information.
+ * Precomputed moves information.
  */
 namespace Moves {
     std::vector<MovesStruct> ROOK = computeRookMoves();
@@ -259,27 +259,8 @@ namespace Hashes {
  * Return true if a square is a dark square, else false.
  * @param square: The square to check.
  */
-bool isDark(int square) {
-    if ((square % 2 == 0 && ((square / 8) % 2) == 0) || (square % 2 == 1 && ((square / 8) % 2) == 1)) {
-        return true;
-    }
-    return false;
-}
-
-MoveType type(Move move) {
-    return (MoveType)(move & (0b11 << 12));
-}
-
-Square end(Move move) {
-    return (Square)((move >> 6) & 0b111111);
-}
-
-Square start(Move move) {
-    return (Square)(move & 0b111111);
-}
-
-Promotion promo(Move move) {
-    return (Promotion)(move & (0b11 << 14));
+inline bool isDark(int square) {
+    return (square % 2 == 0 && ((square / 8) % 2) == 0) || (square % 2 == 1 && ((square / 8) % 2) == 1) ? true : false;
 }
 
 /**
@@ -633,11 +614,8 @@ void Pos::showEOG(ExitCode code) {
 
 /**
  * Computes the index (in this case the key) into the ROOK_BLOCK moves map.
- * @param pos: The uint64_t with possible destination squares from the param
- *      square set.
- * @param moves: The precomputed moves.
+ * @param pos: The uint64_t with possible destination squares from the param square set.
  * @param square: The square from which the piece moves.
- * @param game: A Game struct pointer.
  * @return: Index into the ROOK_BLOCK array.
  */
 const int Pos::rookBlockIndex(uint64_t pos, Square square) {
