@@ -27,22 +27,22 @@ Node::Node(Move incoming_move, bool is_root, Hash hash, bool turn, int depth) {
 /**
  * Calculates the UCB1 value of the node.
  */
-float Node::UCB1() const {
+float Node::UCB1(SearchParams& sp) const {
     if (this->visits == 0) return INFINITY;
-    return (this->value / this->visits) + this->c * std::sqrt(std::log(this->parent->visits) / this->visits);
+    return (this->value / this->visits) + sp.c * std::sqrt(std::log(this->parent->visits) / this->visits);
 }
 
 /**
  * Performs the selection phase of monte carlo tree search.
  * @param pos: Position from which to select a child (initial call should always be the root position).
  */
-Node* Node::select(Pos& pos) {
+Node* Node::select(Pos& pos, SearchParams& sp) {
     if (this->children.size() == 0) {
         return this;
     }
-    Node* bestChild = this->bestChild();
+    Node* bestChild = this->bestChild(sp);
     pos.makeMove(bestChild->incoming_move);
-    return bestChild->select(pos);
+    return bestChild->select(pos, sp);
 }
 
 /**
@@ -50,7 +50,7 @@ Node* Node::select(Pos& pos) {
  * @param pos: Position to expand from.
  * @param nodes: Set of all nodes with the same hashes.
  */
-Node* Node::expand(Pos& pos, std::unordered_map<Hash, std::unordered_set<Node*>>& nodes) {
+Node* Node::expand(Pos& pos, std::unordered_map<Hash, std::unordered_set<Node*>>& nodes, SearchParams& sp) {
     MoveList moves = MoveList(pos);
     if (this->visits == 0 || pos.isEOG(moves)) {
         return this;
@@ -86,7 +86,7 @@ float Node::simulate(Pos& pos) {
 
     // Perform the simulation.
     while (!(code = pos.isEOG(moves))) {
-        pos.makeMove(pos.pseudoRandomMove(moves));
+        pos.makeMove(moves.randomMove());
         moveCount++;
         moves = MoveList(pos);
     }
@@ -140,7 +140,7 @@ void Node::rollback(float val, Pos& pos, std::unordered_map<Hash, std::unordered
  * @param pos: Position that is at the root node.
  * @param nodes: Set of all nodes with the same hashes.
  */
-Node* initialise(Pos& pos, std::unordered_map<Hash, std::unordered_set<Node*>>& nodes) {
+Node* initialise(Pos& pos, std::unordered_map<Hash, std::unordered_set<Node*>>& nodes, SearchParams& sp) {
     Node* root = new Node(0, true, pos.getHash(), pos.getTurn(), 0);
     nodes[pos.getHash()].insert(root);
     MoveList moves = MoveList(pos);
@@ -160,11 +160,11 @@ Node* initialise(Pos& pos, std::unordered_map<Hash, std::unordered_set<Node*>>& 
     return root;
 }
 
-Node* Node::bestChild() {
+Node* Node::bestChild(SearchParams& sp) {
     float max_val = -INFINITY;
     std::vector<Node*> maximal_nodes;
     for (Node* node : this->children) {
-        float val = node->UCB1();
+        float val = node->UCB1(sp);
         if (val > max_val) {
             maximal_nodes.clear();
             max_val = val;
@@ -206,10 +206,10 @@ void printInfo(Node* root, Info info) {
 /**
  * Print the best move after end of search.
  */
-void printBestMove(Node* root) {
+void printBestMove(Node* root, SearchParams& sp) {
     // Print the bestmove
     std::cout << "bestmove ";
-    Node* bestNode = root->bestChild();
+    Node* bestNode = root->bestChild(sp);
     if (bestNode == nullptr) {
         std::cout << "(None)" << "\n";
     } else {
@@ -220,7 +220,7 @@ void printBestMove(Node* root) {
     // Print debug stuff
     for (Node* node : root->children) {
         printMove(node->incoming_move, false);
-        std::cout << " " << node->UCB1() << " " << node->value << " " << node->visits << "\n";
+        std::cout << " " << node->UCB1(sp) << " " << node->value << " " << node->visits << "\n";
     }
 
     // Print pondermove
@@ -237,15 +237,15 @@ void printBestMove(Node* root) {
 void mcts(Pos& pos, SearchParams sp, std::atomic_bool& stop) {
     Info info;
     std::unordered_map<Hash, std::unordered_set<Node*>> nodes;
-    Node* root = initialise(pos, nodes);
+    Node* root = initialise(pos, nodes, sp);
     while (!stop) {
-        Node* leaf = root->select(pos);
-        leaf = leaf->expand(pos, nodes);
+        Node* leaf = root->select(pos, sp);
+        leaf = leaf->expand(pos, nodes, sp);
         float val = leaf->simulate(pos);
         leaf->rollback(val, pos, nodes);
         printInfo(root, info);
     }
-    printBestMove(root);
+    printBestMove(root, sp);
     stop = true;
 
     // Free the allocated nodes.

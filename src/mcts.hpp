@@ -36,15 +36,14 @@ class Node {
 
         float value = 0;
         float visits = 0;
-        float c = std::sqrt(2);
 
-        Node* select(Pos&);
-        Node* expand(Pos&, std::unordered_map<Hash, std::unordered_set<Node*>>&);
+        Node* select(Pos&, SearchParams&);
+        Node* expand(Pos&, std::unordered_map<Hash, std::unordered_set<Node*>>&, SearchParams&);
         float simulate(Pos&);
         void rollback(float, Pos&, std::unordered_map<Hash, std::unordered_set<Node*>>&);
 
-        float UCB1() const;
-        Node* bestChild();
+        float UCB1(SearchParams&) const;
+        Node* bestChild(SearchParams&);
 };
 
 void mcts(Pos& pos, SearchParams sp, std::atomic_bool& stop);

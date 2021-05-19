@@ -22,11 +22,19 @@ void communicate(std::string communication) {
 
 void UCI::sendIds() {
     communicate("id name " + (std::string) NAME + " (" + (std::string) VERSION + ")");
-    communicate("id author " + (std::string) AUTHOR);
+    communicate("id author " + (std::string) AUTHOR + "\n");
+}
+
+void showOption(std::string name, std::string type, std::string def, std::string min = "", std::string max = "",
+        std::vector<std::string> vars = {}) {
+    std::cout << "option name " << name << " type " << type << " default " << def;
+    if (min != "") std::cout << " min " << min << " max " << max;
+    for (std::string var : vars) std::cout << " var " << var;
+    std::cout << '\n';
 }
 
 void UCI::options() {
-    
+    showOption("Exploration Constant", "spin", "default_const", "-infinity", "infinity", {"default_constant"});
 }
 
 /**
