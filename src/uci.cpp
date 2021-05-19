@@ -81,10 +81,6 @@ void UCI::handleIsReady() {
     this->sendReadyOk();
 }
 
-void UCI::handleSetOption() {
-    communicate("handle set option");
-}
-
 void UCI::handleDebug(std::vector<std::string> inputs) {
     communicate("handle debug");
     if (inputs.size() == 2 && inputs[1] == "on") {
@@ -95,7 +91,12 @@ void UCI::handleDebug(std::vector<std::string> inputs) {
 }
 
 void UCI::handleSetOption(std::vector<std::string> inputs) {
-    communicate("handle set options");
+    if (inputs[2] == "Exploration" && inputs[3] == "Constant") {
+        this->params.c = std::stof(inputs[4]);
+    } else {
+        std::cout << "Unknown setoption " << inputs[2] << "\n"; // TODO Print the rest of the commands
+    }
+    std::cout << this->params.c << "\n";
 }
 
 void UCI::handleRegister(std::vector<std::string> inputs) {
@@ -103,7 +104,7 @@ void UCI::handleRegister(std::vector<std::string> inputs) {
 }
 
 void UCI::handleUCI_NewGame() {
-    communicate("handle ucinewgame");
+    this->pos.parseFen(STANDARD_GAME);
 }
 
 void UCI::handlePosition(std::vector<std::string> inputs) {
@@ -143,9 +144,8 @@ void UCI::runUCI(std::string input) {
     while (input != "quit" && input != "exit" && input != "q") {
         std::vector<std::string> commands = split(input, " ");
         if (commands[0] == "isready")           this->handleIsReady();
-        else if (commands[0] == "setoption")    this->handleSetOption();
-        else if (commands[0] == "debug")        this->handleDebug(commands);
         else if (commands[0] == "setoption")    this->handleSetOption(commands);
+        else if (commands[0] == "debug")        this->handleDebug(commands);
         else if (commands[0] == "register")     this->handleRegister(commands);
         else if (commands[0] == "ucinewgame")   this->handleUCI_NewGame();
         else if (commands[0] == "position")     this->handlePosition(commands);
