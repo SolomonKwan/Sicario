@@ -5,6 +5,7 @@
 #include <cmath>
 #include <unordered_map>
 #include <unordered_set>
+#include <chrono>
 #include "game.hpp"
 
 typedef Move Edge;
@@ -17,7 +18,7 @@ struct Info {
     int nodes = 0;
     int nps = 0;
     int tbhits = 0;
-    int time = 0;
+    std::chrono::_V2::system_clock::time_point time = std::chrono::high_resolution_clock::now();
     Move bestMove = 0U;
 };
 
@@ -38,7 +39,7 @@ class Node {
         float visits = 0;
 
         Node* select(Pos&, SearchParams&);
-        Node* expand(Pos&, std::unordered_map<Hash, std::unordered_set<Node*>>&, SearchParams&);
+        Node* expand(Pos&, std::unordered_map<Hash, std::unordered_set<Node*>>&, SearchParams&, Info&);
         float simulate(Pos&);
         void rollback(float, Pos&, std::unordered_map<Hash, std::unordered_set<Node*>>&);
 

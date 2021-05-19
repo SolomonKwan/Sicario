@@ -92,7 +92,7 @@ void UCI::handleDebug(std::vector<std::string> inputs) {
 
 void UCI::handleSetOption(std::vector<std::string> inputs) {
     if (inputs[2] == "Exploration" && inputs[3] == "Constant") {
-        this->params.c = std::stof(inputs[4]);
+        this->params.c = std::stof(inputs[4]); // TODO Set the default variable options for this one.
     } else {
         std::cout << "Unknown setoption " << inputs[2] << "\n"; // TODO Print the rest of the commands
     }

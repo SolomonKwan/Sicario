@@ -4,6 +4,7 @@
 #include <stack>
 #include <random>
 #include <unordered_set>
+#include <chrono>
 
 #include "mcts.hpp"
 
@@ -50,7 +51,7 @@ Node* Node::select(Pos& pos, SearchParams& sp) {
  * @param pos: Position to expand from.
  * @param nodes: Set of all nodes with the same hashes.
  */
-Node* Node::expand(Pos& pos, std::unordered_map<Hash, std::unordered_set<Node*>>& nodes, SearchParams& sp) {
+Node* Node::expand(Pos& pos, std::unordered_map<Hash, std::unordered_set<Node*>>& nodes, SearchParams& sp, Info& info) {
     MoveList moves = MoveList(pos);
     if (this->visits == 0 || pos.isEOG(moves)) {
         return this;
@@ -60,6 +61,8 @@ Node* Node::expand(Pos& pos, std::unordered_map<Hash, std::unordered_set<Node*>>
     for (Move move : moves) {
         pos.makeMove(move);
         Node* newNode = new Node(move, false, pos.getHash(), pos.getTurn(), this->depth + 1);
+        info.nodes += 1;
+        if (this->depth + 1 > info.depth) info.depth = this->depth + 1;
         nodes[pos.getHash()].insert(newNode);
         this->children.push_back(newNode);
         newNode->parent = this;
@@ -140,8 +143,9 @@ void Node::rollback(float val, Pos& pos, std::unordered_map<Hash, std::unordered
  * @param pos: Position that is at the root node.
  * @param nodes: Set of all nodes with the same hashes.
  */
-Node* initialise(Pos& pos, std::unordered_map<Hash, std::unordered_set<Node*>>& nodes, SearchParams& sp) {
+Node* initialise(Pos& pos, std::unordered_map<Hash, std::unordered_set<Node*>>& nodes, SearchParams& sp, Info& info) {
     Node* root = new Node(0, true, pos.getHash(), pos.getTurn(), 0);
+    info.nodes += 1;
     nodes[pos.getHash()].insert(root);
     MoveList moves = MoveList(pos);
 
@@ -149,6 +153,8 @@ Node* initialise(Pos& pos, std::unordered_map<Hash, std::unordered_set<Node*>>& 
     for (Move move : moves) {
         pos.makeMove(move);
         Node* newNode = new Node(move, false, pos.getHash(), pos.getTurn(), 1);
+        info.nodes += 1;
+        if (1 > info.depth) info.depth = 1;
         nodes[pos.getHash()].insert(newNode);
         root->children.push_back(newNode);
         newNode->parent = root;
@@ -184,23 +190,27 @@ Node* Node::bestChild(SearchParams& sp) {
 /**
  * Prints the info of the search information.
  */
-void printInfo(Node* root, Info info) {
-    // Move bestMove = root->bestChild()->incoming_move;
-    // if (bestMove != info.bestMove) {
-    //     std::cout <<
-    //             "info depth " << info.depth <<
-    //             " seldepth " << info.seldepth <<
-    //             " multipv " << info.multipv <<
-    //             " score cp " << info.cp <<
-    //             " nodes " << info.nodes <<
-    //             " nps " << info.nps <<
-    //             " tbhits " << info.tbhits <<
-    //             " time " << info.time <<
-    //             " pv ";
-    //     printMove(bestMove, false);
-    //     std::cout << "\n";
-    //     info.bestMove = bestMove;
-    // }
+void printInfo(Node* root, Info& info, SearchParams& sp) {
+    auto now = std::chrono::high_resolution_clock::now();
+    int64_t duration = std::chrono::duration_cast<std::chrono::milliseconds>(now - info.time).count();
+    int nps = (int) (info.nodes / (duration / (double) 1000));
+
+    Move bestMove = root->bestChild(sp)->incoming_move;
+    if (bestMove != info.bestMove) {
+        std::cout <<
+                "info depth " << info.depth <<
+                " seldepth " << info.seldepth <<
+                " multipv " << info.multipv <<
+                " score cp " << info.cp <<
+                " nodes " << info.nodes <<
+                " nps " << nps <<
+                " tbhits " << info.tbhits <<
+                " time " << duration <<
+                " pv ";
+        printMove(bestMove, false);
+        std::cout << "\n";
+        info.bestMove = bestMove;
+    }
 }
 
 /**
@@ -237,13 +247,13 @@ void printBestMove(Node* root, SearchParams& sp) {
 void mcts(Pos& pos, SearchParams sp, std::atomic_bool& stop) {
     Info info;
     std::unordered_map<Hash, std::unordered_set<Node*>> nodes;
-    Node* root = initialise(pos, nodes, sp);
+    Node* root = initialise(pos, nodes, sp, info);
     while (!stop) {
         Node* leaf = root->select(pos, sp);
-        leaf = leaf->expand(pos, nodes, sp);
+        leaf = leaf->expand(pos, nodes, sp, info);
         float val = leaf->simulate(pos);
         leaf->rollback(val, pos, nodes);
-        printInfo(root, info);
+        printInfo(root, info, sp);
     }
     printBestMove(root, sp);
     stop = true;
