@@ -69,7 +69,14 @@ void SearchInfo::clearTable() {
  * Search the current position.
  */
 void Pos::search(SearchParams params, std::atomic_bool& stop) {
-    mcts(*this, params, stop);
+    Searcher searcher = Searcher(*this, params);
+    searcher.mcts(stop);
+}
+
+Searcher::Searcher(Pos& pos, SearchParams searchParams) : pos(pos) {
+    this->time = searchParams.time;
+    this->children_to_search = searchParams.children_to_search;
+    this->c = searchParams.c;
 }
 
 /**

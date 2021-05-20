@@ -28,22 +28,22 @@ Node::Node(Move incoming_move, bool is_root, Hash hash, bool turn, int depth) {
 /**
  * Calculates the UCB1 value of the node.
  */
-float Node::UCB1(SearchParams& sp) const {
+float Node::UCB1(Searcher& searcher) const {
     if (this->visits == 0) return INFINITY;
-    return (this->value / this->visits) + sp.c * std::sqrt(std::log(this->parent->visits) / this->visits);
+    return (this->value / this->visits) + searcher.c * std::sqrt(std::log(this->parent->visits) / this->visits);
 }
 
 /**
  * Performs the selection phase of monte carlo tree search.
  * @param pos: Position from which to select a child (initial call should always be the root position).
  */
-Node* Node::select(Pos& pos, SearchParams& sp) {
+Node* Node::select(Searcher& searcher) {
     if (this->children.size() == 0) {
         return this;
     }
-    Node* bestChild = this->bestChild(sp);
-    pos.makeMove(bestChild->incoming_move);
-    return bestChild->select(pos, sp);
+    Node* bestChild = this->bestChild(searcher);
+    searcher.pos.makeMove(bestChild->incoming_move);
+    return bestChild->select(searcher);
 }
 
 /**
@@ -51,22 +51,22 @@ Node* Node::select(Pos& pos, SearchParams& sp) {
  * @param pos: Position to expand from.
  * @param nodes: Set of all nodes with the same hashes.
  */
-Node* Node::expand(Pos& pos, std::unordered_map<Hash, std::unordered_set<Node*>>& nodes, SearchParams& sp, Info& info) {
-    MoveList moves = MoveList(pos);
-    if (this->visits == 0 || pos.isEOG(moves)) {
+Node* Node::expand(Searcher& searcher) {
+    MoveList moves = MoveList(searcher.pos);
+    if (this->visits == 0 || searcher.pos.isEOG(moves)) {
         return this;
     }
 
     // Expand the node
     for (Move move : moves) {
-        pos.makeMove(move);
-        Node* newNode = new Node(move, false, pos.getHash(), pos.getTurn(), this->depth + 1);
-        info.nodes += 1;
-        if (this->depth + 1 > info.depth) info.depth = this->depth + 1;
-        nodes[pos.getHash()].insert(newNode);
+        searcher.pos.makeMove(move);
+        Node* newNode = new Node(move, false, searcher.pos.getHash(), searcher.pos.getTurn(), this->depth + 1);
+        searcher.nodes++;
+        if (this->depth + 1 > searcher.depth) searcher.depth = this->depth + 1;
+        searcher.hashPositions[searcher.pos.getHash()].insert(newNode);
         this->children.push_back(newNode);
         newNode->parent = this;
-        pos.undoMove();
+        searcher.pos.undoMove();
     }
 
     // Return a random child of the expanded node to be used in the next phase.
@@ -74,7 +74,7 @@ Node* Node::expand(Pos& pos, std::unordered_map<Hash, std::unordered_set<Node*>>
     std::mt19937 rng(dev());
     std::uniform_int_distribution<> randomIndex(0, this->children.size() - 1);
     int index = randomIndex(rng);
-    pos.makeMove(this->children[index]->incoming_move);
+    searcher.pos.makeMove(this->children[index]->incoming_move);
     return this->children[index];
 }
 
@@ -82,21 +82,21 @@ Node* Node::expand(Pos& pos, std::unordered_map<Hash, std::unordered_set<Node*>>
  * Performs the simulation step of monte carlo tree search.
  * @param pos: Position from which to perform a simulation.
  */
-float Node::simulate(Pos& pos) {
+float Node::simulate(Searcher& searcher) {
     int moveCount = 0;
-    MoveList moves = MoveList(pos);
+    MoveList moves = MoveList(searcher.pos);
     ExitCode code;
 
     // Perform the simulation.
-    while (!(code = pos.isEOG(moves))) {
-        pos.makeMove(moves.randomMove());
+    while (!(code = searcher.pos.isEOG(moves))) {
+        searcher.pos.makeMove(moves.randomMove());
         moveCount++;
-        moves = MoveList(pos);
+        moves = MoveList(searcher.pos);
     }
 
     // Undo the moves of the simulation.
     while (moveCount != 0) {
-        pos.undoMove();
+        searcher.pos.undoMove();
         moveCount--;
     }
 
@@ -114,18 +114,18 @@ float Node::simulate(Pos& pos) {
  * @param pos: Position from which the simulation was made.
  * @param nodes: Set of all nodes with the same hashes.
  */
-void Node::rollback(float val, Pos& pos, std::unordered_map<Hash, std::unordered_set<Node*>>& nodes) {
-    Hash hash = pos.getHash();
+void Node::rollback(float val, Searcher& searcher) {
+    Hash hash = searcher.pos.getHash();
 
     // Save current hash then undo move back to root.
     Node* curr = this;
     while (!curr->is_root) {
         curr = curr->parent;
-        pos.undoMove();
+        searcher.pos.undoMove();
     }
 
     // Rollback the value through every occurence of the hash position.
-    for (Node* node : nodes[hash]) {
+    for (Node* node : searcher.hashPositions[hash]) {
         while (!node->is_root) {
             node->visits += 1;
             node->value += (node->turn == Node::rootPlayer ? -1.0 * val : val);
@@ -143,34 +143,34 @@ void Node::rollback(float val, Pos& pos, std::unordered_map<Hash, std::unordered
  * @param pos: Position that is at the root node.
  * @param nodes: Set of all nodes with the same hashes.
  */
-Node* initialise(Pos& pos, std::unordered_map<Hash, std::unordered_set<Node*>>& nodes, SearchParams& sp, Info& info) {
-    Node* root = new Node(0, true, pos.getHash(), pos.getTurn(), 0);
-    info.nodes += 1;
-    nodes[pos.getHash()].insert(root);
-    MoveList moves = MoveList(pos);
+Node* initialise(Searcher& searcher) {
+    Node* root = new Node(0, true, searcher.pos.getHash(), searcher.pos.getTurn(), 0);
+    searcher.nodes++;
+    searcher.hashPositions[searcher.pos.getHash()].insert(root);
+    MoveList moves = MoveList(searcher.pos);
 
     // Expand the root node.
     for (Move move : moves) {
-        pos.makeMove(move);
-        Node* newNode = new Node(move, false, pos.getHash(), pos.getTurn(), 1);
-        info.nodes += 1;
-        if (1 > info.depth) info.depth = 1;
-        nodes[pos.getHash()].insert(newNode);
+        searcher.pos.makeMove(move);
+        Node* newNode = new Node(move, false, searcher.pos.getHash(), searcher.pos.getTurn(), 1);
+        searcher.nodes++;
+        if (1 > searcher.depth) searcher.depth = 1;
+        searcher.hashPositions[searcher.pos.getHash()].insert(newNode);
         root->children.push_back(newNode);
         newNode->parent = root;
-        pos.undoMove();
+        searcher.pos.undoMove();
     }
 
     // Set the root node player for rollback phase.
-    Node::rootPlayer = pos.getTurn() == WHITE ? WHITE : BLACK;
+    Node::rootPlayer = searcher.pos.getTurn() == WHITE ? WHITE : BLACK;
     return root;
 }
 
-Node* Node::bestChild(SearchParams& sp) {
+Node* Node::bestChild(Searcher& searcher) {
     float max_val = -INFINITY;
     std::vector<Node*> maximal_nodes;
     for (Node* node : this->children) {
-        float val = node->UCB1(sp);
+        float val = node->UCB1(searcher);
         if (val > max_val) {
             maximal_nodes.clear();
             max_val = val;
@@ -190,36 +190,36 @@ Node* Node::bestChild(SearchParams& sp) {
 /**
  * Prints the info of the search information.
  */
-void printInfo(Node* root, Info& info, SearchParams& sp) {
+void printInfo(Node* root, Searcher& searcher) {
     auto now = std::chrono::high_resolution_clock::now();
-    int64_t duration = std::chrono::duration_cast<std::chrono::milliseconds>(now - info.time).count();
-    int nps = (int) (info.nodes / (duration / (double) 1000));
+    int64_t duration = std::chrono::duration_cast<std::chrono::milliseconds>(now - searcher.start).count();
+    int nps = (int) (searcher.nodes / (duration / (double) 1000));
 
-    Move bestMove = root->bestChild(sp)->incoming_move;
-    if (bestMove != info.bestMove) {
+    Move bestMove = root->bestChild(searcher)->incoming_move;
+    if (bestMove != searcher.bestMove) {
         std::cout <<
-                "info depth " << info.depth <<
-                " seldepth " << info.seldepth <<
-                " multipv " << info.multipv <<
-                " score cp " << info.cp <<
-                " nodes " << info.nodes <<
+                "info depth " << searcher.depth <<
+                " seldepth " << searcher.seldepth <<
+                " multipv " << searcher.multipv <<
+                " score cp " << searcher.cp <<
+                " nodes " << searcher.nodes <<
                 " nps " << nps <<
-                " tbhits " << info.tbhits <<
+                " tbhits " << searcher.tbhits <<
                 " time " << duration <<
                 " pv ";
         printMove(bestMove, false);
         std::cout << "\n";
-        info.bestMove = bestMove;
+        searcher.bestMove = bestMove;
     }
 }
 
 /**
  * Print the best move after end of search.
  */
-void printBestMove(Node* root, SearchParams& sp) {
+void printBestMove(Node* root, Searcher searcher) {
     // Print the bestmove
     std::cout << "bestmove ";
-    Node* bestNode = root->bestChild(sp);
+    Node* bestNode = root->bestChild(searcher);
     if (bestNode == nullptr) {
         std::cout << "(None)" << "\n";
     } else {
@@ -230,7 +230,7 @@ void printBestMove(Node* root, SearchParams& sp) {
     // Print debug stuff
     for (Node* node : root->children) {
         printMove(node->incoming_move, false);
-        std::cout << " " << node->UCB1(sp) << " " << node->value << " " << node->visits << "\n";
+        std::cout << " " << node->UCB1(searcher) << " " << node->value << " " << node->visits << "\n";
     }
 
     // Print pondermove
@@ -244,22 +244,20 @@ void printBestMove(Node* root, SearchParams& sp) {
  * @param sp: Search parameters.
  * @param stop: Boolean indicating whether or not to continue the search.
  */
-void mcts(Pos& pos, SearchParams sp, std::atomic_bool& stop) {
-    Info info;
-    std::unordered_map<Hash, std::unordered_set<Node*>> nodes;
-    Node* root = initialise(pos, nodes, sp, info);
+void Searcher::mcts(std::atomic_bool& stop) {
+    Node* root = initialise(*this);
     while (!stop) {
-        Node* leaf = root->select(pos, sp);
-        leaf = leaf->expand(pos, nodes, sp, info);
-        float val = leaf->simulate(pos);
-        leaf->rollback(val, pos, nodes);
-        printInfo(root, info, sp);
+        Node* leaf = root->select(*this);
+        leaf = leaf->expand(*this);
+        float val = leaf->simulate(*this);
+        leaf->rollback(val, *this);
+        printInfo(root, *this);
     }
-    printBestMove(root, sp);
+    printBestMove(root, *this);
     stop = true;
 
     // Free the allocated nodes.
-    for (auto set : nodes) {
+    for (auto set : this->hashPositions) {
         for (Node* node : set.second) {
             delete node;
         }
