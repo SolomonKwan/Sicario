@@ -7,6 +7,16 @@
 
 struct GoParams {
     std::vector<Move> moves;
+    int wtime = 0;
+    int btime = 0;
+    int winc = 0;
+    int binc = 0;
+    int moves_to_go = 0;
+    int depth = 0;
+    int nodes = 0;
+    int mate = 0;
+    int movetime = 0;
+    bool infinite = true;
 };
 
 class UCI {

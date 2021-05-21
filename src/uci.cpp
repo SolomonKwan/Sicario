@@ -118,7 +118,7 @@ void UCI::handleGo(std::vector<std::string> commands, std::atomic_bool& stop) {
     GoParams go_params;
 
     // Parse go commands
-    for (int i = 1; i < (int) commands.size(); i++) {
+    for (int i = 1; i < (int) commands.size(); i++) { // TODO Error checking needed
         if (commands[i] == "searchmoves") {
             for (int j = i + 1; j < (int) commands.size(); j++) {
                 Move move = UCI::parseMove(commands[j]);
@@ -126,27 +126,27 @@ void UCI::handleGo(std::vector<std::string> commands, std::atomic_bool& stop) {
                 go_params.moves.push_back(move);
             }
         } else if (commands[i] == "ponder") {
-
+            // TODO
         } else if (commands[i] == "wtime") {
-            
+            go_params.wtime = stoi(commands[i + 1]);
         } else if (commands[i] == "btime") {
-
+            go_params.btime = stoi(commands[i + 1]);
         } else if (commands[i] == "winc") {
-
+            go_params.winc = stoi(commands[i + 1]);
         } else if (commands[i] == "binc") {
-
+            go_params.binc = stoi(commands[i + 1]);
         } else if (commands[i] == "movestogo") {
-        
+            go_params.moves_to_go = stoi(commands[i + 1]);
         } else if (commands[i] == "depth") {
-
+            go_params.depth = stoi(commands[i + 1]);
         } else if (commands[i] == "nodes") {
-
+            go_params.nodes = stoi(commands[i + 1]);
         } else if (commands[i] == "mate") {
-
+            go_params.mate = stoi(commands[i + 1]);
         } else if (commands[i] == "movetime") {
-
+            go_params.movetime = stoi(commands[i + 1]);
         } else if (commands[i] == "infinite") {
-            
+            go_params.infinite = true;
         }
     }
 
