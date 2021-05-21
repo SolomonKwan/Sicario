@@ -2,6 +2,7 @@
 #include "game.hpp"
 #include "search.hpp"
 #include "mcts.hpp"
+#include "uci.hpp"
 
 #include <iostream>
 #include <cmath>
@@ -68,12 +69,13 @@ void SearchInfo::clearTable() {
 /**
  * Search the current position.
  */
-void Pos::search(SearchParams params, std::atomic_bool& stop) {
+void Pos::search(SearchParams params, std::atomic_bool& stop, GoParams go_params) {
     Searcher searcher = Searcher(*this, params);
     searcher.mcts(stop);
 }
 
-Searcher::Searcher(Pos& pos, SearchParams searchParams) : pos(pos) {
+Searcher::Searcher(Pos pos, SearchParams searchParams) {
+    this->pos = pos;
     this->time = searchParams.time;
     this->children_to_search = searchParams.children_to_search;
     this->c = searchParams.c;

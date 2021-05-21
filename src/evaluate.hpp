@@ -32,14 +32,14 @@ namespace PieceValue {
     }
 }
 
-class Pos;
-class Evaluator {
-    public:
-        Evaluator(const Pos&);
-        int evaluate();
+// class Pos;
+// class Evaluator {
+//     public:
+//         Evaluator(const Pos&);
+//         int evaluate();
 
-    private:
-        const Pos& pos;
-};
+//     private:
+//         const Pos& pos;
+// };
 
 #endif

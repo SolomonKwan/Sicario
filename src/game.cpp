@@ -2796,17 +2796,26 @@ Move Pos::chooseMove(MoveList& moves) {
     // Recieve and print move.
     if ((this->turn && this->white == HUMAN) || (!this->turn && this->black == HUMAN)) {
         std::cout << std::flush;
-        std::cout << "Enter move: ";
 
         while (true) {
+            std::cout << "Enter move: ";
             move = NORMAL | pKNIGHT;
             std::string move_string;
             std::cin >> move_string;
 
             if (move_string == "kill") exit(-1);
-            if (move_string == "fen") std::cout << this->getFEN() << '\n';
-            if (move_string == "hash") std::cout << this->hash << "\n";
-            if (move_string == "displayall") this->displayAll();
+            if (move_string == "fen") {
+                std::cout << this->getFEN() << '\n';
+                continue;
+            }
+            if (move_string == "hash") {
+                std::cout << this->hash << "\n";
+                continue;
+            }
+            if (move_string == "displayall") {
+                this->displayAll();
+                continue;
+            }
             if (move_string == "undo") return 0;
 
             uint start, end;
@@ -2820,7 +2829,7 @@ Move Pos::chooseMove(MoveList& moves) {
             } else break;
         }
     } else {
-        move = this->pseudoRandomMove(moves);
+        move = moves.randomMove();
         if (!this->quiteMode) {
             std::cout << "Computer move: ";
             printMove(move, false);

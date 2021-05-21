@@ -7,6 +7,7 @@
 #include <unordered_set>
 #include <chrono>
 #include "game.hpp"
+#include "search.hpp"
 
 typedef Move Edge;
 

@@ -94,7 +94,7 @@ inline Square mirrored(Square square) {
     return (Square) (square ^ 56);
 }
 
-Evaluator::Evaluator(const Pos& pos) : pos(pos) {}
+// Evaluator::Evaluator(const Pos& pos) : pos(pos) {}
 
 /**
  * Returns true if it is an endgame with queens, else false.
@@ -223,12 +223,12 @@ int Pos::material() const {
  * Returns a integer representing the value of the board.
  * @param int: An integer value representation of the board.
  */
-int Evaluator::evaluate() {
-    int value = 0;
-    value += this->pos.psqt();
-    value += this->pos.material();
-    return value;
-}
+// int Evaluator::evaluate() {
+//     int value = 0;
+//     value += this->pos.psqt();
+//     value += this->pos.material();
+//     return value;
+// }
 
 /**
  * Returns a pseudorandom move from the provided MoveList based off of various heuristics.

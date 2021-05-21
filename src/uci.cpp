@@ -113,11 +113,82 @@ void UCI::handlePosition(std::vector<std::string> inputs) {
     this->pos.parseFen(concatFEN(inputs));
 }
 
-void UCI::handleGo(std::vector<std::string> inputs, std::atomic_bool& stop) {
-    communicate("Handling go command. For now, assuming a go infinite command");
+void UCI::handleGo(std::vector<std::string> commands, std::atomic_bool& stop) {
+    if (stop != true) return;
+    GoParams go_params;
+
+    // Parse go commands
+    for (int i = 1; i < (int) commands.size(); i++) {
+        if (commands[i] == "searchmoves") {
+            for (int j = i + 1; j < (int) commands.size(); j++) {
+                Move move = UCI::parseMove(commands[j]);
+                if (move == 0) continue;
+                go_params.moves.push_back(move);
+            }
+        } else if (commands[i] == "ponder") {
+
+        } else if (commands[i] == "wtime") {
+            
+        } else if (commands[i] == "btime") {
+
+        } else if (commands[i] == "winc") {
+
+        } else if (commands[i] == "binc") {
+
+        } else if (commands[i] == "movestogo") {
+        
+        } else if (commands[i] == "depth") {
+
+        } else if (commands[i] == "nodes") {
+
+        } else if (commands[i] == "mate") {
+
+        } else if (commands[i] == "movetime") {
+
+        } else if (commands[i] == "infinite") {
+            
+        }
+    }
+
+    for (Move move : go_params.moves) {
+        printMove(move, true);
+        std::cout << "\n";
+    }
+
     stop = false;
-    std::thread searchThread(&Pos::search, &this->pos, this->params, std::ref(stop));
+    std::thread searchThread(&Pos::search, &this->pos, this->params, std::ref(stop), go_params);
     searchThread.detach();
+}
+
+Move UCI::parseMove(std::string move_str) {
+    Move move = 0;
+    if (move_str[0] < 'a' || move_str[0] > 'h' || move_str[2] < 'a' || move_str[2] > 'h') {
+        return 0;
+    }
+
+    if (move_str[1] < '1' || move_str[1] > '8' || move_str[3] < '1' || move_str[3] > '8') {
+        return 0;
+    }
+
+    int start_file = move_str[0] - 'a';
+    int start_rank = move_str[1] - '1';
+    int end_file = move_str[2] - 'a';
+    int end_rank = move_str[3] - '1';
+
+    if (move_str.length() == 5) {
+        move |= PROMOTION;
+        if (move_str[4] == 'q') {
+            move |= pQUEEN;
+        } else if (move_str[4] == 'r') {
+            move |= pROOK;
+        } else if (move_str[4] == 'b') {
+            move |= pBISHOP;
+        }
+    }
+
+    move |= 8 * start_rank + start_file;
+    move |= ((8 * end_rank + end_file) << 6);
+    return move;
 }
 
 void UCI::handleStop(std::atomic_bool& stop) {

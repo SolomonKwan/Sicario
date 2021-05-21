@@ -12,7 +12,7 @@ game.o: game.cpp game.hpp constants.hpp movegen.hpp search.hpp
 mcts.o: mcts.cpp mcts.hpp constants.hpp movegen.hpp
 	$(FLAGS) -c mcts.cpp -o mcts.o
 
-search.o: search.cpp search.hpp constants.hpp movegen.hpp mcts.hpp
+search.o: search.cpp search.hpp constants.hpp movegen.hpp mcts.hpp game.hpp
 	$(FLAGS) -c search.cpp -o search.o
 
 evaluate.o: evaluate.cpp evaluate.hpp constants.hpp

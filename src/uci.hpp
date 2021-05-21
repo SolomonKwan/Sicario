@@ -4,6 +4,11 @@
 
 #include "game.hpp"
 #include "search.hpp"
+
+struct GoParams {
+    std::vector<Move> moves;
+};
+
 class UCI {
     public:
         static void init(std::string input);
@@ -33,6 +38,8 @@ class UCI {
         void sendCopyProtection();
         void sendRegistration();
         void sendInfo();
+
+        Move parseMove(std::string);
 };
 
 #endif

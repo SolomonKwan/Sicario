@@ -3,10 +3,10 @@
 #define GAME_HPP
 
 #include <atomic>
+#include <cmath>
 
 #include "constants.hpp"
 #include "movegen.hpp"
-#include "search.hpp"
 
 void printMove(Move move, bool extraInfo);
 
@@ -29,8 +29,32 @@ inline Promotion promo(Move move) {
 /**
  * Forward declarations.
  */
-class SearchInfo;
 class MoveList;
+
+struct PV {
+    Move move;
+    float score;
+};
+
+struct SearchParams {
+    int time = 5000; // 5 seconds for dev. Default shall be infinite.
+    int children_to_search = 5; // Default to 5 child nodes for each node in the tree.
+    float c = std::sqrt(2);
+};
+
+class SearchInfo {
+    public:
+        SearchInfo(int hashSize);
+        void setHashSize(int hashSize);
+
+    private:
+        int originalSize = DEFAULT_HASH_SIZE;
+        std::unordered_map<Hash, PV> PV_table;
+
+        void clearTable();
+};
+
+struct GoParams;
 
 /**
  * A struct representing the current board position.
@@ -54,7 +78,7 @@ class Pos {
         // Tree search
         void setDepth(int);
         void setHashSize(int);
-        void search(SearchParams, std::atomic_bool&);
+        void search(SearchParams, std::atomic_bool&, GoParams);
         void makeMove(Move);
         void undoMove();
         Move pseudoRandomMove(MoveList&);
