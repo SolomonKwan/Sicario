@@ -1,8 +1,6 @@
 
 #include <iostream>
 #include <thread>
-#include <atomic>
-#include <functional>
 
 #include "game.hpp"
 #include "uci.hpp"

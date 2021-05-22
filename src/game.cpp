@@ -1,14 +1,9 @@
 
 #include <iostream>
 #include <bitset>
-#include <vector>
-#include <cmath>
 #include <random>
 
 #include "game.hpp"
-#include "search.hpp"
-#include "movegen.hpp"
-#include "evaluate.hpp"
 
 /**
  * Precomputed moves information.
@@ -2947,7 +2942,7 @@ void printPromo(Move move) {
 }
 
 MoveList::MoveList(Pos& pos) {
-    pos.getMoves(moves_index, moves);
+    pos.getMoves(moves_index, this->moves);
 }
 
 uint64_t MoveList::bulkCount() {

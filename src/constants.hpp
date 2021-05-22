@@ -11,16 +11,18 @@
 #define STOCKFISH "Stockfish"
 #define BLUE_FEVER_SOFT "bluefeversoft"
 
-#define UNSET 0xFFFFFFFFFFFFFFFF
 #define STANDARD_GAME "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
-#define KIWIPETE "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1"
-#define MAX_MOVES 500
-#define MAX_MOVE_SETS 50
-#define MAX_THREADS 4
-#define DEFAULT_HASH_SIZE 16
 
 typedef uint64_t Hash;
 typedef uint64_t Bitboard;
+typedef uint16_t Move;
+
+/**
+ * Player side enum.
+ */
+enum Player {
+    BLACK, WHITE
+};
 
 /**
  * The squares of the board and their associated numbers. NONE (64) used as a sentinel value.

@@ -7,6 +7,7 @@
 #include <chrono>
 
 #include "mcts.hpp"
+#include "uci.hpp"
 
 // This value is properly set in the initialise function.
 Player Node::rootPlayer = WHITE;
@@ -235,7 +236,7 @@ void printBestMove(Node* root, Searcher searcher) {
 
     // Print pondermove
 
-    std::cout << "\n";
+    std::cout << "\n" << std::flush;
 }
 
 /**
@@ -244,14 +245,14 @@ void printBestMove(Node* root, Searcher searcher) {
  * @param sp: Search parameters.
  * @param stop: Boolean indicating whether or not to continue the search.
  */
-void Searcher::mcts(std::atomic_bool& stop) {
+void Searcher::mcts(std::atomic_bool& stop, GoParams go_params) {
     Node* root = initialise(*this);
     while (!stop) {
         Node* leaf = root->select(*this);
         leaf = leaf->expand(*this);
         float val = leaf->simulate(*this);
         leaf->rollback(val, *this);
-        printInfo(root, *this);
+        // printInfo(root, *this);
     }
     printBestMove(root, *this);
     stop = true;

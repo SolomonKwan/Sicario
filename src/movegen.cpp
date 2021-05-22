@@ -3,9 +3,7 @@
 #include <algorithm>
 #include <iostream>
 #include <cmath>
-#include <set>
 
-#include "constants.hpp"
 #include "movegen.hpp"
 #include "game.hpp"
 

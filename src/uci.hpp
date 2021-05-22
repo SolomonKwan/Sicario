@@ -3,7 +3,7 @@
 #define UCI_HPP
 
 #include "game.hpp"
-#include "search.hpp"
+// #include "search.hpp"
 
 struct GoParams {
     std::vector<Move> moves;

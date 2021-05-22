@@ -2,13 +2,8 @@
 #ifndef SEARCH_HPP
 #define SEARCH_HPP
 
-#include "constants.hpp"
-#include "evaluate.hpp"
-#include "movegen.hpp"
 #include "game.hpp"
-#include <unordered_map>
 #include <unordered_set>
-#include <cmath>
 #include <chrono>
 
 class Node;
@@ -16,7 +11,7 @@ class Searcher {
     public:
         Searcher(Pos pos, SearchParams params);
         Pos pos;
-        void mcts(std::atomic_bool& stop);
+        void mcts(std::atomic_bool& stop, GoParams);
         inline void incrementNodes() {
             this->nodes++;
         }

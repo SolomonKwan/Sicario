@@ -2,8 +2,6 @@
 #ifndef EVALUATE_HPP
 #define EVALUATE_HPP
 
-#include "constants.hpp"
-
 namespace PSQT {
     extern const int PAWN[64];
     extern const int KNIGHT[64];
@@ -31,15 +29,5 @@ namespace PieceValue {
         };
     }
 }
-
-// class Pos;
-// class Evaluator {
-//     public:
-//         Evaluator(const Pos&);
-//         int evaluate();
-
-//     private:
-//         const Pos& pos;
-// };
 
 #endif

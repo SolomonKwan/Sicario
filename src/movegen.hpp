@@ -2,15 +2,11 @@
 #ifndef MOVEGEN_HPP
 #define MOVEGEN_HPP
 
-#include <vector>
 #include <unordered_map>
+#include <vector>
 #include "constants.hpp"
 
-typedef uint16_t Move;
-
-enum Player {
-    BLACK, WHITE
-};
+#define UNSET 0xFFFFFFFFFFFFFFFF
 
 /**
  * A struct holding the move families. 

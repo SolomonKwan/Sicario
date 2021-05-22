@@ -2,12 +2,8 @@
 #ifndef MCTS_HPP
 #define MCTS_HPP
 
-#include <cmath>
-#include <unordered_map>
-#include <unordered_set>
-#include <chrono>
-#include "game.hpp"
 #include "search.hpp"
+#include "constants.hpp"
 
 typedef Move Edge;
 

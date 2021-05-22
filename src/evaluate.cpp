@@ -1,5 +1,4 @@
 
-#include "constants.hpp"
 #include "evaluate.hpp"
 #include "game.hpp"
 
@@ -218,17 +217,6 @@ int Pos::material() const {
 
     return value;
 }
-
-/**
- * Returns a integer representing the value of the board.
- * @param int: An integer value representation of the board.
- */
-// int Evaluator::evaluate() {
-//     int value = 0;
-//     value += this->pos.psqt();
-//     value += this->pos.material();
-//     return value;
-// }
 
 /**
  * Returns a pseudorandom move from the provided MoveList based off of various heuristics.

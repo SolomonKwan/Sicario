@@ -1,14 +1,14 @@
 
-#include "game.hpp"
+// #include "game.hpp"
 #include "search.hpp"
-#include "mcts.hpp"
+// #include "mcts.hpp"
 #include "uci.hpp"
 
-#include <iostream>
-#include <cmath>
-#include <vector>
+// #include <iostream>
+// #include <cmath>
+// #include <vector>
 #include <algorithm>
-#include <atomic>
+// #include <atomic>
 
 namespace Moves {
     extern std::vector<MovesStruct> ROOK;
@@ -55,7 +55,7 @@ SearchInfo::SearchInfo(int hashSize) {
 void SearchInfo::setHashSize(int hashSize) {
     this->originalSize = hashSize;
     this->PV_table.reserve((hashSize * 1000000) / sizeof(PV));
-    std::cout << "PV table initialised for " << (hashSize * 1000000) / sizeof(PV) << " entries\n";
+    // std::cout << "PV table initialised for " << (hashSize * 1000000) / sizeof(PV) << " entries\n";
 }
 
 /**
@@ -71,7 +71,7 @@ void SearchInfo::clearTable() {
  */
 void Pos::search(SearchParams params, std::atomic_bool& stop, GoParams go_params) {
     Searcher searcher = Searcher(*this, params);
-    searcher.mcts(stop);
+    searcher.mcts(stop, go_params);
 }
 
 Searcher::Searcher(Pos pos, SearchParams searchParams) {

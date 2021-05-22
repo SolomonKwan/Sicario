@@ -1,8 +1,6 @@
 
 #include <iostream>
-#include "movegen.hpp"
 #include "uci.hpp"
-#include "game.hpp"
 
 namespace Run {
     void showStartUp() {
