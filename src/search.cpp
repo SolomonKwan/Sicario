@@ -10,38 +10,6 @@
 #include <algorithm>
 // #include <atomic>
 
-namespace Moves {
-    extern std::vector<MovesStruct> ROOK;
-    extern std::vector<MovesStruct> BISHOP;
-    extern std::vector<MovesStruct> KNIGHT;
-    extern std::vector<MovesStruct> KING;
-    extern std::vector<MovesStruct> CASTLING;
-    extern std::vector<MovesStruct> EN_PASSANT;
-    extern std::vector<MovesStruct> DOUBLE_PUSH;
-    extern std::vector<std::vector<MovesStruct>> PAWN;
-
-    namespace Blocks {
-        extern std::vector<MovesStruct> BISHOP;
-        extern std::vector<MovesStruct> ROOK;
-    }
-}
-
-/**
- * Vector of indices for rook and bishop indexing.
- */
-namespace Indices {
-    extern const std::vector<std::vector<int>> ROOK;
-    extern const std::vector<std::vector<int>> BISHOP;
-}
-
-/**
- * Rays bitboards from start (exlusive) to end (inclusive).
- */
-namespace Rays {
-    extern const std::vector<std::vector<Bitboard>> LEVEL;
-    extern const std::vector<std::vector<Bitboard>> DIAGONAL;
-}
-
 /**
  * @param hashSize: Hash table size in megabytes.
  */

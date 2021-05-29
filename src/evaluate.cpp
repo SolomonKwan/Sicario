@@ -1,6 +1,7 @@
 
 #include "evaluate.hpp"
 #include "game.hpp"
+#include <random>
 
 /**
  * Piece square tables in the view of white.
@@ -125,7 +126,7 @@ bool Pos::isEndGame() const {
 
 /**
  * Returns a piece square table value representation of the board.
- * @param int: A value representing the value of the board.
+ * @param int: A value representing the value of the board. 0 = even, +ve = white advantage, -ve = black advantage.
  */
 int Pos::psqt() const {
     int value = 0;
@@ -224,20 +225,26 @@ int Pos::material() const {
  * @return: A pseudorandom move.
  */
 Move Pos::pseudoRandomMove(MoveList& moves) {
-    Move bestMove = 0;
-    int bestValue = 0;
+    std::vector<Move> bestMoves;
+    int bestValue = this->turn == WHITE ? -INFINITY : INFINITY;
+
     for (Move move : moves) {
         this->makeMove(move);
 
         int value = this->psqt();
-        value += this->material();
-        if ((this->turn == WHITE && value <= bestValue) || (this->turn == BLACK && value >= bestValue)) {
+        if (this->turn == WHITE ? value < bestValue : value > bestValue) {
+            bestMoves.clear();
+            bestMoves.push_back(move);
             bestValue = value;
-            bestMove = move;
+        } else if (value == bestValue) {
+            bestMoves.push_back(move);
         }
 
         this->undoMove();
     }
 
-    return bestMove;
+    std::random_device dev;
+    std::mt19937 rng(dev());
+    std::uniform_int_distribution<> dist(0, bestMoves.size() - 1);
+    return bestMoves[dist(rng)];
 }

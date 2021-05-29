@@ -2945,7 +2945,7 @@ MoveList::MoveList(Pos& pos) {
     pos.getMoves(moves_index, this->moves);
 }
 
-uint64_t MoveList::bulkCount() {
+uint64_t MoveList::size() {
     uint64_t count = 0;
     for (int i = 0; i < this->moves_index; i++) {
         count += this->moves[i]->size();
@@ -3030,7 +3030,7 @@ void printPerft(Move move, uint64_t nodes) {
 uint64_t Pos::perft(int depth, bool print) {
     uint64_t nodes = 0;
     if (depth == 1) {
-        return MoveList(*this).bulkCount();
+        return MoveList(*this).size();
     }
 
     for (Move move : MoveList(*this)) {
@@ -3050,7 +3050,7 @@ void basePerft(Pos game) {
         printPerft(move, 1);
     }
 
-    std::cout << "\nNodes searched: " << moves.bulkCount() << "\n\n";
+    std::cout << "\nNodes searched: " << moves.size() << "\n\n";
 }
 
 /**

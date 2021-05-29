@@ -90,7 +90,7 @@ float Node::simulate(Searcher& searcher) {
 
     // Perform the simulation.
     while (!(code = searcher.pos.isEOG(moves))) {
-        searcher.pos.makeMove(moves.randomMove());
+        searcher.pos.makeMove(searcher.pos.pseudoRandomMove(moves));
         moveCount++;
         moves = MoveList(searcher.pos);
     }

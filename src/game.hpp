@@ -137,7 +137,7 @@ class Pos {
         int ply;
 
         // Miscellaneous info
-        PlayerType white = COMPUTER, black = COMPUTER;
+        PlayerType white = HUMAN, black = COMPUTER;
         bool unicodeMode = true;
         bool quiteMode = false;
 
@@ -240,7 +240,7 @@ class Pos {
 class MoveList {
     public:
         MoveList(Pos&);
-        uint64_t bulkCount();
+        uint64_t size();
         Move randomMove();
 
         struct Iterator {
