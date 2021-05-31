@@ -217,7 +217,7 @@ void printInfo(Node* root, Searcher& searcher) {
 /**
  * Print the best move after end of search.
  */
-void printBestMove(Node* root, Searcher searcher) {
+void printBestMove(Node* root, Searcher& searcher) {
     // Print the bestmove
     std::cout << "bestmove ";
     Node* bestNode = root->bestChild(searcher);
