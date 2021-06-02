@@ -83,13 +83,13 @@ Node* Node::expand(Searcher& searcher) {
  * Performs the simulation step of monte carlo tree search.
  * @param pos: Position from which to perform a simulation.
  */
-float Node::simulate(Searcher& searcher) {
+float Node::simulate(Searcher& searcher, std::atomic_bool& stop) {
     int moveCount = 0;
     MoveList moves = MoveList(searcher.pos);
     ExitCode code;
 
     // Perform the simulation.
-    while (!(code = searcher.pos.isEOG(moves))) {
+    while (!(code = searcher.pos.isEOG(moves)) && !stop) {
         searcher.pos.makeMove(searcher.pos.pseudoRandomMove(moves));
         moveCount++;
         moves = MoveList(searcher.pos);
@@ -115,7 +115,8 @@ float Node::simulate(Searcher& searcher) {
  * @param pos: Position from which the simulation was made.
  * @param nodes: Set of all nodes with the same hashes.
  */
-void Node::rollback(float val, Searcher& searcher) {
+void Node::rollback(float val, Searcher& searcher, std::atomic_bool& stop) {
+    if (stop) return;
     Hash hash = searcher.pos.getHash();
 
     // Save current hash then undo move back to root.
@@ -250,8 +251,8 @@ void Searcher::mcts(std::atomic_bool& stop, GoParams go_params) {
     while (!stop) {
         Node* leaf = root->select(*this);
         leaf = leaf->expand(*this);
-        float val = leaf->simulate(*this);
-        leaf->rollback(val, *this);
+        float val = leaf->simulate(*this, stop);
+        leaf->rollback(val, *this, stop);
         // printInfo(root, *this);
     }
     printBestMove(root, *this);
