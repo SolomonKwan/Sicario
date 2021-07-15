@@ -148,11 +148,6 @@ void UCI::handleGo(std::vector<std::string> commands, std::atomic_bool& stop) {
         }
     }
 
-    for (Move move : go_params.moves) {
-        printMove(move, true);
-        std::cout << "\n";
-    }
-
     stop = false;
     std::thread searchThread(&Pos::search, &this->pos, this->params, std::ref(stop), go_params);
     searchThread.detach();

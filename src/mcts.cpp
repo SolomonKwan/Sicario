@@ -145,7 +145,7 @@ void Node::rollback(float val, Searcher& searcher, std::atomic_bool& stop) {
  * @param pos: Position that is at the root node.
  * @param nodes: Set of all nodes with the same hashes.
  */
-Node* initialise(Searcher& searcher) {
+Node* initialise(Searcher& searcher, GoParams& go_params) {
     Node* root = new Node(0, true, searcher.pos.getHash(), searcher.pos.getTurn(), 0);
     searcher.nodes++;
     searcher.hashPositions[searcher.pos.getHash()].insert(root);
@@ -153,14 +153,17 @@ Node* initialise(Searcher& searcher) {
 
     // Expand the root node.
     for (Move move : moves) {
-        searcher.pos.makeMove(move);
-        Node* newNode = new Node(move, false, searcher.pos.getHash(), searcher.pos.getTurn(), 1);
-        searcher.nodes++;
-        if (1 > searcher.depth) searcher.depth = 1;
-        searcher.hashPositions[searcher.pos.getHash()].insert(newNode);
-        root->children.push_back(newNode);
-        newNode->parent = root;
-        searcher.pos.undoMove();
+        std::vector<Move>& search_moves = go_params.moves;
+        if (search_moves.size() == 0 || std::find(search_moves.begin(), search_moves.end(), move) != search_moves.end()) {
+            searcher.pos.makeMove(move);
+            Node* newNode = new Node(move, false, searcher.pos.getHash(), searcher.pos.getTurn(), 1);
+            searcher.nodes++;
+            if (1 > searcher.depth) searcher.depth = 1;
+            searcher.hashPositions[searcher.pos.getHash()].insert(newNode);
+            root->children.push_back(newNode);
+            newNode->parent = root;
+            searcher.pos.undoMove();
+        }
     }
 
     // Set the root node player for rollback phase.
@@ -247,7 +250,7 @@ void printBestMove(Node* root, Searcher& searcher) {
  * @param stop: Boolean indicating whether or not to continue the search.
  */
 void Searcher::mcts(std::atomic_bool& stop, GoParams go_params) {
-    Node* root = initialise(*this);
+    Node* root = initialise(*this, go_params);
     while (!stop) {
         Node* leaf = root->select(*this);
         leaf = leaf->expand(*this);
