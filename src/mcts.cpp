@@ -82,6 +82,7 @@ Node* Node::expand(Searcher& searcher) {
 /**
  * Performs the simulation step of monte carlo tree search.
  * @param pos: Position from which to perform a simulation.
+ * @return (float): +1 if rootplayer wins, -1.0 if rootplayer loses, 0.0 if draw.
  */
 float Node::simulate(Searcher& searcher, std::atomic_bool& stop) {
     int moveCount = 0;
@@ -90,7 +91,7 @@ float Node::simulate(Searcher& searcher, std::atomic_bool& stop) {
 
     // Perform the simulation.
     while (!(code = searcher.pos.isEOG(moves)) && !stop) {
-        searcher.pos.makeMove(searcher.pos.pseudoRandomMove(moves));
+        searcher.pos.makeMove(searcher.pos.pseudoRandomMove(moves, Node::rootPlayer));
         moveCount++;
         moves = MoveList(searcher.pos);
     }
@@ -171,6 +172,9 @@ Node* initialise(Searcher& searcher, GoParams& go_params) {
     return root;
 }
 
+/**
+ * Returns the best child of a node based on the UCB1 equation.
+ */
 Node* Node::bestChild(Searcher& searcher) {
     float max_val = -INFINITY;
     std::vector<Node*> maximal_nodes;

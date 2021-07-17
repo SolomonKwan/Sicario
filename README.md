@@ -78,6 +78,7 @@ for the move precomputation (at the price of clarity, maintenance, my time and m
     <li>Research into CPU architecture and their effects on the program.</li>
     <li>Utilise more in-depth C++ features.</li>
     <li>Handle exiting the program during a search and releasing the necessary memory at that point.</li>
+    <li>Replace node creation of MCTS with smart pointers.</li>
 </ul>
 </br>
 <H2>Acknowledgements</H2>

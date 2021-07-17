@@ -224,7 +224,7 @@ int Pos::material() const {
  * @param moves: MoveList of the legal moves in the postion.
  * @return: A pseudorandom move.
  */
-Move Pos::pseudoRandomMove(MoveList& moves) {
+Move Pos::pseudoRandomMove(MoveList& moves, Player rootPlayer) {
     std::vector<Move> bestMoves;
     int bestValue = this->turn == WHITE ? -INFINITY : INFINITY;
 
