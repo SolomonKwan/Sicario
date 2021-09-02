@@ -255,87 +255,22 @@ namespace Hashes {
  * @param square: The square to check.
  */
 inline bool isDark(int square) {
-    return (square % 2 == 0 && ((square / 8) % 2) == 0) || (square % 2 == 1 && ((square / 8) % 2) == 1) ? true : false;
+    return (DARK >> square) & 1;
 }
 
 /**
- * Display all individual game position information.
- * @param game: Pointer to game struct.
- */
-void Pos::displayAll() const {
-    std::cout << "White";
-    displayBB(this->sides[WHITE]);
-
-    std::cout << "Black";
-    displayBB(this->sides[BLACK]);
-
-    std::cout << "Kings";
-    displayBB(this->kings);
-
-    std::cout << "Queens";
-    displayBB(this->queens);
-
-    std::cout << "Rooks";
-    displayBB(this->rooks);
-
-    std::cout << "Bishops";
-    displayBB(this->bishops);
-
-    std::cout << "Knights";
-    displayBB(this->knights);
-
-    std::cout << "pawns";
-    displayBB(this->pawns);
-
-    std::cout << (this->turn ? "White" : "Black") << '\n';
-
-    std::cout << "Castling: " << std::bitset<4>(this->castling) << '\n';
-
-    std::cout << "En-passant: " << squareName[this->en_passant] << '\n';
-
-    std::cout << "Halfmove: " << this->halfmove << '\n';
-    
-    std::cout << "Fullmove: " << this->fullmove << "\n\n";
-
-    std::cout << "piece_cnt: " << this->piece_cnt << '\n';
-    std::cout << "knight_cnt: " << this->knight_cnt << '\n';
-    std::cout << "wdsb_cnt: " << this->wdsb_cnt << '\n';
-    std::cout << "wlsb_cnt: " << this->wlsb_cnt << '\n';
-    std::cout << "bdsb_cnt: " << this->bdsb_cnt << '\n';
-    std::cout << "blsb_cnt: " << this->blsb_cnt << "\n\n";
-
-    for (int i = 0; i < 12; i++) {
-        std::cout << piece_type_string[i] << " " << this->piece_index[i] << " : ";
-        for (int j = 0; j < this->piece_index[i]; j++) {
-            std::cout << squareName[this->piece_list[i][j]] << " ";
-        }
-        std::cout << '\n';
-    }
-    std::cout << '\n';
-
-    for (int i = 0; i < 64; i++) {
-        std::cout << squareName[i] << ":" << piece_type_string[this->pieces[i]] << " ";
-        if (i % 8 == 7) std::cout << '\n';
-    }
-}
-
-/**
- * Returns whether or not a fen is valid. STILL TO BE MADE...
- * 
+ * Returns whether or not a fen is valid.
  * @param fen: The fen string to check.
- * 
  * @return: True if valid, else false.
  */
 bool goodFen(std::string fen) {
-    return true;
+    return true; // TODO
 }
 
 /**
  * Parses the fen string into a game struct.
- * 
  * @param game: Pointer to game struct.
  * @param fen: The fen string.
- * 
  * @return: INVALID_FEN if fen is invalid, else NORMAL_PLY.
  */
 ExitCode Pos::parseFen(std::string fen) {
@@ -1728,7 +1663,6 @@ Bitboard Pos::getKingAttackers(const Square sq, const bool turn) const {
 
 void Pos::setCheckers() {
     this->checkers = 0ULL;
-    // std::cout << squareName[this->piece_list[this->turn][0]] << '\n';
     this->checkers = this->isAttacked(this->piece_list[this->turn][0], !this->turn);
 }
 
@@ -2807,10 +2741,6 @@ Move Pos::chooseMove(MoveList& moves) {
                 std::cout << this->hash << "\n";
                 continue;
             }
-            if (move_string == "displayall") {
-                this->displayAll();
-                continue;
-            }
             if (move_string == "undo") return 0;
 
             uint start, end;
@@ -2844,7 +2774,7 @@ bool Pos::oneBitSet(Bitboard bits) {
 
 /**
  * Sets the bitboards for the checkers and the rook and bishop pin rays. Called before retrieving the moves of a
- * position. Need to do further computation to check that king does not move into check. 
+ * position.
  */
 void Pos::setBitboards() {
     this->setCheckers();
@@ -2942,7 +2872,7 @@ void printPromo(Move move) {
 }
 
 MoveList::MoveList(Pos& pos) {
-    pos.getMoves(moves_index, this->moves);
+    pos.getMoves(this->moves_index, this->moves);
 }
 
 uint64_t MoveList::size() {
@@ -3158,22 +3088,16 @@ void runSample(Pos pos, int num) {
  * Loop for user input tasks.
  * @param input: The initial user input.
  */
-void runNormal(std::string input) {
+void Play::init() {
     Pos pos;
-    while (input != "exit" && input != "quit" && input != "q") {
+    std::string input("");
+    while (input != "q" && input != "quit" && input != "exit") {
+        std::getline(std::cin, input);
         std::vector<std::string> commands = split(input, " ");
         if (commands[0] == "play") handleGame(pos);
         else if (commands[0] == "sample") runSample(pos, std::stoi(commands[1]));
         else if (commands[0] == "perft") runPerft(std::stoi(commands[1]), pos);
         else if (commands[0] == "set") setCommand(commands, pos);
         else if (commands[0] == "display" && commands.size() == 1) pos.display();
-        else if (commands[0] == "display" && commands.size() != 1 && commands[1] == "all") pos.displayAll();
-        else if (commands[0] == "exit" || commands[0] == "quit" || commands[0] == "q") break;
-        std::cout << std::flush;
-        std::getline(std::cin, input);
     }
-}
-
-void Play::init(std::string input) {
-    runNormal(input);
 }

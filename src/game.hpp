@@ -71,7 +71,6 @@ class Pos {
         uint64_t perft(int, bool = false);
         ExitCode parseFen(std::string);
         void display() const;
-        void displayAll() const;
         void setPlayer(Player, std::string);
         void toggleQuiet();
 
@@ -278,7 +277,7 @@ class MoveList {
 std::string concatFEN(std::vector<std::string> strings);
 
 namespace Play {
-    void init(std::string);
+    void init();
 }
 
 #endif

@@ -21,8 +21,8 @@ struct GoParams {
 
 class UCI {
     public:
-        static void init(std::string input);
-        void runUCI(std::string input);
+        static void init();
+        void runUCI();
 
         Pos pos;
         SearchParams params;

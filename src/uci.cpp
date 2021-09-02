@@ -202,10 +202,12 @@ void UCI::handlePonderHit() {
  * handle different parts of program.
  * @param input: THe initial input string.
  */
-void UCI::runUCI(std::string input) {
+void UCI::runUCI() {
     this->sendInitialResponse();
     std::atomic_bool stop(true);
+    std::string input("");
     while (input != "quit" && input != "exit" && input != "q") {
+        std::getline(std::cin, input);
         std::vector<std::string> commands = split(input, " ");
         if (commands[0] == "isready")           this->handleIsReady();
         else if (commands[0] == "setoption")    this->handleSetOption(commands);
@@ -217,7 +219,6 @@ void UCI::runUCI(std::string input) {
         else if (commands[0] == "stop")         this->handleStop(stop);
         else if (commands[0] == "ponderhit")    this->handlePonderHit();
         std::cout << std::flush;
-        std::getline(std::cin, input);
     }
     this->handleStop(stop);
 }
@@ -227,7 +228,7 @@ void UCI::runUCI(std::string input) {
  * interations.
  * @param input: THe initial input string.
  */
-void UCI::init(std::string input) {
+void UCI::init() {
     UCI game_instance;
-    game_instance.runUCI(input);
+    game_instance.runUCI();
 }

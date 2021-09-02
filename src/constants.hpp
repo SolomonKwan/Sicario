@@ -12,6 +12,7 @@
 #define BLUE_FEVER_SOFT "bluefeversoft"
 
 #define STANDARD_GAME "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+#define DARK 0xAA55AA55AA55AA55
 
 typedef uint64_t Hash;
 typedef uint64_t Bitboard;
