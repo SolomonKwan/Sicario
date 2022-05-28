@@ -10,7 +10,6 @@
 #define CHESS_PROGRAMMING "www.chessprogramming.org"
 #define STOCKFISH "Stockfish"
 #define BLUE_FEVER_SOFT "bluefeversoft"
-
 #define STANDARD_GAME "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
 #define DARK 0xAA55AA55AA55AA55
 
@@ -41,6 +40,21 @@ enum Square {
 };
 
 /**
+ * The squares in string format. Used for development and debugging.
+ */
+const std::string squareName[65] = {
+    "a1", "b1", "c1", "d1", "e1", "f1", "g1", "h1",
+    "a2", "b2", "c2", "d2", "e2", "f2", "g2", "h2",
+    "a3", "b3", "c3", "d3", "e3", "f3", "g3", "h3",
+    "a4", "b4", "c4", "d4", "e4", "f4", "g4", "h4",
+    "a5", "b5", "c5", "d5", "e5", "f5", "g5", "h5",
+    "a6", "b6", "c6", "d6", "e6", "f6", "g6", "h6",
+    "a7", "b7", "c7", "d7", "e7", "f7", "g7", "h7",
+    "a8", "b8", "c8", "d8", "e8", "f8", "g8", "h8",
+    "None"
+};
+
+/**
  * The piece types.
  */
 enum PieceType {
@@ -51,6 +65,16 @@ enum PieceType {
 };
 
 /**
+ * Piece type strings. Used for development and debugging.
+ */
+const std::string piece_type_string[13] = {
+    "B_KING", "W_KING",
+    "W_QUEEN", "W_ROOK", "W_BISHOP", "W_KNIGHT", "W_PAWN",
+    "B_QUEEN", "B_ROOK", "B_BISHOP", "B_KNIGHT", "B_PAWN",
+    "NO_PIECE"
+};
+
+/**
  * The promotion piece types. In the format for move hashes (i.e. left shifted by 14 bits).
  */
 enum Promotion {
@@ -58,10 +82,24 @@ enum Promotion {
 };
 
 /**
+ * Promotion piece strings.
+ */
+const std::string promoName[4] = {
+    "n", "b", "r", "q"
+};
+
+/**
  * The move types. In the format for move hashes (i.e. left shifted by 12 bits).
  */
 enum MoveType {
     NORMAL = 0, PROMOTION = 1 << 12, EN_PASSANT = 2 << 12, CASTLING = 3 << 12
+};
+
+/**
+ * Move type strings.
+ */
+const std::string moveName[4] = {
+    "Normal", "Promotion", "En-passant", "Castling"
 };
 
 /**
@@ -111,45 +149,6 @@ const Bitboard ranks[64] = {
 };
 
 /**
- * The squares in string format. Used for building and debugging. 
- */
-const std::string squareName[65] = {
-    "a1", "b1", "c1", "d1", "e1", "f1", "g1", "h1",
-    "a2", "b2", "c2", "d2", "e2", "f2", "g2", "h2",
-    "a3", "b3", "c3", "d3", "e3", "f3", "g3", "h3",
-    "a4", "b4", "c4", "d4", "e4", "f4", "g4", "h4",
-    "a5", "b5", "c5", "d5", "e5", "f5", "g5", "h5",
-    "a6", "b6", "c6", "d6", "e6", "f6", "g6", "h6",
-    "a7", "b7", "c7", "d7", "e7", "f7", "g7", "h7",
-    "a8", "b8", "c8", "d8", "e8", "f8", "g8", "h8",
-    "None"
-};
-
-/**
- * Piece type strings.
- */
-const std::string piece_type_string[13] = {
-    "B_KING", "W_KING", 
-    "W_QUEEN", "W_ROOK", "W_BISHOP", "W_KNIGHT", "W_PAWN",
-    "B_QUEEN", "B_ROOK", "B_BISHOP", "B_KNIGHT", "B_PAWN",
-    "NO_PIECE"
-};
-
-/**
- * Promotion piece strings.
- */
-const std::string promoName[4] = {
-    "n", "b", "r", "q"
-};
-
-/**
- * Move type strings.
- */
-const std::string moveName[4] = {
-    "Normal", "Promotion", "En-passant", "Castling"
-};
-
-/**
  * Magic numbers for vertical and horizontal rook attacks.
  */
 const Bitboard rookMagicNums[64] = {
@@ -168,8 +167,8 @@ const Bitboard rookMagicNums[64] = {
     0x02000804A0100AULL, 0x91005802040001ULL, 0x01000400820001ULL, 0x090000804A0A21ULL
 };
 
-/** 
- * Masks for vertical and horizontal rook attacks. 
+/**
+ * Masks for vertical and horizontal rook attacks.
  */
 const Bitboard rookMasks[64] = {
     0x000101010101017EULL, 0x000202020202027CULL, 0x000404040404047AULL, 0x0008080808080876ULL, 0x001010101010106EULL,
@@ -187,8 +186,8 @@ const Bitboard rookMasks[64] = {
     0x6E10101010101000ULL, 0x5E20202020202000ULL, 0x3E40404040404000ULL, 0x7E80808080808000ULL
 };
 
-/** 
- * Shifts for finding rook indices. 
+/**
+ * Shifts for finding rook indices.
  */
 const int rookShifts[64] = {
     52, 53, 53, 53, 53, 53, 53, 52,
@@ -201,8 +200,8 @@ const int rookShifts[64] = {
     52, 53, 53, 53, 53, 53, 53, 52,
 };
 
-/** 
- * Magic numbers for diagonal attacks. 
+/**
+ * Magic numbers for diagonal attacks.
  */
 const Bitboard bishopMagicNums[64] = {
     0x04081001020051, 0x10010842808000, 0x10010045020008, 0x18204040080000, 0x21104008000008, 0x6088200A00B954,
@@ -218,8 +217,8 @@ const Bitboard bishopMagicNums[64] = {
     0x00000040050102, 0x00800410420200, 0x002004C1080100, 0x20204101010010
 };
 
-/** 
- * Masks for diagonal attacks. 
+/**
+ * Masks for diagonal attacks.
  */
 const Bitboard bishopMasks[64] = {
     0x40201008040200, 0x00402010080400, 0x00004020100A00, 0x00000040221400, 0x00000002442800, 0x00000204085000,
@@ -235,7 +234,7 @@ const Bitboard bishopMasks[64] = {
     0x28440200000000, 0x50080402000000, 0x20100804020000, 0x40201008040200
 };
 
-/** 
+/**
  * Shifts for finding bishop indices.
  */
 const int bishopShifts[64] = {

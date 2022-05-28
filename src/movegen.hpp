@@ -9,8 +9,8 @@
 #define UNSET 0xFFFFFFFFFFFFFFFF
 
 /**
- * A struct holding the move families. 
- * 
+ * A struct holding the move families.
+ *
  * Contains:
  *  reach:      A bit board of the squares a piece can reach. Enemy and friendly
  *              pieces included. Goes all the way to the edge of the board.
@@ -54,17 +54,17 @@ std::vector<std::vector<Bitboard>> computeDiagonalRays();
 
 /**
  * Splits a string by a delimeter string and returns vector of results.
- * 
+ *
  * @param input: String to split.
  * @param delim: String delimiter.
- * 
+ *
  * @return: Vector of input split by delim.
  */
 std::vector<std::string> split(std::string input, std::string delim);
 
 /**
  * Calculates the index into the move_set of a particular move family.
- * 
+ *
  * @param masked_reach: A bitboard of the reach of the piece with own pieces masked out.
  * @param move_family: A pointer to Moves struct holding the move family. The block_bits vector MUST hold the squares
  *      in order from smallest to largest.
@@ -81,7 +81,7 @@ int MSB(int n);
 
 /**
  * Returns true if the nths bit of pos is set, else false.
- * 
+ *
  * @param pos: A bitboard.
  * @param n: The wanted bit.
  * @return: True if bit is set, else false.
@@ -94,9 +94,9 @@ bool bitAt(uint64_t pos, int n);
 void displayBB(uint64_t pos);
 
 /**
- * Returns the index from BISHOP_INDEX into BISHOP_MOVES based on the square and 
+ * Returns the index from BISHOP_INDEX into BISHOP_MOVES based on the square and
  * occupancy.
- * 
+ *
  * @param pos: A bitboard of the pieces on the board.
  * @param square: The square of the piece whose moves we want.
  */
@@ -105,7 +105,7 @@ const int bishopIndex(const uint64_t pos, Square square);
 /**
  * Iterates through the squares and call functions to compute bishop moves and
  * calculate indices.
- * 
+ *
  * @param BISHOP_INDEX: Array of vectors holding ints where indices into the
  *      bishop attack sets are set.
  * @param BISHOP_MOVES: Array of bishop move sets to store precomputed moves.
@@ -113,9 +113,9 @@ const int bishopIndex(const uint64_t pos, Square square);
 std::vector<MovesStruct> computeBishopMoves();
 
 /**
- * Computes the blocking moves (and captures in case of check) for bishops on 
+ * Computes the blocking moves (and captures in case of check) for bishops on
  * each square.
- * 
+ *
  * @param BISHOP_BLOCKS: A vector of move structs.
  */
 std::vector<MovesStruct> computeBishopBlocks();
@@ -145,7 +145,7 @@ std::vector<MovesStruct> computeKnightMoves();
 std::vector<std::vector<MovesStruct>> computePawnMoves();
 
 /**
- * Returns the index from ROOK_INDEX into ROOK_MOVES based on the square and 
+ * Returns the index from ROOK_INDEX into ROOK_MOVES based on the square and
  * occupancy.
  * @param pos: A bitboard of the pieces on the board.
  * @param square: The square of the piece whose moves we want.
