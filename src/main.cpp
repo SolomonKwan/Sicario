@@ -5,11 +5,12 @@
 void showStartUp() {
     std::cout << '\n' << NAME << " (" << VERSION << ")\n";
     std::cout << "By " << AUTHOR << '\n';
-    std::cout << "Acknowledgments:\n";
-    std::cout << "    " << CHESS_PROGRAMMING << '\n';
-    std::cout << "    " << STOCKFISH << '\n';
-    std::cout << "    " << BLUE_FEVER_SOFT << '\n';
-    std::cout << '\n';
+    // TODO Add cmd line option to show this info
+    // std::cout << "Acknowledgments:\n";
+    // std::cout << "    " << CHESS_PROGRAMMING << '\n';
+    // std::cout << "    " << STOCKFISH << '\n';
+    // std::cout << "    " << BLUE_FEVER_SOFT << '\n';
+    // std::cout << '\n';
     std::cout << std::flush;
 }
 

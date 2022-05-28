@@ -94,8 +94,6 @@ inline Square mirrored(Square square) {
     return (Square) (square ^ 56);
 }
 
-// Evaluator::Evaluator(const Pos& pos) : pos(pos) {}
-
 /**
  * Returns true if it is an endgame with queens, else false.
  * @param rookCnt: The count of rooks.

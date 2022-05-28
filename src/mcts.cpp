@@ -155,7 +155,8 @@ Node* initialise(Searcher& searcher, GoParams& go_params) {
     // Expand the root node.
     for (Move move : moves) {
         std::vector<Move>& search_moves = go_params.moves;
-        if (search_moves.size() == 0 || std::find(search_moves.begin(), search_moves.end(), move) != search_moves.end()) {
+        if (search_moves.size() == 0 || std::find(search_moves.begin(), search_moves.end(), move) !=
+                search_moves.end()) {
             searcher.pos.makeMove(move);
             Node* newNode = new Node(move, false, searcher.pos.getHash(), searcher.pos.getTurn(), 1);
             searcher.nodes++;

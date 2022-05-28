@@ -52,7 +52,7 @@ Searcher::Searcher(Pos pos, SearchParams searchParams) {
 /**
  * Order the moves by most "interesting/best" first and least "intereseting/worse" last (i.e. order by score in
  * descending order).
- * 
+ *
  * TODO: Need to make the ordering algorithm cleaner. Somekind of ordering while iterating the first time.
  */
 std::vector<std::pair<int, Move>> Pos::scoreMoves(SearchParams, MoveList& moves) {

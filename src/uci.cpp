@@ -60,7 +60,7 @@ void UCI::sendCopyProtection() {
 }
 
 void UCI::sendRegistration() {
-    
+
 }
 
 void UCI::sendInfo() {
