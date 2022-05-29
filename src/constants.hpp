@@ -5,7 +5,8 @@
 #include <string>
 
 #define NAME "Sicario"
-#define VERSION "Genesis v1.0.0-alpha"
+#define CODENAME ""
+#define VERSION ""
 #define AUTHOR "S. Kwan"
 #define CHESS_PROGRAMMING "www.chessprogramming.org"
 #define STOCKFISH "Stockfish"

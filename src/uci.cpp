@@ -19,7 +19,8 @@ void communicate(std::string communication) {
 }
 
 void Uci::sendIds() {
-    communicate("id name " + (std::string) NAME + " (" + (std::string) VERSION + ")");
+    // CHECK, is the (std::string) necessary
+    communicate("id name " + (std::string) NAME + " (" + (std::string) CODENAME + " " + (std::string) VERSION + ")");
     communicate("id author " + (std::string) AUTHOR + "\n");
 }
 
