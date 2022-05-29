@@ -3,24 +3,76 @@
 #define UCI_HPP
 
 #include "game.hpp"
-// #include "search.hpp"
 
-// TODO list all the possible uci inputs, and then list custom inputs
-enum UciInputs {
-    QUIT,
+/**
+ * Input commands to the engine. Includes the UCI protocol and custom commands.
+ */
+enum UciInput {
+    // UCI Protocol GUI to engine commands
     UCI,
+    DEBUG,
     ISREADY,
     SETOPTION,
-    DEBUG,
     REGISTER,
     UCINEWGAME,
     POSITION,
     GO,
     STOP,
     PONDERHIT,
+    QUIT,
 
-    INVALID_INPUT
+    // Custom commands to engine
+    PERFT,
+
+    // Sentinel for invalid command
+    INVALID_COMMAND
 };
+
+enum SicarioOption {
+    HASH,
+    NALIMOV_PATH,
+    NALIMOV_CACHE,
+    PONDER,
+    OWN_BOOK,
+    MULTI_PV,
+    UCI_SHOW_CURR_LINE,
+    UCI_SHOW_REFUTATIONS,
+    UCI_LIMIT_STRENGTH,
+    UCI_ELO,
+    UCI_ANALYSE_MODE,
+    UCI_OPPONENT,
+
+    // Sentinels for errors.
+    INVALID_OPTION_SYNTAX,
+    NO_OPTION_GIVEN,
+    UNKNOWN_OPTION,
+};
+
+struct SicarioConfigs {
+    bool DEBUG_MODE = false; // This is set with the "debug" command, not "setoption".
+    int Hash = 16; // Megabytes
+    std::string NalimovPath = "";
+    int NalimovCache = 0; // Megabytes
+    bool Ponder = false;
+    bool OwnBook = false;
+    int MultiPV = 1;
+    bool UCI_ShowCurrLine = false;
+    bool UCI_ShowRefutations = false;
+    bool UCI_LimitStrength = false;
+    int UCI_Elo = 3000;
+    bool UCI_AnalyseMode = true;
+    std::string UCI_Opponent = "";
+};
+
+struct OptionInfo {
+    std::string name = "";
+    std::string type = "";
+    std::string def = "";
+    std::string min = "";
+    std::string max = "";
+    std::vector<std::string> vars = {};
+};
+
 struct GoParams {
     std::vector<Move> moves;
     int wtime = 0;
@@ -33,39 +85,6 @@ struct GoParams {
     int mate = 0;
     int movetime = 0;
     bool infinite = true;
-};
-
-class Uci {
-    public:
-        Position pos;
-        SearchParams params;
-
-        void parseInput(std::string);
-        UciInputs hashInput(std::string);
-
-        bool debug_mode = false;
-
-        void handleIsReady();
-        void handleSetOption();
-        void handleDebug(std::vector<std::string>);
-        void handleSetOption(std::vector<std::string>);
-        void handleRegister(std::vector<std::string>);
-        void handleUCI_NewGame();
-        void handlePosition(std::vector<std::string>);
-        void handleGo(std::vector<std::string>);
-        void handleStop();
-        void handlePonderHit();
-
-        void sendInitialResponse();
-        void sendIds();
-        void options();
-        void sendReadyOk();
-        void sendBestMove();
-        void sendCopyProtection();
-        void sendRegistration();
-        void sendInfo();
-
-        Move parseMove(std::string);
 };
 
 #endif

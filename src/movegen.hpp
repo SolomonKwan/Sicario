@@ -53,16 +53,6 @@ std::vector<std::vector<Bitboard>> computeLevelRays();
 std::vector<std::vector<Bitboard>> computeDiagonalRays();
 
 /**
- * Splits a string by a delimeter string and returns vector of results.
- *
- * @param input: String to split.
- * @param delim: String delimiter.
- *
- * @return: Vector of input split by delim.
- */
-std::vector<std::string> split(std::string input, std::string delim);
-
-/**
  * Calculates the index into the move_set of a particular move family.
  *
  * @param masked_reach: A bitboard of the reach of the piece with own pieces masked out.
@@ -80,27 +70,27 @@ int moveSetIndex(uint64_t masked_reach, MovesStruct* move_family);
 int MSB(int n);
 
 /**
- * Returns true if the nths bit of pos is set, else false.
+ * Returns true if the nths bit of position is set, else false.
  *
- * @param pos: A bitboard.
+ * @param position: A bitboard.
  * @param n: The wanted bit.
  * @return: True if bit is set, else false.
  */
-bool bitAt(uint64_t pos, int n);
+bool bitAt(uint64_t position, int n);
 
 /**
- * @param pos: A bitboard.
+ * @param position: A bitboard.
  */
-void displayBB(uint64_t pos);
+void displayBB(uint64_t position);
 
 /**
  * Returns the index from BISHOP_INDEX into BISHOP_MOVES based on the square and
  * occupancy.
  *
- * @param pos: A bitboard of the pieces on the board.
+ * @param position: A bitboard of the pieces on the board.
  * @param square: The square of the piece whose moves we want.
  */
-const int bishopIndex(const uint64_t pos, Square square);
+const int bishopIndex(const uint64_t position, Square square);
 
 /**
  * Iterates through the squares and call functions to compute bishop moves and
@@ -147,11 +137,11 @@ std::vector<std::vector<MovesStruct>> computePawnMoves();
 /**
  * Returns the index from ROOK_INDEX into ROOK_MOVES based on the square and
  * occupancy.
- * @param pos: A bitboard of the pieces on the board.
+ * @param position: A bitboard of the pieces on the board.
  * @param square: The square of the piece whose moves we want.
  * @return: Index into ROOK_MOVES.
  */
-const int rookIndex(const uint64_t pos, Square square);
+const int rookIndex(const uint64_t position, Square square);
 
 /**
  * Iterates through the squares and call functions to compute rook moves and

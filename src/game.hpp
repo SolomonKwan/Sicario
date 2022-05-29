@@ -40,12 +40,6 @@ struct PV {
     float score;
 };
 
-struct SearchParams {
-    int time = 5000; // 5 seconds for dev. Default shall be infinite.
-    int children_to_search = 5; // Default to 5 child nodes for each node in the tree.
-    float c = std::sqrt(2);
-};
-
 class SearchInfo {
     public:
         SearchInfo(int hashSize);
@@ -81,7 +75,7 @@ class Position {
         // Tree search
         void setDepth(int);
         void setHashSize(int);
-        void search(SearchParams, GoParams);
+        void search(GoParams);
         void makeMove(Move);
         void undoMove();
         Move pseudoRandomMove(MoveList&, Player);
@@ -145,7 +139,6 @@ class Position {
         // Evaluation and search
         SearchInfo searchInfo;
         int depth = 3;
-        std::vector<std::pair<int, Move>> scoreMoves(SearchParams, MoveList&);
 
         // Move ordering
         int scoreMove(Move);

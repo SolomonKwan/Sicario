@@ -1,125 +1,214 @@
 
 #include <iostream>
 #include <thread>
+#include <algorithm>
+
 
 #include "game.hpp"
 #include "uci.hpp"
+#include "utils.hpp"
+#include "sicario.hpp"
 
 #define NULL_MOVE 0000
 
-/**********************************************************************************************************************/
-/***************************************** Engine to interface commands ***********************************************/
-
 /**
- * Prints all messages to Uci communication to stdin. Used to distinguish from other print commands.
- * @param communication: The communication message to be sent to Uci GUI.
+ * Parses the GUI input string and calls handlers for commands.
+ * @param input: Input string from GUI.
  */
-void communicate(std::string communication) {
-    std::cout << communication << '\n' << std::flush;
+void Sicario::processInput(std::string input) {
+    std::vector<std::string> commands = split(input, " ");
+    UciInput hashedInput = hashCommandInput(commands[0]);
+
+    switch (hashedInput) {
+        case UCI:
+            handleUci();
+            break;
+        case DEBUG:
+            handleDebug(commands);
+            break;
+        case ISREADY:
+            handleIsReady();
+            break;
+        case SETOPTION:
+            handleSetOption(commands);
+            break;
+        case REGISTER:
+            handleRegister(commands);
+            break;
+        case UCINEWGAME:
+            handleUciNewGame();
+            break;
+        case POSITION:
+            handlePosition(commands);
+            break;
+        case GO:
+            handleGo(commands);
+            break;
+        case STOP:
+            handleStop();
+            break;
+        case PONDERHIT:
+            handlePonderHit();
+            break;
+        case QUIT:
+            break;
+        case INVALID_COMMAND:
+            sendInvalidCommand(commands[0]);
+            break;
+        case PERFT:
+            handlePerft(commands[0]);
+            break;
+    }
 }
 
-void Uci::sendIds() {
-    // CHECK, is the (std::string) necessary
-    communicate("id name " + (std::string) NAME + " (" + (std::string) CODENAME + " " + (std::string) VERSION + ")");
-    communicate("id author " + (std::string) AUTHOR + "\n");
+UciInput Sicario::hashCommandInput(std::string input) {
+    // UCI protocol GUI to engine commands
+    if (input == "uci") return UCI;
+    if (input == "debug") return DEBUG;
+    if (input == "isready") return ISREADY;
+    if (input == "setoption") return SETOPTION;
+    if (input == "register") return REGISTER;
+    if (input == "ucinewgame") return UCINEWGAME;
+    if (input == "position") return POSITION;
+    if (input == "go") return GO;
+    if (input == "stop") return STOP;
+    if (input == "ponderhit") return PONDERHIT;
+    if (input == "quit") return QUIT;
+
+    // Custom command to engine
+    if (input == "perft") return PERFT;
+
+    return INVALID_COMMAND;
 }
 
-void showOption(std::string name, std::string type, std::string def, std::string min = "", std::string max = "",
-        std::vector<std::string> vars = {}) {
-    std::cout << "option name " << name << " type " << type << " default " << def;
-    if (min != "") std::cout << " min " << min << " max " << max;
-    for (std::string var : vars) std::cout << " var " << var;
-    std::cout << '\n';
-}
+SicarioOption Sicario::hashOptionsInput(std::vector<std::string> inputs) {
+    auto nameItr = std::find(inputs.begin(), inputs.end(), "name");
+    int nameIndex = nameItr - inputs.begin();
 
-void Uci::options() {
-    showOption("Exploration Constant", "spin", "default_const", "-infinity", "infinity", {"default_constant"});
+    if (nameItr == inputs.end()) return INVALID_OPTION_SYNTAX;
+    if (nameIndex != 1) return INVALID_OPTION_SYNTAX;
+    if (nameIndex + 1 > inputs.size() - 1) return NO_OPTION_GIVEN;
+    if (inputs[nameIndex + 1] == "Hash") return HASH;
+    if (inputs[nameIndex + 1] == "NalimovPath") return NALIMOV_PATH;
+    if (inputs[nameIndex + 1] == "NalimovCache") return NALIMOV_CACHE;
+    if (inputs[nameIndex + 1] == "Ponder") return PONDER;
+    if (inputs[nameIndex + 1] == "OwnBook") return OWN_BOOK;
+    if (inputs[nameIndex + 1] == "MultiPV") return MULTI_PV;
+    if (inputs[nameIndex + 1] == "UCI_ShowCurrLine") return UCI_SHOW_CURR_LINE;
+    if (inputs[nameIndex + 1] == "UCI_ShowRefutations") return UCI_SHOW_REFUTATIONS;
+    if (inputs[nameIndex + 1] == "UCI_LimitStrength") return UCI_LIMIT_STRENGTH;
+    if (inputs[nameIndex + 1] == "UCI_Elo") return UCI_ELO;
+    if (inputs[nameIndex + 1] == "UCI_AnalyseMode") return UCI_ANALYSE_MODE;
+    if (inputs[nameIndex + 1] == "UCI_Opponent") return UCI_OPPONENT;
+
+    return UNKNOWN_OPTION;
 }
 
 /**
  * Sends the response to the Uci engine after recieving the initial uci command.
  */
-void Uci::sendInitialResponse() {
-    this->sendIds();
-    this->options();
+void Sicario::handleUci() {
+    // ID information
+    communicate("id name " + (std::string)NAME + " (" + (std::string)CODENAME + " " + (std::string)VERSION + ")");
+    communicate("id author " + (std::string)AUTHOR + "\n");
+
+    // Configurable options (see SicarioConfigs struct)
+    sendOption({"Hash", "spin", "16"});
+    sendOption({"NalimovPath", "string", ""});
+    sendOption({"NalimovCache", "spin", "0"});
+    sendOption({"Ponder", "check", "false"});
+    sendOption({"OwnBook", "check", "false"});
+    sendOption({"MultiPV", "spin", "1"});
+    sendOption({"UCI_ShowCurrLine", "check", "false"});
+    sendOption({"UCI_ShowRefutations", "check", "false"});
+    sendOption({"UCI_LimitStrength", "check", "false"});
+    sendOption({"UCI_Elo", "spin", "3000"});
+    sendOption({"UCI_AnalyseMode", "check", "true"});
+    sendOption({"UCI_Opponent", "string", ""});
+
     communicate("uciok");
 }
 
-/**
- * Sends the is readyok.
- */
-void Uci::sendReadyOk() {
-    communicate("readyok");
+void Sicario::handleIsReady() {
+    sendReadyOk();
 }
 
-void Uci::sendBestMove() {
-
-}
-
-void Uci::sendCopyProtection() {
-
-}
-
-void Uci::sendRegistration() {
-
-}
-
-void Uci::sendInfo() {
-
-}
-
-/************************************** End of engine to interface commands *******************************************/
-/**********************************************************************************************************************/
-
-
-
-/**********************************************************************************************************************/
-/***************************************** Interface to engine commands ***********************************************/
-
-void Uci::handleIsReady() {
-    this->sendReadyOk();
-}
-
-void Uci::handleDebug(std::vector<std::string> inputs) {
-    communicate("handle debug");
-    if (inputs.size() == 2 && inputs[1] == "on") {
-
+void Sicario::handleDebug(std::vector<std::string> inputs) {
+    if (inputs.size() != 2) {
+        sendMissingArgument("debug [ on | off ]");
+    } else if (inputs[1] != "on" && inputs[1] != "off") {
+        sendInvalidArgument(inputs[1]);
+    } else if (inputs.size() == 2 && inputs[1] == "on") {
+        sicaroConfigs.DEBUG_MODE = true;
     } else if (inputs.size() == 2 && inputs[1] == "off") {
-
+        sicaroConfigs.DEBUG_MODE = false;
     }
 }
 
-void Uci::handleSetOption(std::vector<std::string> inputs) {
-    if (inputs[2] == "Exploration" && inputs[3] == "Constant") {
-        this->params.c = std::stof(inputs[4]); // TODO Set the default variable options for this one.
-    } else {
-        std::cout << "Unknown setoption " << inputs[2] << "\n"; // TODO Print the rest of the commands
+void Sicario::handleSetOption(std::vector<std::string> inputs) {
+    SicarioOption hashedInput = hashOptionsInput(inputs);
+
+    switch (hashedInput) {
+        case HASH:
+            break;
+        case NALIMOV_PATH:
+            break;
+        case NALIMOV_CACHE:
+            break;
+        case PONDER:
+            break;
+        case OWN_BOOK:
+            break;
+        case MULTI_PV:
+            break;
+        case UCI_SHOW_CURR_LINE:
+            break;
+        case UCI_SHOW_REFUTATIONS:
+            break;
+        case UCI_LIMIT_STRENGTH:
+            break;
+        case UCI_ELO:
+            break;
+        case UCI_ANALYSE_MODE:
+            break;
+        case UCI_OPPONENT:
+            break;
+        case INVALID_OPTION_SYNTAX:
+            sendInvalidOptionSyntax(concat(inputs, " "));
+            break;
+        case NO_OPTION_GIVEN:
+            sendNoOptionGiven(concat(inputs, " "));
+            break;
+        case UNKNOWN_OPTION:
+            sendUnknownOption(inputs[2]);
+            break;
     }
-    std::cout << this->params.c << "\n";
 }
 
-void Uci::handleRegister(std::vector<std::string> inputs) {
-    communicate("handle register");
+void Sicario::handleRegister(std::vector<std::string> inputs) {
+    // TODO Dafuq is this?
 }
 
-void Uci::handleUCI_NewGame() {
-    this->pos.parseFen(STANDARD_GAME);
+void Sicario::handleUciNewGame() {
+    position.parseFen(STANDARD_GAME);
 }
 
-void Uci::handlePosition(std::vector<std::string> inputs) {
+void Sicario::handlePosition(std::vector<std::string> inputs) {
     // Insert dummy command at start to use concatFEN
+    // CHECK
     inputs.insert(inputs.begin(), "set");
-    this->pos.parseFen(concatFEN(inputs));
+    this->position.parseFen(concatFEN(inputs));
 }
 
-void Uci::handleGo(std::vector<std::string> commands) {
+void Sicario::handleGo(std::vector<std::string> commands) {
+    // TODO
     GoParams go_params;
 
     // Parse go commands
     for (int i = 1; i < (int) commands.size(); i++) { // TODO Error checking needed
         if (commands[i] == "searchmoves") {
             for (int j = i + 1; j < (int) commands.size(); j++) {
-                Move move = Uci::parseMove(commands[j]);
+                Move move = parseMove(commands[j]);
                 if (move == 0) continue;
                 go_params.moves.push_back(move);
             }
@@ -148,116 +237,80 @@ void Uci::handleGo(std::vector<std::string> commands) {
         }
     }
 
-    std::thread searchThread(&Position::search, &this->pos, this->params, go_params);
+    std::thread searchThread(&Position::search, &this->position, go_params);
     searchThread.detach();
 }
 
-Move Uci::parseMove(std::string move_str) {
-    Move move = 0;
-    if (move_str[0] < 'a' || move_str[0] > 'h' || move_str[2] < 'a' || move_str[2] > 'h') {
-        return 0;
-    }
-
-    if (move_str[1] < '1' || move_str[1] > '8' || move_str[3] < '1' || move_str[3] > '8') {
-        return 0;
-    }
-
-    int start_file = move_str[0] - 'a';
-    int start_rank = move_str[1] - '1';
-    int end_file = move_str[2] - 'a';
-    int end_rank = move_str[3] - '1';
-
-    if (move_str.length() == 5) {
-        move |= PROMOTION;
-        if (move_str[4] == 'q') {
-            move |= pQUEEN;
-        } else if (move_str[4] == 'r') {
-            move |= pROOK;
-        } else if (move_str[4] == 'b') {
-            move |= pBISHOP;
-        }
-    }
-
-    move |= 8 * start_rank + start_file;
-    move |= ((8 * end_rank + end_file) << 6);
-    return move;
+void Sicario::handleStop() {
+    // TODO
 }
 
-void Uci::handleStop() {
-    // stop = true;
+void Sicario::handlePonderHit() {
+    // TODO
 }
 
-void Uci::handlePonderHit() {
-    communicate("handle ponderhit");
+void Sicario::handlePerft(std::string depth) {
+    // TODO
 }
-
-/************************************** End of interface to engine commands *******************************************/
-/**********************************************************************************************************************/
-
-
 
 /**
- * The main loop that constantly reads from stdin for Uci commands. Calls other functions that create threads which
- * handle different parts of program.
- * @param input: THe initial input string.
+ * Prints all messages to Uci communication to stdin. Used to distinguish from other print commands.
+ * @param communication: The communication message to be sent to Uci GUI.
  */
-void Uci::parseInput(std::string input) {
-    std::vector<std::string> commands = split(input, " ");
-    UciInputs hashedInput = hashInput(commands[0]);
-
-    switch (hashedInput) {
-        case QUIT:
-            break;
-        case INVALID_INPUT:
-            // TODO
-            std::cout << "Invalid input. This needs to be updated to parse the remainder of the string (Uci protocol)" << '\n';
-            break;
-        case UCI:
-            // TODO
-            std::cout << "todo" << '\n';
-            break;
-        case ISREADY:
-            handleIsReady();
-            break;
-        case SETOPTION:
-            handleSetOption(commands);
-            break;
-        case DEBUG:
-            handleDebug(commands);
-            break;
-        case REGISTER:
-            handleRegister(commands);
-            break;
-        case UCINEWGAME:
-            handleUCI_NewGame();
-            break;
-        case POSITION:
-            handlePosition(commands);
-            break;
-        case GO:
-            // handleGo(commands);
-            break;
-        case STOP:
-            std::cout << "TODO stopping" << '\n';
-            break;
-        case PONDERHIT:
-            handlePonderHit();
-            break;
-    }
+void Sicario::communicate(std::string communication) {
+    std::cout << communication << '\n';
 }
 
-UciInputs Uci::hashInput(std::string input) {
-    if (input == "quit") return QUIT;
-    if (input == "uci") return UCI;
-    if (input == "isready") return ISREADY;
-    if (input == "setoption") return SETOPTION;
-    if (input == "debug") return DEBUG;
-    if (input == "register") return REGISTER;
-    if (input == "ucinewgame") return UCINEWGAME;
-    if (input == "position") return POSITION;
-    if (input == "go") return GO;
-    if (input == "stop") return STOP;
-    if (input == "ponderhit") return PONDERHIT;
+void Sicario::sendOption(OptionInfo option) {
+    std::string optionString = "option name " + option.name + " type " + option.type + " default " + option.def;
+    if (option.min != "") optionString += " min " + option.min + " max " + option.max;
+    for (std::string var : option.vars) optionString += " var " + var;
+    communicate(optionString);
+}
 
-    return INVALID_INPUT;
+/**
+ * Sends the is readyok.
+ */
+void Sicario::sendReadyOk() {
+    communicate("readyok");
+}
+
+void Sicario::sendBestMove() {
+
+}
+
+void Sicario::sendCopyProtection() {
+
+}
+
+void Sicario::sendRegistration() {
+
+}
+
+void Sicario::sendInfo() {
+
+}
+
+void Sicario::sendInvalidCommand(std::string command) {
+    communicate("Unknown command: " + command);
+}
+
+void Sicario::sendMissingArgument(std::string arg) {
+    communicate("Missing argument: " + arg);
+}
+
+void Sicario::sendInvalidArgument(std::string arg) {
+    communicate("Invalid argument: " + arg);
+}
+
+void Sicario::sendInvalidOptionSyntax(std::string input) {
+    communicate("Invalid syntax: " + input);
+}
+
+void Sicario::sendNoOptionGiven(std::string input) {
+    communicate("No option given: " + input);
+}
+
+void Sicario::sendUnknownOption(std::string option) {
+    communicate("Unknown option: " + option);
 }
