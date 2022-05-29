@@ -2,16 +2,19 @@
 #include <iostream>
 #include "sicario.hpp"
 
-void showStartUp() {
-    std::cout << '\n' << NAME << " (" << CODENAME << " " << VERSION << ")\n";
-    std::cout << "By " << AUTHOR << "\n\n";
-    // TODO Add cmd line option to show this info
-    // std::cout << "Acknowledgments:\n";
-    // std::cout << "    " << CHESS_PROGRAMMING << '\n';
-    // std::cout << "    " << STOCKFISH << '\n';
-    // std::cout << "    " << BLUE_FEVER_SOFT << '\n';
-    // std::cout << '\n';
-    std::cout << std::flush;
+// TODO Add custom commands explanations to readme
+void showInfo(int argc, char* argv[]) {
+    if (argc < 2) return;
+    if (argv[1] == std::string("-h") || argv[1] == std::string("--help")) {
+        std::cout << NAME << " (" << CODENAME << " " << VERSION << ")\n";
+        std::cout << "By " << AUTHOR << '\n';
+        std::cout << "Refer to README for more information on how to use." << '\n';
+        std::cout << "Acknowledgments:\n";
+        std::cout << "    " << CHESS_PROGRAMMING << '\n';
+        std::cout << "    " << STOCKFISH << '\n';
+        std::cout << "    " << BLUE_FEVER_SOFT << '\n';
+        exit(0);
+    }
 }
 
 void showLogo() {
@@ -25,7 +28,13 @@ void showLogo() {
     std::cout << " \\_______) /_______\\ (_______/ |/      \\| |/   \\___/ )_______( (_______)\n";
 }
 
-int main(int argc, char *argv[]) {
+void showStartUp() {
+    std::cout << '\n' << NAME << " (" << CODENAME << " " << VERSION << ")\n";
+    std::cout << "By " << AUTHOR << "\n\n";
+}
+
+int main(int argc, char* argv[]) {
+    showInfo(argc, argv);
     showLogo();
     showStartUp();
     return Sicario::run();
