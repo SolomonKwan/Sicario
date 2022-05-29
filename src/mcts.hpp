@@ -37,8 +37,8 @@ class Node {
 
         Node* select(Searcher&);
         Node* expand(Searcher&);
-        float simulate(Searcher&, std::atomic_bool&);
-        void rollback(float, Searcher&, std::atomic_bool&);
+        float simulate(Searcher&);
+        void rollback(float, Searcher&);
 
         float UCB1(Searcher&) const;
         Node* bestChild(Searcher&);

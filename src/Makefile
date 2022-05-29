@@ -21,11 +21,14 @@ evaluate.o: evaluate.cpp evaluate.hpp constants.hpp
 uci.o: uci.cpp uci.hpp
 	$(FLAGS) -c uci.cpp -o uci.o
 
-main.o: main.cpp movegen.hpp game.hpp search.hpp evaluate.hpp uci.hpp
+sicario.o: constants.hpp
+	$(FLAGS) -c sicario.cpp -o sicario.o
+
+main.o: main.cpp movegen.hpp game.hpp search.hpp evaluate.hpp uci.hpp sicario.hpp
 	$(FLAGS) -c main.cpp -o main.o
 
-sicario: main.o game.o movegen.o search.o evaluate.o uci.o mcts.o
-	$(FLAGS) main.o game.o movegen.o search.o evaluate.o uci.o mcts.o -o sicario
+sicario: main.o game.o movegen.o search.o evaluate.o uci.o mcts.o sicario.o
+	$(FLAGS) main.o game.o movegen.o search.o evaluate.o uci.o mcts.o sicario.o -o sicario
 
 clean:
 	rm *.o sicario

@@ -1,6 +1,6 @@
 
 #include <iostream>
-#include "uci.hpp"
+#include "sicario.hpp"
 
 void showStartUp() {
     std::cout << '\n' << NAME << " (" << VERSION << ")\n";
@@ -27,23 +27,8 @@ void showLogo() {
     std::cout << std::flush;
 }
 
-void run() {
+int main(int argc, char *argv[]) {
     showLogo();
     showStartUp();
-    std::string input("");
-    while (input != "q" && input != "quit" && input != "exit") {
-        std::getline(std::cin, input);
-        if (input == "uci") {
-            UCI::init();
-            break;
-        } else if (input == "nouci") {
-            Play::init();
-            break;
-        }
-    }
-}
-
-int main(int argc, char *argv[]) {
-    run();
-    return 0;
+    return Sicario::run();
 }

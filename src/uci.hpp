@@ -5,6 +5,22 @@
 #include "game.hpp"
 // #include "search.hpp"
 
+// TODO list all the possible uci inputs, and then list custom inputs
+enum UciInputs {
+    QUIT,
+    UCI,
+    ISREADY,
+    SETOPTION,
+    DEBUG,
+    REGISTER,
+    UCINEWGAME,
+    POSITION,
+    GO,
+    STOP,
+    PONDERHIT,
+
+    INVALID_INPUT
+};
 struct GoParams {
     std::vector<Move> moves;
     int wtime = 0;
@@ -19,13 +35,13 @@ struct GoParams {
     bool infinite = true;
 };
 
-class UCI {
+class Uci {
     public:
-        static void init();
-        void runUCI();
-
-        Pos pos;
+        Position pos;
         SearchParams params;
+
+        void parseInput(std::string);
+        UciInputs hashInput(std::string);
 
         bool debug_mode = false;
 
@@ -36,8 +52,8 @@ class UCI {
         void handleRegister(std::vector<std::string>);
         void handleUCI_NewGame();
         void handlePosition(std::vector<std::string>);
-        void handleGo(std::vector<std::string>, std::atomic_bool&);
-        void handleStop(std::atomic_bool&);
+        void handleGo(std::vector<std::string>);
+        void handleStop();
         void handlePonderHit();
 
         void sendInitialResponse();

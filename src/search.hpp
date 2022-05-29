@@ -9,9 +9,9 @@
 class Node;
 class Searcher {
     public:
-        Searcher(Pos pos, SearchParams params);
-        Pos pos;
-        void mcts(std::atomic_bool& stop, GoParams);
+        Searcher(Position pos, SearchParams params);
+        Position pos;
+        void mcts(GoParams);
         inline void incrementNodes() {
             this->nodes++;
         }
