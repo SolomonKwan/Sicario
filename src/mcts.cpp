@@ -84,13 +84,13 @@ Node* Node::expand(Searcher& searcher) {
  * @param pos: Position from which to perform a simulation.
  * @return (float): +1 if rootplayer wins, -1.0 if rootplayer loses, 0.0 if draw.
  */
-float Node::simulate(Searcher& searcher, std::atomic_bool& stop) {
+float Node::simulate(Searcher& searcher) {
     int moveCount = 0;
     MoveList moves = MoveList(searcher.pos);
     ExitCode code;
 
     // Perform the simulation.
-    while (!(code = searcher.pos.isEOG(moves)) && !stop) {
+    while (!(code = searcher.pos.isEOG(moves))) {
         searcher.pos.makeMove(searcher.pos.pseudoRandomMove(moves, Node::rootPlayer));
         moveCount++;
         moves = MoveList(searcher.pos);
@@ -116,8 +116,7 @@ float Node::simulate(Searcher& searcher, std::atomic_bool& stop) {
  * @param pos: Position from which the simulation was made.
  * @param nodes: Set of all nodes with the same hashes.
  */
-void Node::rollback(float val, Searcher& searcher, std::atomic_bool& stop) {
-    if (stop) return;
+void Node::rollback(float val, Searcher& searcher) {
     Hash hash = searcher.pos.getHash();
 
     // Save current hash then undo move back to root.
@@ -254,17 +253,17 @@ void printBestMove(Node* root, Searcher& searcher) {
  * @param sp: Search parameters.
  * @param stop: Boolean indicating whether or not to continue the search.
  */
-void Searcher::mcts(std::atomic_bool& stop, GoParams go_params) {
+void Searcher::mcts(GoParams go_params) {
     Node* root = initialise(*this, go_params);
-    while (!stop) {
+    std::cout << "searching...3" << '\n';
+    while (true) {
         Node* leaf = root->select(*this);
         leaf = leaf->expand(*this);
-        float val = leaf->simulate(*this, stop);
-        leaf->rollback(val, *this, stop);
+        float val = leaf->simulate(*this);
+        leaf->rollback(val, *this);
         // printInfo(root, *this);
     }
     printBestMove(root, *this);
-    stop = true;
 
     // Free the allocated nodes.
     for (auto set : this->hashPositions) {

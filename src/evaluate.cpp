@@ -109,7 +109,7 @@ inline bool isEndGameWithQueen(int rookCnt, int bishopCnt, int knightCnt) {
  * Returns true if it is an endgame, else false.
  * @return bool.
  */
-bool Pos::isEndGame() const {
+bool Position::isEndGame() const {
     if (this->piece_index[W_QUEEN] == 0 && this->piece_index[B_QUEEN] == 0) return true;
 
     // Every side which has a queen has additionally no other pieces or one minorpiece maximum.
@@ -126,7 +126,7 @@ bool Pos::isEndGame() const {
  * Returns a piece square table value representation of the board.
  * @param int: A value representing the value of the board. 0 = even, +ve = white advantage, -ve = black advantage.
  */
-int Pos::psqt() const {
+int Position::psqt() const {
     int value = 0;
 
     // King value
@@ -185,7 +185,7 @@ int Pos::psqt() const {
  * Returns a material representation of the board.
  * @param int: An integer representing the piece value of the table.
  */
-int Pos::material() const {
+int Position::material() const {
     int value = 0;
 
     if (this->isEndGame()) {
@@ -222,7 +222,7 @@ int Pos::material() const {
  * @param moves: MoveList of the legal moves in the postion.
  * @return: A pseudorandom move.
  */
-Move Pos::pseudoRandomMove(MoveList& moves, Player rootPlayer) {
+Move Position::pseudoRandomMove(MoveList& moves, Player rootPlayer) {
     std::vector<Move> bestMoves;
     int bestValue = this->turn == WHITE ? -INFINITY : INFINITY;
 

@@ -2,7 +2,6 @@
 #ifndef GAME_HPP
 #define GAME_HPP
 
-#include <atomic>
 #include <cmath>
 
 #include "constants.hpp"
@@ -64,9 +63,9 @@ struct GoParams;
 /**
  * A struct representing the current board position.
  */
-class Pos {
+class Position {
     public:
-        Pos(std::string = STANDARD_GAME);
+        Position(std::string = STANDARD_GAME);
         ExitCode run();
         uint64_t perft(int, bool = false);
         ExitCode parseFen(std::string);
@@ -82,7 +81,7 @@ class Pos {
         // Tree search
         void setDepth(int);
         void setHashSize(int);
-        void search(SearchParams, std::atomic_bool&, GoParams);
+        void search(SearchParams, GoParams);
         void makeMove(Move);
         void undoMove();
         Move pseudoRandomMove(MoveList&, Player);
@@ -125,7 +124,7 @@ class Pos {
         int wdsb_cnt = 0, wlsb_cnt = 0;
         int bdsb_cnt = 0, blsb_cnt = 0;
 
-        // Pos history
+        // Position history
         Move last_move;
         PieceType piece_moved;
         PieceType piece_captured;
@@ -238,7 +237,7 @@ class Pos {
 
 class MoveList {
     public:
-        MoveList(Pos&);
+        MoveList(Position&);
         uint64_t size();
         Move randomMove();
 

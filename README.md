@@ -1,9 +1,9 @@
 # <strong><em>Sicario</em></strong>
-Sicario is a (soon-to-be) UCI compatible chess engine. It was created as a project of mine to learn the basics of C++.
+Sicario is a (soon-to-be) Uci compatible chess engine. It was created as a project of mine to learn the basics of C++.
 There is a lot more work to be done.
 </br>
 </br>
-A lot of help was received by various resources online. Specifically to 
+A lot of help was received by various resources online. Specifically to
 www.chessprogramming.org for explanations, Stockfish for inspiration and the Bluefeversoft YouTube channel.
 </br>
 </br>
@@ -48,7 +48,7 @@ Currently, no form of position evaluation is made.
 <h1>Notes</h1>
 The code for the move precomputation and generation is absolutely janked. When I first started, it was my first time
 coding in C++ and doing an engine so it was done in an absolutely convoluted and confusing way. But... it works... and
-works reasonably well. Plus, the time I absolutely wasted on micro-memory optimization means it uses very little memory 
+works reasonably well. Plus, the time I absolutely wasted on micro-memory optimization means it uses very little memory
 for the move precomputation (at the price of clarity, maintenance, my time and mental sanity), so...
 </br>
 </br>
@@ -74,7 +74,7 @@ for the move precomputation (at the price of clarity, maintenance, my time and m
     potential attackers left on the board.</li>
     <li>En-passant move generation may be checking invalid positions.</li>
     <li>Revise and update the function docstrings.</li>
-    <li>Still need to implement UCI.</li>
+    <li>Still need to implement Uci.</li>
     <li>Research into CPU architecture and their effects on the program.</li>
     <li>Utilise more in-depth C++ features.</li>
     <li>Handle exiting the program during a search and releasing the necessary memory at that point.</li>

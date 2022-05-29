@@ -8,7 +8,6 @@
 // #include <cmath>
 // #include <vector>
 #include <algorithm>
-// #include <atomic>
 
 /**
  * @param hashSize: Hash table size in megabytes.
@@ -37,12 +36,12 @@ void SearchInfo::clearTable() {
 /**
  * Search the current position.
  */
-void Pos::search(SearchParams params, std::atomic_bool& stop, GoParams go_params) {
+void Position::search(SearchParams params, GoParams go_params) {
     Searcher searcher = Searcher(*this, params);
-    searcher.mcts(stop, go_params);
+    searcher.mcts(go_params);
 }
 
-Searcher::Searcher(Pos pos, SearchParams searchParams) {
+Searcher::Searcher(Position pos, SearchParams searchParams) {
     this->pos = pos;
     this->time = searchParams.time;
     this->children_to_search = searchParams.children_to_search;
@@ -55,7 +54,7 @@ Searcher::Searcher(Pos pos, SearchParams searchParams) {
  *
  * TODO: Need to make the ordering algorithm cleaner. Somekind of ordering while iterating the first time.
  */
-std::vector<std::pair<int, Move>> Pos::scoreMoves(SearchParams, MoveList& moves) {
+std::vector<std::pair<int, Move>> Position::scoreMoves(SearchParams, MoveList& moves) {
     std::vector<std::pair<int, Move>> ordering;
     for (Move move : moves) {
         ordering.push_back(std::make_pair(this->scoreMove(move), move));
@@ -68,7 +67,7 @@ std::vector<std::pair<int, Move>> Pos::scoreMoves(SearchParams, MoveList& moves)
  * Gives a rank for the move.
  * @param move: Move to give the rank of.
  */
-int Pos::scoreMove(Move move) {
+int Position::scoreMove(Move move) {
     ////////////////////// Modify below //////////////////////
     // PV move
     if (type(move) == CASTLING) return 2; // King safety
@@ -87,21 +86,21 @@ int Pos::scoreMove(Move move) {
  * Estimate the safety of the king.
  * @param move: Move to guess the score of.
  */
-int Pos::kingSafety(Move move) {
+int Position::kingSafety(Move move) {
     return 0;
 }
 
-int Pos::scoreCastlingSafety(Move move) {
+int Position::scoreCastlingSafety(Move move) {
     return 0;
 }
 
-int Pos::scoreKingSafety(Move move) {
+int Position::scoreKingSafety(Move move) {
     return 0;
 }
 
 /**
  * Gives a preferential score to certain captures first.
  */
-int Pos::captures(Move move) {
+int Position::captures(Move move) {
     return 0;
 }
