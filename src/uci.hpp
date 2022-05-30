@@ -30,6 +30,7 @@ enum UciInput {
 
 enum SicarioOption {
     HASH,
+    CLEAR_HASH,
     NALIMOV_PATH,
     NALIMOV_CACHE,
     PONDER,
@@ -43,25 +44,23 @@ enum SicarioOption {
     UCI_OPPONENT,
 
     // Sentinels for errors.
-    INVALID_OPTION_SYNTAX,
-    NO_OPTION_GIVEN,
     UNKNOWN_OPTION,
 };
 
 struct SicarioConfigs {
-    bool DEBUG_MODE = false; // This is set with the "debug" command, not "setoption".
-    int Hash = 16; // Megabytes
-    std::string NalimovPath = "";
-    int NalimovCache = 0; // Megabytes
-    bool Ponder = false;
-    bool OwnBook = false;
-    int MultiPV = 1;
-    bool UCI_ShowCurrLine = false;
-    bool UCI_ShowRefutations = false;
-    bool UCI_LimitStrength = false;
-    int UCI_Elo = 3000;
-    bool UCI_AnalyseMode = true;
-    std::string UCI_Opponent = "";
+    bool debugMode = false; // This is set with the "debug" command, not "setoption".
+    int hash = 16; // Megabytes
+    std::string nalimovPath = "";
+    int nalimovCache = 0; // Megabytes
+    bool ponder = false;
+    bool ownBook = false;
+    int multiPv = 1;
+    bool uciShowCurrLine = false;
+    bool uciShowRefutations = false;
+    bool uciLimitStrength = false;
+    int uciElo = 3000;
+    bool uciAnalyseMode = true;
+    std::string uciOpponent = "";
 };
 
 struct OptionInfo {

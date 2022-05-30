@@ -12,10 +12,10 @@ std::vector<std::string> split(std::string input, std::string delim) {
     std::size_t pos;
 
     while ((pos = input.find(delim)) != std::string::npos) {
-        result.push_back(input.substr(0, pos));
+        if (input.substr(0, pos) != "") result.push_back(input.substr(0, pos));
         input = input.substr(pos + delim.length(), input.length() - 1);
     }
-    result.push_back(input.substr(0, pos));
+    if (input.substr(0, pos) != "") result.push_back(input.substr(0, pos));
 
     return result;
 }

@@ -9,8 +9,6 @@
 #include "utils.hpp"
 #include "sicario.hpp"
 
-#define NULL_MOVE 0000
-
 /**
  * Parses the GUI input string and calls handlers for commands.
  * @param input: Input string from GUI.
@@ -82,24 +80,21 @@ UciInput Sicario::hashCommandInput(std::string input) {
 }
 
 SicarioOption Sicario::hashOptionsInput(std::vector<std::string> inputs) {
-    auto nameItr = std::find(inputs.begin(), inputs.end(), "name");
-    int nameIndex = nameItr - inputs.begin();
+    std::string command = getOptionName(inputs);
 
-    if (nameItr == inputs.end()) return INVALID_OPTION_SYNTAX;
-    if (nameIndex != 1) return INVALID_OPTION_SYNTAX;
-    if (nameIndex + 1 > inputs.size() - 1) return NO_OPTION_GIVEN;
-    if (inputs[nameIndex + 1] == "Hash") return HASH;
-    if (inputs[nameIndex + 1] == "NalimovPath") return NALIMOV_PATH;
-    if (inputs[nameIndex + 1] == "NalimovCache") return NALIMOV_CACHE;
-    if (inputs[nameIndex + 1] == "Ponder") return PONDER;
-    if (inputs[nameIndex + 1] == "OwnBook") return OWN_BOOK;
-    if (inputs[nameIndex + 1] == "MultiPV") return MULTI_PV;
-    if (inputs[nameIndex + 1] == "UCI_ShowCurrLine") return UCI_SHOW_CURR_LINE;
-    if (inputs[nameIndex + 1] == "UCI_ShowRefutations") return UCI_SHOW_REFUTATIONS;
-    if (inputs[nameIndex + 1] == "UCI_LimitStrength") return UCI_LIMIT_STRENGTH;
-    if (inputs[nameIndex + 1] == "UCI_Elo") return UCI_ELO;
-    if (inputs[nameIndex + 1] == "UCI_AnalyseMode") return UCI_ANALYSE_MODE;
-    if (inputs[nameIndex + 1] == "UCI_Opponent") return UCI_OPPONENT;
+    if (command == "hash") return HASH;
+    if (command == "clear hash") return CLEAR_HASH;
+    if (command == "nalimovpath") return NALIMOV_PATH;
+    if (command == "nalimovcache") return NALIMOV_CACHE;
+    if (command == "ponder") return PONDER;
+    if (command == "ownbook") return OWN_BOOK;
+    if (command == "multipv") return MULTI_PV;
+    if (command == "uci_showcurrLine") return UCI_SHOW_CURR_LINE;
+    if (command == "uci_showrefutations") return UCI_SHOW_REFUTATIONS;
+    if (command == "uci_limitstrength") return UCI_LIMIT_STRENGTH;
+    if (command == "uci_elo") return UCI_ELO;
+    if (command == "uci_analysemode") return UCI_ANALYSE_MODE;
+    if (command == "uci_opponent") return UCI_OPPONENT;
 
     return UNKNOWN_OPTION;
 }
@@ -137,11 +132,11 @@ void Sicario::handleDebug(std::vector<std::string> inputs) {
     if (inputs.size() != 2) {
         sendMissingArgument("debug [ on | off ]");
     } else if (inputs[1] != "on" && inputs[1] != "off") {
-        sendInvalidArgument(inputs[1]);
+        sendInvalidArgument(inputs);
     } else if (inputs.size() == 2 && inputs[1] == "on") {
-        sicaroConfigs.DEBUG_MODE = true;
+        sicarioConfigs.debugMode = true;
     } else if (inputs.size() == 2 && inputs[1] == "off") {
-        sicaroConfigs.DEBUG_MODE = false;
+        sicarioConfigs.debugMode = false;
     }
 }
 
@@ -150,37 +145,46 @@ void Sicario::handleSetOption(std::vector<std::string> inputs) {
 
     switch (hashedInput) {
         case HASH:
+            setOptionHash(inputs);
+            break;
+        case CLEAR_HASH:
+            setOptionClearHash();
             break;
         case NALIMOV_PATH:
+            setOptionNalimovPath(inputs);
             break;
         case NALIMOV_CACHE:
+            setOptionNalimovCache(inputs);
             break;
         case PONDER:
+            setOptionPonder(inputs);
             break;
         case OWN_BOOK:
+            setOptionOwnBook(inputs);
             break;
         case MULTI_PV:
+            setOptionMultiPV(inputs);
             break;
         case UCI_SHOW_CURR_LINE:
+            setOptionUciShowCurrLine(inputs);
             break;
         case UCI_SHOW_REFUTATIONS:
+            setOptionUciShowRefutations(inputs);
             break;
         case UCI_LIMIT_STRENGTH:
+            setOptionUciLimitStrength(inputs);
             break;
         case UCI_ELO:
+            setOptionUciElo(inputs);
             break;
         case UCI_ANALYSE_MODE:
+            setOptionUciAnalyseMode(inputs);
             break;
         case UCI_OPPONENT:
-            break;
-        case INVALID_OPTION_SYNTAX:
-            sendInvalidOptionSyntax(concat(inputs, " "));
-            break;
-        case NO_OPTION_GIVEN:
-            sendNoOptionGiven(concat(inputs, " "));
+            setOptionUciOpponent(inputs);
             break;
         case UNKNOWN_OPTION:
-            sendUnknownOption(inputs[2]);
+            sendUnknownOption(inputs);
             break;
     }
 }
@@ -299,18 +303,164 @@ void Sicario::sendMissingArgument(std::string arg) {
     communicate("Missing argument: " + arg);
 }
 
-void Sicario::sendInvalidArgument(std::string arg) {
-    communicate("Invalid argument: " + arg);
+void Sicario::sendInvalidArgument(std::vector<std::string> inputs) {
+    communicate("Invalid argument: " + getOptionValue(inputs));
 }
 
-void Sicario::sendInvalidOptionSyntax(std::string input) {
-    communicate("Invalid syntax: " + input);
+void Sicario::sendUnknownOption(std::vector<std::string> inputs) {
+    communicate("Unknown option: " + getOptionName(inputs));
 }
 
-void Sicario::sendNoOptionGiven(std::string input) {
-    communicate("No option given: " + input);
+// TODO check that setoption conforms with min, max, etc
+
+void Sicario::setOptionHash(std::vector<std::string> inputs) {
+    std::string value = getOptionValue(inputs);
+    for (char c : value) {
+        if (!std::isdigit(c)) {
+            sendInvalidArgument(inputs);
+            return;
+        }
+    }
+
+    sicarioConfigs.hash = std::stoi(value);
 }
 
-void Sicario::sendUnknownOption(std::string option) {
-    communicate("Unknown option: " + option);
+void Sicario::setOptionClearHash() {
+    // TODO
+}
+
+void Sicario::setOptionNalimovPath(std::vector<std::string> inputs) {
+    std::string value = getOptionValue(inputs);
+    sicarioConfigs.nalimovPath = value;
+}
+
+void Sicario::setOptionNalimovCache(std::vector<std::string> inputs) {
+    std::string value = getOptionValue(inputs);
+    for (char c : value) {
+        if (!std::isdigit(c)) {
+            sendInvalidArgument(inputs);
+            return;
+        }
+    }
+
+    sicarioConfigs.nalimovCache = std::stoi(value);
+}
+
+void Sicario::setOptionPonder(std::vector<std::string> inputs) {
+    std::string value = getOptionValue(inputs);
+    if (value == "true") {
+        sicarioConfigs.ponder = true;
+    } else if (value == "false") {
+        sicarioConfigs.ponder = false;
+    } else {
+        sendInvalidArgument(inputs);
+    }
+}
+
+void Sicario::setOptionOwnBook(std::vector<std::string> inputs) {
+    std::string value = getOptionValue(inputs);
+    if (value == "true") {
+        sicarioConfigs.ownBook = true;
+    } else if (value == "false") {
+        sicarioConfigs.ownBook = false;
+    } else {
+        sendInvalidArgument(inputs);
+    }
+}
+
+void Sicario::setOptionMultiPV(std::vector<std::string> inputs) {
+    std::string value = getOptionValue(inputs);
+    for (char c : value) {
+        if (!std::isdigit(c)) {
+            sendInvalidArgument(inputs);
+            return;
+        }
+    }
+
+    sicarioConfigs.multiPv = std::stoi(value);
+}
+
+void Sicario::setOptionUciShowCurrLine(std::vector<std::string> inputs) {
+    std::string value = getOptionValue(inputs);
+    if (value == "true") {
+        sicarioConfigs.uciShowCurrLine = true;
+    } else if (value == "false") {
+        sicarioConfigs.uciShowCurrLine = false;
+    } else {
+        sendInvalidArgument(inputs);
+    }
+}
+
+void Sicario::setOptionUciShowRefutations(std::vector<std::string> inputs) {
+    std::string value = getOptionValue(inputs);
+    if (value == "true") {
+        sicarioConfigs.uciShowRefutations = true;
+    } else if (value == "false") {
+        sicarioConfigs.uciShowRefutations = false;
+    } else {
+        sendInvalidArgument(inputs);
+    }
+}
+
+void Sicario::setOptionUciLimitStrength(std::vector<std::string> inputs) {
+    std::string value = getOptionValue(inputs);
+    if (value == "true") {
+        sicarioConfigs.uciLimitStrength = true;
+    } else if (value == "false") {
+        sicarioConfigs.uciLimitStrength = false;
+    } else {
+        sendInvalidArgument(inputs);
+    }
+}
+
+void Sicario::setOptionUciElo(std::vector<std::string> inputs) {
+    std::string value = getOptionValue(inputs);
+    for (char c : value) {
+        if (!std::isdigit(c)) {
+            sendInvalidArgument(inputs);
+            return;
+        }
+    }
+
+    sicarioConfigs.uciElo = std::stoi(value);
+}
+
+void Sicario::setOptionUciAnalyseMode(std::vector<std::string> inputs) {
+    std::string value = getOptionValue(inputs);
+    if (value == "true") {
+        sicarioConfigs.uciAnalyseMode = true;
+    } else if (value == "false") {
+        sicarioConfigs.uciAnalyseMode = false;
+    } else {
+        sendInvalidArgument(inputs);
+    }
+}
+
+void Sicario::setOptionUciOpponent(std::vector<std::string> inputs) {
+    std::string value = getOptionValue(inputs);
+    sicarioConfigs.uciOpponent = value;
+}
+
+std::string Sicario::getOptionName(std::vector<std::string> inputs) {
+    auto nameItr = std::find(inputs.begin(), inputs.end(), "name");
+    auto valueItr = std::find(inputs.begin(), inputs.end(), "value");
+    int nameIndex = nameItr - inputs.begin();
+    int valueIndex = valueItr - inputs.begin();
+
+    if (nameItr == inputs.end() || nameIndex != 1 || nameIndex + 1 > inputs.size() - 1) return "";
+    std::string name = concat(std::vector<std::string>(nameItr + 1, valueItr), " ");
+    std::transform(name.begin(), name.end(), name.begin(), [](unsigned char c){ return std::tolower(c); });
+    return name;
+}
+
+std::string Sicario::getOptionValue(std::vector<std::string> inputs) {
+    auto nameItr = std::find(inputs.begin(), inputs.end(), "name");
+    auto valueItr = std::find(inputs.begin(), inputs.end(), "value");
+    int nameIndex = nameItr - inputs.begin();
+    int valueIndex = valueItr - inputs.begin();
+
+    if (nameItr == inputs.end() || valueItr == inputs.end() || valueIndex + 1 > inputs.size() - 1) return "";
+    std::string value = concat(std::vector<std::string>(valueItr + 1, inputs.end()), " ");
+    std::transform(value.begin(), value.end(), value.begin(), [](unsigned char c){ return std::tolower(c); });
+    return value;
 }

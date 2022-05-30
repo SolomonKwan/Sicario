@@ -13,7 +13,7 @@ class Sicario {
 
     private:
         Position position;
-        SicarioConfigs sicaroConfigs;
+        SicarioConfigs sicarioConfigs;
 
         // UCI command processing
         void processInput(std::string);
@@ -46,10 +46,27 @@ class Sicario {
         void sendInfo();
         void sendInvalidCommand(std::string);
         void sendMissingArgument(std::string);
-        void sendInvalidArgument(std::string);
-        void sendInvalidOptionSyntax(std::string);
-        void sendNoOptionGiven(std::string);
-        void sendUnknownOption(std::string);
+        void sendInvalidArgument(std::vector<std::string>);
+        void sendUnknownOption(std::vector<std::string>);
+
+        // Option setters
+        void setOptionHash(std::vector<std::string>);
+        void setOptionClearHash();
+        void setOptionNalimovPath(std::vector<std::string>);
+        void setOptionNalimovCache(std::vector<std::string>);
+        void setOptionPonder(std::vector<std::string>);
+        void setOptionOwnBook(std::vector<std::string>);
+        void setOptionMultiPV(std::vector<std::string>);
+        void setOptionUciShowCurrLine(std::vector<std::string>);
+        void setOptionUciShowRefutations(std::vector<std::string>);
+        void setOptionUciLimitStrength(std::vector<std::string>);
+        void setOptionUciElo(std::vector<std::string>);
+        void setOptionUciAnalyseMode(std::vector<std::string>);
+        void setOptionUciOpponent(std::vector<std::string>);
+
+        // SetOption command processing
+        std::string getOptionName(std::vector<std::string>);
+        std::string getOptionValue(std::vector<std::string>);
 };
 
 #endif
