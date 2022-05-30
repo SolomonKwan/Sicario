@@ -9,6 +9,18 @@
 #include "utils.hpp"
 #include "sicario.hpp"
 
+inline bool isValidTitle(std::string str) {
+    return str == "GM" || str == "IM" || str == "FM" || str == "WGM" || str == "WIM" || str == "none";
+}
+
+inline bool isValidPlayerType(std::string str) {
+    return str == "computer" || str == "human";
+}
+
+inline bool isValidElo(std::string str) {
+    return isNumber(str) || str == "none";
+}
+
 /**
  * Parses the GUI input string and calls handlers for commands.
  * @param input: Input string from GUI.
@@ -82,10 +94,9 @@ UciInput Sicario::hashCommandInput(std::string input) {
 SicarioOption Sicario::hashOptionsInput(std::vector<std::string> inputs) {
     std::string command = getOptionName(inputs);
 
+    if (command == "thread") return THREAD;
     if (command == "hash") return HASH;
     if (command == "clear hash") return CLEAR_HASH;
-    if (command == "nalimovpath") return NALIMOV_PATH;
-    if (command == "nalimovcache") return NALIMOV_CACHE;
     if (command == "ponder") return PONDER;
     if (command == "ownbook") return OWN_BOOK;
     if (command == "multipv") return MULTI_PV;
@@ -108,18 +119,17 @@ void Sicario::handleUci() {
     communicate("id author " + (std::string)AUTHOR + "\n");
 
     // Configurable options (see SicarioConfigs struct)
-    sendOption({"Hash", "spin", "16"});
-    sendOption({"NalimovPath", "string", ""});
-    sendOption({"NalimovCache", "spin", "0"});
-    sendOption({"Ponder", "check", "false"});
-    sendOption({"OwnBook", "check", "false"});
-    sendOption({"MultiPV", "spin", "1"});
-    sendOption({"UCI_ShowCurrLine", "check", "false"});
-    sendOption({"UCI_ShowRefutations", "check", "false"});
-    sendOption({"UCI_LimitStrength", "check", "false"});
-    sendOption({"UCI_Elo", "spin", "3000"});
-    sendOption({"UCI_AnalyseMode", "check", "true"});
-    sendOption({"UCI_Opponent", "string", ""});
+    sendOption(thread);
+    sendOption(hash);
+    sendOption(ponder);
+    sendOption(ownBook);
+    sendOption(multiPv);
+    sendOption(uciShowCurrLine);
+    sendOption(uciShowRefutations);
+    sendOption(uciLimitStrength);
+    sendOption(uciElo);
+    sendOption(uciAnalyseMode);
+    sendOption(uciOpponent);
 
     communicate("uciok");
 }
@@ -144,17 +154,14 @@ void Sicario::handleSetOption(std::vector<std::string> inputs) {
     SicarioOption hashedInput = hashOptionsInput(inputs);
 
     switch (hashedInput) {
+        case THREAD:
+            setOptionThread(inputs);
+            break;
         case HASH:
             setOptionHash(inputs);
             break;
         case CLEAR_HASH:
             setOptionClearHash();
-            break;
-        case NALIMOV_PATH:
-            setOptionNalimovPath(inputs);
-            break;
-        case NALIMOV_CACHE:
-            setOptionNalimovCache(inputs);
             break;
         case PONDER:
             setOptionPonder(inputs);
@@ -311,39 +318,40 @@ void Sicario::sendUnknownOption(std::vector<std::string> inputs) {
     communicate("Unknown option: " + getOptionName(inputs));
 }
 
-// TODO check that setoption conforms with min, max, etc
+void Sicario::sendArgumentOutOfRange(std::vector<std::string> inputs) {
+    communicate("Argument out of range: " + getOptionValue(inputs));
+}
+
+void Sicario::setOptionThread(std::vector<std::string> inputs) {
+    std::string value = getOptionValue(inputs);
+    if (!isNumber(value)) {
+        sendInvalidArgument(inputs);
+        return;
+    }
+
+    if (std::stoi(value) < std::stoi(thread.min) || std::stoi(value) > std::stoi(thread.max)) {
+        sendArgumentOutOfRange(inputs);
+        return;
+    }
+    sicarioConfigs.hash = std::stoi(value);
+}
 
 void Sicario::setOptionHash(std::vector<std::string> inputs) {
     std::string value = getOptionValue(inputs);
-    for (char c : value) {
-        if (!std::isdigit(c)) {
-            sendInvalidArgument(inputs);
-            return;
-        }
+    if (!isNumber(value)) {
+        sendInvalidArgument(inputs);
+        return;
     }
 
+    if (std::stoi(value) < std::stoi(hash.min) || std::stoi(value) > std::stoi(hash.max)) {
+        sendArgumentOutOfRange(inputs);
+        return;
+    }
     sicarioConfigs.hash = std::stoi(value);
 }
 
 void Sicario::setOptionClearHash() {
     // TODO
-}
-
-void Sicario::setOptionNalimovPath(std::vector<std::string> inputs) {
-    std::string value = getOptionValue(inputs);
-    sicarioConfigs.nalimovPath = value;
-}
-
-void Sicario::setOptionNalimovCache(std::vector<std::string> inputs) {
-    std::string value = getOptionValue(inputs);
-    for (char c : value) {
-        if (!std::isdigit(c)) {
-            sendInvalidArgument(inputs);
-            return;
-        }
-    }
-
-    sicarioConfigs.nalimovCache = std::stoi(value);
 }
 
 void Sicario::setOptionPonder(std::vector<std::string> inputs) {
@@ -370,13 +378,15 @@ void Sicario::setOptionOwnBook(std::vector<std::string> inputs) {
 
 void Sicario::setOptionMultiPV(std::vector<std::string> inputs) {
     std::string value = getOptionValue(inputs);
-    for (char c : value) {
-        if (!std::isdigit(c)) {
-            sendInvalidArgument(inputs);
-            return;
-        }
+    if (!isNumber(value)) {
+        sendInvalidArgument(inputs);
+        return;
     }
 
+    if (std::stoi(value) < std::stoi(multiPv.min) || std::stoi(value) > std::stoi(multiPv.max)) {
+        sendArgumentOutOfRange(inputs);
+        return;
+    }
     sicarioConfigs.multiPv = std::stoi(value);
 }
 
@@ -415,13 +425,15 @@ void Sicario::setOptionUciLimitStrength(std::vector<std::string> inputs) {
 
 void Sicario::setOptionUciElo(std::vector<std::string> inputs) {
     std::string value = getOptionValue(inputs);
-    for (char c : value) {
-        if (!std::isdigit(c)) {
-            sendInvalidArgument(inputs);
-            return;
-        }
+    if (!isNumber(value)) {
+        sendInvalidArgument(inputs);
+        return;
     }
 
+    if (std::stoi(value) < std::stoi(uciElo.min) || std::stoi(value) > std::stoi(uciElo.max)) {
+        sendArgumentOutOfRange(inputs);
+        return;
+    }
     sicarioConfigs.uciElo = std::stoi(value);
 }
 
@@ -438,6 +450,11 @@ void Sicario::setOptionUciAnalyseMode(std::vector<std::string> inputs) {
 
 void Sicario::setOptionUciOpponent(std::vector<std::string> inputs) {
     std::string value = getOptionValue(inputs);
+    std::vector<std::string> values = split(value, " ");
+    if (values.size() < 4 || !isValidTitle(values[0]) || !isValidElo(values[1]) || !isValidPlayerType(values[2])) {
+        sendInvalidArgument(inputs);
+        return;
+    }
     sicarioConfigs.uciOpponent = value;
 }
 
@@ -460,7 +477,5 @@ std::string Sicario::getOptionValue(std::vector<std::string> inputs) {
     int valueIndex = valueItr - inputs.begin();
 
     if (nameItr == inputs.end() || valueItr == inputs.end() || valueIndex + 1 > inputs.size() - 1) return "";
-    std::string value = concat(std::vector<std::string>(valueItr + 1, inputs.end()), " ");
-    std::transform(value.begin(), value.end(), value.begin(), [](unsigned char c){ return std::tolower(c); });
-    return value;
+    return concat(std::vector<std::string>(valueItr + 1, inputs.end()), " ");
 }

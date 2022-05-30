@@ -17,4 +17,6 @@ Move parseMove(std::string);
 
 std::string concat(std::vector<std::string> strings, std::string delimeter);
 
+bool isNumber(std::string);
+
 #endif

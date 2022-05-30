@@ -59,3 +59,12 @@ std::string concat(std::vector<std::string> strings, std::string delimeter) {
     combinedStr = combinedStr.substr(0, combinedStr.size() - 1);
     return combinedStr;
 }
+
+bool isNumber(std::string str) {
+    for (char c : str) {
+        if (!std::isdigit(c)) {
+            return false;
+        }
+    }
+    return true;
+}

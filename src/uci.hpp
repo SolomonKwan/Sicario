@@ -29,10 +29,9 @@ enum UciInput {
 };
 
 enum SicarioOption {
+    THREAD,
     HASH,
     CLEAR_HASH,
-    NALIMOV_PATH,
-    NALIMOV_CACHE,
     PONDER,
     OWN_BOOK,
     MULTI_PV,
@@ -49,9 +48,8 @@ enum SicarioOption {
 
 struct SicarioConfigs {
     bool debugMode = false; // This is set with the "debug" command, not "setoption".
+    int threads = 1;
     int hash = 16; // Megabytes
-    std::string nalimovPath = "";
-    int nalimovCache = 0; // Megabytes
     bool ponder = false;
     bool ownBook = false;
     int multiPv = 1;
