@@ -60,10 +60,10 @@ void Sicario::processInput(std::string& input) {
         case QUIT:
             break;
         case INVALID_COMMAND:
-            sendInvalidCommand(commands[0]);
+            sendInvalidCommand(commands);
             break;
         case PERFT:
-            handlePerft(commands[0]);
+            handlePerft(commands);
             break;
     }
 }
@@ -193,7 +193,7 @@ void Sicario::handleSetOption(std::vector<std::string>& inputs) {
 }
 
 void Sicario::handleUciNewGame() {
-    position.parseFen(STANDARD_GAME);
+    // TODO Depends on implementation. Will do at end.
 }
 
 void Sicario::handlePosition(std::vector<std::string>& inputs) {
@@ -252,7 +252,7 @@ void Sicario::handlePonderHit() {
     // TODO
 }
 
-void Sicario::handlePerft(std::string& depth) {
+void Sicario::handlePerft(std::vector<std::string>& commands) {
     // TODO
 }
 
@@ -294,8 +294,8 @@ void Sicario::sendInfo() {
 
 }
 
-void Sicario::sendInvalidCommand(std::string& command) {
-    communicate("Unknown command: " + command);
+void Sicario::sendInvalidCommand(std::vector<std::string>& commands) {
+    communicate("Unknown command: " + commands[0]);
 }
 
 void Sicario::sendMissingArgument(std::vector<std::string>& inputs) {

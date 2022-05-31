@@ -33,7 +33,7 @@ class Sicario {
         void handlePonderHit();
 
         // Handlers for custom commands
-        void handlePerft(std::string&);
+        void handlePerft(std::vector<std::string>&);
 
         // GUI messaging
         void communicate(std::string);
@@ -43,7 +43,7 @@ class Sicario {
         void sendCopyProtection();
         void sendRegistration();
         void sendInfo();
-        void sendInvalidCommand(std::string&);
+        void sendInvalidCommand(std::vector<std::string>&);
         void sendMissingArgument(std::vector<std::string>&);
         void sendInvalidArgument(std::vector<std::string>&);
         void sendUnknownOption(std::vector<std::string>&);
