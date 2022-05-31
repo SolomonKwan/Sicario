@@ -2,7 +2,6 @@
 #include <iostream>
 #include "sicario.hpp"
 
-// TODO Add custom commands explanations to readme
 void showInfo(int argc, char* argv[]) {
     if (argc < 2) return;
     if (argv[1] == std::string("-h") || argv[1] == std::string("--help")) {
@@ -37,5 +36,9 @@ int main(int argc, char* argv[]) {
     showInfo(argc, argv);
     showLogo();
     showStartUp();
-    return Sicario::run();
+
+    Sicario sicario;
+    ExitCode code = sicario.run();
+
+    return code;
 }

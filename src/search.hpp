@@ -9,7 +9,7 @@
 class Node;
 class Searcher {
     public:
-        Searcher(Position pos, SearchParams params);
+        Searcher(Position pos);
         Position pos;
         void mcts(GoParams);
         inline void incrementNodes() {

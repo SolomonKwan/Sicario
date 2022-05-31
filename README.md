@@ -10,6 +10,11 @@ www.chessprogramming.org for explanations, Stockfish for inspiration and the Blu
 </br>
 <h1>Compiling and Running</h1>
 Simply compile the source code with the included Makefile. The program is then run via the command `./sicario`.
+<h2>Supported commands</h2>
+<ul>
+    <li>UCI protocol commands</li>
+    <li><code>perft [depth]</code> where <code>depth</code> is the desired depth.</li>
+</ul>
 </br>
 </br>
 </br>

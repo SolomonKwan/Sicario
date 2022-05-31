@@ -4,6 +4,7 @@
 #include <random>
 
 #include "game.hpp"
+#include "utils.hpp"
 
 /**
  * Precomputed moves information.
@@ -534,12 +535,12 @@ void Position::showEOG(ExitCode code) {
 
 /**
  * Computes the index (in this case the key) into the ROOK_BLOCK moves map.
- * @param pos: The uint64_t with possible destination squares from the param square set.
+ * @param position: The uint64_t with possible destination squares from the param square set.
  * @param square: The square from which the piece moves.
  * @return: Index into the ROOK_BLOCK array.
  */
-const int Position::rookBlockIndex(uint64_t pos, Square square) {
-    return pos & this->getRookFamily(square)->reach;
+const int Position::rookBlockIndex(uint64_t position, Square square) {
+    return position & this->getRookFamily(square)->reach;
 }
 
 /**
@@ -696,9 +697,9 @@ void Position::getCheckedMoves(std::vector<Move>* pos_moves[MAX_MOVE_SETS], int&
 
         // Pawn single advance to block check.
         if ((1ULL << (pawn + advance)) & (this->check_rays & ~this->checkers)) {
-            Bitboard pos = (1ULL << (pawn + advance + advance));
+            Bitboard position = (1ULL << (pawn + advance + advance));
             MovesStruct* pawn_moves = &Moves::PAWN[this->turn][pawn];
-            move_set = &pawn_moves->move_set[moveSetIndex(pos, pawn_moves)];
+            move_set = &pawn_moves->move_set[moveSetIndex(position, pawn_moves)];
             if (move_set->size() != 0) pos_moves[(moves_index)++] = move_set;
         }
 
@@ -977,34 +978,34 @@ void Position::getQueenMoves(std::vector<Move>* pos_moves[MAX_MOVE_SETS], int& m
  */
 void Position::getRookPinMoves(int square, std::vector<Move>* pos_moves[MAX_MOVE_SETS], int& moves_index) {
     int king = this->piece_list[this->turn][0];
-    uint64_t pos = this->sides[BLACK] | this->sides[WHITE];
+    uint64_t position = this->sides[BLACK] | this->sides[WHITE];
     uint64_t friendly = 0;
     if (square == A1 || square == A8 || square == H1 || square == H8) {
         return;
     } else if (square / 8 == 0) {
-        pos |= files[square % 8];
+        position |= files[square % 8];
         friendly |= 1ULL << (square + 8);
     } else if (square / 8 == 7) {
-        pos |= files[square % 8];
+        position |= files[square % 8];
         friendly |= 1ULL << (square - 8);
     } else if (square % 8 == 0) {
-        pos |= ranks[square / 8];
+        position |= ranks[square / 8];
         friendly |= 1ULL << (square + 1);
     } else if (square % 8 == 7) {
-        pos |= ranks[square / 8];
+        position |= ranks[square / 8];
         friendly |= 1ULL << (square - 1);
     } else { // Middle
         if (king % 8 == square % 8) { // Vertical pin
-            pos |= ranks[square / 8];
+            position |= ranks[square / 8];
             friendly |= 1ULL << (square + 1);
             friendly |= 1ULL << (square - 1);
         } else { // Horizontal pin
-            pos |= files[square % 8];
+            position |= files[square % 8];
             friendly |= 1ULL << (square + 8);
             friendly |= 1ULL << (square - 8);
         }
     }
-    MovesStruct* rook_moves = &Moves::ROOK[Indices::ROOK[square][rookIndex(pos, (Square) square)]];
+    MovesStruct* rook_moves = &Moves::ROOK[Indices::ROOK[square][rookIndex(position, (Square) square)]];
     std::vector<Move>* move_set = &rook_moves->move_set[moveSetIndex(rook_moves->reach ^ (this->sides[this->turn] |
             friendly), rook_moves)];
     if (move_set->size() != 0) pos_moves[(moves_index)++] = move_set;
@@ -1020,22 +1021,22 @@ void Position::getRookPinMoves(int square, std::vector<Move>* pos_moves[MAX_MOVE
  */
 void Position::getBishopPinMoves (int square, std::vector<Move>* pos_moves[MAX_MOVE_SETS], int& moves_index) {
     int king = this->piece_list[this->turn][0];
-    uint64_t pos = this->sides[BLACK] | this->sides[WHITE];
+    uint64_t position = this->sides[BLACK] | this->sides[WHITE];
     uint64_t friendly = 0;
     if (square / 8 == 0 || square / 8 == 7 || square % 8 == 0 || square % 8 == 7) {
         return;
     } else {
         if ((king > square && (king % 8) > (square % 8)) || (king < square && (king % 8) < (square % 8))) { // [/] pin
-            pos |= 1ULL << (square + 7) | 1ULL << (square - 7);
+            position |= 1ULL << (square + 7) | 1ULL << (square - 7);
             friendly |= 1ULL << (square + 7);
             friendly |= 1ULL << (square - 7);
         } else { // [\] pin
-            pos |= 1ULL << (square + 9) | 1ULL << (square - 9);
+            position |= 1ULL << (square + 9) | 1ULL << (square - 9);
             friendly |= 1ULL << (square + 9);
             friendly |= 1ULL << (square - 9);
         }
     }
-    MovesStruct* bishop_moves = &Moves::BISHOP[Indices::BISHOP[square][bishopIndex(pos, (Square) square)]];
+    MovesStruct* bishop_moves = &Moves::BISHOP[Indices::BISHOP[square][bishopIndex(position, (Square) square)]];
     std::vector<Move>* move_set = &bishop_moves->move_set[moveSetIndex(bishop_moves->reach ^ (this->sides[this->turn] |
             friendly), bishop_moves)];
     if (move_set->size() != 0) pos_moves[(moves_index)++] = move_set;
@@ -1146,9 +1147,9 @@ void Position::getPawnMoves(std::vector<Move>* pos_moves[MAX_MOVE_SETS], int& mo
 
             if (enemies & (1ULL << square)) {
                 int advance = this->turn ? 8 : -8;
-                uint64_t pos = (1ULL << (pawn + advance)) | (1ULL << (pawn + ray));
+                uint64_t position = (1ULL << (pawn + advance)) | (1ULL << (pawn + ray));
                 MovesStruct* pawn_moves = &Moves::PAWN[this->turn][pawn];
-                std::vector<Move>* move_set = &pawn_moves->move_set[moveSetIndex(pos, pawn_moves)];
+                std::vector<Move>* move_set = &pawn_moves->move_set[moveSetIndex(position, pawn_moves)];
                 if (move_set->size() != 0) pos_moves[(moves_index)++] = move_set;
             }
         } else {
@@ -2824,8 +2825,8 @@ void printPromo(Move move) {
     }
 }
 
-MoveList::MoveList(Position& pos) {
-    pos.getMoves(this->moves_index, this->moves);
+MoveList::MoveList(Position& position) {
+    position.getMoves(this->moves_index, this->moves);
 }
 
 uint64_t MoveList::size() {
@@ -2949,10 +2950,10 @@ void runPerft(int depth, Position game) {
 }
 
 /**
- * Makes call to run a game instance. Takes pos by value to simplify runNormal loop.
+ * Makes call to run a game instance. Takes position by value to simplify runNormal loop.
  */
-ExitCode handleGame(Position pos) {
-    return pos.run();
+ExitCode handleGame(Position position) {
+    return position.run();
 }
 
 /**
@@ -2975,15 +2976,15 @@ std::string concatFEN(std::vector<std::string> strings) {
 }
 
 /**
- * Sets the position of the pos object.
+ * Sets the position of the position object.
  */
-void setFen(std::vector<std::string> commands, Position& pos) {
+void setFen(std::vector<std::string> commands, Position& position) {
     if (commands[2] == "kiwipete") {
-        pos.parseFen(KIWIPETE);
+        position.parseFen(KIWIPETE);
     } else if (commands[2] == "new") {
-        pos.parseFen(STANDARD_GAME);
+        position.parseFen(STANDARD_GAME);
     } else {
-        pos.parseFen(concatFEN(commands));
+        position.parseFen(concatFEN(commands));
     }
 }
 
@@ -3011,21 +3012,21 @@ void Position::toggleQuiet() {
     this->quiteMode = !this->quiteMode;
 }
 
-void setCommand(std::vector<std::string> commands, Position& pos) {
-    if (commands[1] == "fen") setFen(commands, pos);
-    else if (commands[1] == "white") pos.setPlayer(WHITE, commands[2]);
-    else if (commands[1] == "black") pos.setPlayer(BLACK, commands[2]);
-    else if (commands[1] == "depth") pos.setDepth(std::stoi(commands[2]));
-    else if (commands[1] == "hash") pos.setHashSize(std::stoi(commands[2]));
-    else if (commands[1] == "quiet") pos.toggleQuiet();
+void setCommand(std::vector<std::string> commands, Position& position) {
+    if (commands[1] == "fen") setFen(commands, position);
+    else if (commands[1] == "white") position.setPlayer(WHITE, commands[2]);
+    else if (commands[1] == "black") position.setPlayer(BLACK, commands[2]);
+    else if (commands[1] == "depth") position.setDepth(std::stoi(commands[2]));
+    else if (commands[1] == "hash") position.setHashSize(std::stoi(commands[2]));
+    else if (commands[1] == "quiet") position.toggleQuiet();
     else std::cout << "unknown set option\n";
 }
 
-void runSample(Position pos, int num) {
+void runSample(Position position, int num) {
     std::unordered_map<ExitCode, int> results;
     for (int i = 0; i < num; i++) {
-        Position newPos = pos;
-        ExitCode code = handleGame(pos);
+        Position newPos = position;
+        ExitCode code = handleGame(position);
         results[code]++;
     }
     std::cout << "White wins: " << results[WHITE_WINS] << '\n';
@@ -3042,15 +3043,15 @@ void runSample(Position pos, int num) {
  * @param input: The initial user input.
  */
 void Play::init() {
-    Position pos;
+    Position position;
     std::string input("");
     while (input != "q" && input != "quit" && input != "exit") {
         std::getline(std::cin, input);
         std::vector<std::string> commands = split(input, " ");
-        if (commands[0] == "play") handleGame(pos);
-        else if (commands[0] == "sample") runSample(pos, std::stoi(commands[1]));
-        else if (commands[0] == "perft") runPerft(std::stoi(commands[1]), pos);
-        else if (commands[0] == "set") setCommand(commands, pos);
-        else if (commands[0] == "display" && commands.size() == 1) pos.display();
+        if (commands[0] == "play") handleGame(position);
+        else if (commands[0] == "sample") runSample(position, std::stoi(commands[1]));
+        else if (commands[0] == "perft") runPerft(std::stoi(commands[1]), position);
+        else if (commands[0] == "set") setCommand(commands, position);
+        else if (commands[0] == "display" && commands.size() == 1) position.display();
     }
 }

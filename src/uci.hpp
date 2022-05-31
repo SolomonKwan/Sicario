@@ -3,24 +3,72 @@
 #define UCI_HPP
 
 #include "game.hpp"
-// #include "search.hpp"
 
-// TODO list all the possible uci inputs, and then list custom inputs
-enum UciInputs {
-    QUIT,
+/**
+ * Input commands to the engine. Includes the UCI protocol and custom commands.
+ */
+enum UciInput {
+    // UCI Protocol GUI to engine commands
     UCI,
+    DEBUG,
     ISREADY,
     SETOPTION,
-    DEBUG,
-    REGISTER,
     UCINEWGAME,
     POSITION,
     GO,
     STOP,
     PONDERHIT,
+    QUIT,
 
-    INVALID_INPUT
+    // Custom commands to engine
+    PERFT,
+
+    // Sentinel for invalid command
+    INVALID_COMMAND
 };
+
+enum ConfigOption {
+    THREAD,
+    HASH,
+    CLEAR_HASH,
+    PONDER,
+    OWN_BOOK,
+    MULTI_PV,
+    UCI_SHOW_CURR_LINE,
+    UCI_SHOW_REFUTATIONS,
+    UCI_LIMIT_STRENGTH,
+    UCI_ELO,
+    UCI_ANALYSE_MODE,
+    UCI_OPPONENT,
+
+    // Sentinels for errors.
+    UNKNOWN_OPTION,
+};
+
+struct SicarioConfigs {
+    bool debugMode = false; // This is set with the "debug" command, not "setoption".
+    int threads = 1;
+    int hash = 16; // Megabytes
+    bool ponder = false;
+    bool ownBook = false;
+    int multiPv = 1;
+    bool uciShowCurrLine = false;
+    bool uciShowRefutations = false;
+    bool uciLimitStrength = false;
+    int uciElo = 3000;
+    bool uciAnalyseMode = true;
+    std::string uciOpponent = "";
+};
+
+struct OptionInfo {
+    std::string name = "";
+    std::string type = "";
+    std::string def = "";
+    std::string min = "";
+    std::string max = "";
+    std::vector<std::string> vars = {};
+};
+
 struct GoParams {
     std::vector<Move> moves;
     int wtime = 0;
@@ -33,39 +81,6 @@ struct GoParams {
     int mate = 0;
     int movetime = 0;
     bool infinite = true;
-};
-
-class Uci {
-    public:
-        Position pos;
-        SearchParams params;
-
-        void parseInput(std::string);
-        UciInputs hashInput(std::string);
-
-        bool debug_mode = false;
-
-        void handleIsReady();
-        void handleSetOption();
-        void handleDebug(std::vector<std::string>);
-        void handleSetOption(std::vector<std::string>);
-        void handleRegister(std::vector<std::string>);
-        void handleUCI_NewGame();
-        void handlePosition(std::vector<std::string>);
-        void handleGo(std::vector<std::string>);
-        void handleStop();
-        void handlePonderHit();
-
-        void sendInitialResponse();
-        void sendIds();
-        void options();
-        void sendReadyOk();
-        void sendBestMove();
-        void sendCopyProtection();
-        void sendRegistration();
-        void sendInfo();
-
-        Move parseMove(std::string);
 };
 
 #endif

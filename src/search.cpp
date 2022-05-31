@@ -36,31 +36,13 @@ void SearchInfo::clearTable() {
 /**
  * Search the current position.
  */
-void Position::search(SearchParams params, GoParams go_params) {
-    Searcher searcher = Searcher(*this, params);
+void Position::search(GoParams go_params) {
+    Searcher searcher = Searcher(*this);
     searcher.mcts(go_params);
 }
 
-Searcher::Searcher(Position pos, SearchParams searchParams) {
+Searcher::Searcher(Position pos) {
     this->pos = pos;
-    this->time = searchParams.time;
-    this->children_to_search = searchParams.children_to_search;
-    this->c = searchParams.c;
-}
-
-/**
- * Order the moves by most "interesting/best" first and least "intereseting/worse" last (i.e. order by score in
- * descending order).
- *
- * TODO: Need to make the ordering algorithm cleaner. Somekind of ordering while iterating the first time.
- */
-std::vector<std::pair<int, Move>> Position::scoreMoves(SearchParams, MoveList& moves) {
-    std::vector<std::pair<int, Move>> ordering;
-    for (Move move : moves) {
-        ordering.push_back(std::make_pair(this->scoreMove(move), move));
-    }
-    std::sort(ordering.begin(), ordering.end());
-    return ordering;
 }
 
 /**
