@@ -79,11 +79,6 @@ int MSB(int n);
 bool bitAt(uint64_t position, int n);
 
 /**
- * @param position: A bitboard.
- */
-void displayBB(uint64_t position);
-
-/**
  * Returns the index from BISHOP_INDEX into BISHOP_MOVES based on the square and
  * occupancy.
  *

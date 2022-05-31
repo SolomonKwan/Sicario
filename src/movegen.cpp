@@ -8,24 +8,6 @@
 #include "game.hpp"
 
 /**
- * @param pos: A bitboard.
- */
-void displayBB(uint64_t pos) {
-    // Convert number to binary string.
-    std::string positionString = std::bitset<64>(pos).to_string();
-
-    // Reverse each line then print.
-    std::cout << "\n";
-    for (int i = 0; i < 8; i++) {
-        std::string line = positionString.substr(8 * i, 8);
-        std::reverse(line.begin(), line.end());
-        std::cout << line << '\n';
-    }
-
-    std::cout << '\n' << std::flush;
-}
-
-/**
  * Finds and returns the position of the most significant set bit. If not bits
  * are set, returns 0.
  *
