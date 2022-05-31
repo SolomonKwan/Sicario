@@ -13,7 +13,6 @@ enum UciInput {
     DEBUG,
     ISREADY,
     SETOPTION,
-    REGISTER,
     UCINEWGAME,
     POSITION,
     GO,

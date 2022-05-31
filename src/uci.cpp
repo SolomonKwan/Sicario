@@ -42,9 +42,6 @@ void Sicario::processInput(std::string& input) {
         case SETOPTION:
             handleSetOption(commands);
             break;
-        case REGISTER:
-            handleRegister(commands);
-            break;
         case UCINEWGAME:
             handleUciNewGame();
             break;
@@ -77,7 +74,6 @@ UciInput Sicario::hashCommandInput(std::string& input) {
     if (input == "debug") return DEBUG;
     if (input == "isready") return ISREADY;
     if (input == "setoption") return SETOPTION;
-    if (input == "register") return REGISTER;
     if (input == "ucinewgame") return UCINEWGAME;
     if (input == "position") return POSITION;
     if (input == "go") return GO;
@@ -194,10 +190,6 @@ void Sicario::handleSetOption(std::vector<std::string>& inputs) {
             sendUnknownOption(inputs);
             break;
     }
-}
-
-void Sicario::handleRegister(std::vector<std::string>& inputs) {
-    // TODO Dafuq is this?
 }
 
 void Sicario::handleUciNewGame() {

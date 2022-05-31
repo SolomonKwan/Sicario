@@ -26,7 +26,6 @@ class Sicario {
         void handleSetOption();
         void handleDebug(std::vector<std::string>&);
         void handleSetOption(std::vector<std::string>&);
-        void handleRegister(std::vector<std::string>&);
         void handleUciNewGame();
         void handlePosition(std::vector<std::string>&);
         void handleGo(std::vector<std::string>&);
