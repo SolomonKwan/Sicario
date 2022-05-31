@@ -25,7 +25,7 @@ inline bool isValidElo(std::string str) {
  * Parses the GUI input string and calls handlers for commands.
  * @param input: Input string from GUI.
  */
-void Sicario::processInput(std::string input) {
+void Sicario::processInput(std::string& input) {
     std::vector<std::string> commands = split(input, " ");
     UciInput hashedInput = hashCommandInput(commands[0]);
 
@@ -71,7 +71,7 @@ void Sicario::processInput(std::string input) {
     }
 }
 
-UciInput Sicario::hashCommandInput(std::string input) {
+UciInput Sicario::hashCommandInput(std::string& input) {
     // UCI protocol GUI to engine commands
     if (input == "uci") return UCI;
     if (input == "debug") return DEBUG;
@@ -91,7 +91,7 @@ UciInput Sicario::hashCommandInput(std::string input) {
     return INVALID_COMMAND;
 }
 
-SicarioOption Sicario::hashOptionsInput(std::vector<std::string> inputs) {
+ConfigOption Sicario::hashOptionsInput(std::vector<std::string>& inputs) {
     std::string command = getOptionName(inputs);
 
     if (command == "thread") return THREAD;
@@ -138,9 +138,9 @@ void Sicario::handleIsReady() {
     sendReadyOk();
 }
 
-void Sicario::handleDebug(std::vector<std::string> inputs) {
+void Sicario::handleDebug(std::vector<std::string>& inputs) {
     if (inputs.size() != 2) {
-        sendMissingArgument("debug [ on | off ]");
+        sendMissingArgument(inputs);
     } else if (inputs[1] != "on" && inputs[1] != "off") {
         sendInvalidArgument(inputs);
     } else if (inputs.size() == 2 && inputs[1] == "on") {
@@ -150,8 +150,8 @@ void Sicario::handleDebug(std::vector<std::string> inputs) {
     }
 }
 
-void Sicario::handleSetOption(std::vector<std::string> inputs) {
-    SicarioOption hashedInput = hashOptionsInput(inputs);
+void Sicario::handleSetOption(std::vector<std::string>& inputs) {
+    ConfigOption hashedInput = hashOptionsInput(inputs);
 
     switch (hashedInput) {
         case THREAD:
@@ -196,7 +196,7 @@ void Sicario::handleSetOption(std::vector<std::string> inputs) {
     }
 }
 
-void Sicario::handleRegister(std::vector<std::string> inputs) {
+void Sicario::handleRegister(std::vector<std::string>& inputs) {
     // TODO Dafuq is this?
 }
 
@@ -204,14 +204,14 @@ void Sicario::handleUciNewGame() {
     position.parseFen(STANDARD_GAME);
 }
 
-void Sicario::handlePosition(std::vector<std::string> inputs) {
+void Sicario::handlePosition(std::vector<std::string>& inputs) {
     // Insert dummy command at start to use concatFEN
     // CHECK
     inputs.insert(inputs.begin(), "set");
     this->position.parseFen(concatFEN(inputs));
 }
 
-void Sicario::handleGo(std::vector<std::string> commands) {
+void Sicario::handleGo(std::vector<std::string>& commands) {
     // TODO
     GoParams go_params;
 
@@ -260,7 +260,7 @@ void Sicario::handlePonderHit() {
     // TODO
 }
 
-void Sicario::handlePerft(std::string depth) {
+void Sicario::handlePerft(std::string& depth) {
     // TODO
 }
 
@@ -272,7 +272,7 @@ void Sicario::communicate(std::string communication) {
     std::cout << communication << '\n';
 }
 
-void Sicario::sendOption(OptionInfo option) {
+void Sicario::sendOption(OptionInfo& option) {
     std::string optionString = "option name " + option.name + " type " + option.type + " default " + option.def;
     if (option.min != "") optionString += " min " + option.min + " max " + option.max;
     for (std::string var : option.vars) optionString += " var " + var;
@@ -302,27 +302,31 @@ void Sicario::sendInfo() {
 
 }
 
-void Sicario::sendInvalidCommand(std::string command) {
+void Sicario::sendInvalidCommand(std::string& command) {
     communicate("Unknown command: " + command);
 }
 
-void Sicario::sendMissingArgument(std::string arg) {
-    communicate("Missing argument: " + arg);
+void Sicario::sendMissingArgument(std::vector<std::string>& inputs) {
+    communicate("Missing argument: " + concat(inputs, " "));
 }
 
-void Sicario::sendInvalidArgument(std::vector<std::string> inputs) {
-    communicate("Invalid argument: " + getOptionValue(inputs));
+void Sicario::sendInvalidArgument(std::vector<std::string>& inputs) {
+    communicate("Invalid argument: " + concat(inputs, " "));
 }
 
-void Sicario::sendUnknownOption(std::vector<std::string> inputs) {
+void Sicario::sendUnknownOption(std::vector<std::string>& inputs) {
     communicate("Unknown option: " + getOptionName(inputs));
 }
 
-void Sicario::sendArgumentOutOfRange(std::vector<std::string> inputs) {
+void Sicario::sendInvalidValue(std::vector<std::string>& inputs) {
+    communicate("Invalid argument: " + getOptionValue(inputs));
+}
+
+void Sicario::sendArgumentOutOfRange(std::vector<std::string>& inputs) {
     communicate("Argument out of range: " + getOptionValue(inputs));
 }
 
-void Sicario::setOptionThread(std::vector<std::string> inputs) {
+void Sicario::setOptionThread(std::vector<std::string>& inputs) {
     std::string value = getOptionValue(inputs);
     if (!isNumber(value)) {
         sendInvalidArgument(inputs);
@@ -336,7 +340,7 @@ void Sicario::setOptionThread(std::vector<std::string> inputs) {
     sicarioConfigs.hash = std::stoi(value);
 }
 
-void Sicario::setOptionHash(std::vector<std::string> inputs) {
+void Sicario::setOptionHash(std::vector<std::string>& inputs) {
     std::string value = getOptionValue(inputs);
     if (!isNumber(value)) {
         sendInvalidArgument(inputs);
@@ -354,7 +358,7 @@ void Sicario::setOptionClearHash() {
     // TODO
 }
 
-void Sicario::setOptionPonder(std::vector<std::string> inputs) {
+void Sicario::setOptionPonder(std::vector<std::string>& inputs) {
     std::string value = getOptionValue(inputs);
     if (value == "true") {
         sicarioConfigs.ponder = true;
@@ -365,7 +369,7 @@ void Sicario::setOptionPonder(std::vector<std::string> inputs) {
     }
 }
 
-void Sicario::setOptionOwnBook(std::vector<std::string> inputs) {
+void Sicario::setOptionOwnBook(std::vector<std::string>& inputs) {
     std::string value = getOptionValue(inputs);
     if (value == "true") {
         sicarioConfigs.ownBook = true;
@@ -376,7 +380,7 @@ void Sicario::setOptionOwnBook(std::vector<std::string> inputs) {
     }
 }
 
-void Sicario::setOptionMultiPV(std::vector<std::string> inputs) {
+void Sicario::setOptionMultiPV(std::vector<std::string>& inputs) {
     std::string value = getOptionValue(inputs);
     if (!isNumber(value)) {
         sendInvalidArgument(inputs);
@@ -390,7 +394,7 @@ void Sicario::setOptionMultiPV(std::vector<std::string> inputs) {
     sicarioConfigs.multiPv = std::stoi(value);
 }
 
-void Sicario::setOptionUciShowCurrLine(std::vector<std::string> inputs) {
+void Sicario::setOptionUciShowCurrLine(std::vector<std::string>& inputs) {
     std::string value = getOptionValue(inputs);
     if (value == "true") {
         sicarioConfigs.uciShowCurrLine = true;
@@ -401,7 +405,7 @@ void Sicario::setOptionUciShowCurrLine(std::vector<std::string> inputs) {
     }
 }
 
-void Sicario::setOptionUciShowRefutations(std::vector<std::string> inputs) {
+void Sicario::setOptionUciShowRefutations(std::vector<std::string>& inputs) {
     std::string value = getOptionValue(inputs);
     if (value == "true") {
         sicarioConfigs.uciShowRefutations = true;
@@ -412,7 +416,7 @@ void Sicario::setOptionUciShowRefutations(std::vector<std::string> inputs) {
     }
 }
 
-void Sicario::setOptionUciLimitStrength(std::vector<std::string> inputs) {
+void Sicario::setOptionUciLimitStrength(std::vector<std::string>& inputs) {
     std::string value = getOptionValue(inputs);
     if (value == "true") {
         sicarioConfigs.uciLimitStrength = true;
@@ -423,7 +427,7 @@ void Sicario::setOptionUciLimitStrength(std::vector<std::string> inputs) {
     }
 }
 
-void Sicario::setOptionUciElo(std::vector<std::string> inputs) {
+void Sicario::setOptionUciElo(std::vector<std::string>& inputs) {
     std::string value = getOptionValue(inputs);
     if (!isNumber(value)) {
         sendInvalidArgument(inputs);
@@ -437,7 +441,7 @@ void Sicario::setOptionUciElo(std::vector<std::string> inputs) {
     sicarioConfigs.uciElo = std::stoi(value);
 }
 
-void Sicario::setOptionUciAnalyseMode(std::vector<std::string> inputs) {
+void Sicario::setOptionUciAnalyseMode(std::vector<std::string>& inputs) {
     std::string value = getOptionValue(inputs);
     if (value == "true") {
         sicarioConfigs.uciAnalyseMode = true;
@@ -448,7 +452,7 @@ void Sicario::setOptionUciAnalyseMode(std::vector<std::string> inputs) {
     }
 }
 
-void Sicario::setOptionUciOpponent(std::vector<std::string> inputs) {
+void Sicario::setOptionUciOpponent(std::vector<std::string>& inputs) {
     std::string value = getOptionValue(inputs);
     std::vector<std::string> values = split(value, " ");
     if (values.size() < 4 || !isValidTitle(values[0]) || !isValidElo(values[1]) || !isValidPlayerType(values[2])) {
@@ -458,11 +462,10 @@ void Sicario::setOptionUciOpponent(std::vector<std::string> inputs) {
     sicarioConfigs.uciOpponent = value;
 }
 
-std::string Sicario::getOptionName(std::vector<std::string> inputs) {
+std::string Sicario::getOptionName(std::vector<std::string>& inputs) {
     auto nameItr = std::find(inputs.begin(), inputs.end(), "name");
     auto valueItr = std::find(inputs.begin(), inputs.end(), "value");
-    int nameIndex = nameItr - inputs.begin();
-    int valueIndex = valueItr - inputs.begin();
+    unsigned long nameIndex = nameItr - inputs.begin();
 
     if (nameItr == inputs.end() || nameIndex != 1 || nameIndex + 1 > inputs.size() - 1) return "";
     std::string name = concat(std::vector<std::string>(nameItr + 1, valueItr), " ");
@@ -470,11 +473,10 @@ std::string Sicario::getOptionName(std::vector<std::string> inputs) {
     return name;
 }
 
-std::string Sicario::getOptionValue(std::vector<std::string> inputs) {
+std::string Sicario::getOptionValue(std::vector<std::string>& inputs) {
     auto nameItr = std::find(inputs.begin(), inputs.end(), "name");
     auto valueItr = std::find(inputs.begin(), inputs.end(), "value");
-    int nameIndex = nameItr - inputs.begin();
-    int valueIndex = valueItr - inputs.begin();
+    unsigned long valueIndex = valueItr - inputs.begin();
 
     if (nameItr == inputs.end() || valueItr == inputs.end() || valueIndex + 1 > inputs.size() - 1) return "";
     return concat(std::vector<std::string>(valueItr + 1, inputs.end()), " ");

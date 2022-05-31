@@ -28,7 +28,7 @@ enum UciInput {
     INVALID_COMMAND
 };
 
-enum SicarioOption {
+enum ConfigOption {
     THREAD,
     HASH,
     CLEAR_HASH,
