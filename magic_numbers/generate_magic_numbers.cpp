@@ -134,6 +134,69 @@ void findRookMNs() {
     }
 }
 
+void findBishopMNs() {
+    for (int sq = 0; sq < 64; sq++) {
+        int northEastSize = max(min(6 - sq / 8, 6 - sq % 8), 0);
+        int southEastSize = max(min(sq / 8 - 1, 6 - sq % 8), 0);
+        int southWestSize = max(min(sq / 8 - 1, sq % 8 - 1), 0);
+        int northWestSize = max(min(6 - sq / 8, sq % 8 - 1), 0);
+        int totalSize = northEastSize + southEastSize + southWestSize + northWestSize;
+
+        uint64_t maxOccupancy = pow(2, totalSize);
+        uint16_t indexMask = 0;
+        uint64_t magicNum;
+        for (int i = 0; i < totalSize; i++) indexMask |= ((uint16_t)1 << i);
+
+        int attempt = 0;
+        float prob = 0.05;
+        searchAgain:
+            if (attempt > 100000) {
+                attempt = 0;
+                prob += 0.05;
+            }
+
+            if (prob >= 1) {
+                cout << "Welp, the square " << squareName[sq] << " was fucked..." << '\n';
+                goto nextSquare;
+            }
+            magicNum = randomMagicNumber(prob);
+            for (int magicShift = 0; magicShift <= 64 - totalSize; magicShift++) {
+                unordered_set<int> indices;
+                bool duplicate = false;
+
+                // Build occupancy bitboard
+                for (uint64_t j = 0; j < maxOccupancy; j++) {
+                    uint64_t occ = 0ULL;
+                    int shift = 0;
+                    for (int k = 0; k < northEastSize; k++, shift++) occ |= ((j >> shift) & 1UL) << (sq + NORTHEAST * (k + 1));
+                    for (int k = 0; k < southEastSize; k++, shift++) occ |= ((j >> shift) & 1UL) << (sq + SOUTHEAST * (k + 1));
+                    for (int k = 0; k < southWestSize; k++, shift++) occ |= ((j >> shift) & 1UL) << (sq + SOUTHWEST * (k + 1));
+                    for (int k = 0; k < northWestSize; k++, shift++) occ |= ((j >> shift) & 1UL) << (sq + NORTHWEST * (k + 1));
+
+                    uint16_t magicIndex = ((occ * magicNum) >> magicShift) & indexMask;
+                    if (indices.find(magicIndex) != indices.end()) {
+                        duplicate = true;
+                        break;
+                    }
+
+                    indices.insert(magicIndex);
+                }
+
+                if (!duplicate) {
+                    cout << squareName[sq] << " 0x" << std::hex << magicNum << " \t" << std::dec << magicShift << '\n';
+                    goto nextSquare;
+                }
+            }
+            attempt++;
+            goto searchAgain;
+        nextSquare:
+            continue;
+    }
+}
+
 int main() {
-    findRookMNs();
+    // cout << "Rook magic numbers" << '\n';
+    // findRookMNs();
+    // cout << "Bishop magic numbers" << '\n';
+    findBishopMNs();
 }
