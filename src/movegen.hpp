@@ -6,7 +6,24 @@
 #include <vector>
 #include "constants.hpp"
 
-#define UNSET 0xFFFFFFFFFFFFFFFF
+#define UNSET 0xFFFFFFFFFFFFFFFF // CHECK
+
+enum Direction {
+    NORTH =  8,
+    NORTHEAST = 9,
+    EAST = 1,
+    SOUTHEAST = -7,
+    SOUTH = -8,
+    SOUTHWEST = -9,
+    WEST = -1,
+    NORTHWEST = 7
+};
+
+/**
+ * Compute pseudolegal moves of the king on each square.
+ * @return: Array of vectors of pseudolegal moves.
+ */
+std::array<std::vector<Move>, 64> generateKingMoves();
 
 /**
  * A struct holding the move families.
