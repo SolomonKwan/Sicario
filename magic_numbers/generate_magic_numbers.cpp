@@ -89,7 +89,7 @@ void findRookMNs() {
 
         int attempt = 0;
         float prob = 0.05;
-        searchAgain:
+        while (true) {
             if (attempt > 100000) {
                 attempt = 0;
                 prob += 0.05;
@@ -97,40 +97,36 @@ void findRookMNs() {
 
             if (prob >= 1) {
                 cout << "Welp, the square " << squareName[sq] << " was fucked..." << '\n';
-                goto nextSquare;
+                break;
             }
             magicNum = randomMagicNumber(prob);
-            for (int magicShift = 0; magicShift <= 64 - totalSize; magicShift++) {
-                unordered_set<int> indices;
-                bool duplicate = false;
+            unordered_set<int> indices;
+            bool duplicate = false;
 
-                // Build occupancy bitboard
-                for (uint64_t j = 0; j < maxOccupancy; j++) {
-                    uint64_t occ = 0ULL;
-                    int shift = 0;
-                    for (int k = 0; k < northSize; k++, shift++) occ |= ((j >> shift) & 1UL) << (sq + NORTH * (k + 1));
-                    for (int k = 0; k < southSize; k++, shift++) occ |= ((j >> shift) & 1UL) << (sq + SOUTH * (k + 1));
-                    for (int k = 0; k < eastSize; k++, shift++) occ |= ((j >> shift) & 1UL) << (sq + EAST * (k + 1));
-                    for (int k = 0; k < westSize; k++, shift++) occ |= ((j >> shift) & 1UL) << (sq + WEST * (k + 1));
+            // Build occupancy bitboard
+            for (uint64_t j = 0; j < maxOccupancy; j++) {
+                uint64_t occ = 0ULL;
+                int shift = 0;
+                for (int k = 0; k < northSize; k++, shift++) occ |= ((j >> shift) & 1UL) << (sq + NORTH * (k + 1));
+                for (int k = 0; k < southSize; k++, shift++) occ |= ((j >> shift) & 1UL) << (sq + SOUTH * (k + 1));
+                for (int k = 0; k < eastSize; k++, shift++) occ |= ((j >> shift) & 1UL) << (sq + EAST * (k + 1));
+                for (int k = 0; k < westSize; k++, shift++) occ |= ((j >> shift) & 1UL) << (sq + WEST * (k + 1));
 
-                    uint16_t magicIndex = ((occ * magicNum) >> magicShift) & indexMask;
-                    if (indices.find(magicIndex) != indices.end()) {
-                        duplicate = true;
-                        break;
-                    }
-
-                    indices.insert(magicIndex);
+                uint16_t magicIndex = ((occ * magicNum) >> (64 - totalSize)) & indexMask;
+                if (indices.find(magicIndex) != indices.end()) {
+                    duplicate = true;
+                    break;
                 }
 
-                if (!duplicate) {
-                    cout << squareName[sq] << " 0x" << std::hex << magicNum << " \t" << std::dec << magicShift << '\n';
-                    goto nextSquare;
-                }
+                indices.insert(magicIndex);
+            }
+
+            if (!duplicate) {
+                cout << squareName[sq] << " 0x" << std::hex << magicNum << " \t" << std::dec << (64 - totalSize) << '\n';
+                break;
             }
             attempt++;
-            goto searchAgain;
-        nextSquare:
-            continue;
+        }
     }
 }
 
@@ -149,7 +145,7 @@ void findBishopMNs() {
 
         int attempt = 0;
         float prob = 0.05;
-        searchAgain:
+        while (true) {
             if (attempt > 100000) {
                 attempt = 0;
                 prob += 0.05;
@@ -157,46 +153,42 @@ void findBishopMNs() {
 
             if (prob >= 1) {
                 cout << "Welp, the square " << squareName[sq] << " was fucked..." << '\n';
-                goto nextSquare;
+                break;
             }
             magicNum = randomMagicNumber(prob);
-            for (int magicShift = 0; magicShift <= 64 - totalSize; magicShift++) {
-                unordered_set<int> indices;
-                bool duplicate = false;
+            unordered_set<int> indices;
+            bool duplicate = false;
 
-                // Build occupancy bitboard
-                for (uint64_t j = 0; j < maxOccupancy; j++) {
-                    uint64_t occ = 0ULL;
-                    int shift = 0;
-                    for (int k = 0; k < northEastSize; k++, shift++) occ |= ((j >> shift) & 1UL) << (sq + NORTHEAST * (k + 1));
-                    for (int k = 0; k < southEastSize; k++, shift++) occ |= ((j >> shift) & 1UL) << (sq + SOUTHEAST * (k + 1));
-                    for (int k = 0; k < southWestSize; k++, shift++) occ |= ((j >> shift) & 1UL) << (sq + SOUTHWEST * (k + 1));
-                    for (int k = 0; k < northWestSize; k++, shift++) occ |= ((j >> shift) & 1UL) << (sq + NORTHWEST * (k + 1));
+            // Build occupancy bitboard
+            for (uint64_t j = 0; j < maxOccupancy; j++) {
+                uint64_t occ = 0ULL;
+                int shift = 0;
+                for (int k = 0; k < northEastSize; k++, shift++) occ |= ((j >> shift) & 1UL) << (sq + NORTHEAST * (k + 1));
+                for (int k = 0; k < southEastSize; k++, shift++) occ |= ((j >> shift) & 1UL) << (sq + SOUTHEAST * (k + 1));
+                for (int k = 0; k < southWestSize; k++, shift++) occ |= ((j >> shift) & 1UL) << (sq + SOUTHWEST * (k + 1));
+                for (int k = 0; k < northWestSize; k++, shift++) occ |= ((j >> shift) & 1UL) << (sq + NORTHWEST * (k + 1));
 
-                    uint16_t magicIndex = ((occ * magicNum) >> magicShift) & indexMask;
-                    if (indices.find(magicIndex) != indices.end()) {
-                        duplicate = true;
-                        break;
-                    }
-
-                    indices.insert(magicIndex);
+                uint16_t magicIndex = ((occ * magicNum) >> (64 - totalSize)) & indexMask;
+                if (indices.find(magicIndex) != indices.end()) {
+                    duplicate = true;
+                    break;
                 }
 
-                if (!duplicate) {
-                    cout << squareName[sq] << " 0x" << std::hex << magicNum << " \t" << std::dec << magicShift << '\n';
-                    goto nextSquare;
-                }
+                indices.insert(magicIndex);
+            }
+
+            if (!duplicate) {
+                cout << squareName[sq] << " 0x" << std::hex << magicNum << " \t" << std::dec << (64 - totalSize) << '\n';
+                break;
             }
             attempt++;
-            goto searchAgain;
-        nextSquare:
-            continue;
+        }
     }
 }
 
 int main() {
-    // cout << "Rook magic numbers" << '\n';
-    // findRookMNs();
-    // cout << "Bishop magic numbers" << '\n';
+    cout << "Rook magic numbers" << '\n';
+    findRookMNs();
+    cout << "Bishop magic numbers" << '\n';
     findBishopMNs();
 }
