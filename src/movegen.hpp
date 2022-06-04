@@ -9,21 +9,40 @@
 #define UNSET 0xFFFFFFFFFFFFFFFF // CHECK
 
 enum Direction {
-    NORTH =  8,
-    NORTHEAST = 9,
-    EAST = 1,
-    SOUTHEAST = -7,
-    SOUTH = -8,
-    SOUTHWEST = -9,
-    WEST = -1,
-    NORTHWEST = 7
+    N = 8,
+    NE = 9,
+    E = 1,
+    SE = -7,
+    S = -8,
+    SW = -9,
+    W = -1,
+    NW = 7
+};
+
+enum KnightDirection {
+    NNE = +17,
+    ENE = +10,
+    ESE = -6,
+    SES = -15,
+    SWS = -17,
+    WSW = -10,
+    WNW = +6,
+    NWN = +15,
 };
 
 /**
  * Compute pseudolegal moves of the king on each square.
  * @return: Array of vectors of pseudolegal moves.
+ * @note: Does not take into account king potentially moving into check.
  */
 std::array<std::vector<Move>, 64> generateKingMoves();
+
+/**
+ * Compute pseudolegal moves of the knight on each square.
+ * @return: Array of vectors of pseudolegal moves.
+ * @note: Does not take into account if the knight is pinned.
+ */
+std::array<std::vector<Move>, 64> generateKnightMoves();
 
 /**
  * A struct holding the move families.
