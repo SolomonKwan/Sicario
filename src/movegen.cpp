@@ -7,6 +7,22 @@
 #include "movegen.hpp"
 #include "game.hpp"
 
+std::array<std::vector<Move>, 64> generateKingMoves() {
+    std::array<std::vector<Move>, 64> kingMoves;
+    for (int square = A1; square <= H8; square++) {
+        std::vector<Move>& moves = kingMoves[square];
+        if (square / 8 != 7) moves.push_back(square | (square + NORTH) | NORMAL);
+        if (square / 8 != 7 && square % 8 != 7) moves.push_back(square | (square + NORTHEAST) | NORMAL);
+        if (square % 8 != 7) moves.push_back(square | (square + EAST) | NORMAL);
+        if (square / 8 != 0 && square % 8 != 7) moves.push_back(square | (square + SOUTHEAST) | NORMAL);
+        if (square / 8 != 0) moves.push_back(square | (square + SOUTH) | NORMAL);
+        if (square / 8 != 0 && square % 8 != 0) moves.push_back(square | (square + SOUTHWEST) | NORMAL);
+        if (square % 8 != 0) moves.push_back(square | (square + WEST) | NORMAL);
+        if (square / 8 != 7 && square % 8 != 0) moves.push_back(square | (square + NORTHWEST) | NORMAL);
+    }
+    return kingMoves;
+}
+
 /**
  * Finds and returns the position of the most significant set bit. If not bits
  * are set, returns 0.

@@ -186,6 +186,18 @@ void findBishopMNs() {
     }
 }
 
+void generateRookMasks() {
+
+}
+
+void generateBishopMasks() {
+
+}
+
+void generateKnightMask() {
+
+}
+
 int main() {
     cout << "Rook magic numbers" << '\n';
     findRookMNs();
