@@ -1,3 +1,4 @@
 .vscode
 sicario
 *.o
+generate

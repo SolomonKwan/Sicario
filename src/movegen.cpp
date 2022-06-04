@@ -7,22 +7,20 @@
 #include "movegen.hpp"
 #include "game.hpp"
 
-/**
- * @param pos: A bitboard.
- */
-void displayBB(uint64_t pos) {
-    // Convert number to binary string.
-    std::string positionString = std::bitset<64>(pos).to_string();
-
-    // Reverse each line then print.
-    std::cout << "\n";
-    for (int i = 0; i < 8; i++) {
-        std::string line = positionString.substr(8 * i, 8);
-        std::reverse(line.begin(), line.end());
-        std::cout << line << '\n';
+std::array<std::vector<Move>, 64> generateKingMoves() {
+    std::array<std::vector<Move>, 64> kingMoves;
+    for (int square = A1; square <= H8; square++) {
+        std::vector<Move>& moves = kingMoves[square];
+        if (square / 8 != 7) moves.push_back(square | (square + NORTH) | NORMAL);
+        if (square / 8 != 7 && square % 8 != 7) moves.push_back(square | (square + NORTHEAST) | NORMAL);
+        if (square % 8 != 7) moves.push_back(square | (square + EAST) | NORMAL);
+        if (square / 8 != 0 && square % 8 != 7) moves.push_back(square | (square + SOUTHEAST) | NORMAL);
+        if (square / 8 != 0) moves.push_back(square | (square + SOUTH) | NORMAL);
+        if (square / 8 != 0 && square % 8 != 0) moves.push_back(square | (square + SOUTHWEST) | NORMAL);
+        if (square % 8 != 0) moves.push_back(square | (square + WEST) | NORMAL);
+        if (square / 8 != 7 && square % 8 != 0) moves.push_back(square | (square + NORTHWEST) | NORMAL);
     }
-
-    std::cout << '\n' << std::flush;
+    return kingMoves;
 }
 
 /**

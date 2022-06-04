@@ -18,7 +18,7 @@ inline bool isValidPlayerType(std::string str) {
 }
 
 inline bool isValidElo(std::string str) {
-    return isNumber(str) || str == "none";
+    return isPostiveInteger(str) || str == "none";
 }
 
 /**
@@ -320,7 +320,7 @@ void Sicario::sendArgumentOutOfRange(std::vector<std::string>& inputs) {
 
 void Sicario::setOptionThread(std::vector<std::string>& inputs) {
     std::string value = getOptionValue(inputs);
-    if (!isNumber(value)) {
+    if (!isPostiveInteger(value)) {
         sendInvalidArgument(inputs);
         return;
     }
@@ -334,7 +334,7 @@ void Sicario::setOptionThread(std::vector<std::string>& inputs) {
 
 void Sicario::setOptionHash(std::vector<std::string>& inputs) {
     std::string value = getOptionValue(inputs);
-    if (!isNumber(value)) {
+    if (!isPostiveInteger(value)) {
         sendInvalidArgument(inputs);
         return;
     }
@@ -374,7 +374,7 @@ void Sicario::setOptionOwnBook(std::vector<std::string>& inputs) {
 
 void Sicario::setOptionMultiPV(std::vector<std::string>& inputs) {
     std::string value = getOptionValue(inputs);
-    if (!isNumber(value)) {
+    if (!isPostiveInteger(value)) {
         sendInvalidArgument(inputs);
         return;
     }
@@ -421,7 +421,7 @@ void Sicario::setOptionUciLimitStrength(std::vector<std::string>& inputs) {
 
 void Sicario::setOptionUciElo(std::vector<std::string>& inputs) {
     std::string value = getOptionValue(inputs);
-    if (!isNumber(value)) {
+    if (!isPostiveInteger(value)) {
         sendInvalidArgument(inputs);
         return;
     }

@@ -1,12 +1,10 @@
+#include <bitset>
+#include <iostream>
+#include <algorithm>
+
 #include "utils.hpp"
 #include "constants.hpp"
 
-/**
- * Splits a string by a delimeter string and returns vector of results.
- * @param input: String to split.
- * @param delim: String delimiter.
- * @return: Vector of input split by delim.
- */
 std::vector<std::string> split(std::string input, std::string delim) {
     std::vector<std::string> result;
     std::size_t pos;
@@ -60,11 +58,21 @@ std::string concat(std::vector<std::string> strings, std::string delimeter) {
     return combinedStr;
 }
 
-bool isNumber(std::string str) {
+bool isPostiveInteger(std::string str) {
     for (char c : str) {
-        if (!std::isdigit(c)) {
-            return false;
-        }
+        if (!std::isdigit(c)) return false;
     }
     return true;
+}
+
+void displayBB(uint64_t position) {
+    std::string positionString = std::bitset<64>(position).to_string();
+    std::cout << "\n";
+    for (int i = 0; i < 8; i++) {
+        // Reverse each line then print.
+        std::string line = positionString.substr(8 * i, 8);
+        std::reverse(line.begin(), line.end());
+        std::cout << line << '\n';
+    }
+    std::cout << '\n' << std::flush;
 }

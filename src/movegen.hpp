@@ -6,7 +6,24 @@
 #include <vector>
 #include "constants.hpp"
 
-#define UNSET 0xFFFFFFFFFFFFFFFF
+#define UNSET 0xFFFFFFFFFFFFFFFF // CHECK
+
+enum Direction {
+    NORTH =  8,
+    NORTHEAST = 9,
+    EAST = 1,
+    SOUTHEAST = -7,
+    SOUTH = -8,
+    SOUTHWEST = -9,
+    WEST = -1,
+    NORTHWEST = 7
+};
+
+/**
+ * Compute pseudolegal moves of the king on each square.
+ * @return: Array of vectors of pseudolegal moves.
+ */
+std::array<std::vector<Move>, 64> generateKingMoves();
 
 /**
  * A struct holding the move families.
@@ -77,11 +94,6 @@ int MSB(int n);
  * @return: True if bit is set, else false.
  */
 bool bitAt(uint64_t position, int n);
-
-/**
- * @param position: A bitboard.
- */
-void displayBB(uint64_t position);
 
 /**
  * Returns the index from BISHOP_INDEX into BISHOP_MOVES based on the square and
