@@ -17,14 +17,14 @@ using namespace std;
 // cout << _popcnt64(0ULL) << '\n';
 
 enum Direction {
-    NORTH =  8,
-    NORTHEAST = 9,
-    EAST = 1,
-    SOUTHEAST = -7,
-    SOUTH = -8,
-    SOUTHWEST = -9,
-    WEST = -1,
-    NORTHWEST = 7
+    N =  8,
+    NE = 9,
+    E = 1,
+    SE = -7,
+    S = -8,
+    SW = -9,
+    W = -1,
+    NW = 7
 };
 
 const std::string squareName[65] = {
@@ -107,10 +107,10 @@ void findRookMNs() {
             for (uint64_t j = 0; j < maxOccupancy; j++) {
                 uint64_t occ = 0ULL;
                 int shift = 0;
-                for (int k = 0; k < northSize; k++, shift++) occ |= ((j >> shift) & 1UL) << (sq + NORTH * (k + 1));
-                for (int k = 0; k < southSize; k++, shift++) occ |= ((j >> shift) & 1UL) << (sq + SOUTH * (k + 1));
-                for (int k = 0; k < eastSize; k++, shift++) occ |= ((j >> shift) & 1UL) << (sq + EAST * (k + 1));
-                for (int k = 0; k < westSize; k++, shift++) occ |= ((j >> shift) & 1UL) << (sq + WEST * (k + 1));
+                for (int k = 0; k < northSize; k++, shift++) occ |= ((j >> shift) & 1UL) << (sq + N * (k + 1));
+                for (int k = 0; k < southSize; k++, shift++) occ |= ((j >> shift) & 1UL) << (sq + S * (k + 1));
+                for (int k = 0; k < eastSize; k++, shift++) occ |= ((j >> shift) & 1UL) << (sq + E * (k + 1));
+                for (int k = 0; k < westSize; k++, shift++) occ |= ((j >> shift) & 1UL) << (sq + W * (k + 1));
 
                 uint16_t magicIndex = ((occ * magicNum) >> (64 - totalSize)) & indexMask;
                 if (indices.find(magicIndex) != indices.end()) {
@@ -163,10 +163,10 @@ void findBishopMNs() {
             for (uint64_t j = 0; j < maxOccupancy; j++) {
                 uint64_t occ = 0ULL;
                 int shift = 0;
-                for (int k = 0; k < northEastSize; k++, shift++) occ |= ((j >> shift) & 1UL) << (sq + NORTHEAST * (k + 1));
-                for (int k = 0; k < southEastSize; k++, shift++) occ |= ((j >> shift) & 1UL) << (sq + SOUTHEAST * (k + 1));
-                for (int k = 0; k < southWestSize; k++, shift++) occ |= ((j >> shift) & 1UL) << (sq + SOUTHWEST * (k + 1));
-                for (int k = 0; k < northWestSize; k++, shift++) occ |= ((j >> shift) & 1UL) << (sq + NORTHWEST * (k + 1));
+                for (int k = 0; k < northEastSize; k++, shift++) occ |= ((j >> shift) & 1UL) << (sq + NE * (k + 1));
+                for (int k = 0; k < southEastSize; k++, shift++) occ |= ((j >> shift) & 1UL) << (sq + SE * (k + 1));
+                for (int k = 0; k < southWestSize; k++, shift++) occ |= ((j >> shift) & 1UL) << (sq + SW * (k + 1));
+                for (int k = 0; k < northWestSize; k++, shift++) occ |= ((j >> shift) & 1UL) << (sq + NW * (k + 1));
 
                 uint16_t magicIndex = ((occ * magicNum) >> (64 - totalSize)) & indexMask;
                 if (indices.find(magicIndex) != indices.end()) {

@@ -11,16 +11,32 @@ std::array<std::vector<Move>, 64> generateKingMoves() {
     std::array<std::vector<Move>, 64> kingMoves;
     for (int square = A1; square <= H8; square++) {
         std::vector<Move>& moves = kingMoves[square];
-        if (square / 8 != 7) moves.push_back(square | (square + NORTH) | NORMAL);
-        if (square / 8 != 7 && square % 8 != 7) moves.push_back(square | (square + NORTHEAST) | NORMAL);
-        if (square % 8 != 7) moves.push_back(square | (square + EAST) | NORMAL);
-        if (square / 8 != 0 && square % 8 != 7) moves.push_back(square | (square + SOUTHEAST) | NORMAL);
-        if (square / 8 != 0) moves.push_back(square | (square + SOUTH) | NORMAL);
-        if (square / 8 != 0 && square % 8 != 0) moves.push_back(square | (square + SOUTHWEST) | NORMAL);
-        if (square % 8 != 0) moves.push_back(square | (square + WEST) | NORMAL);
-        if (square / 8 != 7 && square % 8 != 0) moves.push_back(square | (square + NORTHWEST) | NORMAL);
+        if (square / 8 != 7) moves.push_back(square | (square + N) << 6);
+        if (square / 8 != 7 && square % 8 != 7) moves.push_back(square | (square + NE) << 6);
+        if (square % 8 != 7) moves.push_back(square | (square + E) << 6);
+        if (square / 8 != 0 && square % 8 != 7) moves.push_back(square | (square + SE) << 6);
+        if (square / 8 != 0) moves.push_back(square | (square + S) << 6);
+        if (square / 8 != 0 && square % 8 != 0) moves.push_back(square | (square + SW) << 6);
+        if (square % 8 != 0) moves.push_back(square | (square + W) << 6);
+        if (square / 8 != 7 && square % 8 != 0) moves.push_back(square | (square + NW) << 6);
     }
     return kingMoves;
+}
+
+std::array<std::vector<Move>, 64> generateKnightMoves() {
+    std::array<std::vector<Move>, 64> knightMoves;
+    for (int square = A1; square <= H8; square++) {
+        std::vector<Move>& moves = knightMoves[square];
+        if (square / 8 < 6 && square % 8 < 7) moves.push_back(square | (square + NNE) << 6);
+        if (square / 8 < 7 && square % 8 < 6) moves.push_back(square | (square + ENE) << 6);
+        if (square / 8 > 0 && square % 8 < 6) moves.push_back(square | (square + ESE) << 6);
+        if (square / 8 > 1 && square % 8 < 7) moves.push_back(square | (square + SES) << 6);
+        if (square / 8 > 1 && square % 8 > 0) moves.push_back(square | (square + SWS) << 6);
+        if (square / 8 > 0 && square % 8 > 1) moves.push_back(square | (square + WSW) << 6);
+        if (square / 8 < 7 && square % 8 > 1) moves.push_back(square | (square + WNW) << 6);
+        if (square / 8 < 6 && square % 8 > 0) moves.push_back(square | (square + NWN) << 6);
+    }
+    return knightMoves;
 }
 
 /**
