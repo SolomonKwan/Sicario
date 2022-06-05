@@ -45,6 +45,14 @@ std::array<std::vector<Move>, 64> generateKingMoves();
 std::array<std::vector<Move>, 64> generateKnightMoves();
 
 /**
+ * Compute pseudolegal moves of the pawn on each square.
+ * @return: Array of array of vectors of pseudolegal moves.
+ * @note: Does not take into account if the pawn is pinned.
+ * @note: Black array is 0, white array is 1.
+ */
+std::array<std::array<std::vector<Move>, 64>,2> generatePawnMoves();
+
+/**
  * A struct holding the move families.
  *
  * Contains:

@@ -39,6 +39,70 @@ std::array<std::vector<Move>, 64> generateKnightMoves() {
     return knightMoves;
 }
 
+std::array<std::array<std::vector<Move>, 64>,2> generatePawnMoves() {
+    std::array<std::array<std::vector<Move>, 64>,2> pawnMoves;
+    for (int square = A2; square <= H7; square++) {
+        std::vector<Move>& whiteMoves = pawnMoves[WHITE][square];
+        std::vector<Move>& blackMoves = pawnMoves[BLACK][square];
+
+        if (square / 8 == 1) {
+            whiteMoves.push_back(square | (square + N) << 6);
+            whiteMoves.push_back(square | (square + N + N) << 6);
+            blackMoves.push_back(square | (square + S) | PROMOTION | pKNIGHT);
+            blackMoves.push_back(square | (square + S) | PROMOTION | pBISHOP);
+            blackMoves.push_back(square | (square + S) | PROMOTION | pROOK);
+            blackMoves.push_back(square | (square + S) | PROMOTION | pQUEEN);
+            if (square % 8 != 0) {
+                whiteMoves.push_back(square | (square + NW) << 6);
+                blackMoves.push_back(square | (square + SW) | PROMOTION | pKNIGHT);
+                blackMoves.push_back(square | (square + SW) | PROMOTION | pBISHOP);
+                blackMoves.push_back(square | (square + SW) | PROMOTION | pROOK);
+                blackMoves.push_back(square | (square + SW) | PROMOTION | pQUEEN);
+            }
+            if (square % 8 != 7) {
+                whiteMoves.push_back(square | (square + NE) << 6);
+                blackMoves.push_back(square | (square + SE) | PROMOTION | pKNIGHT);
+                blackMoves.push_back(square | (square + SE) | PROMOTION | pBISHOP);
+                blackMoves.push_back(square | (square + SE) | PROMOTION | pROOK);
+                blackMoves.push_back(square | (square + SE) | PROMOTION | pQUEEN);
+            }
+        } else if (square / 8 == 6) {
+            blackMoves.push_back(square | (square + S) << 6);
+            blackMoves.push_back(square | (square + S + S) << 6);
+            whiteMoves.push_back(square | (square + N) | PROMOTION | pKNIGHT);
+            whiteMoves.push_back(square | (square + N) | PROMOTION | pBISHOP);
+            whiteMoves.push_back(square | (square + N) | PROMOTION | pROOK);
+            whiteMoves.push_back(square | (square + N) | PROMOTION | pQUEEN);
+            if (square % 8 != 0) {
+                blackMoves.push_back(square | (square + SW) << 6);
+                whiteMoves.push_back(square | (square + NW) | PROMOTION | pKNIGHT);
+                whiteMoves.push_back(square | (square + NW) | PROMOTION | pBISHOP);
+                whiteMoves.push_back(square | (square + NW) | PROMOTION | pROOK);
+                whiteMoves.push_back(square | (square + NW) | PROMOTION | pQUEEN);
+            }
+            if (square % 8 != 7) {
+                blackMoves.push_back(square | (square + SE) << 6);
+                whiteMoves.push_back(square | (square + NE) | PROMOTION | pKNIGHT);
+                whiteMoves.push_back(square | (square + NE) | PROMOTION | pBISHOP);
+                whiteMoves.push_back(square | (square + NE) | PROMOTION | pROOK);
+                whiteMoves.push_back(square | (square + NE) | PROMOTION | pQUEEN);
+            }
+        } else {
+            whiteMoves.push_back(square | (square + N) << 6);
+            blackMoves.push_back(square | (square - S) << 6);
+            if (square % 8 != 0) {
+                whiteMoves.push_back(square | (square + NW) << 6);
+                blackMoves.push_back(square | (square + SW) << 6);
+            }
+            if (square % 8 != 7) {
+                whiteMoves.push_back(square | (square + NE) << 6);
+                blackMoves.push_back(square | (square + SE) << 6);
+            }
+        }
+    }
+    return pawnMoves;
+}
+
 /**
  * Finds and returns the position of the most significant set bit. If not bits
  * are set, returns 0.
