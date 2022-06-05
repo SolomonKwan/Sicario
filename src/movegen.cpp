@@ -39,8 +39,8 @@ std::array<std::vector<Move>, 64> generateKnightMoves() {
     return knightMoves;
 }
 
-std::array<std::array<std::vector<Move>, 64>,2> generatePawnMoves() {
-    std::array<std::array<std::vector<Move>, 64>,2> pawnMoves;
+std::array<std::array<std::vector<Move>, 64>, 2> generatePawnMoves() {
+    std::array<std::array<std::vector<Move>, 64>, 2> pawnMoves;
     for (int square = A2; square <= H7; square++) {
         std::vector<Move>& whiteMoves = pawnMoves[WHITE][square];
         std::vector<Move>& blackMoves = pawnMoves[BLACK][square];
@@ -101,6 +101,86 @@ std::array<std::array<std::vector<Move>, 64>,2> generatePawnMoves() {
         }
     }
     return pawnMoves;
+}
+
+std::array<std::vector<std::vector<Move>>, 64> generateRookMoves() {
+    std::array<std::vector<std::vector<Move>>, 64> rookMoves;
+    for (int square = A2; square <= H7; square++) {
+
+    }
+    return rookMoves;
+}
+
+std::array<std::vector<int>, 64> generateRookIndices() {
+    std::array<std::vector<int>, 64> rookIndices;
+    for (int square = A1; square <= H8; square++) {
+        std::vector<int>& indices = rookIndices[square];
+        int northSize = std::max(6 - (square / 8), 0);
+        int southSize = std::max(square / 8 - 1, 0);
+        int eastSize = std::max(6 - (square % 8), 0);
+        int westSize = std::max(square % 8 - 1, 0);
+        int totalSize = northSize + southSize + eastSize + westSize;
+        indices.resize(pow(2, totalSize));
+
+        int northBlock = 0, eastBlock = 0, southBlock = 0, westBlock = 0;
+        uint16_t maxOccupancy = pow(2, totalSize);
+        for (uint16_t j = 0; j < maxOccupancy; j++) {
+            uint64_t occ = 0ULL;
+            int shift = 0;
+            for (int k = 0; k < northSize; k++, shift++) {
+                occ |= ((j >> shift) & 1UL) << (square + N * (k + 1));
+                if (!northBlock && ((j >> shift) & 1UL)) northBlock = k + 1;
+            }
+            for (int k = 0; k < southSize; k++, shift++) {
+                occ |= ((j >> shift) & 1UL) << (square + S * (k + 1));
+                if (!southBlock && ((j >> shift) & 1UL)) southBlock = k + 1;
+            }
+            for (int k = 0; k < eastSize; k++, shift++) {
+                occ |= ((j >> shift) & 1UL) << (square + E * (k + 1));
+                if (!eastBlock && ((j >> shift) & 1UL)) eastBlock = k + 1;
+            }
+            for (int k = 0; k < westSize; k++, shift++) {
+                occ |= ((j >> shift) & 1UL) << (square + W * (k + 1));
+                if (!westBlock && ((j >> shift) & 1UL)) westBlock = k + 1;
+            }
+
+            uint16_t magicIndex = ((occ * rookMagicNums[square]) >> rookShifts[square]);
+            int mappedIndex = getIndex(
+                {northBlock, eastBlock, southBlock, westBlock},
+                {northSize, eastSize, southSize, westSize}
+            );
+            indices[magicIndex] = mappedIndex;
+        }
+    }
+    return rookIndices;
+}
+
+int getIndex(std::vector<int> values, std::vector<int> ranges) {
+    if (values.size() == 0) return values[0];
+
+    // Iteratively build the index (basically just a composition of functions i.e. f(f(f(...)))).
+    int currValue = -1, currRange = -1;
+    for (int i = 0; i < ranges.size(); i++) {
+        if (ranges[i] != 0 && currValue == -1) {
+            currValue = values[i];
+            currRange = ranges[i];
+        } else if (ranges[i] != 0) {
+            currValue = pairingFunction(currValue, values[i], currRange, ranges[i]);
+            currRange =  currRange * ranges[i];
+        }
+    }
+
+    return currValue;
+}
+
+int pairingFunction(int n, int m, int N, int M) {
+    if (N == M) {
+        return n + m * N;
+    } else if (N < M) {
+        return m + n * M;
+    } else {
+        return n + m * N;
+    }
 }
 
 /**

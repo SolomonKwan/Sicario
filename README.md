@@ -16,38 +16,11 @@ Simply compile the source code with the included Makefile. The program is then r
     <li><code>perft [depth]</code> where <code>depth</code> is the desired depth.</li>
 </ul>
 </br>
+<h1>Move generation</h1>
+Move generation is pseudo-legal and based on magic bitboards. For non-ranged pieces, you can just index into an array to get the appropriate move set. For ranged pieces, a slightly unconventional approach was used to avoid wasting large amounts of memory.
 </br>
 </br>
-<h1>Search</h1>
-The search algorithm of Sicario is a vanilla monte carlo tree search algorithm. There are plans to improve this.
-</br>
-</br>
-<h2>Selection Phase</h2>
-The selection phase of the algorithm always arrives at a leaf node via a path that maximises the UCB1 value at each
-level of the tree.
-</br>
-</br>
-<h2>Expansion Phase</h2>
-This phase creates a new node for each possible move from the current node position and then randomly selects one of
-these expanded nodes as the current node from which to simulate a random playout.
-</br>
-</br>
-<h2>Simulation Phase</h2>
-In the simulation phase, a random playout is made by uniformly selecting and playing a move until a decisive end state
-is arrived at. A value of +1 is returned if the root player wins, -1 is returned if the root player loses, and 0 is
-returned in case of a draw.
-</br>
-</br>
-<h2>Rollback Phase</h2>
-With the value that the simulation phase returned, the rollback phase backpropagates this value all the way to the root
-node. At each step, the value of the returned simulation value is added to the node value and the node visit count is
-incremented.
-</br>
-</br>
-</br>
-<h1>Evaluation</h1>
-Currently, no form of position evaluation is made.
-</br>
+For a ranged piece like a rook on A4, one will need to take the masked occupancy of the position along the A file and 4th rank (excluding the rook itself) to produce a new bitboard. One must then multiply this bitboard by the corresponding rook magic number for A4, and then shift the result down by the corresponding shift. The resulting number will be unique for every possible occupancy. However, we ideally want to map attack ranges to attack sets, not occupancies to attack sets as the majority of attack sets will be duplicated by different occupancies since only the first blocking piece determines the attack range and not the ones behind it. Therefore, this unique number we get after the shift, will be the index into another precomputed data structure, that gives us a unique mapping from attack range to attack sets by construction.
 </br>
 </br>
 <h1>Notes</h1>
