@@ -6,6 +6,7 @@
 
 #include "movegen.hpp"
 #include "game.hpp"
+#include "utils.hpp"
 
 std::array<std::vector<Move>, 64> generateKingMoves() {
     std::array<std::vector<Move>, 64> kingMoves;
@@ -103,11 +104,55 @@ std::array<std::array<std::vector<Move>, 64>, 2> generatePawnMoves() {
     return pawnMoves;
 }
 
+// CHECK Maybe I can improve and not use the second for loop?
 std::array<std::vector<std::vector<Move>>, 64> generateRookMoves() {
     std::array<std::vector<std::vector<Move>>, 64> rookMoves;
-    for (int square = A2; square <= H7; square++) {
+    for (int square = A1; square <= H8; square++) {
+        int northSize = std::max(6 - (square / 8), 0);
+        int southSize = std::max(square / 8 - 1, 0);
+        int eastSize = std::max(6 - (square % 8), 0);
+        int westSize = std::max(square % 8 - 1, 0);
+        std::vector<std::vector<Move>>& moveFamily = rookMoves[square];
+        moveFamily.resize((northSize ? northSize + 1 : 1) * (southSize ? southSize + 1 : 1) *
+                (eastSize ? eastSize + 1 : 1) * (westSize ? westSize + 1 : 1));
 
+        uint16_t maxOccupancy = pow(2, northSize + southSize + eastSize + westSize);
+        for (uint16_t j = 0; j < maxOccupancy; j++) {
+            std::vector<Move> moves;
+            int northBlock = 0, eastBlock = 0, southBlock = 0, westBlock = 0;
+            uint64_t occ = 0ULL;
+            int shift = 0;
+            for (int k = 0; k < northSize; k++, shift++) {
+                occ |= ((j >> shift) & 1UL) << (square + N * (k + 1));
+                if (!northBlock) moves.push_back(square | (square + (N * (k + 1))) << 6);
+                if (!northBlock && ((j >> shift) & 1UL)) northBlock = k + 1;
+            }
+            for (int k = 0; k < southSize; k++, shift++) {
+                occ |= ((j >> shift) & 1UL) << (square + S * (k + 1));
+                if (!southBlock) moves.push_back(square | (square + (S * (k + 1))) << 6);
+                if (!southBlock && ((j >> shift) & 1UL)) southBlock = k + 1;
+            }
+            for (int k = 0; k < eastSize; k++, shift++) {
+                occ |= ((j >> shift) & 1UL) << (square + E * (k + 1));
+                if (!eastBlock) moves.push_back(square | (square + (E * (k + 1))) << 6);
+                if (!eastBlock && ((j >> shift) & 1UL)) eastBlock = k + 1;
+            }
+            for (int k = 0; k < westSize; k++, shift++) {
+                occ |= ((j >> shift) & 1UL) << (square + W * (k + 1));
+                if (!westBlock) moves.push_back(square | (square + (W * (k + 1))) << 6);
+                if (!westBlock && ((j >> shift) & 1UL)) westBlock = k + 1;
+            }
+
+            int mappedIndex = getIndex(
+                {northBlock, eastBlock, southBlock, westBlock},
+                {northSize + 1, eastSize + 1, southSize + 1, westSize + 1}
+            );
+
+            if (moveFamily[mappedIndex].size() != 0) continue;
+            moveFamily[mappedIndex] = moves;
+        }
     }
+
     return rookMoves;
 }
 
@@ -122,9 +167,9 @@ std::array<std::vector<int>, 64> generateRookIndices() {
         int totalSize = northSize + southSize + eastSize + westSize;
         indices.resize(pow(2, totalSize));
 
-        int northBlock = 0, eastBlock = 0, southBlock = 0, westBlock = 0;
         uint16_t maxOccupancy = pow(2, totalSize);
         for (uint16_t j = 0; j < maxOccupancy; j++) {
+            int northBlock = 0, eastBlock = 0, southBlock = 0, westBlock = 0;
             uint64_t occ = 0ULL;
             int shift = 0;
             for (int k = 0; k < northSize; k++, shift++) {
@@ -147,7 +192,7 @@ std::array<std::vector<int>, 64> generateRookIndices() {
             uint16_t magicIndex = ((occ * rookMagicNums[square]) >> rookShifts[square]);
             int mappedIndex = getIndex(
                 {northBlock, eastBlock, southBlock, westBlock},
-                {northSize, eastSize, southSize, westSize}
+                {northSize + 1, eastSize + 1, southSize + 1, westSize + 1}
             );
             indices[magicIndex] = mappedIndex;
         }
@@ -160,7 +205,7 @@ int getIndex(std::vector<int> values, std::vector<int> ranges) {
 
     // Iteratively build the index (basically just a composition of functions i.e. f(f(f(...)))).
     int currValue = -1, currRange = -1;
-    for (int i = 0; i < ranges.size(); i++) {
+    for (int i = 0; i < (int)ranges.size(); i++) {
         if (ranges[i] != 0 && currValue == -1) {
             currValue = values[i];
             currRange = ranges[i];
