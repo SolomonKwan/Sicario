@@ -60,10 +60,23 @@ std::array<std::array<std::vector<Move>, 64>,2> generatePawnMoves();
 std::array<std::vector<std::vector<Move>>, 64> generateRookMoves();
 
 /**
+ * Compute pseudolegal moves of the bishop on each square.
+ * @return: Array of vectors of pseudolegal moves.
+ * @note: Does not take into account if the bishop is pinned.
+ */
+std::array<std::vector<std::vector<Move>>, 64> generateBishopMoves();
+
+/**
  * Compute the rook indices into the move set for the magic indices.
  * @return: Array of vectors of ints of the rook index into the move set.
  */
 std::array<std::vector<int>, 64> generateRookIndices();
+
+/**
+ * Compute the bishop indices into the move set for the magic indices.
+ * @return: Array of vectors of ints of the bishop index into the move set.
+ */
+std::array<std::vector<int>, 64> generateBishopIndices();
 
 /**
  * Hash the ordered integers in values to a unique index.

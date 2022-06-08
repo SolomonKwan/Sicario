@@ -145,15 +145,67 @@ std::array<std::vector<std::vector<Move>>, 64> generateRookMoves() {
 
             int mappedIndex = getIndex(
                 {northBlock, eastBlock, southBlock, westBlock},
-                {northSize + 1, eastSize + 1, southSize + 1, westSize + 1}
+                {northSize ? northSize + 1 : 0, eastSize ? eastSize + 1 : 0, southSize ? southSize + 1 : 0,
+                        westSize ? westSize + 1 : 0}
             );
 
             if (moveFamily[mappedIndex].size() != 0) continue;
             moveFamily[mappedIndex] = moves;
         }
     }
-
     return rookMoves;
+}
+
+// CHECK Maybe I can improve and not use the second for loop?
+std::array<std::vector<std::vector<Move>>, 64> generateBishopMoves() {
+    std::array<std::vector<std::vector<Move>>, 64> bishopMoves;
+    for (int square = A1; square <= H8; square++) {
+        int northeastSize = std::max(std::min(6 - square / 8, 6 - square % 8), 0);
+        int southeastSize = std::max(std::min(square / 8 - 1, 6 - square % 8), 0);
+        int southwestSize = std::max(std::min(square / 8 - 1, square % 8 - 1), 0);
+        int northwestSize = std::max(std::min(6 - square / 8, square % 8 - 1), 0);
+        std::vector<std::vector<Move>>& moveFamily = bishopMoves[square];
+        moveFamily.resize((northeastSize ? northeastSize + 1 : 1) * (southeastSize ? southeastSize + 1 : 1) *
+                (southwestSize ? southwestSize + 1 : 1) * (northwestSize ? northwestSize + 1 : 1));
+
+        uint16_t maxOccupancy = pow(2, northeastSize + southeastSize + southwestSize + northwestSize);
+        for (uint16_t j = 0; j < maxOccupancy; j++) {
+            std::vector<Move> moves;
+            int northeastBlock = 0, southeastBlock = 0, southwestBlock = 0, northwestBlock = 0;
+            uint64_t occ = 0ULL;
+            int shift = 0;
+            for (int k = 0; k < northeastSize; k++, shift++) {
+                occ |= ((j >> shift) & 1UL) << (square + NE * (k + 1));
+                if (!northeastBlock) moves.push_back(square | (square + (NE * (k + 1))) << 6);
+                if (!northeastBlock && ((j >> shift) & 1UL)) northeastBlock = k + 1;
+            }
+            for (int k = 0; k < southeastSize; k++, shift++) {
+                occ |= ((j >> shift) & 1UL) << (square + SE * (k + 1));
+                if (!southeastBlock) moves.push_back(square | (square + (SE * (k + 1))) << 6);
+                if (!southeastBlock && ((j >> shift) & 1UL)) southeastBlock = k + 1;
+            }
+            for (int k = 0; k < southwestSize; k++, shift++) {
+                occ |= ((j >> shift) & 1UL) << (square + SW * (k + 1));
+                if (!southwestBlock) moves.push_back(square | (square + (SW * (k + 1))) << 6);
+                if (!southwestBlock && ((j >> shift) & 1UL)) southwestBlock = k + 1;
+            }
+            for (int k = 0; k < northwestSize; k++, shift++) {
+                occ |= ((j >> shift) & 1UL) << (square + NW * (k + 1));
+                if (!northwestBlock) moves.push_back(square | (square + (NW * (k + 1))) << 6);
+                if (!northwestBlock && ((j >> shift) & 1UL)) northwestBlock = k + 1;
+            }
+
+            int mappedIndex = getIndex(
+                {northeastBlock, southeastBlock, southwestBlock, northwestBlock},
+                {northeastSize ? northeastSize + 1 : 0, southeastSize ? southeastSize + 1 : 0,
+                        southwestSize ? southwestSize + 1 : 0, northwestSize ? northwestSize + 1 : 0}
+            );
+
+            if (moveFamily[mappedIndex].size() != 0) continue;
+            moveFamily[mappedIndex] = moves;
+        }
+    }
+    return bishopMoves;
 }
 
 std::array<std::vector<int>, 64> generateRookIndices() {
@@ -176,13 +228,13 @@ std::array<std::vector<int>, 64> generateRookIndices() {
                 occ |= ((j >> shift) & 1UL) << (square + N * (k + 1));
                 if (!northBlock && ((j >> shift) & 1UL)) northBlock = k + 1;
             }
-            for (int k = 0; k < southSize; k++, shift++) {
-                occ |= ((j >> shift) & 1UL) << (square + S * (k + 1));
-                if (!southBlock && ((j >> shift) & 1UL)) southBlock = k + 1;
-            }
             for (int k = 0; k < eastSize; k++, shift++) {
                 occ |= ((j >> shift) & 1UL) << (square + E * (k + 1));
                 if (!eastBlock && ((j >> shift) & 1UL)) eastBlock = k + 1;
+            }
+            for (int k = 0; k < southSize; k++, shift++) {
+                occ |= ((j >> shift) & 1UL) << (square + S * (k + 1));
+                if (!southBlock && ((j >> shift) & 1UL)) southBlock = k + 1;
             }
             for (int k = 0; k < westSize; k++, shift++) {
                 occ |= ((j >> shift) & 1UL) << (square + W * (k + 1));
@@ -192,12 +244,58 @@ std::array<std::vector<int>, 64> generateRookIndices() {
             uint16_t magicIndex = ((occ * rookMagicNums[square]) >> rookShifts[square]);
             int mappedIndex = getIndex(
                 {northBlock, eastBlock, southBlock, westBlock},
-                {northSize + 1, eastSize + 1, southSize + 1, westSize + 1}
+                {northSize ? northSize + 1 : 0, eastSize ? eastSize + 1 : 0, southSize ? southSize + 1 : 0,
+                        westSize ? westSize + 1 : 0}
             );
             indices[magicIndex] = mappedIndex;
         }
     }
     return rookIndices;
+}
+
+std::array<std::vector<int>, 64> generateBishopIndices() {
+    std::array<std::vector<int>, 64> bishopIndices;
+    for (int square = A1; square <= H8; square++) {
+        std::vector<int>& indices = bishopIndices[square];
+        int northeastSize = std::max(std::min(6 - square / 8, 6 - square % 8), 0);
+        int southeastSize = std::max(std::min(square / 8 - 1, 6 - square % 8), 0);
+        int southwestSize = std::max(std::min(square / 8 - 1, square % 8 - 1), 0);
+        int northwestSize = std::max(std::min(6 - square / 8, square % 8 - 1), 0);
+        int totalSize = northeastSize + southeastSize + southwestSize + northwestSize;
+        indices.resize(pow(2, totalSize));
+
+        uint16_t maxOccupancy = pow(2, totalSize);
+        for (uint16_t j = 0; j < maxOccupancy; j++) {
+            int northeastBlock = 0, southeastBlock = 0, southwestBlock = 0, northwestBlock = 0;
+            uint64_t occ = 0ULL;
+            int shift = 0;
+            for (int k = 0; k < northeastSize; k++, shift++) {
+                occ |= ((j >> shift) & 1UL) << (square + NE * (k + 1));
+                if (!northeastBlock && ((j >> shift) & 1UL)) northeastBlock = k + 1;
+            }
+            for (int k = 0; k < southeastSize; k++, shift++) {
+                occ |= ((j >> shift) & 1UL) << (square + SE * (k + 1));
+                if (!southeastBlock && ((j >> shift) & 1UL)) southeastBlock = k + 1;
+            }
+            for (int k = 0; k < southwestSize; k++, shift++) {
+                occ |= ((j >> shift) & 1UL) << (square + SW * (k + 1));
+                if (!southwestBlock && ((j >> shift) & 1UL)) southwestBlock = k + 1;
+            }
+            for (int k = 0; k < northwestSize; k++, shift++) {
+                occ |= ((j >> shift) & 1UL) << (square + NW * (k + 1));
+                if (!northwestBlock && ((j >> shift) & 1UL)) northwestBlock = k + 1;
+            }
+
+            uint16_t magicIndex = ((occ * bishopMagicNums[square]) >> bishopShifts[square]);
+            int mappedIndex = getIndex(
+                {northeastBlock, southeastBlock, southwestBlock, northwestBlock},
+                {northeastSize ? northeastSize + 1 : 0, southeastSize ? southeastSize + 1 : 0,
+                        southwestSize ? southwestSize + 1 : 0, northwestSize ? northwestSize + 1 : 0}
+            );
+            indices[magicIndex] = mappedIndex;
+        }
+    }
+    return bishopIndices;
 }
 
 int getIndex(std::vector<int> values, std::vector<int> ranges) {
