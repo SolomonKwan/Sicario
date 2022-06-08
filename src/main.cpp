@@ -31,7 +31,7 @@ void showStartUp() {
     std::cout << '\n' << NAME << " (" << CODENAME << " " << VERSION << ")\n";
     std::cout << "By " << AUTHOR << "\n\n";
 }
-
+#include "utils.hpp"
 int main(int argc, char* argv[]) {
     showInfo(argc, argv);
     showLogo();
