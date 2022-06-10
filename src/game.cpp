@@ -45,210 +45,10 @@ namespace Rays {
  * Hashes used for zobrist.
  */
 namespace Hashes {
-    Hash PIECES[12][64] = {
-        {
-            0x7718b18430bb79e4, 0x02cf97689c6446c6, 0x0ed8f775b0a99c1d, 0xe61d1c23cb4df5ca, 0xe5f7624fcb50ee5c,
-            0x565173112377b9b3, 0x2e0d7d3511e94224, 0xa99d471a797e781f, 0xe5ef3593ffde7cf4, 0x1ee0ca13d82e185b,
-            0xd198ce97a6f3914c, 0x9d809c5671e59963, 0x9af4d22ebc307afa, 0x30ff44ae96261d89, 0x33838dd422fb7abe,
-            0xb16fd0e5bca5690a, 0xca5029b2ef4ddd1e, 0x34cebcd1be72ef51, 0xc380e325e462d6d2, 0x78b5b1997d7f76fd,
-            0xb88b51eea4357a7d, 0x8885144c4239f3bc, 0x29f723b81221947f, 0x2db27d97e3855c49, 0x6d5cf9c9245a0125,
-            0x97a1022431ca02fd, 0xa6470c9a784623f2, 0xe237c95abdbc0f12, 0xdc20f0160ec0a3c4, 0xf98dc042156ca61c,
-            0x0f55b35cc0e2e9cb, 0x9f30e2d4e17f4df1, 0x4245607b07e6e622, 0x12635aea42236abd, 0xafdd970038409633,
-            0x6dd706a5bd9be8db, 0x7ab3c23c466f3e5d, 0x78e6dacd28c930d4, 0x5d357c6e870f136e, 0x3acf007b787518e2,
-            0x44babacf3b2e0f1f, 0x1984455930fa38b9, 0x46f755c93392304a, 0x339afa6214b84254, 0x0b6dc12542267f81,
-            0x69177c2784825c39, 0x80a24637e5113964, 0x41acfe3552b73188, 0x54cc92bb4ac50dff, 0xc8adc3c21206fc4f,
-            0x44d1ffd36795c39a, 0x8837cc6bda8c65fd, 0x0e676e69714c63fb, 0x2e0750421fe70cb3, 0x7078e358e5e7a498,
-            0x5d49559d155686e0, 0x46fccb7f13174424, 0x06c041d3b0abb8bd, 0x1ff4f755a605e18c, 0xa0029f4936138499,
-            0xc023be7e16d61b40, 0xddbfd92aaeb8d17b, 0xa8b4d093c7232b5d, 0x23ce14d2198765a6
-        },
-
-        {
-            0x82f6b6e3dafbcca9, 0xc383bdc31b1b3083, 0x55d23a92f7a023e9, 0xcf48f9a8e2316dbe, 0xda66b066fda9096d,
-            0xc58388a8e3fb0244, 0x841a599f40d9561f, 0xfee9284b6622ea1a, 0x1a16c91bd93a170a, 0x3b7abc9abae201a4,
-            0x237bd6eaf31111fe, 0x8ba872c8668a3b79, 0x8f652d6a570e5a13, 0x006d1280b6687984, 0x5f104775ba5d6f51,
-            0x86e234e3d82ecafb, 0xba6ec97325cad079, 0x5952d977e0b1ee4a, 0xae8df2d853873af7, 0x3e2fed287e84a519,
-            0xcb3a8720fa62fd36, 0x830f045dbf7fec93, 0xa6d40f4a087c2674, 0xf2a49d998ec6910d, 0x027075401f869420,
-            0x00aca9cdf427e771, 0xb3b23853e70dfd5f, 0x49ec0b932c402f7b, 0x9ba033bd928881c6, 0x4c9385ece359d077,
-            0xcd396e3962b53848, 0xaafd7111b45918f8, 0x81ddacaac83275d3, 0x2bdad3c5302d6e89, 0x0250ca1c4ef9f203,
-            0x4900e2797b0ae46a, 0x538e092558dd12be, 0xe4548b05c4c15d35, 0xcd76367be82a9bde, 0xfc5a1d8ddf63f5b6,
-            0x8e3487caf03561bc, 0x40fb6d002ee94f15, 0x776116be29c307a3, 0xabe0bc4ca81fd531, 0x1458f1e36cc89e6f,
-            0x8c0b1480a2eeedd3, 0x9ddedd8e3a0c5ecf, 0x62ad132bd1cb5026, 0x6dff6acd00bf1def, 0x0c8c3004cb29ca7d,
-            0x2579bbe85dd23ab2, 0x1bc014fc4a6981cb, 0xea8ce6e0b4af1e0f, 0xce00f7d6e1b68ba2, 0x061ced72c4fac274,
-            0x8bcd2f847633106d, 0x221aacfe8dee1ebb, 0xb539a149f1cf5c5d, 0xf05bf33fe51c62b8, 0x980c46e5f0776e8d,
-            0xf325a0aa967fd5ff, 0xc616088cd011b830, 0x5937c30643a7ed86, 0x0d48085f7c2bc7df
-        },
-
-        {
-            0x5328a07129193744, 0x0853fe3008d13fdb, 0x18d91bda5449aa41, 0x845be15f283523f6, 0xf82a1f80ff7ca37b,
-            0x7f3deacdf9c292f4, 0x47e570ff2ef0a22c, 0x5041c5dc538217fa, 0x8b730d528371d345, 0x1e58c569eeecc96c,
-            0x7fbcbdb110fbd213, 0x4ffe53d896d49afb, 0x59b8a07ef925bc98, 0xa9023f3ae318a626, 0xab16b1a0213a96ac,
-            0x5cde241f97da4cb7, 0x9b1eaca45fc3fbd0, 0x41bbd705fad4223f, 0xf2104c520a1bda29, 0x94e8e58a61e899ce,
-            0x78e6c00bb1a21953, 0xe4bcdc0f9417b3f0, 0xd5a0e373350b4318, 0x4ab3775bc1e56f82, 0x9d7008a27270564c,
-            0xfd3e6c11e78934d9, 0xa5f56c6becdaacd3, 0xb286d9c8e79b41c8, 0x0978e4a444fd946d, 0x7bcce4a8414ac21b,
-            0xb4b434197cabc514, 0x43c0efa5b515fb1e, 0xa311f0e6bd8729ae, 0xf100114ccb306c90, 0xa12ec9c189430fb9,
-            0xac338182bcea60b9, 0xef56d7183eb951f7, 0x78e8ea533590ed74, 0x9c9390e2579e29c5, 0x72cf3157a5e1af71,
-            0xe8afee49237b74e2, 0xd2758f365c01186b, 0x4dcd5a72d320e134, 0xf8c4c9cdd967b021, 0xfbf4d8971b0fbacf,
-            0xdf400d18f596da96, 0x66a85511950756e2, 0x4012f27557fce3d0, 0x049628cc5a0b05ef, 0x8a4518b8591060d0,
-            0x818bc8cdca18f364, 0x547de23ccc1fa912, 0x1a3c13e1b8fee86a, 0x21c5725d4070c15c, 0x79fa21d20a023b47,
-            0xa0db3acc3290b52a, 0x650d10d100618839, 0x6a0289175e860c09, 0x4ee084449f1458d9, 0x4ce28aa9bf579b3b,
-            0x88504268f37c202e, 0x772205bbfc502f29, 0xac6bdcb252712a77, 0x5dcc3212a38bbd25
-        },
-
-        {
-            0xa454ba8a188d208c, 0x8acde3a6d7f4155d, 0xbeaecb935b3649f0, 0x57f6544eca24ad36, 0xcc40b9a32149f3c7,
-            0x110d107ebb8b8ecd, 0x21de69d54c44e523, 0x5fec1246859b200f, 0x75569559b535ad90, 0x3b6684eef55da4dc,
-            0x5b96511027751c16, 0x79e36c2467edf166, 0x435a086798a54777, 0xe4329b73d9f35ae0, 0xd2f97bc1b1a5afa0,
-            0x0ddae808266832f0, 0xcfc051b2b3d0e619, 0xf72100b389df5f6e, 0x3a080952d1640e7e, 0xbbe64b56abc01e31,
-            0x310ef690d4a703bb, 0x434c20e3a0a6e02a, 0x828f19c898431ec9, 0xa5624884fc9c6136, 0x49966c8d31a6fba1,
-            0xf80d0ac4160ba21d, 0x2e9039cec3e077c9, 0xa5e6ed300b0ebf53, 0xe0b4a6d1795d264c, 0x179e5b367516eaa3,
-            0xdcbd7fd8c7c8d237, 0xfb6600617612e384, 0x11d8e2655983d058, 0x86d86001033bb446, 0x17418cf3c68d1a66,
-            0x11e50c8ada567fe5, 0xc4b12c11c9268df9, 0x4eb3726fe82128cb, 0x61912c9f236b064f, 0xa5400fe590de591b,
-            0x6498dda0ebad773e, 0x9b58618031d8423e, 0x8ed419346b390fa3, 0xbb2f06146166adb0, 0xb22689dd83ed7bcf,
-            0x4c931b0adb4d26fc, 0xe8b38a94b44c7d92, 0xd62b047eb8703ecd, 0x71cd30b1ea2907b9, 0xbb16cb0ee0ff57a9,
-            0x36a8400e88b1e819, 0x218ca6dbde51f964, 0x5af349c07b37f5e9, 0xe84afce3b9803ec9, 0xa1b88164f5d0e3f3,
-            0x646170eb07080a49, 0xc924ad4849ede669, 0xed79f27d1634ba66, 0x16e76be9a842bba0, 0x843d4b6972a4cad9,
-            0x5741946ca024d14f, 0xb6fad4c66d5665dd, 0x0549eb6e565dc9a5, 0x08b310b6ff31530c
-        },
-
-        {
-            0xc6071e35c1a8a6e8, 0xc17d282348c3dd35, 0x9745797b7775dc86, 0x163da19f2f71d345, 0xf896c12548656483,
-            0x3f7bb7603f5be57c, 0x6306cfd5608a95a0, 0x922d362146e06524, 0x758dc8238b867cb6, 0x70b68b593677a86e,
-            0x4c70d453caa4a6ff, 0x466a8c936a5cb383, 0x4bdd8373ab62dbba, 0x043cd4321003e1c4, 0x26c8b0460381b844,
-            0x083bcebe88a9547d, 0xa573c887d6cf6037, 0xe4841b2d1ff7decf, 0x01c5832098575e00, 0xb786f843d250eeda,
-            0x2a43ce0720ecd0af, 0x5317561af0d180ea, 0x8ddb675dee77bad3, 0x9aa6df563c99da45, 0x8c1d5368510d633a,
-            0xcc39822f78b500c7, 0xd02df1ff3f711a1f, 0x08ff3d6d1565c790, 0x85f33cf44d764989, 0xd733c8ebd27ffd63,
-            0xafa9d4f972436436, 0xdbf021fa9bd3a24f, 0x4fb0682c5477e7db, 0xfc919755969305ae, 0xb5700a69c980051c,
-            0xe1907478f17532b4, 0x8b295efdcb29961c, 0xd60240cb1d4ba4e5, 0xbbd03427b55ab9ca, 0x0bee7adcdacbb5c8,
-            0x6380974d5ed1bcee, 0x1d12b43aa45a8d87, 0x391b9130ec927782, 0x7034cd456aeff157, 0xb8fda38a0100282c,
-            0xa3e9ddf9d69f3611, 0x2bdebe12cd894fde, 0xa03fb3e364d03f21, 0x5a486f911d10f8a4, 0x8775db169593e296,
-            0x11593b424ee4a8c6, 0x16f7a9cb251718b4, 0xb1f1635eead84fa8, 0x612320517bfc393c, 0x6f915259026e6bd5,
-            0x5e4aec7dadc9e612, 0xb2f052099598562e, 0x3a1063ff6fed8b03, 0x288337e2dcde088f, 0xf7848f2c668bb823,
-            0xd67e6c9ad9e67190, 0x0b5580723da59228, 0x908957d5faf07393, 0xb8a16ed0d7221626
-        },
-
-        {
-            0x36084c93a54839b9, 0xc1095e7bfe2ae5f1, 0x10cac2b299ef0ae0, 0x6f538a591522f269, 0x7a066f22d7622f6d,
-            0x2b76cf9d7783d61d, 0xfc8a06356c65f414, 0x460942f5e81b0dc4, 0x08d26fb912b0a8a9, 0x2e3e9bee85dedef2,
-            0xb38c195413b63afd, 0x4e5ebdd50bc073db, 0x241ca5b991aaee95, 0xb20adb3bca3a3007, 0x30f89139c622e0b7,
-            0x125584d78556174d, 0x22d86a299a6d6960, 0x9c38fe364b84de24, 0xd0d45ca3ae2241d5, 0x40474ddf34391912,
-            0x50741117c43278ab, 0xc45007ab56131e6e, 0xd85e85a1fa09eff3, 0xfb415bb5232c0072, 0x5d88da08af77671d,
-            0xb817d85710753e95, 0xc11fc256a13b85f0, 0x58831ab6ea1bee6e, 0x79ecfb0a525a3c28, 0x927232b238490608,
-            0x2221703a4cbd2ca3, 0x1def9effbfe6f005, 0xc1c26250e1caadc0, 0xaa6eccb3072496b7, 0x566c68840701e908,
-            0x1a7e1455ba34a1f7, 0x9134a72ac6429f75, 0xd3e22b9bef9ef27b, 0x9c52c6ad38919790, 0x628414848f0c7572,
-            0xf4d8539842d69310, 0xb3bafb37e2023f3e, 0x00ef504e2a211300, 0xdfaaed3847729090, 0x0e3a950de09d2829,
-            0x1780def5815393cb, 0x523b825f347edcc0, 0xed592185c71334ef, 0x95960b76c9c9e6ae, 0xa030e302d8164480,
-            0xcbb038fb54e0caf4, 0xb311de2ee754b0c5, 0xa14c1cbb80054c56, 0x8ce94405f0697c03, 0x3d0dace177f0adb8,
-            0xa932123b8f2be57a, 0xa6a51113bb6e0ef7, 0x7171f3ad354bc43b, 0xace7545008fa6093, 0x5af2f0009bef5dc8,
-            0xe2270e960c48a1b9, 0xa3e53b402da221d4, 0x29a26e91aa3df131, 0xba17397aae41713d
-        },
-
-        {
-            0xbc47f0a8238d87f0, 0x937eb92bb4bf0813, 0x12560ed4adc3d3e1, 0x9b0994f52f0e0486, 0x7625c12d56320c85,
-            0x3ae05cd9051ac971, 0xb635c573afc68a39, 0x510da52584d99aca, 0x1f564b57bb07ddc4, 0xaa776e7713ffd80b,
-            0x2e2cf8c32c7b0a30, 0x7a07a3e159fef032, 0x12fbcc650d35d437, 0x68017907cef10934, 0x7ad5cc81cf939f20,
-            0x583609a9132deb28, 0xf4ab1adcacc24e71, 0xe42dc99dbf71cab9, 0x572fd9e559380702, 0x17093078fbcb67f8,
-            0x6306b5e06ab862a0, 0xb893ad12f40ff5e5, 0x968f022799b85d06, 0xd5e9fa26d952402e, 0x55d93f20eb663238,
-            0xead0023b0cb2afb6, 0xd284d482b0b915a6, 0x3fdfa21ca259d3b0, 0x49ea437ebffa394d, 0xa6d70e19489f87e8,
-            0x9cd3c81fe51cdbea, 0x94b2163d5ca74b57, 0xfc3beeb3baa33b34, 0x976b15bad867c103, 0x6fa776311b4c2793,
-            0xecaa9f03662959d7, 0xd6ff97218b2f632b, 0x5c9ec6ccdc9ea457, 0x53a7f92e85e27a64, 0xb83a018e55416e88,
-            0x80994211be5ed2c1, 0x11fb7e9e979d986e, 0xdbfd94a31f30f44e, 0x4371663e31c4019c, 0xdbf4d9afda17d299,
-            0x76244dfc31458e62, 0xf369b78dbd560e48, 0x2bb2e9b330eec908, 0xdb01e0fe14e6454d, 0xe9173709fdd95c3b,
-            0x6ad9fe2e9cab3594, 0x435497c3b8c536bc, 0xc22ec6b299dc3951, 0x0df12756ad12a891, 0x380c00e92ee77a0e,
-            0x1b598b02c4eeb16f, 0x865157ddf040240e, 0x1470c3fbb891bb5f, 0xe87bc276848c48a9, 0x3d4fe73dd8bcf4d5,
-            0x138863f4440e8086, 0x5ba3db45fa7a7bf6, 0x6a691605de9be820, 0x8781844541fb9d6c
-        },
-
-        {
-            0x46d1eca8ab723c9c, 0x64cf23cfcee69bfb, 0xad64340e549c4cb5, 0xfcf3687d678b20f7, 0xaacd98788b191d4f,
-            0x8785e0917fa3b986, 0x47f669ed811b2c52, 0x29b311595217156f, 0x0bebf463e6867daf, 0xb918aff482bc94cf,
-            0xeac19987cce23848, 0x024f95f59ee3cf18, 0x07e557433dd4eb0a, 0xc30579e61ada5482, 0xa8346d1a7fa6cf05,
-            0xba8dd9e5a0305469, 0x329d393dda489097, 0x1b81a49cb3ec5ca6, 0x61765144fb039396, 0x06d1883aa4f8f95d,
-            0x5d34e49ea1461c69, 0xba28280a9e9ca78e, 0x67d3f06192745fa7, 0x6f2f529de4aae463, 0x845d2dead7594525,
-            0x5d97f0ebd5823a5d, 0x702a679b6b6961fe, 0x1bd39548eac7c64a, 0x87850eaca8ad8df2, 0x5a54969ae417e256,
-            0x5fbd018b947d0bf5, 0x1de080d5e3426f15, 0x66c82be1e1cc9e2b, 0xd95ca996d035b9bd, 0x10f61823137a69bd,
-            0x0335c71eaec584b1, 0x164ea82c7c2892e0, 0x4e336835eb48f4af, 0x0e0638591d016e3a, 0xe5c5d8bf451ad482,
-            0x11138e9fcd102961, 0xb51ea10d1f088f67, 0xd852fa943506ada7, 0x8a67301a341bd92a, 0x3bad95689eeb35c2,
-            0x2d4f118b48d4d0c0, 0x482457b42ab3be95, 0xb474beac95d68465, 0x57d5c85e6e02fadb, 0xd1332374576761d7,
-            0xbc34976f1ccd952e, 0xdedf02b1808b1580, 0x15804e8bf640120b, 0x1838280478c08d9e, 0x795d52e0a36d5eb1,
-            0x7d709f017e49f4c5, 0x06c342350f7e0cc3, 0x05d579cf4b71e184, 0x27119a549056c279, 0x9236fca7916db544,
-            0xaef42faf75720e87, 0x763146f26101a7ef, 0xf20dc7861dfd176c, 0xb8b4a1e0a99d4ea9
-        },
-
-        {
-            0x76b10a4b26c406e0, 0xa630f66b7040734f, 0xe44ee804a2431036, 0x2f62f6610523b96a, 0x4fee979f02f65316,
-            0x541ae4c112c0a1ff, 0xd6f706266875697b, 0x5d9d2e7daab553d6, 0x7550c3f2b0f00fb6, 0x6412a4c2ffa0f91e,
-            0x9ffc39d254a23bc9, 0x71be0e19904afe59, 0x3b73eb7b73f30195, 0xeadeff1a53c6bf5b, 0xfa5c9ca08304e793,
-            0xb960b48c9730bc32, 0xe58564536f856fc2, 0x827ff61d3ff6173d, 0x55b9e982567b571b, 0xd63393ff2c7b489f,
-            0xbce4f208898ec32b, 0xab3ed9e4c584bf04, 0xc44370f4b0803967, 0x3720c7e7f4ba8511, 0x51c3f1200f42ff74,
-            0xd84ba6d4d4b78633, 0xa969652aa1c7c68a, 0x65d0553fe8379d25, 0x9d496f74416d91d4, 0xa083f7040afbc196,
-            0xa873287f17fbf66a, 0x42890b8348bd95be, 0x0e625adf1455ccc1, 0x76f8278af1703445, 0xfc3ff72da781a9ea,
-            0x65516c8406d63b4f, 0x1f9cc14a0f128d69, 0xdf08a621d1c0ff11, 0x0cb0a5955e2df749, 0x2b207cd18c3999b5,
-            0x7ced87e2cd8b84ce, 0xb39204e91e562ec6, 0xd3879476743ecd47, 0xf713548cb980614d, 0x7680b6a03273d14b,
-            0xc962ca24ca8dcee2, 0x8d562128daa8deac, 0x81b07e8ef925183d, 0xa89be8a59859ede4, 0xbaa08c2061f02984,
-            0x3b5f3a6a7d451abb, 0x57d43bb0147736f1, 0x56eefa761c8e5c94, 0xdb65c5578cc26352, 0x874f3070e72b7cd0,
-            0x2275c6a880f18a60, 0x4413e7e4eb26ecf3, 0xf9870f6384014c1f, 0x3fa5dfdee3738ccc, 0xdb4eda7481ce2334,
-            0xa3352340d00f7748, 0x92f20a9e5e71d212, 0x556e88af78346233, 0xb6cec8a1c24d4ead
-        },
-
-        {
-            0xc5ba00851598df8e, 0xcd1ef2cc3b9584ca, 0xe0c70e5d6f8da116, 0xf7318d278909bfb9, 0x6b12286884d8a2cb,
-            0x4d0bd1e289f9b683, 0x3854bfa03f7640ba, 0xd464d3317ca61098, 0x64216030c6c0ba39, 0x4737fd74812e8744,
-            0x8ac98a54fb71aa5e, 0x2851ad90572bb046, 0x21ba4be55c6bbbd9, 0x9d9ef28373e89027, 0xd62ce2065d9207a9,
-            0xe5f1ad3ad593582a, 0xb5b0a351fb19a511, 0x9999751727c4dcb5, 0x01b478675cb39751, 0xab19087787825263,
-            0x5e53b67014b7cff0, 0x535fd8590d234e60, 0xcefa502e3d806538, 0x529fa7d06e974230, 0xe59eb549a5975764,
-            0xac5daee86d52d146, 0xda974179498ed360, 0x49cfb47b958758a0, 0x48c60b78f4cbd34a, 0xdfc170d7f4a3bf92,
-            0x0ce31041bf6aadf5, 0xbc6c99d52e9bf956, 0xbc515f59106e1aae, 0x33078f7ef10f6b04, 0xfed89962cfd686cf,
-            0x5ea3c7ae88f3701e, 0x069b207c98bedf69, 0xf0f0b42404c2760f, 0x03374d220abb417f, 0x9adb341342d71feb,
-            0x1bcfd57eabc4870c, 0x2c269a871f261cdd, 0x42c27ef633f1e844, 0xa219900b2c922081, 0xc6a3fa2b7d62e112,
-            0xe6a4322670c9c176, 0x0025b9f768238d41, 0x7b28ca179216dbbb, 0xf27dce96cfcfceee, 0xcbbd5c2f233a5c9a,
-            0x2f8d30f512dc75ca, 0xba9cd9c3fdfb7587, 0x8ab5d968151f09bf, 0x35ad4d7f000ef8af, 0x080efbbcae269412,
-            0x5cc4be8519b93629, 0x87b683ef075a0293, 0x4bb08555859537fc, 0xfdf0604ce4d90660, 0xeed1e75cfbeda32b,
-            0x92d9a1f7afa6dcd2, 0x29085e2b32597aee, 0x5de08e834f05cbb9, 0x0b23be4d70a5fe91
-        },
-
-        {
-            0x19d25ea725575a67, 0x17cf56c79bffb5e4, 0x562392017d151c9d, 0xf14bf82a611163c8, 0x98855eea733c43a0,
-            0x511d649c3903b1a5, 0xc9e56e22e5879d27, 0xd855086b975b425e, 0x962451f58ecfb94b, 0x7fb04e5d1388d669,
-            0x484e9f9131ff8844, 0xa55c74729af5f9d7, 0x7dc94490e8c85ae5, 0xe2c68089902cba5b, 0x0215a74604e5a9d2,
-            0xa12ffd8501b955ff, 0x32d8e745371c7f6d, 0x50f7e055b159356a, 0xf8a38bd7766466f4, 0x2ef01210a7e08627,
-            0x4fdcb88dc9a41ec4, 0x4b1976d4fa5fb987, 0xf6b48884a1885938, 0xc3ff46dfab84c2a9, 0x8b520628970facc1,
-            0xb891e786a7989cae, 0x68128f7250fec0b1, 0xf7e8bbc12ce41c86, 0x632d56b870c8224a, 0xb2bb53463a3f0c02,
-            0xac34f6545e19a0cd, 0x09101d47221a13b7, 0x3b7b0552bc10514b, 0xde496e6cf0b6e445, 0x45b75b8abf1194a0,
-            0xe0d3f510c210e393, 0x27d6e783147d7a3e, 0x8ef294380908bfb8, 0xff35068c697119fc, 0x3ce88c55db9a74d3,
-            0x7b982f0e56fe43de, 0x212b8b640a733d36, 0x5113bf7d1742bc52, 0x10f284997fe0a475, 0xf4ff5a259c7928af,
-            0x85093afd09421c53, 0x0a83010a91319c36, 0xf9f2eed7f5d613d5, 0x45ce9123c6ce24e3, 0xce0ab5cea2a34e04,
-            0x1b63e2c7c359a9b4, 0x83e07c31f27137c3, 0x97891a4061e8700d, 0x1372b33067724f44, 0x2d57f98cc69d50ab,
-            0xd988461884c97cda, 0xbab098be50ccac2b, 0x8501b4bf6d5070be, 0x7471499badde1668, 0x53faf50aef652027,
-            0xf34001e6c5fe75e5, 0xda340122d31606ae, 0x664b2c03d60d3dfa, 0x912527ce791d80c9
-        },
-
-        {
-            0x5dd3cd6dd7129374, 0x107d4ec15d0fa4c5, 0xf03c53d8458a35b8, 0x89a94cd827df9d40, 0x1c991aff5dde841f,
-            0xbde32bd5b202be8d, 0xfa996807a5806647, 0xdfd652af50ab80ed, 0x05d354449b964ec0, 0x5761b48aaa6c37a1,
-            0xd45137f601dbf4c4, 0xd62e9212a3ab6e75, 0x1f6d252b4e023529, 0xb2f94cf8b04c408e, 0xbf32ead5ae3680ab,
-            0x8b8b0f37874bc50b, 0x892961276f4548a6, 0xa8e08fb1ced99a5f, 0xec06fd67e0181499, 0x2536d9c6595b622b,
-            0xa454f9bde52ec9fd, 0x220424a29c662516, 0x8b86988c9a610db1, 0x54cb4dd6849c9fd8, 0xe60e2543ee43a7f3,
-            0xb06653f36304feae, 0x47cdf6a41f807982, 0x2ff01dd818ba2af3, 0x6b891259296ef9ee, 0xc3e06d1a3cc054b1,
-            0x1da72bbda7c540c7, 0x46cec87887267b07, 0x4d1d843eb3d20bba, 0x628a4ee6b8a602c7, 0xc270f1b4ad688741,
-            0xafd3e623df0a23a7, 0x3589a5d4ffa027d4, 0xe20e9f3706840e2d, 0xe0c04717609f1a8c, 0x09202003b5914d37,
-            0x41d481b289ccf40f, 0x5d261b9e4cbb2d9b, 0xdca661a694ab236f, 0xd7dcd733b22ab5d7, 0x3c847f81e02b27c2,
-            0xd118ce85101673fb, 0xb35507dcc0c055e8, 0x7bf57a8dfb1f1c73, 0x1bd0a05d83d175ac, 0x3e7619fe29e286c0,
-            0xa73bd562741768ec, 0xf3063d9e204c526c, 0xf3b6ee89ff3533eb, 0xa8e05d2bfafc577e, 0xfa22b5d2f4df6550,
-            0xee5a8e3370715130, 0x36cb6ed13d7a3656, 0xe918462a089545f3, 0xc6b2209fe070ed8a, 0x885ffde1301c962f,
-            0xc6a34ead5fd10d0b, 0x8581f9020d0be57b, 0x5b0e708b887e9723, 0xab9d02d44b80c023
-        },
-    };
-    Hash TURN = 0x5c3b287ef7fb458c;
-    Hash CASTLING[16] = {
-        0xda717836ed8fd501, 0x07c1b72374c36ffc, 0x23bb5aaec6183b2c, 0xc0f3561018b90d2d, 0xb588f4030c37182f,
-        0x0ae78cdd96e708f9, 0x30e513338fccbbd2, 0x5653d7721b395a87, 0x92637def2c813b6f, 0x55bb54c7c33a135d,
-        0x0468df8b899a8696, 0x590f45d7c2aaa2a5, 0xe0096f3be2c7c8e1, 0x9004d434bee026b3, 0xbe2abac134719858,
-        0x08ee593853a48375
-    };
-    Hash EN_PASSANT[8] = {
-        0xe41f7c2010520212, 0x42d91118e6aedac6, 0xd85ccd9fb3f08313, 0x6dcb4caf0a197bec, 0xac0a52f3b29311f8,
-        0x97dd3bd5ae77b4a4, 0xedff8a0d047310af, 0xac6b72801c49744c
-    };
+    std::array<std::array<Hash, 64>, 12> PIECES = generatePieceHashes();
+    Hash TURN = generateTurnHash();
+    std::array<Hash, 16> CASTLING = generateCastlingHash();
+    std::array<Hash, 8> EN_PASSANT = generateEnPassantHash();
 }
 
 /**
@@ -896,25 +696,25 @@ void Position::getCheckedEp(uint64_t checkers, std::vector<Move>* pos_moves[MAX_
  * Computes the initial hash of the position. Basically, just computes the current hash.
  */
 void Position::initialiseHash() {
-    this->hash = 0ULL;
+    // this->hash = 0ULL;
 
-    // Hash the pieces
-    for (int sq = A1; sq <= H8; sq++) {
-        if (this->pieces[sq] != NO_PIECE) {
-            this->hash ^= Hashes::PIECES[this->pieces[sq]][sq];
-        }
-    }
+    // // Hash the pieces
+    // for (int sq = A1; sq <= H8; sq++) {
+    //     if (this->pieces[sq] != NO_PIECE) {
+    //         this->hash ^= Hashes::PIECES[this->pieces[sq]][sq];
+    //     }
+    // }
 
-    // Hash turn
-    if (this->turn == BLACK) this->hash ^= Hashes::TURN;
+    // // Hash turn
+    // if (this->turn == BLACK) this->hash ^= Hashes::TURN;
 
-    // Hash the castling
-    this->hash ^= Hashes::CASTLING[this->castling];
+    // // Hash the castling
+    // this->hash ^= Hashes::CASTLING[this->castling];
 
-    // Hash en-passant
-    if (this->en_passant != NONE) {
-        this->hash ^= Hashes::EN_PASSANT[this->en_passant % 8];
-    }
+    // // Hash en-passant
+    // if (this->en_passant != NONE) {
+    //     this->hash ^= Hashes::EN_PASSANT[this->en_passant % 8];
+    // }
 }
 
 /**
@@ -1845,39 +1645,39 @@ void Position::removePiece() {
  * @param game: Pointer to game struct.
  */
 void Position::handleCastle() {
-    int start, end;
-    int last_end = (this->last_move >> 6) & 0b111111;
-    PieceType rook;
+    // int start, end;
+    // int last_end = (this->last_move >> 6) & 0b111111;
+    // PieceType rook;
 
-    if (last_end  == G1) {
-        start = H1;
-        end = F1;
-        rook = W_ROOK;
-    } else if (last_end == C1) {
-        start = A1;
-        end = D1;
-        rook = W_ROOK;
-    } else if (last_end == G8) {
-        start = H8;
-        end = F8;
-        rook = B_ROOK;
-    } else {
-        start = A8;
-        end = D8;
-        rook = B_ROOK;
-    }
+    // if (last_end  == G1) {
+    //     start = H1;
+    //     end = F1;
+    //     rook = W_ROOK;
+    // } else if (last_end == C1) {
+    //     start = A1;
+    //     end = D1;
+    //     rook = W_ROOK;
+    // } else if (last_end == G8) {
+    //     start = H8;
+    //     end = F8;
+    //     rook = B_ROOK;
+    // } else {
+    //     start = A8;
+    //     end = D8;
+    //     rook = B_ROOK;
+    // }
 
-    this->sides[this->turn] &= ~(1ULL << start);
-    this->sides[this->turn] |= 1ULL << end;
-    this->pieces[start] = NO_PIECE;
-    this->hash ^= Hashes::PIECES[rook][start];
-    this->pieces[end] = rook;
-    this->hash ^= Hashes::PIECES[rook][end];
+    // this->sides[this->turn] &= ~(1ULL << start);
+    // this->sides[this->turn] |= 1ULL << end;
+    // this->pieces[start] = NO_PIECE;
+    // this->hash ^= Hashes::PIECES[rook][start];
+    // this->pieces[end] = rook;
+    // this->hash ^= Hashes::PIECES[rook][end];
 
-    this->findAndRemovePiece(rook, (Square) start);
-    this->addPiece(rook, (Square) end);
-    this->rooks &= ~(1ULL << start);
-    this->rooks |= 1ULL << end;
+    // this->findAndRemovePiece(rook, (Square) start);
+    // this->addPiece(rook, (Square) end);
+    // this->rooks &= ~(1ULL << start);
+    // this->rooks |= 1ULL << end;
 }
 
 /**
@@ -1993,82 +1793,82 @@ void printMove(Move move, bool extraInfo) {
  * @param game: Pointer to game struct.
  */
 void Position::makePawnMoves(Move move) {
-    this->removePiece();
-    int start = move & 0b111111;
-    int end = (move >> 6) & 0b111111;
-    int move_type = move & (0b11 << 12);
-    int promo = move & (0b11 << 14);
-    bool pawn = false;
-    int ep = end + (this->turn ? -8 : 8);
-    PieceType piece = this->turn ? W_PAWN : B_PAWN;
-    this->findAndRemovePiece(piece, (Square) start);
+//     this->removePiece();
+//     int start = move & 0b111111;
+//     int end = (move >> 6) & 0b111111;
+//     int move_type = move & (0b11 << 12);
+//     int promo = move & (0b11 << 14);
+//     bool pawn = false;
+//     int ep = end + (this->turn ? -8 : 8);
+//     PieceType piece = this->turn ? W_PAWN : B_PAWN;
+//     this->findAndRemovePiece(piece, (Square) start);
 
-    if (move_type == PROMOTION) {
-        if (this->turn) {
-            piece = promo == pQUEEN ? W_QUEEN : promo == pROOK ? W_ROOK : promo == pBISHOP ? W_BISHOP : W_KNIGHT;
-        } else {
-            piece = promo == pQUEEN ? B_QUEEN : promo == pROOK ? B_ROOK : promo == pBISHOP ? B_BISHOP : B_KNIGHT;
-        }
+//     if (move_type == PROMOTION) {
+//         if (this->turn) {
+//             piece = promo == pQUEEN ? W_QUEEN : promo == pROOK ? W_ROOK : promo == pBISHOP ? W_BISHOP : W_KNIGHT;
+//         } else {
+//             piece = promo == pQUEEN ? B_QUEEN : promo == pROOK ? B_ROOK : promo == pBISHOP ? B_BISHOP : B_KNIGHT;
+//         }
 
-        if (promo == pQUEEN) {
-            this->queens |= 1ULL << end;
-            PieceType queen = this->turn ? W_QUEEN : B_QUEEN;
-            this->addPiece(queen, (Square) end);
-        } else if (promo == pROOK) {
-            this->rooks |= 1ULL << end;
-            PieceType ROOK = this->turn ? W_ROOK : B_ROOK;
-            this->addPiece(ROOK, (Square) end);
-        } else if (promo == pBISHOP) {
-            this->bishops |= 1ULL << end;
-            PieceType bishop = this->turn ? W_BISHOP : B_BISHOP;
-            this->addPiece(bishop, (Square) end);
-        } else {
-            this->knights |= 1ULL << end;
-            PieceType knight = this->turn ? W_KNIGHT : B_KNIGHT;
-            this->addPiece(knight, (Square) end);
-        }
-        this->pieces[end] = piece;
-        this->hash ^= Hashes::PIECES[piece][end];
-    } else if (move_type == EN_PASSANT) {
-        pawn = true;
-        this->addPiece(piece, (Square) end);
-        piece = this->turn ? B_PAWN : W_PAWN;
-        this->findAndRemovePiece(piece, (Square) ep);
-        this->pawns &= ~(1ULL << ep);
-        this->sides[1 - this->turn] &= ~(1ULL << ep);
-        this->pieces[ep] = NO_PIECE;
-        this->hash ^= Hashes::PIECES[piece][ep];
-    } else {
-        pawn = true;
-        this->addPiece(piece, (Square) end);
-        int rank_diff = end / 8 - start / 8;
-        if (std::abs(rank_diff) != 1) {
-            this->en_passant = (Square) (start + 8 * (rank_diff - (rank_diff > 0 ? 1 : -1)));
-            this->hash ^= Hashes::EN_PASSANT[this->en_passant % 8];
-        }
-    }
+//         if (promo == pQUEEN) {
+//             this->queens |= 1ULL << end;
+//             PieceType queen = this->turn ? W_QUEEN : B_QUEEN;
+//             this->addPiece(queen, (Square) end);
+//         } else if (promo == pROOK) {
+//             this->rooks |= 1ULL << end;
+//             PieceType ROOK = this->turn ? W_ROOK : B_ROOK;
+//             this->addPiece(ROOK, (Square) end);
+//         } else if (promo == pBISHOP) {
+//             this->bishops |= 1ULL << end;
+//             PieceType bishop = this->turn ? W_BISHOP : B_BISHOP;
+//             this->addPiece(bishop, (Square) end);
+//         } else {
+//             this->knights |= 1ULL << end;
+//             PieceType knight = this->turn ? W_KNIGHT : B_KNIGHT;
+//             this->addPiece(knight, (Square) end);
+//         }
+//         this->pieces[end] = piece;
+//         this->hash ^= Hashes::PIECES[piece][end];
+//     } else if (move_type == EN_PASSANT) {
+//         pawn = true;
+//         this->addPiece(piece, (Square) end);
+//         piece = this->turn ? B_PAWN : W_PAWN;
+//         this->findAndRemovePiece(piece, (Square) ep);
+//         this->pawns &= ~(1ULL << ep);
+//         this->sides[1 - this->turn] &= ~(1ULL << ep);
+//         this->pieces[ep] = NO_PIECE;
+//         this->hash ^= Hashes::PIECES[piece][ep];
+//     } else {
+//         pawn = true;
+//         this->addPiece(piece, (Square) end);
+//         int rank_diff = end / 8 - start / 8;
+//         if (std::abs(rank_diff) != 1) {
+//             this->en_passant = (Square) (start + 8 * (rank_diff - (rank_diff > 0 ? 1 : -1)));
+//             this->hash ^= Hashes::EN_PASSANT[this->en_passant % 8];
+//         }
+//     }
 
-    this->pawns &= ~(1ULL << start);
-    this->pawns |= (uint64_t)pawn << end;
-}
+//     this->pawns &= ~(1ULL << start);
+//     this->pawns |= (uint64_t)pawn << end;
+// }
 
-/**
- * Save game state to history for undoing moves.
- * @param game: Pointer to game struct.
- * @param move: The move to made.
- */
-void Position::saveHistory(Move move) {
-    this->history[this->ply].castling = this->castling;
-    this->history[this->ply].en_passant = this->en_passant;
-    this->history[this->ply].halfmove = this->halfmove;
-    this->history[this->ply].move = move;
-    this->history[this->ply].captured = this->pieces[(move >> 6) & 0b111111];
-    this->history[this->ply].hash = this->hash;
-    this->ply++;
+// /**
+//  * Save game state to history for undoing moves.
+//  * @param game: Pointer to game struct.
+//  * @param move: The move to made.
+//  */
+// void Position::saveHistory(Move move) {
+//     this->history[this->ply].castling = this->castling;
+//     this->history[this->ply].en_passant = this->en_passant;
+//     this->history[this->ply].halfmove = this->halfmove;
+//     this->history[this->ply].move = move;
+//     this->history[this->ply].captured = this->pieces[(move >> 6) & 0b111111];
+//     this->history[this->ply].hash = this->hash;
+//     this->ply++;
 
-    if (this->ply >= MAX_MOVES) {
-        this->history.resize(2 * MAX_MOVES);
-    }
+//     if (this->ply >= MAX_MOVES) {
+//         this->history.resize(2 * MAX_MOVES);
+//     }
 }
 
 /**
@@ -2384,105 +2184,105 @@ void Position::undoMove() {
  * @param game: Pointer to game struct.
  */
 void Position::makeMove(Move move) {
-    if (move == 0) {
-        this->undoMove();
-        return;
-    }
+    // if (move == 0) {
+    //     this->undoMove();
+    //     return;
+    // }
 
-    // Save current position and move to make to history.
-    this->saveHistory(move);
+    // // Save current position and move to make to history.
+    // this->saveHistory(move);
 
-    int start = move & 0b111111;
-    int end = (move >> 6) & 0b111111;
-    int move_type = move & (0b11 << 12);
+    // int start = move & 0b111111;
+    // int end = (move >> 6) & 0b111111;
+    // int move_type = move & (0b11 << 12);
 
-    this->last_move = move;
-    this->last_move_type = (MoveType) move_type;
-    this->piece_captured = this->pieces[end];
-    this->piece_moved = this->pieces[start];
+    // this->last_move = move;
+    // this->last_move_type = (MoveType) move_type;
+    // this->piece_captured = this->pieces[end];
+    // this->piece_moved = this->pieces[start];
 
-    // Remove en-passant and its hash
-    if (this->en_passant != NONE) {
-        this->hash ^= Hashes::EN_PASSANT[this->en_passant % 8];
-        this->en_passant = NONE;
-    }
+    // // Remove en-passant and its hash
+    // if (this->en_passant != NONE) {
+    //     this->hash ^= Hashes::EN_PASSANT[this->en_passant % 8];
+    //     this->en_passant = NONE;
+    // }
 
-    this->sides[this->turn] &= ~(1ULL << start);
-    this->sides[this->turn] |= 1ULL << end;
-    this->sides[1 - this->turn] &= ~(1ULL << end);
-    this->pieces[start] = NO_PIECE;
-    this->hash ^= Hashes::PIECES[this->piece_moved][start];
-    this->pieces[end] = this->piece_moved;
-    if (this->piece_captured != NO_PIECE) {
-        this->hash ^= Hashes::PIECES[this->piece_captured][end];
-    }
-    this->hash ^= Hashes::PIECES[this->piece_moved][end];
+    // this->sides[this->turn] &= ~(1ULL << start);
+    // this->sides[this->turn] |= 1ULL << end;
+    // this->sides[1 - this->turn] &= ~(1ULL << end);
+    // this->pieces[start] = NO_PIECE;
+    // this->hash ^= Hashes::PIECES[this->piece_moved][start];
+    // this->pieces[end] = this->piece_moved;
+    // if (this->piece_captured != NO_PIECE) {
+    //     this->hash ^= Hashes::PIECES[this->piece_captured][end];
+    // }
+    // this->hash ^= Hashes::PIECES[this->piece_moved][end];
 
-    // Change castling privileges.
-    if (start == E1 && 0b11 & this->castling) {
-        this->hash ^= Hashes::CASTLING[this->castling];
-        this->castling &= 0b1100;
-        this->hash ^= Hashes::CASTLING[this->castling];
-    }
+    // // Change castling privileges.
+    // if (start == E1 && 0b11 & this->castling) {
+    //     this->hash ^= Hashes::CASTLING[this->castling];
+    //     this->castling &= 0b1100;
+    //     this->hash ^= Hashes::CASTLING[this->castling];
+    // }
 
-    if (start == E8 && (0b11 << 2) & this->castling) {
-        this->hash ^= Hashes::CASTLING[this->castling];
-        this->castling &= 0b0011;
-        this->hash ^= Hashes::CASTLING[this->castling];
-    }
+    // if (start == E8 && (0b11 << 2) & this->castling) {
+    //     this->hash ^= Hashes::CASTLING[this->castling];
+    //     this->castling &= 0b0011;
+    //     this->hash ^= Hashes::CASTLING[this->castling];
+    // }
 
-    if ((start == H1 || end == H1) && this->castling & (1 << WKSC)) {
-        this->hash ^= Hashes::CASTLING[this->castling];
-        this->castling &= ~(1 << WKSC);
-        this->hash ^= Hashes::CASTLING[this->castling];
-    }
+    // if ((start == H1 || end == H1) && this->castling & (1 << WKSC)) {
+    //     this->hash ^= Hashes::CASTLING[this->castling];
+    //     this->castling &= ~(1 << WKSC);
+    //     this->hash ^= Hashes::CASTLING[this->castling];
+    // }
 
-    if ((start == A1 || end == A1) && this->castling & (1 << WQSC)) {
-        this->hash ^= Hashes::CASTLING[this->castling];
-        this->castling &= ~(1 << WQSC);
-        this->hash ^= Hashes::CASTLING[this->castling];
-    }
+    // if ((start == A1 || end == A1) && this->castling & (1 << WQSC)) {
+    //     this->hash ^= Hashes::CASTLING[this->castling];
+    //     this->castling &= ~(1 << WQSC);
+    //     this->hash ^= Hashes::CASTLING[this->castling];
+    // }
 
-    if ((start == H8 || end == H8) && this->castling & (1 << BKSC)) {
-        this->hash ^= Hashes::CASTLING[this->castling];
-        this->castling &= ~(1 << BKSC);
-        this->hash ^= Hashes::CASTLING[this->castling];
-    }
+    // if ((start == H8 || end == H8) && this->castling & (1 << BKSC)) {
+    //     this->hash ^= Hashes::CASTLING[this->castling];
+    //     this->castling &= ~(1 << BKSC);
+    //     this->hash ^= Hashes::CASTLING[this->castling];
+    // }
 
-    if ((start == A8 || end == A8) && this->castling & (1 << BQSC)) {
-        this->hash ^= Hashes::CASTLING[this->castling];
-        this->castling &= ~(1 << BQSC);
-        this->hash ^= Hashes::CASTLING[this->castling];
-    }
+    // if ((start == A8 || end == A8) && this->castling & (1 << BQSC)) {
+    //     this->hash ^= Hashes::CASTLING[this->castling];
+    //     this->castling &= ~(1 << BQSC);
+    //     this->hash ^= Hashes::CASTLING[this->castling];
+    // }
 
-    PieceType moved = this->piece_moved;
-    if (moved == W_KING || moved == B_KING) {
-        this->makeKingMoves(move);
-    } else if (moved == W_QUEEN || moved == B_QUEEN) {
-        this->makeQueenMoves(move);
-    } else if (moved == W_ROOK || moved == B_ROOK) {
-        this->makeRookMoves(move);
-    } else if (moved == W_BISHOP || moved == B_BISHOP) {
-        this->makeBishopMoves(move);
-    } else if (moved == W_KNIGHT || moved == B_KNIGHT) {
-        this->makeKnightMoves(move);
-    } else {
-        this->makePawnMoves(move);
-    }
+    // PieceType moved = this->piece_moved;
+    // if (moved == W_KING || moved == B_KING) {
+    //     this->makeKingMoves(move);
+    // } else if (moved == W_QUEEN || moved == B_QUEEN) {
+    //     this->makeQueenMoves(move);
+    // } else if (moved == W_ROOK || moved == B_ROOK) {
+    //     this->makeRookMoves(move);
+    // } else if (moved == W_BISHOP || moved == B_BISHOP) {
+    //     this->makeBishopMoves(move);
+    // } else if (moved == W_KNIGHT || moved == B_KNIGHT) {
+    //     this->makeKnightMoves(move);
+    // } else {
+    //     this->makePawnMoves(move);
+    // }
 
-    this->turn = 1 - this->turn;
-    if (this->turn == BLACK) {
-        this->fullmove++;
-        this->hash ^= Hashes::TURN;
-    }
-    if (moved == W_PAWN || moved == B_PAWN || this->piece_captured != NO_PIECE) {
-        this->halfmove = 0;
-    } else {
-        this->halfmove++;
-    }
+    // this->turn = 1 - this->turn;
+    // if (this->turn == BLACK) {
+    //     this->fullmove++;
+    //     this->hash ^= Hashes::TURN;
+    // }
+    // if (moved == W_PAWN || moved == B_PAWN || this->piece_captured != NO_PIECE) {
+    //     this->halfmove = 0;
+    // } else {
+    //     this->halfmove++;
+    // }
 
-    // Increment position hash counter
-    this->incrementHash(move);
+    // // Increment position hash counter
+    // this->incrementHash(move);
 }
 
 void Position::incrementHash(Move move) {
@@ -3054,4 +2854,42 @@ void Play::init() {
         else if (commands[0] == "set") setCommand(commands, position);
         else if (commands[0] == "display" && commands.size() == 1) position.display();
     }
+}
+
+std::array<std::array<Hash, 64>, 12> generatePieceHashes() {
+    std::default_random_engine generator(42); // Fixed seed
+    std::uniform_int_distribution<uint64_t> distribution(0, 0xFFFFFFFFFFFFFFFF);
+    std::array<std::array<Hash, 64>, 12> hashes;
+    for (int piece = 0; piece < 12; piece++) {
+        for (int square = A1; square <= H8; square++) {
+            hashes[piece][square] = distribution(generator);
+        }
+    }
+    return hashes;
+}
+
+Hash generateTurnHash() {
+    std::default_random_engine generator(314); // Fixed seed
+    std::uniform_int_distribution<uint64_t> distribution(0, 0xFFFFFFFFFFFFFFFF);
+    return distribution(generator);
+}
+
+std::array<Hash, 16> generateCastlingHash() {
+    std::default_random_engine generator(272); // Fixed seed
+    std::uniform_int_distribution<uint64_t> distribution(0, 0xFFFFFFFFFFFFFFFF);
+    std::array<Hash, 16> hashes;
+    for (int i = 0; i < 16; i++) {
+        hashes[i] = distribution(generator);
+    }
+    return hashes;
+}
+
+std::array<Hash, 8> generateEnPassantHash() {
+    std::default_random_engine generator(162); // Fixed seed
+    std::uniform_int_distribution<uint64_t> distribution(0, 0xFFFFFFFFFFFFFFFF);
+    std::array<Hash, 8> hashes;
+    for (int i = 0; i < 8; i++) {
+        hashes[i] = distribution(generator);
+    }
+    return hashes;
 }

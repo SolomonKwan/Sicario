@@ -50,7 +50,7 @@ std::array<std::vector<Move>, 64> generateKnightMoves();
  * @note: Does not take into account if the pawn is pinned.
  * @note: Black array is 0, white array is 1.
  */
-std::array<std::array<std::vector<Move>, 64>,2> generatePawnMoves();
+std::array<std::array<std::vector<Move>, 64>, 2> generatePawnMoves();
 
 /**
  * Compute pseudolegal moves of the rook on each square.
