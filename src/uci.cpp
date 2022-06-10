@@ -8,6 +8,7 @@
 #include "uci.hpp"
 #include "utils.hpp"
 #include "sicario.hpp"
+#include "mcts.hpp"
 
 inline bool isValidTitle(std::string str) {
     return str == "GM" || str == "IM" || str == "FM" || str == "WGM" || str == "WIM" || str == "none";
@@ -205,47 +206,71 @@ void Sicario::handlePosition(std::vector<std::string>& inputs) {
 
 void Sicario::handleGo(std::vector<std::string>& commands) {
     // TODO
-    GoParams go_params;
+    // GoParams go_params;
 
     // Parse go commands
-    for (int i = 1; i < (int) commands.size(); i++) { // TODO Error checking needed
-        if (commands[i] == "searchmoves") {
-            for (int j = i + 1; j < (int) commands.size(); j++) {
-                Move move = parseMove(commands[j]);
-                if (move == 0) continue;
-                go_params.moves.push_back(move);
-            }
-        } else if (commands[i] == "ponder") {
-            // TODO
-        } else if (commands[i] == "wtime") {
-            go_params.wtime = stoi(commands[i + 1]);
-        } else if (commands[i] == "btime") {
-            go_params.btime = stoi(commands[i + 1]);
-        } else if (commands[i] == "winc") {
-            go_params.winc = stoi(commands[i + 1]);
-        } else if (commands[i] == "binc") {
-            go_params.binc = stoi(commands[i + 1]);
-        } else if (commands[i] == "movestogo") {
-            go_params.moves_to_go = stoi(commands[i + 1]);
-        } else if (commands[i] == "depth") {
-            go_params.depth = stoi(commands[i + 1]);
-        } else if (commands[i] == "nodes") {
-            go_params.nodes = stoi(commands[i + 1]);
-        } else if (commands[i] == "mate") {
-            go_params.mate = stoi(commands[i + 1]);
-        } else if (commands[i] == "movetime") {
-            go_params.movetime = stoi(commands[i + 1]);
-        } else if (commands[i] == "infinite") {
-            go_params.infinite = true;
-        }
-    }
+    // for (int i = 1; i < (int) commands.size(); i++) { // TODO Error checking needed
+    //     if (commands[i] == "searchmoves") {
+    //         for (int j = i + 1; j < (int) commands.size(); j++) {
+    //             Move move = parseMove(commands[j]);
+    //             if (move == 0) continue;
+    //             go_params.moves.push_back(move);
+    //         }
+    //     } else if (commands[i] == "ponder") {
+    //         // TODO
+    //     } else if (commands[i] == "wtime") {
+    //         go_params.wtime = stoi(commands[i + 1]);
+    //     } else if (commands[i] == "btime") {
+    //         go_params.btime = stoi(commands[i + 1]);
+    //     } else if (commands[i] == "winc") {
+    //         go_params.winc = stoi(commands[i + 1]);
+    //     } else if (commands[i] == "binc") {
+    //         go_params.binc = stoi(commands[i + 1]);
+    //     } else if (commands[i] == "movestogo") {
+    //         go_params.moves_to_go = stoi(commands[i + 1]);
+    //     } else if (commands[i] == "depth") {
+    //         go_params.depth = stoi(commands[i + 1]);
+    //     } else if (commands[i] == "nodes") {
+    //         go_params.nodes = stoi(commands[i + 1]);
+    //     } else if (commands[i] == "mate") {
+    //         go_params.mate = stoi(commands[i + 1]);
+    //     } else if (commands[i] == "movetime") {
+    //         go_params.movetime = stoi(commands[i + 1]);
+    //     } else if (commands[i] == "infinite") {
+    //         go_params.infinite = true;
+    //     }
+    // }
 
-    std::thread searchThread(&Position::search, &this->position, go_params);
-    searchThread.detach();
+    if (searchTree == false) {
+        searchTree = true;
+        std::thread searchThread(&Sicario::mcts, this);
+        searchThread.detach();
+        // std::thread searchThread2(&Sicario::mcts, this);
+        // searchThread2.detach();
+        // std::thread searchThread3(&Sicario::mcts, this);
+        // searchThread3.detach();
+        // std::thread searchThread4(&Sicario::mcts, this);
+        // searchThread4.detach();
+        // std::thread searchThread5(&Sicario::mcts, this);
+        // searchThread5.detach();
+        // std::thread searchThread6(&Sicario::mcts, this);
+        // searchThread6.detach();
+        // std::thread searchThread7(&Sicario::mcts, this);
+        // searchThread7.detach();
+        // std::thread searchThread8(&Sicario::mcts, this);
+        // searchThread8.detach();
+        // std::thread searchThread9(&Sicario::mcts, this);
+        // searchThread9.detach();
+        // std::thread searchThread10(&Sicario::mcts, this);
+        // searchThread10.detach();
+        // std::thread searchThread11(&Sicario::mcts, this);
+        // searchThread11.detach();
+    }
 }
 
 void Sicario::handleStop() {
-    // TODO
+    std::cout << "handle stop" << '\n';
+    searchTree = false;
 }
 
 void Sicario::handlePonderHit() {

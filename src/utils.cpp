@@ -76,3 +76,10 @@ void displayBB(uint64_t position) {
     }
     std::cout << '\n' << std::flush;
 }
+
+// uint64_t random64bit() {
+//     std::random_device rd;
+//     std::default_random_engine generator(rd());
+//     std::uniform_int_distribution<long long unsigned> distribution(0,0xFFFFFFFFFFFFFFFF);
+//     return distribution(generator);
+// }
