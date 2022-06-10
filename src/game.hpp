@@ -245,4 +245,29 @@ class MoveList {
 
 std::string concatFEN(std::vector<std::string> strings);
 
+/**
+ * Generate zobrist piece hashes using a predefined seed.
+ * @return: Array of size 12 (each piece for each colour) containing arrays of size 64 Hashes.
+ */
+std::array<std::array<Hash, 64>, 12> generatePieceHashes();
+
+/**
+ * Generate zobrist hashes for the turn using predefined seed.
+ * @return: Hash representing turn.
+ */
+Hash generateTurnHash();
+
+/**
+ * Generate zobrist hashes for different castling permissions combinations using a predefined seed.
+ * @return: Array of size 16 (the number of possible castling permission combinations) of Hashes.
+ */
+std::array<Hash, 16> generateCastlingHash();
+
+/**
+ * Generate zobrist hashes for en passant file using predefined seed.
+ * @return: Array of size 8 (number of files) of Hashes.
+ * @note: The colour of the player who can capture en passant is taken care of by the turn hash.
+ */
+std::array<Hash, 8> generateEnPassantHash();
+
 #endif
