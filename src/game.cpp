@@ -29,10 +29,10 @@ namespace Indices {
  * Hashes used for zobrist.
  */
 namespace Hashes {
-    std::array<std::array<Hash, 64>, 12> PIECES = generatePieceHashes();
-    Hash TURN = generateTurnHash();
-    std::array<Hash, 16> CASTLING = generateCastlingHash();
-    std::array<Hash, 8> EN_PASSANT = generateEnPassantHash();
+    const std::array<std::array<Hash, 64>, 12> PIECES = generatePieceHashes();
+    const Hash TURN = generateTurnHash();
+    const std::array<Hash, 16> CASTLING = generateCastlingHash();
+    const std::array<Hash, 8> EN_PASSANT = generateEnPassantHash();
 }
 
 void Position::setCheckers() {
