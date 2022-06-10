@@ -34,49 +34,54 @@ enum KnightDirection {
  * Compute pseudolegal moves of the king on each square.
  * @return: Array of vectors of pseudolegal moves.
  * @note: Does not take into account king potentially moving into check.
+ * @note: Does not take into account king potentially taking own pieces.
  */
-std::array<std::vector<Move>, 64> generateKingMoves();
+std::array<std::vector<Move>, 64> computeKingMoves();
 
 /**
  * Compute pseudolegal moves of the knight on each square.
  * @return: Array of vectors of pseudolegal moves.
  * @note: Does not take into account if the knight is pinned.
+ * @note: Does not take into account if knight takes own pieces.
  */
-std::array<std::vector<Move>, 64> generateKnightMoves();
+std::array<std::vector<Move>, 64> computeKnightMoves();
 
 /**
  * Compute pseudolegal moves of the pawn on each square.
  * @return: Array of array of vectors of pseudolegal moves.
  * @note: Does not take into account if the pawn is pinned.
+ * @note: Does not take into account capturing own pieces.
  * @note: Black array is 0, white array is 1.
  */
-std::array<std::array<std::vector<Move>, 64>, 2> generatePawnMoves();
+std::array<std::array<std::vector<Move>, 64>,2> computePawnMoves();
 
 /**
  * Compute pseudolegal moves of the rook on each square.
  * @return: Array of vectors of pseudolegal moves.
  * @note: Does not take into account if the rook is pinned.
+ * @note: Does not take into account if rook captures own pieces.
  */
-std::array<std::vector<std::vector<Move>>, 64> generateRookMoves();
+std::array<std::vector<std::vector<Move>>, 64> computeRookMoves();
 
 /**
  * Compute pseudolegal moves of the bishop on each square.
  * @return: Array of vectors of pseudolegal moves.
  * @note: Does not take into account if the bishop is pinned.
+ * @note: Does not take into account if bishop captures own pieces.
  */
-std::array<std::vector<std::vector<Move>>, 64> generateBishopMoves();
+std::array<std::vector<std::vector<Move>>, 64> computeBishopMoves();
 
 /**
  * Compute the rook indices into the move set for the magic indices.
  * @return: Array of vectors of ints of the rook index into the move set.
  */
-std::array<std::vector<int>, 64> generateRookIndices();
+std::array<std::vector<int>, 64> computeRookIndices();
 
 /**
  * Compute the bishop indices into the move set for the magic indices.
  * @return: Array of vectors of ints of the bishop index into the move set.
  */
-std::array<std::vector<int>, 64> generateBishopIndices();
+std::array<std::vector<int>, 64> computeBishopIndices();
 
 /**
  * Hash the ordered integers in values to a unique index.
@@ -132,113 +137,5 @@ struct History {
     PieceType captured;
     uint64_t hash;
 };
-
-std::vector<std::vector<int>> computeRookIndices();
-std::vector<std::vector<int>> computeBishopIndices();
-std::vector<MovesStruct> computeEnPassantMoves();
-std::vector<MovesStruct> computeDoublePushMoves();
-std::vector<std::vector<Bitboard>> computeLevelRays();
-std::vector<std::vector<Bitboard>> computeDiagonalRays();
-
-/**
- * Calculates the index into the move_set of a particular move family.
- *
- * @param masked_reach: A bitboard of the reach of the piece with own pieces masked out.
- * @param move_family: A pointer to Moves struct holding the move family. The block_bits vector MUST hold the squares
- *      in order from smallest to largest.
- * @return:  Index into the move_set.
- */
-int moveSetIndex(uint64_t masked_reach, MovesStruct* move_family);
-
-/**
- * Finds and returns the position of the most significant set bit. If no bits are set, returns 0.
- * @param n: The integer to find the MSB.
- * @return: The most significant bit position.
- */
-int MSB(int n);
-
-/**
- * Returns true if the nths bit of position is set, else false.
- *
- * @param position: A bitboard.
- * @param n: The wanted bit.
- * @return: True if bit is set, else false.
- */
-bool bitAt(uint64_t position, int n);
-
-/**
- * Returns the index from BISHOP_INDEX into BISHOP_MOVES based on the square and
- * occupancy.
- *
- * @param position: A bitboard of the pieces on the board.
- * @param square: The square of the piece whose moves we want.
- */
-const int bishopIndex(const uint64_t position, Square square);
-
-/**
- * Iterates through the squares and call functions to compute bishop moves and
- * calculate indices.
- *
- * @param BISHOP_INDEX: Array of vectors holding ints where indices into the
- *      bishop attack sets are set.
- * @param BISHOP_MOVES: Array of bishop move sets to store precomputed moves.
- */
-std::vector<MovesStruct> computeBishopMoves();
-
-/**
- * Computes the blocking moves (and captures in case of check) for bishops on
- * each square.
- *
- * @param BISHOP_BLOCKS: A vector of move structs.
- */
-std::vector<MovesStruct> computeBishopBlocks();
-
-/**
- * Compute the king moves.
- * @param KING_MOVES: The array of king moves to be computed.
- */
-std::vector<MovesStruct> computeKingMoves();
-
-std::vector<MovesStruct> computeCastling();
-
-/**
- * Compute the knight moves.
- * @param KNIGHT_MOVES: Array of knight moves to be computed.
- */
-std::vector<MovesStruct> computeKnightMoves();
-
-/**
- * Computes the pawn moves.
- * @param PAWN_MOVES: A 2d array of moves structs for pawns.
- * @param EN_PASSANT_MOVES: Array of en-passant moves structs. 32 is the offset
- *  to index a moves struct. move_set index of 1 is for left ep, 0 is for right
- *  ep.
- * @param DOUBLE_PUSH: An array of moves structs for double pawn push blocks.
- */
-std::vector<std::vector<MovesStruct>> computePawnMoves();
-
-/**
- * Returns the index from ROOK_INDEX into ROOK_MOVES based on the square and
- * occupancy.
- * @param position: A bitboard of the pieces on the board.
- * @param square: The square of the piece whose moves we want.
- * @return: Index into ROOK_MOVES.
- */
-const int rookIndex(const uint64_t position, Square square);
-
-/**
- * Iterates through the squares and call functions to compute rook moves and
- * calculate indices.
- * @param ROOK_INDEX: Array of vectors holding ints where indices into the rook
- *      attack sets are set.
- * @param ROOK_MOVES: Move struct to store the moves.
- */
-std::vector<MovesStruct> computeRookMoves();
-
-/**
- * Computes the blocking moves (and captures in case of check) for rooks on each
- * square.
- */
-std::vector<MovesStruct> computeRookBlocks();
 
 #endif

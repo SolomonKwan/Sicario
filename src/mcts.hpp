@@ -2,7 +2,9 @@
 #ifndef MCTS_HPP
 #define MCTS_HPP
 
-#include "search.hpp"
+#include <atomic>
+#include <chrono>
+#include "game.hpp"
 #include "constants.hpp"
 
 typedef Move Edge;
@@ -35,13 +37,13 @@ class Node {
         float value = 0;
         float visits = 0;
 
-        Node* select(Searcher&);
-        Node* expand(Searcher&);
-        float simulate(Searcher&);
-        void rollback(float, Searcher&);
+        Node* select();
+        Node* expand();
+        float simulate();
+        void rollback();
 
-        float UCB1(Searcher&) const;
-        Node* bestChild(Searcher&);
+        float UCB1() const;
+        Node* bestChild();
 };
 
 #endif

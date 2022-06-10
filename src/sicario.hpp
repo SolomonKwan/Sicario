@@ -2,6 +2,7 @@
 #ifndef EVALUATE_HPP
 #define EVALUATE_HPP
 
+#include <atomic>
 #include "constants.hpp"
 #include "game.hpp"
 #include "uci.hpp"
@@ -14,6 +15,7 @@ class Sicario {
     private:
         Position position;
         SicarioConfigs sicarioConfigs;
+        std::atomic_bool searchTree = false;
 
         // UCI command processing
         void processInput(std::string&);
@@ -81,6 +83,9 @@ class Sicario {
         OptionInfo uciElo { "UCI_Elo", "spin", "3000", "1000", "3500" };
         OptionInfo uciAnalyseMode { "UCI_AnalyseMode", "check", "true" };
         OptionInfo uciOpponent { "UCI_Opponent", "string", "" };
+
+        // Tree search
+        void mcts();
 };
 
 #endif

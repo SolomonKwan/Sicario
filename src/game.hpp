@@ -9,7 +9,7 @@
 
 #define KIWIPETE "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1"
 #define MAX_MOVES 500
-#define MAX_MOVE_SETS 50
+#define MOVESET_SIZE 32
 #define DEFAULT_HASH_SIZE 16
 
 void printMove(Move move, bool extraInfo);
@@ -40,18 +40,6 @@ struct PV {
     float score;
 };
 
-class SearchInfo {
-    public:
-        SearchInfo(int hashSize);
-        void setHashSize(int hashSize);
-
-    private:
-        int originalSize = DEFAULT_HASH_SIZE;
-        std::unordered_map<Hash, PV> PV_table;
-
-        void clearTable();
-};
-
 struct GoParams;
 
 /**
@@ -60,28 +48,16 @@ struct GoParams;
 class Position {
     public:
         Position(std::string = STANDARD_GAME);
-        ExitCode run();
-        uint64_t perft(int, bool = false);
         ExitCode parseFen(std::string);
         void display() const;
-        void setPlayer(Player, std::string);
-        void toggleQuiet();
 
-        // Static position evaluation
-        bool isEndGame() const;
-        int psqt() const;
-        int material() const;
+        // Game logic
+        void getMoves(int& moves_index, std::vector<Move>* pos_moves[MOVESET_SIZE]);
 
         // Tree search
-        void setDepth(int);
-        void setHashSize(int);
-        void search(GoParams);
         void makeMove(Move);
         void undoMove();
         Move pseudoRandomMove(MoveList&, Player);
-
-        // Move generation
-        void getMoves(int&, std::vector<Move>*[MAX_MOVE_SETS]);
 
         // Accessors
         Hash getHash();
@@ -137,15 +113,19 @@ class Position {
         std::unordered_map<Bitboard, uint64_t> perft_hash;
 
         // Evaluation and search
-        SearchInfo searchInfo;
         int depth = 3;
 
-        // Move ordering
-        int scoreMove(Move);
-        int kingSafety(Move);
-        int scoreCastlingSafety(Move);
-        int scoreKingSafety(Move);
-        int captures(Move);
+
+
+
+
+        void setCheckers();
+        Bitboard isAttacked(const Square square, const Player player);
+
+
+
+
+
 
         // EOG checks
         bool insufficientMaterial();
@@ -154,19 +134,16 @@ class Position {
         // Game logic
         void checkCastlingEnPassantMoves(uint, uint, Move&);
         bool validMove(Move, MoveList&);
-        bool isChecked();
-        bool isDoubleChecked();
+        bool inCheck();
+        bool inDoubleCheck();
         Bitboard getBishopCheckRays(Square, Bitboard&);
         Bitboard getRookCheckRays(Square, Bitboard&);
         Bitboard getPawnCheckers(Square, Bitboard&);
         Bitboard getKnightCheckers(Square, Bitboard&);
         const int rookBlockIndex(Bitboard, Square);
-        Bitboard isAttacked(const Square, const bool);
         Bitboard isOccupied(const Square);
-        void setBitboards();
         bool oneBitSet(Bitboard);
         Bitboard getKingAttackers(const Square, const bool) const;
-        void setCheckers();
         Bitboard getKingAttackBitBoard() const;
 
         // Position updates
@@ -196,23 +173,23 @@ class Position {
         Bitboard pawnMoveArgs(Square);
 
         // Normal move generation
-        void getNormalMoves(std::vector<Move>*[MAX_MOVE_SETS], int&);
-        void getKingMoves(std::vector<Move>*[MAX_MOVE_SETS], int&);
-        void getQueenMoves(std::vector<Move>*[MAX_MOVE_SETS], int&);
-        void getRookMoves(std::vector<Move>*[MAX_MOVE_SETS], int&);
-        void getBishopMoves(std::vector<Move>*[MAX_MOVE_SETS], int&);
-        void getKnightMoves(std::vector<Move>*[MAX_MOVE_SETS], int&);
-        void getPawnMoves(std::vector<Move>*[MAX_MOVE_SETS], int&);
-        void getRookPinMoves(int, std::vector<Move>*[MAX_MOVE_SETS], int&);
-        void getBishopPinMoves (int, std::vector<Move>*[MAX_MOVE_SETS], int&);
-        void getCastlingMoves(std::vector<Move>*[MAX_MOVE_SETS], int&);
-        void getEpMoves(std::vector<Move>*[MAX_MOVE_SETS], int&);
-        void horizontalPinEp(int, bool, int, int, int, std::vector<Move>*[MAX_MOVE_SETS], int&);
-        void diagonalPinEp(int, bool, int, int, int, std::vector<Move>*[MAX_MOVE_SETS], int&);
+        void getNormalMoves(std::vector<Move>*[MOVESET_SIZE], int&);
+        void getKingMoves(std::vector<Move>*[MOVESET_SIZE], int&);
+        void getQueenMoves(std::vector<Move>*[MOVESET_SIZE], int&);
+        void getRookMoves(std::vector<Move>*[MOVESET_SIZE], int&);
+        void getBishopMoves(std::vector<Move>*[MOVESET_SIZE], int&);
+        void getKnightMoves(std::vector<Move>*[MOVESET_SIZE], int&);
+        void getPawnMoves(std::vector<Move>*[MOVESET_SIZE], int&);
+        void getRookPinMoves(int, std::vector<Move>*[MOVESET_SIZE], int&);
+        void getBishopPinMoves (int, std::vector<Move>*[MOVESET_SIZE], int&);
+        void getCastlingMoves(std::vector<Move>*[MOVESET_SIZE], int&);
+        void getEpMoves(std::vector<Move>*[MOVESET_SIZE], int&);
+        void horizontalPinEp(int, bool, int, int, int, std::vector<Move>*[MOVESET_SIZE], int&);
+        void diagonalPinEp(int, bool, int, int, int, std::vector<Move>*[MOVESET_SIZE], int&);
 
         // Check move generation
-        void getCheckedMoves(std::vector<Move>*[MAX_MOVE_SETS], int&);
-        void getCheckedEp(Bitboard, std::vector<Move>*[MAX_MOVE_SETS], int&);
+        void getCheckMoves(std::vector<Move>*[MOVESET_SIZE], int&);
+        void getCheckedEp(Bitboard, std::vector<Move>*[MOVESET_SIZE], int&);
 
         // Move reading and parsing
         Move chooseMove(MoveList&);
@@ -261,16 +238,12 @@ class MoveList {
         Iterator begin();
         Iterator end();
 
-        std::vector<Move>* moves[MAX_MOVE_SETS];
-        int moves_index;
+        std::vector<Move>* moveSets[MOVESET_SIZE];
+        int moves_index = 0;
         Move endMove; // Dummy move for end of iterator. Just need the address.
 };
 
 std::string concatFEN(std::vector<std::string> strings);
-
-namespace Play {
-    void init();
-}
 
 /**
  * Generate zobrist piece hashes using a predefined seed.
