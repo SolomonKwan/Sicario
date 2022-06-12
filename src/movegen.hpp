@@ -84,6 +84,38 @@ std::array<std::vector<int>, 64> computeRookIndices();
 std::array<std::vector<int>, 64> computeBishopIndices();
 
 /**
+ * @brief Gets the rook index into the precomputed reach arrays.
+ * @param occupancy The occupancy bits of concern.
+ * @param square The square the rook of concern is on.
+ * @return Index into the precomputed rook reach array.
+ */
+inline int getRookReachIndex(Bitboard occupancy, Square square);
+
+/**
+ * @brief Gets the rook index into the precomputed moves arrays.
+ * @param reach The reach of the piece. Each set bit is a legal destination square.
+ * @param square The square the rook of concern is on.
+ * @return Index into the precomputed rook moves array.
+ */
+inline int getRookMovesIndex(Bitboard reach, Square square);
+
+/**
+ * @brief Gets the bishop index into the precomputed reach arrays.
+ * @param occupancy The occupancy bits of concern.
+ * @param square The square the bishop of concern is on.
+ * @return Index into the precomputed bishop reach array.
+ */
+inline int getBishopReachIndex(Bitboard occupancy, Square square);
+
+/**
+ * @brief Gets the bishop index into the precomputed moves arrays.
+ * @param reach The reach of the piece. Each set bit is a legal destination square.
+ * @param square The square the bishop of concern is on.
+ * @return Index into the precomputed bishop moves array.
+ */
+inline int getBishopMovesIndex(Bitboard reach, Square square);
+
+/**
  * Hash the ordered integers in values to a unique index.
  * @param values: Ordered collection of integers.
  * @param ranges: The number ranges[i] is the cardinality of the set from which values[i] comes from.
