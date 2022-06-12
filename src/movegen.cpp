@@ -241,7 +241,7 @@ std::array<std::vector<int>, 64> computeRookIndices() {
                 if (!westBlock && ((j >> shift) & 1UL)) westBlock = k + 1;
             }
 
-            uint16_t magicIndex = ((occ * rookMagicNums[square]) >> rookShifts[square]);
+            uint16_t magicIndex = ((occ * rookReachMagicNumbers[square]) >> rookReachShifts[square]);
             int mappedIndex = getIndex(
                 {northBlock, eastBlock, southBlock, westBlock},
                 {northSize ? northSize + 1 : 0, eastSize ? eastSize + 1 : 0, southSize ? southSize + 1 : 0,
@@ -286,7 +286,7 @@ std::array<std::vector<int>, 64> computeBishopIndices() {
                 if (!northwestBlock && ((j >> shift) & 1UL)) northwestBlock = k + 1;
             }
 
-            uint16_t magicIndex = ((occ * bishopMagicNums[square]) >> bishopShifts[square]);
+            uint16_t magicIndex = ((occ * bishopReachMagicNumbers[square]) >> bishopReachShifts[square]);
             int mappedIndex = getIndex(
                 {northeastBlock, southeastBlock, southwestBlock, northwestBlock},
                 {northeastSize ? northeastSize + 1 : 0, southeastSize ? southeastSize + 1 : 0,
@@ -296,6 +296,22 @@ std::array<std::vector<int>, 64> computeBishopIndices() {
         }
     }
     return bishopIndices;
+}
+
+inline int getRookReachIndex(Bitboard occupancy, Square square) {
+    return (occupancy * rookReachMagicNumbers[square]) >> rookReachShifts[square];
+}
+
+inline int getRookMovesIndex(Bitboard reach, Square square) {
+    return (reach * rookMovesMagicNumbers[square] >> rookMovesShifts[square]);
+}
+
+inline int getBishopReachIndex(Bitboard occupancy, Square square) {
+    return (occupancy * bishopReachMagicNumbers[square]) >> bishopReachShifts[square];
+}
+
+inline int getBishopMovesIndex(Bitboard reach, Square square) {
+    return (reach * bishopMovesMagicNumbers[square] >> bishopMovesShifts[square]);
 }
 
 int getIndex(std::vector<int> values, std::vector<int> ranges) {

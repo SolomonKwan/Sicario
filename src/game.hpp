@@ -12,6 +12,8 @@
 #define MOVESET_SIZE 32
 #define DEFAULT_HASH_SIZE 16
 
+typedef std::vector<Move>* MoveListArray[MOVESET_SIZE];
+
 void printMove(Move move, bool extraInfo);
 
 inline MoveType type(Move move) {
@@ -51,8 +53,12 @@ class Position {
         ExitCode parseFen(std::string);
         void display() const;
 
-        // Game logic
-        void getMoves(int& moves_index, std::vector<Move>* pos_moves[MOVESET_SIZE]);
+        /**
+         * @brief Retrives all legal moves of the current position.
+         * @param moves_index Current index of the first empty position in the pos_moves array.
+         * @param pos_moves Array that holds pointers to vectors of moves.
+         */
+        void getMoves(int& moves_index, MoveListArray pos_moves);
 
         // Tree search
         void makeMove(Move);
@@ -115,17 +121,146 @@ class Position {
         // Evaluation and search
         int depth = 3;
 
+        /**
+         * @brief Checks if the specified square is attacked by the specified player.
+         * @param square Square to check if attacked by "player".
+         * @param player Attacking player to check.
+         * @param ignoreKing Ignore the ~"player" king when calculating. Used for king check moves.
+         * @return Bitboard whose set bits indicate a piece belonging to "player" that attacks the square.
+         */
+        Bitboard isAttacked(const Square square, const Player player, const bool ignoreKing = false);
 
-
-
-
+        /**
+         * @brief Sets the bitboard of checkers.
+         */
         void setCheckers();
-        Bitboard isAttacked(const Square square, const Player player);
+
+        /**
+         * @brief Sets the bitboard of pinned pieces.
+         */
+        void setPinnedPieces();
+
+        /**
+         * @brief Checks if king of the current player to move is in double-check.
+         * @return: True if in double-check, else false.
+         */
+        bool inDoubleCheck();
+
+        /**
+         * @brief Check if king of current player to move is in check.
+         * @return: True if in check, else false.
+         */
+        bool inCheck();
+
+        /**
+         * @brief Retrives and adds the vector of legal king moves of the side to move to the pos_moves array.
+         * @param moves_index Current index of the first empty position in the pos_moves array.
+         * @param pos_moves Array that holds pointers to vectors of moves.
+         */
+        void getKingMoves(int& moves_index, MoveListArray pos_moves);
+
+        /**
+         * @brief Calls other functions to add the legal moves for when the king is in check.
+         * @param moves_index Current index of the first empty position in the pos_moves array.
+         * @param pos_moves Array that holds pointers to vectors of moves.
+         */
+        void getCheckMoves(int& moves_index, MoveListArray pos_moves);
+
+        /**
+         * @brief Retries and adds the vector of legal moves for the queens when king is in check.
+         * @param moves_index Current index of the first empty position in the pos_moves array.
+         * @param pos_moves Array that holds pointers to vectors of moves.
+         */
+        void getQueenCheckedMoves(int& moves_index, MoveListArray pos_moves);
+
+        /**
+         * @brief Retries and adds the vector of legal moves for the rooks when king is in check.
+         * @param moves_index Current index of the first empty position in the pos_moves array.
+         * @param pos_moves Array that holds pointers to vectors of moves.
+         */
+        void getRookCheckedMoves(int& moves_index, MoveListArray pos_moves);
+
+        /**
+         * @brief Retries and adds the vector of legal moves for the bishop when king is in check.
+         * @param moves_index Current index of the first empty position in the pos_moves array.
+         * @param pos_moves Array that holds pointers to vectors of moves.
+         */
+        void getBishopCheckedMoves(int& moves_index, MoveListArray pos_moves);
+
+        /**
+         * @brief Retries and adds the vector of legal moves for the knight when king is in check.
+         * @param moves_index Current index of the first empty position in the pos_moves array.
+         * @param pos_moves Array that holds pointers to vectors of moves.
+         */
+        void getKnightCheckedMoves(int& moves_index, MoveListArray pos_moves);
+
+        /**
+         * @brief Retries and adds the vector of legal moves for the pawn when king is in check.
+         * @param moves_index Current index of the first empty position in the pos_moves array.
+         * @param pos_moves Array that holds pointers to vectors of moves.
+         */
+        void getPawnCheckedMoves(int& moves_index, MoveListArray pos_moves);
+
+        /**
+         * @brief Calls other functions to add the legal moves for when there is no check.
+         * @param moves_index Current index of the first empty position in the pos_moves array.
+         * @param pos_moves Array that holds pointers to vectors of moves.
+         */
+        void getNormalMoves(int& moves_index, MoveListArray pos_moves);
+
+        /**
+         * @brief Retrives and adds the vector of legal queen moves of the side to move to the pos_moves array.
+         * @param moves_index Current index of the first empty position in the pos_moves array.
+         * @param pos_moves Array that holds pointers to vectors of moves.
+         */
+        void getQueenMoves(int& moves_index, MoveListArray pos_moves);
+
+        /**
+         * @brief Retrives and adds the vector of legal rook moves of the side to move to the pos_moves array.
+         * @param moves_index Current index of the first empty position in the pos_moves array.
+         * @param pos_moves Array that holds pointers to vectors of moves.
+         */
+        void getRookMoves(int& moves_index, MoveListArray pos_moves);
+
+        /**
+         * @brief Retrives and adds the vector of legal bishop moves of the side to move to the pos_moves array.
+         * @param moves_index Current index of the first empty position in the pos_moves array.
+         * @param pos_moves Array that holds pointers to vectors of moves.
+         */
+        void getBishopMoves(int& moves_index, MoveListArray pos_moves);
+
+        /**
+         * @brief Retrives and adds the vector of legal knight moves of the side to move to the pos_moves array.
+         * @param moves_index Current index of the first empty position in the pos_moves array.
+         * @param pos_moves Array that holds pointers to vectors of moves.
+         */
+        void getKnightMoves(int& moves_index, MoveListArray pos_moves);
+
+        /**
+         * @brief Retrives and adds the vector of legal castling moves of the side to move to the pos_moves array.
+         * @param moves_index Current index of the first empty position in the pos_moves array.
+         * @param pos_moves Array that holds pointers to vectors of moves.
+         */
+        void getCastlingMoves(int& moves_index, MoveListArray pos_moves);
+
+        /**
+         * @brief Retrives and adds the vector of legal pawn moves of the side to move to the pos_moves array.
+         * @param moves_index Current index of the first empty position in the pos_moves array.
+         * @param pos_moves Array that holds pointers to vectors of moves.
+         */
+        void getPawnMoves(int& moves_index, MoveListArray pos_moves);
 
 
 
 
 
+
+
+
+
+
+        void getRookPinMoves(int, std::vector<Move>*[MOVESET_SIZE], int&);
+        void getBishopPinMoves (int, std::vector<Move>*[MOVESET_SIZE], int&);
 
         // EOG checks
         bool insufficientMaterial();
@@ -134,8 +269,6 @@ class Position {
         // Game logic
         void checkCastlingEnPassantMoves(uint, uint, Move&);
         bool validMove(Move, MoveList&);
-        bool inCheck();
-        bool inDoubleCheck();
         Bitboard getBishopCheckRays(Square, Bitboard&);
         Bitboard getRookCheckRays(Square, Bitboard&);
         Bitboard getPawnCheckers(Square, Bitboard&);
@@ -173,22 +306,10 @@ class Position {
         Bitboard pawnMoveArgs(Square);
 
         // Normal move generation
-        void getNormalMoves(std::vector<Move>*[MOVESET_SIZE], int&);
-        void getKingMoves(std::vector<Move>*[MOVESET_SIZE], int&);
-        void getQueenMoves(std::vector<Move>*[MOVESET_SIZE], int&);
-        void getRookMoves(std::vector<Move>*[MOVESET_SIZE], int&);
-        void getBishopMoves(std::vector<Move>*[MOVESET_SIZE], int&);
-        void getKnightMoves(std::vector<Move>*[MOVESET_SIZE], int&);
-        void getPawnMoves(std::vector<Move>*[MOVESET_SIZE], int&);
-        void getRookPinMoves(int, std::vector<Move>*[MOVESET_SIZE], int&);
-        void getBishopPinMoves (int, std::vector<Move>*[MOVESET_SIZE], int&);
-        void getCastlingMoves(std::vector<Move>*[MOVESET_SIZE], int&);
-        void getEpMoves(std::vector<Move>*[MOVESET_SIZE], int&);
         void horizontalPinEp(int, bool, int, int, int, std::vector<Move>*[MOVESET_SIZE], int&);
         void diagonalPinEp(int, bool, int, int, int, std::vector<Move>*[MOVESET_SIZE], int&);
 
         // Check move generation
-        void getCheckMoves(std::vector<Move>*[MOVESET_SIZE], int&);
         void getCheckedEp(Bitboard, std::vector<Move>*[MOVESET_SIZE], int&);
 
         // Move reading and parsing
