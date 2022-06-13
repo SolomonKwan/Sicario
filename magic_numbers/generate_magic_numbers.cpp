@@ -68,7 +68,7 @@ uint64_t randomMagicNumber(float dist) {
 
     uint64_t res = 0ULL;
     for (int i = 0; i < (int)(dist * 64); i++) {
-        res |= 1ULL << squares[i];
+        res |= squares[i];
     }
 
     return res;

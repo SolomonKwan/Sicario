@@ -1,7 +1,7 @@
 
 FLAGS = g++ -std=c++17 -g -pedantic -Wall -O3 -pthread
 
-all: sicario test
+all: sicario
 
 movegen.o: movegen.cpp movegen.hpp constants.hpp game.hpp
 	$(FLAGS) -c movegen.cpp -o movegen.o
@@ -27,15 +27,5 @@ main.o: main.cpp movegen.hpp game.hpp uci.hpp sicario.hpp
 sicario: main.o game.o movegen.o uci.o sicario.o utils.o mcts.o
 	$(FLAGS) main.o game.o movegen.o uci.o sicario.o utils.o mcts.o -o sicario
 
-
-
-test.o: test.cpp movegen.hpp constants.hpp
-	$(FLAGS) -c test.cpp -o test.o
-
-test: test.o movegen.o
-	$(FLAGS) test.o movegen.o -o test
-
-
-
 clean:
-	rm *.o sicario test
+	rm *.o sicario

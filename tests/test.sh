@@ -41,7 +41,7 @@ perft_suite() {
 	while IFS= read -r line; do
 		local FEN="${line%%;*}"
 		val=$(sicario_value "$FEN" 6)
-		actualVal=$(echo "$line" | grep -o "D6 .*" | cut -c 4-)
+		actualVal=$(echo "$line", grep -o "D6 .*", cut -c 4-)
         GREEN='\033[0;32m'
         RED='\033[0;31m'
         NC='\033[0m'
@@ -123,7 +123,7 @@ perft() {
 		position fen $FEN
 		go perft $1
 	EOF
-	tail -n +2 ~/Sicario/tests/sf_result | sort > ~/Sicario/tests/sf_result_vd
+	tail -n +2 ~/Sicario/tests/sf_result, sort > ~/Sicario/tests/sf_result_vd
 	rm ~/Sicario/tests/sf_result
 
 	# Run sicario perft
@@ -134,7 +134,7 @@ perft() {
 		perft $1
 		exit
 	EOF
-	tail -n +21 ~/Sicario/tests/sc_result | sort > ~/Sicario/tests/sc_result_vd
+	tail -n +21 ~/Sicario/tests/sc_result, sort > ~/Sicario/tests/sc_result_vd
 	rm ~/Sicario/tests/sc_result
 
 	# Vimdiff the results
