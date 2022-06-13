@@ -298,14 +298,6 @@ std::array<std::vector<int>, 64> computeBishopIndices() {
     return bishopIndices;
 }
 
-inline int getRookReachIndex(Bitboard occupancy, Square square) {
-    return (occupancy * rookReachMagicNumbers[square]) >> rookReachShifts[square];
-}
-
-inline int getRookMovesIndex(Bitboard reach, Square square) {
-    return (reach * rookMovesMagicNumbers[square] >> rookMovesShifts[square]);
-}
-
 inline int getBishopReachIndex(Bitboard occupancy, Square square) {
     return (occupancy * bishopReachMagicNumbers[square]) >> bishopReachShifts[square];
 }

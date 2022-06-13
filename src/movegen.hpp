@@ -89,7 +89,9 @@ std::array<std::vector<int>, 64> computeBishopIndices();
  * @param square The square the rook of concern is on.
  * @return Index into the precomputed rook reach array.
  */
-inline int getRookReachIndex(Bitboard occupancy, Square square);
+inline int getRookReachIndex(Bitboard occupancy, Square square) {
+    return (occupancy * rookReachMagicNumbers[square]) >> rookReachShifts[square];
+}
 
 /**
  * @brief Gets the rook index into the precomputed moves arrays.
@@ -97,7 +99,9 @@ inline int getRookReachIndex(Bitboard occupancy, Square square);
  * @param square The square the rook of concern is on.
  * @return Index into the precomputed rook moves array.
  */
-inline int getRookMovesIndex(Bitboard reach, Square square);
+inline int getRookMovesIndex(Bitboard reach, Square square) {
+    return (reach * rookMovesMagicNumbers[square] >> rookMovesShifts[square]);
+}
 
 /**
  * @brief Gets the bishop index into the precomputed reach arrays.
