@@ -101,32 +101,104 @@ void run_getRookReachIndex_tests() {
     assertEquals<int>(ROOK_REACH_INDEX, rookReachIndex(pos2, square), rookReachIndex(pos3, square));
     assertEquals<int>(ROOK_REACH_INDEX, rookReachIndex(pos3, square), rookReachIndex(pos4, square));
 
-    // square = A2;
-    // pos1 = generatePos({A4, C2});
-    // pos2 = generatePos({A4, C2, G2, D2, A5, A6});
-    // pos3 = generatePos({A4, C2, D2, E2, F2, A7});
-    // pos4 = generatePos({A4, A5, A6, A7, C2, D2, E2, F2, G2});
-    // assertEquals<int>("getRookReachIndex4", rookReachIndex(pos1, square), rookReachIndex(pos2, square));
-    // assertEquals<int>("getRookReachIndex5", rookReachIndex(pos2, square), rookReachIndex(pos3, square));
-    // assertEquals<int>("getRookReachIndex6", rookReachIndex(pos3, square), rookReachIndex(pos4, square));
+    square = B2;
+    pos1 = generatePos({B4, C2});
+    pos2 = generatePos({B4, B5, B6, C2, G2, D2});
+    pos3 = generatePos({B4, B7, C2, D2, E2, F2});
+    pos4 = generatePos({B4, B5, B6, B7, C2, D2, E2, F2, G2});
+    assertEquals<int>(ROOK_REACH_INDEX, rookReachIndex(pos1, square), rookReachIndex(pos2, square));
+    assertEquals<int>(ROOK_REACH_INDEX, rookReachIndex(pos2, square), rookReachIndex(pos3, square));
+    assertEquals<int>(ROOK_REACH_INDEX, rookReachIndex(pos3, square), rookReachIndex(pos4, square));
 
-    // square = A3;
-    // pos1 = generatePos({A4, C3, A2});
-    // pos2 = generatePos({A4, C3, G3, D3, A5, A6, A2});
-    // pos3 = generatePos({A4, C3, D3, E3, F3, A7, A2});
-    // pos4 = generatePos({A2, A4, A5, A6, A7, C3, D3, E3, F3, G3});
-    // assertEquals<int>("getRookReachIndex7", rookReachIndex(pos1, square), rookReachIndex(pos2, square));
-    // assertEquals<int>("getRookReachIndex8", rookReachIndex(pos2, square), rookReachIndex(pos3, square));
-    // assertEquals<int>("getRookReachIndex9", rookReachIndex(pos3, square), rookReachIndex(pos4, square));
+    square = B3;
+    pos1 = generatePos({B2, B4, C3});
+    pos2 = generatePos({B2, B4, B5, B6, C3, G3, D3});
+    pos3 = generatePos({B2, B4, B7, C3, D3, E3, F3});
+    pos4 = generatePos({B2, B4, B5, B6, B7, C3, D3, E3, F3, G3});
+    assertEquals<int>(ROOK_REACH_INDEX, rookReachIndex(pos1, square), rookReachIndex(pos2, square));
+    assertEquals<int>(ROOK_REACH_INDEX, rookReachIndex(pos2, square), rookReachIndex(pos3, square));
+    assertEquals<int>(ROOK_REACH_INDEX, rookReachIndex(pos3, square), rookReachIndex(pos4, square));
 
-    // square = A4;
-    // pos1 = generatePos({A2, A5, C4});
-    // pos2 = generatePos({A2, A5, A6, C4, F4, G4});
-    // pos3 = generatePos({A2, A5, A6, C4, D4, F4, G4});
-    // pos4 = generatePos({A2, A5, A6, C4, D4, E4, F4, G4});
-    // assertEquals<int>("getRookReachIndex10", rookReachIndex(pos1, square), rookReachIndex(pos2, square));
-    // assertEquals<int>("getRookReachIndex11", rookReachIndex(pos2, square), rookReachIndex(pos3, square));
-    // assertEquals<int>("getRookReachIndex12", rookReachIndex(pos3, square), rookReachIndex(pos4, square));
+    square = B4;
+    pos1 = generatePos({B5, D4});
+    pos2 = generatePos({B5, B6, D4, E4});
+    pos3 = generatePos({B5, B6, D4, E4, F4});
+    pos4 = generatePos({B5, B6, B7, D4, E4, F4, G4});
+    assertEquals<int>(ROOK_REACH_INDEX, rookReachIndex(pos1, square), rookReachIndex(pos2, square));
+    assertEquals<int>(ROOK_REACH_INDEX, rookReachIndex(pos2, square), rookReachIndex(pos3, square));
+    assertEquals<int>(ROOK_REACH_INDEX, rookReachIndex(pos3, square), rookReachIndex(pos4, square));
+
+    square = C1;
+    pos1 = generatePos({C4, D1});
+    pos2 = generatePos({C4, C5, C6, D1, E1, F1});
+    pos3 = generatePos({C4, C7, D1, G1});
+    pos4 = generatePos({C4, C5, C6, C7, D1, E1, F1, G1});
+    assertEquals<int>(ROOK_REACH_INDEX, rookReachIndex(pos1, square), rookReachIndex(pos2, square));
+    assertEquals<int>(ROOK_REACH_INDEX, rookReachIndex(pos2, square), rookReachIndex(pos3, square));
+    assertEquals<int>(ROOK_REACH_INDEX, rookReachIndex(pos3, square), rookReachIndex(pos4, square));
+
+    square = C2;
+    pos1 = generatePos({C4, D2});
+    pos2 = generatePos({C4, C5, C6, D2, E2, F2});
+    pos3 = generatePos({C4, C7, D2, G2});
+    pos4 = generatePos({C4, C5, C6, C7, D2, E2, F2, G2});
+    assertEquals<int>(ROOK_REACH_INDEX, rookReachIndex(pos1, square), rookReachIndex(pos2, square));
+    assertEquals<int>(ROOK_REACH_INDEX, rookReachIndex(pos2, square), rookReachIndex(pos3, square));
+    assertEquals<int>(ROOK_REACH_INDEX, rookReachIndex(pos3, square), rookReachIndex(pos4, square));
+
+    square = C3;
+    pos1 = generatePos({C4, D3});
+    pos2 = generatePos({C4, C5, C6, D3, E3, F3});
+    pos3 = generatePos({C4, C7, D3, G3});
+    pos4 = generatePos({C4, C5, C6, C7, D3, E3, F3, G3});
+    assertEquals<int>(ROOK_REACH_INDEX, rookReachIndex(pos1, square), rookReachIndex(pos2, square));
+    assertEquals<int>(ROOK_REACH_INDEX, rookReachIndex(pos2, square), rookReachIndex(pos3, square));
+    assertEquals<int>(ROOK_REACH_INDEX, rookReachIndex(pos3, square), rookReachIndex(pos4, square));
+
+    square = C4;
+    pos1 = generatePos({C2, C5, D4});
+    pos2 = generatePos({C2, C5, C6, D4, E4, F4});
+    pos3 = generatePos({C2, C5, C7, D4, G4});
+    pos4 = generatePos({C2, C5, C6, C7, D4, E4, F4, G4});
+    assertEquals<int>(ROOK_REACH_INDEX, rookReachIndex(pos1, square), rookReachIndex(pos2, square));
+    assertEquals<int>(ROOK_REACH_INDEX, rookReachIndex(pos2, square), rookReachIndex(pos3, square));
+    assertEquals<int>(ROOK_REACH_INDEX, rookReachIndex(pos3, square), rookReachIndex(pos4, square));
+
+    square = D1;
+    pos1 = generatePos({D4, B1, F1});
+    pos2 = generatePos({D4, D5, B1, F1});
+    pos3 = generatePos({D4, D5, B1, F1, G1});
+    pos4 = generatePos({D4, D5, D6, D7, B1, F1, G1});
+    assertEquals<int>(ROOK_REACH_INDEX, rookReachIndex(pos1, square), rookReachIndex(pos2, square));
+    assertEquals<int>(ROOK_REACH_INDEX, rookReachIndex(pos2, square), rookReachIndex(pos3, square));
+    assertEquals<int>(ROOK_REACH_INDEX, rookReachIndex(pos3, square), rookReachIndex(pos4, square));
+
+    square = D2;
+    pos1 = generatePos({D4, B2, F2});
+    pos2 = generatePos({D4, D5, B2, F2});
+    pos3 = generatePos({D4, D5, B2, F2, G2});
+    pos4 = generatePos({D4, D5, D6, D7, B2, F2, G2});
+    assertEquals<int>(ROOK_REACH_INDEX, rookReachIndex(pos1, square), rookReachIndex(pos2, square));
+    assertEquals<int>(ROOK_REACH_INDEX, rookReachIndex(pos2, square), rookReachIndex(pos3, square));
+    assertEquals<int>(ROOK_REACH_INDEX, rookReachIndex(pos3, square), rookReachIndex(pos4, square));
+
+    square = D3;
+    pos1 = generatePos({D2, D4, B3, F3});
+    pos2 = generatePos({D2, D4, D5, B3, F3});
+    pos3 = generatePos({D2, D4, D5, B3, F3, G3});
+    pos4 = generatePos({D2, D4, D5, D6, D7, B3, F3, G3});
+    assertEquals<int>(ROOK_REACH_INDEX, rookReachIndex(pos1, square), rookReachIndex(pos2, square));
+    assertEquals<int>(ROOK_REACH_INDEX, rookReachIndex(pos2, square), rookReachIndex(pos3, square));
+    assertEquals<int>(ROOK_REACH_INDEX, rookReachIndex(pos3, square), rookReachIndex(pos4, square));
+
+    square = D4;
+    pos1 = generatePos({D2, D3, D5, B4, F4});
+    pos2 = generatePos({D2, D3, D5, B4, F4});
+    pos3 = generatePos({D2, D3, D5, B4, F4, G4});
+    pos4 = generatePos({D2, D3, D5, D6, D7, B4, F4, G4});
+    assertEquals<int>(ROOK_REACH_INDEX, rookReachIndex(pos1, square), rookReachIndex(pos2, square));
+    assertEquals<int>(ROOK_REACH_INDEX, rookReachIndex(pos2, square), rookReachIndex(pos3, square));
+    assertEquals<int>(ROOK_REACH_INDEX, rookReachIndex(pos3, square), rookReachIndex(pos4, square));
 }
 
 void run_getRookMovesIndex_tests() {
