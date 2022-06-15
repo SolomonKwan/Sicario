@@ -72,16 +72,28 @@ std::array<std::vector<std::vector<Move>>, 64> computeRookMoves();
 std::array<std::vector<std::vector<Move>>, 64> computeBishopMoves();
 
 /**
- * Compute the rook indices into the move set for the magic indices.
+ * Compute the rook indices into the reach index array.
  * @return: Array of vectors of ints of the rook index into the move set.
  */
 std::array<std::vector<int>, 64> computeRookReachIndices();
 
 /**
- * Compute the bishop indices into the move set for the magic indices.
+ * Compute the rook indices into the moves index array.
+ * @return: Array of vectors of ints of the rook index into the move set.
+ */
+std::array<std::vector<int>, 64> computeRookMovesIndices();
+
+/**
+ * Compute the bishop indices into the reach index array.
  * @return: Array of vectors of ints of the bishop index into the move set.
  */
 std::array<std::vector<int>, 64> computeBishopReachIndices();
+
+/**
+ * Compute the bishop indices into the mvoes index array.
+ * @return: Array of vectors of ints of the rook index into the move set.
+ */
+std::array<std::vector<int>, 64> computeBishopMovesIndices();
 
 /**
  * @brief Gets the rook index into the precomputed reach index array.
