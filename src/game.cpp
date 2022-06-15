@@ -21,8 +21,8 @@ namespace Moves {
  * Vector of indices for rook and bishop indexing.
  */
 namespace Indices {
-    const std::array<std::vector<int>, 64> ROOK = computeRookIndices();
-    const std::array<std::vector<int>, 64> BISHOP = computeBishopIndices();
+    const std::array<std::vector<int>, 64> ROOK = computeRookReachIndices();
+    const std::array<std::vector<int>, 64> BISHOP = computeBishopReachIndices();
 }
 
 /**

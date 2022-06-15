@@ -51,8 +51,8 @@ void assertEquals(TestType testType, T expected, T actual, int testNum) {
     }
 }
 
-const std::array<std::vector<int>, 64> ROOK = computeRookIndices();
-const std::array<std::vector<int>, 64> BISHOP = computeBishopIndices();
+const std::array<std::vector<int>, 64> ROOK = computeRookReachIndices();
+const std::array<std::vector<int>, 64> BISHOP = computeBishopReachIndices();
 
 int rookReachIndex(Bitboard occupancy, Square square) {
     return ROOK[square][getRookReachIndex(occupancy, square)];
