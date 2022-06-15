@@ -208,7 +208,7 @@ std::array<std::vector<std::vector<Move>>, 64> computeBishopMoves() {
     return bishopMoves;
 }
 
-std::array<std::vector<int>, 64> computeRookIndices() {
+std::array<std::vector<int>, 64> computeRookReachIndices() {
     std::array<std::vector<int>, 64> rookIndices;
     for (int square = A1; square <= H8; square++) {
         std::vector<int>& indices = rookIndices[square];
@@ -253,7 +253,12 @@ std::array<std::vector<int>, 64> computeRookIndices() {
     return rookIndices;
 }
 
-std::array<std::vector<int>, 64> computeBishopIndices() {
+std::array<std::vector<int>, 64> computeRookMovesIndices() {
+    std::array<std::vector<int>, 64> rookIndices;
+    return rookIndices;
+}
+
+std::array<std::vector<int>, 64> computeBishopReachIndices() {
     std::array<std::vector<int>, 64> bishopIndices;
     for (int square = A1; square <= H8; square++) {
         std::vector<int>& indices = bishopIndices[square];
@@ -298,20 +303,9 @@ std::array<std::vector<int>, 64> computeBishopIndices() {
     return bishopIndices;
 }
 
-inline int getRookReachIndex(Bitboard occupancy, Square square) {
-    return (occupancy * rookReachMagicNumbers[square]) >> rookReachShifts[square];
-}
-
-inline int getRookMovesIndex(Bitboard reach, Square square) {
-    return (reach * rookMovesMagicNumbers[square] >> rookMovesShifts[square]);
-}
-
-inline int getBishopReachIndex(Bitboard occupancy, Square square) {
-    return (occupancy * bishopReachMagicNumbers[square]) >> bishopReachShifts[square];
-}
-
-inline int getBishopMovesIndex(Bitboard reach, Square square) {
-    return (reach * bishopMovesMagicNumbers[square] >> bishopMovesShifts[square]);
+std::array<std::vector<int>, 64> computeBishopMovesIndices() {
+    std::array<std::vector<int>, 64> bishopIndices;
+    return bishopIndices;
 }
 
 int getIndex(std::vector<int> values, std::vector<int> ranges) {

@@ -72,48 +72,68 @@ std::array<std::vector<std::vector<Move>>, 64> computeRookMoves();
 std::array<std::vector<std::vector<Move>>, 64> computeBishopMoves();
 
 /**
- * Compute the rook indices into the move set for the magic indices.
+ * Compute the rook indices into the reach index array.
  * @return: Array of vectors of ints of the rook index into the move set.
  */
-std::array<std::vector<int>, 64> computeRookIndices();
+std::array<std::vector<int>, 64> computeRookReachIndices();
 
 /**
- * Compute the bishop indices into the move set for the magic indices.
+ * Compute the rook indices into the moves index array.
+ * @return: Array of vectors of ints of the rook index into the move set.
+ */
+std::array<std::vector<int>, 64> computeRookMovesIndices();
+
+/**
+ * Compute the bishop indices into the reach index array.
  * @return: Array of vectors of ints of the bishop index into the move set.
  */
-std::array<std::vector<int>, 64> computeBishopIndices();
+std::array<std::vector<int>, 64> computeBishopReachIndices();
 
 /**
- * @brief Gets the rook index into the precomputed reach arrays.
+ * Compute the bishop indices into the mvoes index array.
+ * @return: Array of vectors of ints of the rook index into the move set.
+ */
+std::array<std::vector<int>, 64> computeBishopMovesIndices();
+
+/**
+ * @brief Gets the rook index into the precomputed reach index array.
  * @param occupancy The occupancy bits of concern.
  * @param square The square the rook of concern is on.
  * @return Index into the precomputed rook reach array.
  */
-inline int getRookReachIndex(Bitboard occupancy, Square square);
+inline int getRookReachIndex(Bitboard occupancy, Square square) {
+    return (occupancy * rookReachMagicNumbers[square]) >> rookReachShifts[square];
+}
 
 /**
- * @brief Gets the rook index into the precomputed moves arrays.
+ * @brief Gets the rook index into the precomputed moves index array.
  * @param reach The reach of the piece. Each set bit is a legal destination square.
  * @param square The square the rook of concern is on.
  * @return Index into the precomputed rook moves array.
  */
-inline int getRookMovesIndex(Bitboard reach, Square square);
+inline int getRookMovesIndex(Bitboard reach, Square square) {
+    return (reach * rookMovesMagicNumbers[square] >> rookMovesShifts[square]);
+}
 
 /**
- * @brief Gets the bishop index into the precomputed reach arrays.
+ * @brief Gets the bishop index into the precomputed reach index arrays.
  * @param occupancy The occupancy bits of concern.
  * @param square The square the bishop of concern is on.
  * @return Index into the precomputed bishop reach array.
  */
-inline int getBishopReachIndex(Bitboard occupancy, Square square);
+inline int getBishopReachIndex(Bitboard occupancy, Square square) {
+    return (occupancy * bishopReachMagicNumbers[square]) >> bishopReachShifts[square];
+}
 
 /**
- * @brief Gets the bishop index into the precomputed moves arrays.
+ * @brief Gets the bishop index into the precomputed moves index arrays.
  * @param reach The reach of the piece. Each set bit is a legal destination square.
  * @param square The square the bishop of concern is on.
  * @return Index into the precomputed bishop moves array.
  */
-inline int getBishopMovesIndex(Bitboard reach, Square square);
+inline int getBishopMovesIndex(Bitboard reach, Square square) {
+    return (reach * bishopMovesMagicNumbers[square] >> bishopMovesShifts[square]);
+}
 
 /**
  * Hash the ordered integers in values to a unique index.
@@ -141,8 +161,8 @@ int pairingFunction(int n, int m, int N, int M);
  *              pieces included. Goes all the way to the edge of the board.
  *  block_bits: A vector of the end squares on each ray of the reach bitboard.
  *  move_set:   A vector of vectors of 16 bit unsigned integers. Each integer
- *              encodes a move as Promotion (4) | MoveType (4) | Destination (6)
- *              | Origin (6).
+ *              encodes a move as Promotion (4), MoveType (4), Destination (6)
+ *             , Origin (6).
  *  en_passant: Vector of vectors of en-passant moves. Used only for pawns.
  *  checked_moves: Unnorderd map whose keys are uint64_t ints with the possible
  *      destination squares (captures and blocks) set. The value is a vector of
