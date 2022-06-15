@@ -74,7 +74,28 @@ uint64_t randomMagicNumber(float dist) {
     return res;
 }
 
-void findRookMNs() {
+void generateCombo(std::array<int, 4> sizes, std::array<int, 4>& curr, std::vector<std::array<int, 4>>& res) {
+    res.push_back(curr);
+    if (curr == sizes) return;
+
+    curr[0]++;
+    for (int i = 0; i < (int)curr.size(); i++) {
+        if (curr[i] > sizes[i]) {
+            curr[i] = 0;
+            if (i != (int)curr.size() - 1) curr[i + 1]++;
+        }
+    }
+    generateCombo(sizes, curr, res);
+}
+
+std::vector<std::array<int, 4>> getEndCombinations(std::array<int, 4> sizes) {
+    std::vector<std::array<int, 4>> res;
+    std::array<int, 4> curr = {0, 0, 0, 0};
+    generateCombo(sizes, curr, res);
+    return res;
+}
+
+void findRookReachMNs() {
     for (int sq = 0; sq < 64; sq++) {
         int northSize = max(6 - (sq / 8), 0);
         int southSize = max(sq / 8 - 1, 0);
@@ -130,7 +151,56 @@ void findRookMNs() {
     }
 }
 
-void findBishopMNs() {
+void findRookMovesMNs() {
+    for (int sq = 0; sq < 64; sq++) {
+        int northSize = max(7 - (sq / 8), 0);
+        int southSize = max(sq / 8, 0);
+        int eastSize = max(7 - (sq % 8), 0);
+        int westSize = max(sq % 8, 0);
+        int totalSize = northSize + southSize + eastSize + westSize;
+
+        int attempt = 0;
+        float prob = 0.05;
+        while (true) {
+            if (attempt > 100000) {
+                attempt = 0;
+                prob += 0.05;
+            }
+
+            if (prob >= 1) {
+                cout << "Welp, the square " << squareName[sq] << " was fucked..." << '\n';
+                break;
+            }
+            uint64_t  magicNum = randomMagicNumber(prob);
+            unordered_set<int> indices;
+            bool duplicate = false;
+
+            // Build reach
+            for (std::array<int, 4> selection : getEndCombinations({northSize, eastSize, southSize, westSize})) {
+                uint64_t occ = 0ULL;
+
+                for (int i = 0; i < selection[0]; i++) occ |= 1ULL << (sq + N * (i + 1));
+                for (int i = 0; i < selection[1]; i++) occ |= 1ULL << (sq + E * (i + 1));
+                for (int i = 0; i < selection[2]; i++) occ |= 1ULL << (sq + S * (i + 1));
+                for (int i = 0; i < selection[3]; i++) occ |= 1ULL << (sq + W * (i + 1));
+
+                uint16_t magicIndex = ((occ * magicNum) >> (64 - totalSize));
+                if (indices.find(magicIndex) != indices.end()) {
+                    duplicate = true;
+                    break;
+                }
+            }
+
+            if (!duplicate) {
+                cout << squareName[sq] << " 0x" << std::hex << magicNum << " \t" << std::dec << (64 - totalSize) << '\n';
+                break;
+            }
+            attempt++;
+        }
+    }
+}
+
+void findBishopReachMNs() {
     for (int sq = 0; sq < 64; sq++) {
         int northEastSize = max(min(6 - sq / 8, 6 - sq % 8), 0);
         int southEastSize = max(min(sq / 8 - 1, 6 - sq % 8), 0);
@@ -199,8 +269,9 @@ void generateKnightMask() {
 }
 
 int main() {
-    cout << "Rook magic numbers" << '\n';
-    findRookMNs();
-    cout << "Bishop magic numbers" << '\n';
-    findBishopMNs();
+    // cout << "Rook magic numbers" << '\n';
+    // findRookReachMNs();
+    // cout << "Bishop magic numbers" << '\n';
+    // findBishopReachMNs();
+    findRookMovesMNs();
 }
