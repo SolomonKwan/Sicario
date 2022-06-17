@@ -169,19 +169,14 @@ const Bitboard rookReachMagicNumbers[64] = {
 };
 
 const Bitboard rookMovesMagicNumbers[64] = {
-    0ULL, 0ULL, 0ULL, 0ULL, 0ULL,
-    0ULL, 0ULL, 0ULL, 0ULL, 0ULL,
-    0ULL, 0ULL, 0ULL, 0ULL, 0ULL,
-    0ULL, 0ULL, 0ULL, 0ULL, 0ULL,
-    0ULL, 0ULL, 0ULL, 0ULL, 0ULL,
-    0ULL, 0ULL, 0ULL, 0ULL, 0ULL,
-    0ULL, 0ULL, 0ULL, 0ULL, 0ULL,
-    0ULL, 0ULL, 0ULL, 0ULL, 0ULL,
-    0ULL, 0ULL, 0ULL, 0ULL, 0ULL,
-    0ULL, 0ULL, 0ULL, 0ULL, 0ULL,
-    0ULL, 0ULL, 0ULL, 0ULL, 0ULL,
-    0ULL, 0ULL, 0ULL, 0ULL, 0ULL,
-    0ULL, 0ULL, 0ULL, 0ULL
+    0x2e0efbd2bf0472bcULL, 63ULL, 63ULL, 59ULL, 63ULL, 63ULL, 46ULL, 63ULL,
+    63ULL, 51ULL, 59ULL, 61ULL, 62ULL, 63ULL, 31ULL, 63ULL,
+    30ULL, 57ULL, 31ULL, 55ULL, 63ULL, 63ULL, 15ULL, 63ULL,
+    47ULL, 62ULL, 58ULL, 63ULL, 125ULL, 62ULL, 61ULL, 115ULL,
+    55ULL, 63ULL, 63ULL, 63ULL, 63ULL, 63ULL, 59ULL, 63ULL,
+    63ULL, 47ULL, 59ULL, 47ULL, 63ULL, 61ULL, 31ULL, 63ULL,
+    63ULL, 55ULL, 61ULL, 63ULL, 63ULL, 63ULL, 63ULL, 54ULL,
+    63ULL, 57ULL, 61ULL, 57ULL, 59ULL, 31ULL, 31ULL, 63ULL,
 };
 
 /**
@@ -199,14 +194,14 @@ const int rookReachShifts[64] = {
 };
 
 const int rookMovesShifts[64] = {
-    0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0,
+    57, 50, 50, 50, 50, 50, 50, 50,
+    50, 50, 50, 50, 50, 50, 50, 50,
+    50, 50, 50, 50, 50, 50, 50, 50,
+    50, 50, 50, 50, 50, 50, 50, 50,
+    50, 50, 50, 50, 50, 50, 50, 50,
+    50, 50, 50, 50, 50, 50, 50, 50,
+    50, 50, 50, 50, 50, 50, 50, 50,
+    50, 50, 50, 50, 50, 50, 50, 50,
 };
 
 /**
