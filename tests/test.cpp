@@ -96,7 +96,7 @@ int bishopReachIndex(Bitboard occupancy, Square square) {
 }
 
 int bishopMovesIndex(Bitboard occupancy, Square square) {
-    return getRookMovesIndex(occupancy, square);
+    return getBishopMovesIndex(occupancy, square);
 }
 
 Bitboard generatePos(std::vector<Square> squares) {
@@ -428,137 +428,43 @@ void run_getBishopReachIndex_tests() {
 }
 
 void run_getBishopMovesIndex_tests() {
-    Square square = A1;
-    Bitboard pos1 = generatePos({B2});
-    Bitboard pos2 = generatePos({B2, C3});
-    Bitboard pos3 = generatePos({B2, C3, D4});
-    Bitboard pos4 = generatePos({B2, C3, D4, E5, F6, G7});
-    assertEquals<int>(BISHOP_MOVES_INDEX, bishopMovesIndex(pos1, square), bishopMovesIndex(pos2, square), 1);
-    assertEquals<int>(BISHOP_MOVES_INDEX, bishopMovesIndex(pos2, square), bishopMovesIndex(pos3, square), 2);
-    assertEquals<int>(BISHOP_MOVES_INDEX, bishopMovesIndex(pos3, square), bishopMovesIndex(pos4, square), 3);
+    for (int sq = A1; sq <= H8; sq++) {
+        TOTAL_TEST_COUNT++;
+        TESTS_COUNTS[BISHOP_MOVES_INDEX]++;
+        std::string testName = TESTS_NAMES[BISHOP_MOVES_INDEX] + std::to_string(TESTS_COUNTS[BISHOP_MOVES_INDEX]);
 
-    square = A2;
-    pos1 = generatePos({B3});
-    pos2 = generatePos({B3, C4});
-    pos3 = generatePos({B3, C4, D5});
-    pos4 = generatePos({B3, C4, D5, E6, F7});
-    assertEquals<int>(BISHOP_MOVES_INDEX, bishopMovesIndex(pos1, square), bishopMovesIndex(pos2, square), 4);
-    assertEquals<int>(BISHOP_MOVES_INDEX, bishopMovesIndex(pos2, square), bishopMovesIndex(pos3, square), 5);
-    assertEquals<int>(BISHOP_MOVES_INDEX, bishopMovesIndex(pos3, square), bishopMovesIndex(pos4, square), 6);
+        int northEastSize = std::max(std::min(7 - sq / 8, 7 - sq % 8), 0);
+        int southEastSize = std::max(std::min(sq / 8, 7 - sq % 8), 0);
+        int southWestSize = std::max(std::min(sq / 8, sq % 8), 0);
+        int northWestSize = std::max(std::min(7 - sq / 8, sq % 8), 0);
 
-    square = A3;
-    pos1 = generatePos({B2, B4});
-    pos2 = generatePos({B2, B4, C5});
-    pos3 = generatePos({B2, B4, C5, D6});
-    pos4 = generatePos({B2, B4, C5, D6, E7});
-    assertEquals<int>(BISHOP_MOVES_INDEX, bishopMovesIndex(pos1, square), bishopMovesIndex(pos2, square), 7);
-    assertEquals<int>(BISHOP_MOVES_INDEX, bishopMovesIndex(pos2, square), bishopMovesIndex(pos3, square), 8);
-    assertEquals<int>(BISHOP_MOVES_INDEX, bishopMovesIndex(pos3, square), bishopMovesIndex(pos4, square), 9);
+        // Build reach
+        std::unordered_set<int> indices;
+        bool bad = false;
+        for (std::array<int, 4> selection : getEndCombinations({northEastSize, southEastSize, southWestSize, northWestSize})) {
+            uint64_t occ = 0ULL;
 
-    square = A4;
-    pos1 = generatePos({B3, B5});
-    pos2 = generatePos({B3, C2, B5, C6});
-    pos3 = generatePos({B3, C2, B5, C6, D7});
-    assertEquals<int>(BISHOP_MOVES_INDEX, bishopMovesIndex(pos1, square), bishopMovesIndex(pos2, square), 10);
-    assertEquals<int>(BISHOP_MOVES_INDEX, bishopMovesIndex(pos2, square), bishopMovesIndex(pos3, square), 11);
+            for (int i = 0; i < selection[0]; i++) occ |= 1ULL << (sq + NE * (i + 1));
+            for (int i = 0; i < selection[1]; i++) occ |= 1ULL << (sq + SE * (i + 1));
+            for (int i = 0; i < selection[2]; i++) occ |= 1ULL << (sq + SW * (i + 1));
+            for (int i = 0; i < selection[3]; i++) occ |= 1ULL << (sq + NW * (i + 1));
 
-    square = B1;
-    pos1 = generatePos({C2});
-    pos2 = generatePos({C2, D3});
-    pos3 = generatePos({C2, D3, E4});
-    pos4 = generatePos({C2, D3, E4, F5, G6});
-    assertEquals<int>(BISHOP_MOVES_INDEX, bishopMovesIndex(pos1, square), bishopMovesIndex(pos2, square), 12);
-    assertEquals<int>(BISHOP_MOVES_INDEX, bishopMovesIndex(pos2, square), bishopMovesIndex(pos3, square), 13);
-    assertEquals<int>(BISHOP_MOVES_INDEX, bishopMovesIndex(pos3, square), bishopMovesIndex(pos4, square), 14);
+            uint16_t magicIndex = bishopMovesIndex(occ, (Square)sq);
+            if (indices.find(magicIndex) != indices.end()) {
+                bad = true;
+                break;
+            }
+            indices.insert(magicIndex);
+        }
 
-    square = B2;
-    pos1 = generatePos({C3});
-    pos2 = generatePos({C3, D4});
-    pos3 = generatePos({C3, D4, E5});
-    pos4 = generatePos({C3, D4, E5, F6, G7});
-    assertEquals<int>(BISHOP_MOVES_INDEX, bishopMovesIndex(pos1, square), bishopMovesIndex(pos2, square), 15);
-    assertEquals<int>(BISHOP_MOVES_INDEX, bishopMovesIndex(pos2, square), bishopMovesIndex(pos3, square), 16);
-    assertEquals<int>(BISHOP_MOVES_INDEX, bishopMovesIndex(pos3, square), bishopMovesIndex(pos4, square), 17);
-
-    square = B3;
-    pos1 = generatePos({C2, C4});
-    pos2 = generatePos({C2, C4, D5});
-    pos3 = generatePos({C2, C4, D5, E6});
-    pos4 = generatePos({C2, C4, D5, E6, F7});
-    assertEquals<int>(BISHOP_MOVES_INDEX, bishopMovesIndex(pos1, square), bishopMovesIndex(pos2, square), 18);
-    assertEquals<int>(BISHOP_MOVES_INDEX, bishopMovesIndex(pos2, square), bishopMovesIndex(pos3, square), 19);
-    assertEquals<int>(BISHOP_MOVES_INDEX, bishopMovesIndex(pos3, square), bishopMovesIndex(pos4, square), 20);
-
-    square = B4;
-    pos1 = generatePos({C3, D2, C5});
-    pos2 = generatePos({C3, D2, C5, D6});
-    pos3 = generatePos({C3, D2, C5, D6, E7});
-    assertEquals<int>(BISHOP_MOVES_INDEX, bishopMovesIndex(pos1, square), bishopMovesIndex(pos2, square), 21);
-    assertEquals<int>(BISHOP_MOVES_INDEX, bishopMovesIndex(pos2, square), bishopMovesIndex(pos3, square), 22);
-
-    square = C1;
-    pos1 = generatePos({B2, D2});
-    pos2 = generatePos({B2, D2, E3});
-    pos3 = generatePos({B2, D2, E3, F4});
-    pos4 = generatePos({B2, D2, E3, F4, G5});
-    assertEquals<int>(BISHOP_MOVES_INDEX, bishopMovesIndex(pos1, square), bishopMovesIndex(pos2, square), 23);
-    assertEquals<int>(BISHOP_MOVES_INDEX, bishopMovesIndex(pos2, square), bishopMovesIndex(pos3, square), 24);
-    assertEquals<int>(BISHOP_MOVES_INDEX, bishopMovesIndex(pos3, square), bishopMovesIndex(pos4, square), 25);
-
-    square = C2;
-    pos1 = generatePos({B3, D3});
-    pos2 = generatePos({B3, D3, E4});
-    pos3 = generatePos({B3, D3, E4, F5});
-    pos4 = generatePos({B3, D3, E4, F5, G6});
-    assertEquals<int>(BISHOP_MOVES_INDEX, bishopMovesIndex(pos1, square), bishopMovesIndex(pos2, square), 26);
-    assertEquals<int>(BISHOP_MOVES_INDEX, bishopMovesIndex(pos2, square), bishopMovesIndex(pos3, square), 27);
-    assertEquals<int>(BISHOP_MOVES_INDEX, bishopMovesIndex(pos3, square), bishopMovesIndex(pos4, square), 28);
-
-    square = C3;
-    pos1 = generatePos({B2, B4, D2, D4});
-    pos2 = generatePos({B2, B4, D2, D4, E5});
-    pos3 = generatePos({B2, B4, D2, D4, E5, F6});
-    pos4 = generatePos({B2, B4, D2, D4, E5, F6, G7});
-    assertEquals<int>(BISHOP_MOVES_INDEX, bishopMovesIndex(pos1, square), bishopMovesIndex(pos2, square), 29);
-    assertEquals<int>(BISHOP_MOVES_INDEX, bishopMovesIndex(pos2, square), bishopMovesIndex(pos3, square), 30);
-    assertEquals<int>(BISHOP_MOVES_INDEX, bishopMovesIndex(pos3, square), bishopMovesIndex(pos4, square), 31);
-
-    square = C4;
-    pos1 = generatePos({B3, B5, D3, D5});
-    pos2 = generatePos({B3, B5, D3, D5, E2, E6});
-    pos3 = generatePos({B3, B5, D3, D5, E2, E6, F7});
-    assertEquals<int>(BISHOP_MOVES_INDEX, bishopMovesIndex(pos1, square), bishopMovesIndex(pos2, square), 32);
-    assertEquals<int>(BISHOP_MOVES_INDEX, bishopMovesIndex(pos2, square), bishopMovesIndex(pos3, square), 33);
-
-    square = D1;
-    pos1 = generatePos({B4, E3});
-    pos2 = generatePos({B4, E3, F4});
-    pos3 = generatePos({B4, E3, F4, G5});
-    assertEquals<int>(BISHOP_MOVES_INDEX, bishopMovesIndex(pos1, square), bishopMovesIndex(pos2, square), 34);
-    assertEquals<int>(BISHOP_MOVES_INDEX, bishopMovesIndex(pos2, square), bishopMovesIndex(pos3, square), 35);
-
-    square = D2;
-    pos1 = generatePos({B4, F4});
-    pos2 = generatePos({B4, F4, G5});
-    assertEquals<int>(BISHOP_MOVES_INDEX, bishopMovesIndex(pos1, square), bishopMovesIndex(pos2, square), 36);
-
-    square = D3;
-    pos1 = generatePos({C2, E2, C4, E4, B5});
-    pos2 = generatePos({C2, E2, C4, E4, F5});
-    pos3 = generatePos({C2, E2, C4, E4, B5, F5});
-    pos4 = generatePos({C2, E2, C4, E4, B5, F5, G6});
-    assertEquals<int>(BISHOP_MOVES_INDEX, bishopMovesIndex(pos1, square), bishopMovesIndex(pos2, square), 37);
-    assertEquals<int>(BISHOP_MOVES_INDEX, bishopMovesIndex(pos2, square), bishopMovesIndex(pos3, square), 38);
-    assertEquals<int>(BISHOP_MOVES_INDEX, bishopMovesIndex(pos3, square), bishopMovesIndex(pos4, square), 39);
-
-    square = D4;
-    pos1 = generatePos({B2, C5, E3, F6});
-    pos2 = generatePos({B2, C5, E3, F6, B6});
-    pos3 = generatePos({B2, C5, E3, F6, B6, F2});
-    pos4 = generatePos({B2, C5, E3, F6, B6, F2, G7});
-    assertEquals<int>(BISHOP_MOVES_INDEX, bishopMovesIndex(pos1, square), bishopMovesIndex(pos2, square), 40);
-    assertEquals<int>(BISHOP_MOVES_INDEX, bishopMovesIndex(pos2, square), bishopMovesIndex(pos3, square), 41);
-    assertEquals<int>(BISHOP_MOVES_INDEX, bishopMovesIndex(pos3, square), bishopMovesIndex(pos4, square), 42);
+        if (bad) {
+            TESTS_FAILED++;
+            std::cout << testName << "\t[ \033[0;31mFAILED\033[0m ]\tSquare: " << squareName[sq] << '\n';
+        } else {
+            TESTS_PASSED++;
+            std::cout << testName << "\t[ \033[0;32mPASSED\033[0m ]\t" << '\n';
+        }
+    }
 }
 
 void printFinalResult() {
@@ -571,7 +477,7 @@ int main(int argc, char const *argv[]) {
     run_getRookReachIndex_tests();
     run_getRookMovesIndex_tests();
     run_getBishopReachIndex_tests();
-    // run_getBishopMovesIndex_tests();
+    run_getBishopMovesIndex_tests();
     printFinalResult();
     return 0;
 }
