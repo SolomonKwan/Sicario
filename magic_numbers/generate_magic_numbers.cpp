@@ -8,8 +8,12 @@
 #include <cmath>
 #include <unordered_set>
 #include <sstream>
+#include <vector>
+#include "../src/constants.hpp"
 
 using namespace std;
+
+// This file is just for messing around and testing stuff. no need to keep it clean or anything.
 
 // Useful things for later
 // cout << bitset<64>(_pext_u64(0b100101ULL, 0b101101ULL)) << '\n';
@@ -27,18 +31,6 @@ enum Direction {
     NW = 7
 };
 
-const std::string squareName[65] = {
-    "a1", "b1", "c1", "d1", "e1", "f1", "g1", "h1",
-    "a2", "b2", "c2", "d2", "e2", "f2", "g2", "h2",
-    "a3", "b3", "c3", "d3", "e3", "f3", "g3", "h3",
-    "a4", "b4", "c4", "d4", "e4", "f4", "g4", "h4",
-    "a5", "b5", "c5", "d5", "e5", "f5", "g5", "h5",
-    "a6", "b6", "c6", "d6", "e6", "f6", "g6", "h6",
-    "a7", "b7", "c7", "d7", "e7", "f7", "g7", "h7",
-    "a8", "b8", "c8", "d8", "e8", "f8", "g8", "h8",
-    "None"
-};
-
 void displayBB(uint64_t position) {
     string positionString = bitset<64>(position).to_string();
     for (int i = 0; i < 8; i++) {
@@ -52,14 +44,14 @@ void displayBB(uint64_t position) {
 
 uint64_t randomMagicNumber(float dist) {
     array<int, 64> squares = {
-        1, 2, 3, 4, 5, 6, 7, 8,
+        0, 1, 2, 3, 4, 5, 6, 7, 8,
         9, 10, 11, 12, 13, 14, 15, 16,
         17, 18, 19, 20, 21, 22, 23, 24,
         25, 26, 27, 28, 29, 30, 31, 32,
         33, 34, 35, 36, 37, 38, 39, 40,
         41, 42, 43, 44, 45, 46, 47, 48,
         49, 50, 51, 52, 53, 54, 55, 56,
-        57, 58, 59, 60, 61, 62, 63, 64
+        57, 58, 59, 60, 61, 62, 63
     };
 
     random_device rd;
@@ -68,7 +60,7 @@ uint64_t randomMagicNumber(float dist) {
 
     uint64_t res = 0ULL;
     for (int i = 0; i < (int)(dist * 64); i++) {
-        res |= squares[i];
+        res |= 1ULL << squares[i];
     }
 
     return res;
@@ -153,30 +145,40 @@ void findRookReachMNs() {
 
 void findRookMovesMNs() {
     for (int sq = 0; sq < 64; sq++) {
+        if (sq == A1 || sq == F1 || sq == H1 || sq == H3 || sq == A6 || sq == H6 || sq == H7 || sq == A8 || sq == F8 || sq == H8 || sq == C1
+                || sq == C1 || sq == G7 || sq == C8 || sq == E2 || sq == B8 || sq == E8 || sq == G8 || sq == H4 || sq == H5 || sq == B1
+                || sq == D1 || sq == E1 || sq == G1 || sq == A2 || sq == B2 || sq == D2 || sq == G2 || sq == H2 || sq == A3 || sq == C3
+                || sq == F3 || sq == A4 || sq == B4 || sq == G4 || sq == A5 || sq == B5 || sq == G5 || sq == F6 || sq == A7 || sq == B7
+                || sq == D7 || sq == E7 || sq == D8 || sq == F4 || sq == F5 || sq == C7 || sq == F7 || sq == C6 || sq == F2 || sq == E5
+                || sq == G6 || sq == B6 || sq == E3 || sq == C5 || sq == D6) continue;
         int northSize = max(7 - (sq / 8), 0);
         int southSize = max(sq / 8, 0);
         int eastSize = max(7 - (sq % 8), 0);
         int westSize = max(sq % 8, 0);
-        int totalSize = northSize + southSize + eastSize + westSize;
+        int totalSize = (northSize ? northSize + 1 : 1) * (eastSize ? eastSize + 1 : 1) *
+                (southSize ? southSize + 1 : 1) * (westSize ? westSize + 1 : 1);
+        totalSize = (int)floor(log2(totalSize)) + 4;
+        auto combos = getEndCombinations({northSize, eastSize, southSize, westSize});
 
         int attempt = 0;
-        float prob = 0.05;
+        float prob = 0.5;
         while (true) {
             if (attempt > 100000) {
                 attempt = 0;
                 prob += 0.05;
             }
 
-            if (prob >= 1) {
+            if (prob > 1) {
                 cout << "Welp, the square " << squareName[sq] << " was fucked..." << '\n';
                 break;
             }
-            uint64_t  magicNum = randomMagicNumber(prob);
+            uint64_t magicNum = randomMagicNumber(prob);
+
             unordered_set<int> indices;
             bool duplicate = false;
 
-            // Build reach
-            for (std::array<int, 4> selection : getEndCombinations({northSize, eastSize, southSize, westSize})) {
+            // Build occupancy bitboard
+            for (std::array<int, 4> selection : combos) {
                 uint64_t occ = 0ULL;
 
                 for (int i = 0; i < selection[0]; i++) occ |= 1ULL << (sq + N * (i + 1));
@@ -189,6 +191,8 @@ void findRookMovesMNs() {
                     duplicate = true;
                     break;
                 }
+
+                indices.insert(magicIndex);
             }
 
             if (!duplicate) {
@@ -268,7 +272,7 @@ void generateKnightMask() {
 
 }
 
-int main() {
+int main(int argc, char* argv[]) {
     // cout << "Rook magic numbers" << '\n';
     // findRookReachMNs();
     // cout << "Bishop magic numbers" << '\n';

@@ -33,7 +33,7 @@ main.o: $(SRC)/main.cpp $(SRC)/movegen.hpp $(SRC)/game.hpp $(SRC)/uci.hpp $(SRC)
 generate: $(GENERATE)/generate_magic_numbers.cpp
 	$(FLAGS) $(GENERATE)/generate_magic_numbers.cpp -o $(GENERATE)/generate
 
-test: $(TEST)/test.o $(SRC)/utils.o
+test: $(TEST)/test.o $(SRC)/utils.o $(SRC)/movegen.hpp
 	$(FLAGS) $(TEST)/test.o $(SRC)/utils.o $(SRC)/movegen.o -o $(TEST)/test
 
 sicario: $(SRC)/main.o $(SRC)/game.o $(SRC)/movegen.o $(SRC)/uci.o $(SRC)/sicario.o $(SRC)/utils.o $(SRC)/mcts.o

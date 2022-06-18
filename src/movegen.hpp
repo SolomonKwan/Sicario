@@ -78,22 +78,10 @@ std::array<std::vector<std::vector<Move>>, 64> computeBishopMoves();
 std::array<std::vector<int>, 64> computeRookReachIndices();
 
 /**
- * Compute the rook indices into the moves index array.
- * @return: Array of vectors of ints of the rook index into the move set.
- */
-std::array<std::vector<int>, 64> computeRookMovesIndices();
-
-/**
  * Compute the bishop indices into the reach index array.
  * @return: Array of vectors of ints of the bishop index into the move set.
  */
 std::array<std::vector<int>, 64> computeBishopReachIndices();
-
-/**
- * Compute the bishop indices into the mvoes index array.
- * @return: Array of vectors of ints of the rook index into the move set.
- */
-std::array<std::vector<int>, 64> computeBishopMovesIndices();
 
 /**
  * @brief Gets the rook index into the precomputed reach index array.
@@ -112,7 +100,7 @@ inline int getRookReachIndex(Bitboard occupancy, Square square) {
  * @return Index into the precomputed rook moves array.
  */
 inline int getRookMovesIndex(Bitboard reach, Square square) {
-    return (reach * rookMovesMagicNumbers[square] >> rookMovesShifts[square]);
+    return (reach * rookMovesMagicNumbers[square]) >> rookMovesShifts[square];
 }
 
 /**
@@ -132,7 +120,7 @@ inline int getBishopReachIndex(Bitboard occupancy, Square square) {
  * @return Index into the precomputed bishop moves array.
  */
 inline int getBishopMovesIndex(Bitboard reach, Square square) {
-    return (reach * bishopMovesMagicNumbers[square] >> bishopMovesShifts[square]);
+    return (reach * bishopMovesMagicNumbers[square]) >> bishopMovesShifts[square];
 }
 
 /**

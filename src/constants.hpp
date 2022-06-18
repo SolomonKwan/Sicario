@@ -169,14 +169,14 @@ const Bitboard rookReachMagicNumbers[64] = {
 };
 
 const Bitboard rookMovesMagicNumbers[64] = {
-    0x2e0efbd2bf0472bcULL, 63ULL, 63ULL, 59ULL, 63ULL, 63ULL, 46ULL, 63ULL,
-    63ULL, 51ULL, 59ULL, 61ULL, 62ULL, 63ULL, 31ULL, 63ULL,
-    30ULL, 57ULL, 31ULL, 55ULL, 63ULL, 63ULL, 15ULL, 63ULL,
-    47ULL, 62ULL, 58ULL, 63ULL, 125ULL, 62ULL, 61ULL, 115ULL,
-    55ULL, 63ULL, 63ULL, 63ULL, 63ULL, 63ULL, 59ULL, 63ULL,
-    63ULL, 47ULL, 59ULL, 47ULL, 63ULL, 61ULL, 31ULL, 63ULL,
-    63ULL, 55ULL, 61ULL, 63ULL, 63ULL, 63ULL, 63ULL, 54ULL,
-    63ULL, 57ULL, 61ULL, 57ULL, 59ULL, 31ULL, 31ULL, 63ULL,
+    0xa6d02837c93f707aULL, 0x3eec9c49c592b8ccULL, 0xdc71f7857f05dee4ULL, 0x59d74e2ff0d1265ULL, 0xe82a97c714bf2199ULL, 0xf4fff5d6b47a97f3ULL, 0x85c43edf781a0bc9ULL, 0xde1a324853536d1fULL,
+    0x9a89392f39b540f6ULL, 0xa896c7955c22717dULL, 0xc4f5ccb6de10c913ULL, 0x6b9b6475bfa26e2fULL, 0xffaff7fefff7eff7ULL, 0x5afefffb6dfaf35dULL, 0x970171e2fc3a8e55ULL, 0x4d2b791590f4f073ULL,
+    0x39fdd950ae692134ULL, 0x53acf11ef0ab92a1ULL, 0x75ff3bd7fa7c1cf3ULL, 0x4f9538e949cc9627ULL, 0xfbfdf2fffafff9fbULL, 0xd399f4fffe6cf91fULL, 0x476e042386b7f2eaULL, 0xf0cbf45cfffefffdULL,
+    0x4d6bb0c5b4ae8cacULL, 0x9e466b525bda20baULL, 0x66070f3711d2b973ULL, 0x3db84a69d8a4d15dULL, 0xadfd01b0bbe6582fULL, 0xdfcfbb76fffeffefULL, 0xbccde9984e0c35d2ULL, 0xfffeebfedeffaf9fULL,
+    0x6e55d230f782cb61ULL, 0x7517d6645a9b6445ULL, 0xf7f7ffd7f7feff7fULL, 0xbf3222afd6d2a627ULL, 0xd7be7e2b2ffefdefULL, 0xeffbfdfafcfffcf7ULL, 0x5de253e5291cf63dULL, 0xbef47f7bbb12ffffULL,
+    0xda774f37dcdcfd9fULL, 0x6fffbfffbfff1fffULL, 0x97ffa7ffe9fcff7dULL, 0xfdefdfafee3f1f8bULL, 0xdeddc70ca1092d6aULL, 0xff79e14f76feffedULL, 0xd5fdf31bfdbaffd7ULL, 0xe19e245f8a22e8d7ULL,
+    0x76c09955657a61e3ULL, 0x611297f85e4a7a5cULL, 0x7f77fc2bfbdab45dULL, 0x5fd688829894db5eULL, 0xa532e26d19d30f6cULL, 0xace353dd9d2c9c74ULL, 0xd5f7f75ed777f97eULL, 0x2171d8dbb6986bbULL,
+    0x76a795e1440f1397ULL, 0xf118ab5db92edb49ULL, 0xdf79d866ac48beedULL, 0x1da9466b71074e3bULL, 0x6f9abb5b38fe4ecfULL, 0xea462b890769778bULL, 0xbb7c798d7bcfacd9ULL, 0x3d6305bf99fc0846ULL,
 };
 
 /**
@@ -194,14 +194,14 @@ const int rookReachShifts[64] = {
 };
 
 const int rookMovesShifts[64] = {
-    57, 50, 50, 50, 50, 50, 50, 50,
-    50, 50, 50, 50, 50, 50, 50, 50,
-    50, 50, 50, 50, 50, 50, 50, 50,
-    50, 50, 50, 50, 50, 50, 50, 50,
-    50, 50, 50, 50, 50, 50, 50, 50,
-    50, 50, 50, 50, 50, 50, 50, 50,
-    50, 50, 50, 50, 50, 50, 50, 50,
-    50, 50, 50, 50, 50, 50, 50, 50,
+    56, 55, 55, 54, 54, 55, 55, 56,
+    55, 54, 53, 53, 54, 54, 54, 55,
+    54, 53, 53, 52, 53, 53, 53, 55,
+    54, 53, 52, 52, 52, 53, 53, 55,
+    54, 53, 53, 52, 53, 53, 53, 55,
+    55, 54, 53, 53, 52, 53, 54, 55,
+    55, 54, 54, 53, 53, 54, 55, 56,
+    56, 56, 55, 54, 55, 55, 56, 56,
 };
 
 /**
