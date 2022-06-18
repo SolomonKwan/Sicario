@@ -253,11 +253,6 @@ std::array<std::vector<int>, 64> computeRookReachIndices() {
     return rookIndices;
 }
 
-std::array<std::vector<int>, 64> computeRookMovesIndices() {
-    std::array<std::vector<int>, 64> rookIndices;
-    return rookIndices;
-}
-
 std::array<std::vector<int>, 64> computeBishopReachIndices() {
     std::array<std::vector<int>, 64> bishopIndices;
     for (int square = A1; square <= H8; square++) {
@@ -300,11 +295,6 @@ std::array<std::vector<int>, 64> computeBishopReachIndices() {
             indices[magicIndex] = mappedIndex;
         }
     }
-    return bishopIndices;
-}
-
-std::array<std::vector<int>, 64> computeBishopMovesIndices() {
-    std::array<std::vector<int>, 64> bishopIndices;
     return bishopIndices;
 }
 
