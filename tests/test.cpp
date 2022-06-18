@@ -2,6 +2,8 @@
 #include <string>
 #include <vector>
 #include <unordered_map>
+#include <unordered_set>
+#include <cmath>
 #include "../src/constants.hpp"
 #include "../src/movegen.hpp"
 #include "../src/utils.hpp"
@@ -35,6 +37,30 @@ int TOTAL_TEST_COUNT = 0;
 int TESTS_PASSED = 0;
 int TESTS_FAILED = 0;
 
+const std::array<std::vector<int>, 64> ROOK_REACH_INDICES = computeRookReachIndices();
+const std::array<std::vector<int>, 64> BISHOP_REACH_INDICES = computeBishopReachIndices();
+
+void generateCombo(std::array<int, 4> sizes, std::array<int, 4>& curr, std::vector<std::array<int, 4>>& res) {
+    res.push_back(curr);
+    if (curr == sizes) return;
+
+    curr[0]++;
+    for (int i = 0; i < (int)curr.size(); i++) {
+        if (curr[i] > sizes[i]) {
+            curr[i] = 0;
+            if (i != (int)curr.size() - 1) curr[i + 1]++;
+        }
+    }
+    generateCombo(sizes, curr, res);
+}
+
+std::vector<std::array<int, 4>> getEndCombinations(std::array<int, 4> sizes) {
+    std::vector<std::array<int, 4>> res;
+    std::array<int, 4> curr = {0, 0, 0, 0};
+    generateCombo(sizes, curr, res);
+    return res;
+}
+
 template <typename T>
 void assertEquals(TestType testType, T expected, T actual, int testNum) {
     TOTAL_TEST_COUNT++;
@@ -57,17 +83,12 @@ void assertEquals(TestType testType, T expected, T actual, int testNum) {
     }
 }
 
-const std::array<std::vector<int>, 64> ROOK_REACH_INDICES = computeRookReachIndices();
-const std::array<std::vector<int>, 64> BISHOP_REACH_INDICES = computeBishopReachIndices();
-const std::array<std::vector<int>, 64> ROOK_MOVES_INDICES = computeRookMovesIndices();
-const std::array<std::vector<int>, 64> BISHOP_MOVES_INDICES = computeBishopMovesIndices();
-
 int rookReachIndex(Bitboard occupancy, Square square) {
     return ROOK_REACH_INDICES[square][getRookReachIndex(occupancy, square)];
 }
 
 int rookMovesIndex(Bitboard occupancy, Square square) {
-    return ROOK_MOVES_INDICES[square][getRookMovesIndex(occupancy, square)];
+    return getRookMovesIndex(occupancy, square);
 }
 
 int bishopReachIndex(Bitboard occupancy, Square square) {
@@ -75,7 +96,7 @@ int bishopReachIndex(Bitboard occupancy, Square square) {
 }
 
 int bishopMovesIndex(Bitboard occupancy, Square square) {
-    return BISHOP_MOVES_INDICES[square][getRookMovesIndex(occupancy, square)];
+    return getRookMovesIndex(occupancy, square);
 }
 
 Bitboard generatePos(std::vector<Square> squares) {
@@ -233,149 +254,43 @@ void run_getRookReachIndex_tests() {
 }
 
 void run_getRookMovesIndex_tests() {
-    Square square = A1;
-    Bitboard pos1 = generatePos({A4, C1});
-    Bitboard pos2 = generatePos({A4, A5, A6, C1, G1, D1});
-    Bitboard pos3 = generatePos({A4, A7, C1, D1, E1, F1});
-    Bitboard pos4 = generatePos({A4, A5, A6, A7, C1, D1, E1, F1, G1});
-    assertEquals<int>(ROOK_MOVES_INDEX, rookMovesIndex(pos1, square), rookMovesIndex(pos2, square), 1);
-    assertEquals<int>(ROOK_MOVES_INDEX, rookMovesIndex(pos2, square), rookMovesIndex(pos3, square), 2);
-    assertEquals<int>(ROOK_MOVES_INDEX, rookMovesIndex(pos3, square), rookMovesIndex(pos4, square), 3);
+    for (int sq = A1; sq <= H8; sq++) {
+        TOTAL_TEST_COUNT++;
+        TESTS_COUNTS[ROOK_MOVES_INDEX]++;
+        std::string testName = TESTS_NAMES[ROOK_MOVES_INDEX] + std::to_string(TESTS_COUNTS[ROOK_MOVES_INDEX]);
 
-    square = A2;
-    pos1 = generatePos({A4, C2});
-    pos2 = generatePos({A4, C2, G2, D2, A5, A6});
-    pos3 = generatePos({A4, C2, D2, E2, F2, A7});
-    pos4 = generatePos({A4, A5, A6, A7, C2, D2, E2, F2, G2});
-    assertEquals<int>(ROOK_MOVES_INDEX, rookMovesIndex(pos1, square), rookMovesIndex(pos2, square), 4);
-    assertEquals<int>(ROOK_MOVES_INDEX, rookMovesIndex(pos2, square), rookMovesIndex(pos3, square), 5);
-    assertEquals<int>(ROOK_MOVES_INDEX, rookMovesIndex(pos3, square), rookMovesIndex(pos4, square), 6);
+        int northSize = std::max(7 - (sq / 8), 0);
+        int southSize = std::max(sq / 8, 0);
+        int eastSize = std::max(7 - (sq % 8), 0);
+        int westSize = std::max(sq % 8, 0);
 
-    square = A3;
-    pos1 = generatePos({A4, C3, A2});
-    pos2 = generatePos({A4, C3, G3, D3, A5, A6, A2});
-    pos3 = generatePos({A4, C3, D3, E3, F3, A7, A2});
-    pos4 = generatePos({A2, A4, A5, A6, A7, C3, D3, E3, F3, G3});
-    assertEquals<int>(ROOK_MOVES_INDEX, rookMovesIndex(pos1, square), rookMovesIndex(pos2, square), 7);
-    assertEquals<int>(ROOK_MOVES_INDEX, rookMovesIndex(pos2, square), rookMovesIndex(pos3, square), 8);
-    assertEquals<int>(ROOK_MOVES_INDEX, rookMovesIndex(pos3, square), rookMovesIndex(pos4, square), 9);
+        // Build reach
+        std::unordered_set<int> indices;
+        bool bad = false;
+        for (std::array<int, 4> selection : getEndCombinations({northSize, eastSize, southSize, westSize})) {
+            uint64_t occ = 0ULL;
 
-    square = A4;
-    pos1 = generatePos({A2, A5, C4});
-    pos2 = generatePos({A2, A5, A6, C4, F4, G4});
-    pos3 = generatePos({A2, A5, A6, C4, D4, F4, G4});
-    pos4 = generatePos({A2, A5, A6, C4, D4, E4, F4, G4});
-    assertEquals<int>(ROOK_MOVES_INDEX, rookMovesIndex(pos1, square), rookMovesIndex(pos2, square), 10);
-    assertEquals<int>(ROOK_MOVES_INDEX, rookMovesIndex(pos2, square), rookMovesIndex(pos3, square), 11);
-    assertEquals<int>(ROOK_MOVES_INDEX, rookMovesIndex(pos3, square), rookMovesIndex(pos4, square), 12);
+            for (int i = 0; i < selection[0]; i++) occ |= 1ULL << (sq + N * (i + 1));
+            for (int i = 0; i < selection[1]; i++) occ |= 1ULL << (sq + E * (i + 1));
+            for (int i = 0; i < selection[2]; i++) occ |= 1ULL << (sq + S * (i + 1));
+            for (int i = 0; i < selection[3]; i++) occ |= 1ULL << (sq + W * (i + 1));
 
-    square = B1;
-    pos1 = generatePos({B4, C1});
-    pos2 = generatePos({B4, B5, B6, C1, G1, D1});
-    pos3 = generatePos({B4, B7, C1, D1, E1, F1});
-    pos4 = generatePos({B4, B5, B6, B7, C1, D1, E1, F1, G1});
-    assertEquals<int>(ROOK_MOVES_INDEX, rookMovesIndex(pos1, square), rookMovesIndex(pos2, square), 13);
-    assertEquals<int>(ROOK_MOVES_INDEX, rookMovesIndex(pos2, square), rookMovesIndex(pos3, square), 14);
-    assertEquals<int>(ROOK_MOVES_INDEX, rookMovesIndex(pos3, square), rookMovesIndex(pos4, square), 15);
+            uint16_t magicIndex = rookMovesIndex(occ, (Square)sq);
+            if (indices.find(magicIndex) != indices.end()) {
+                bad = true;
+                break;
+            }
+            indices.insert(magicIndex);
+        }
 
-    square = B2;
-    pos1 = generatePos({B4, C2});
-    pos2 = generatePos({B4, B5, B6, C2, G2, D2});
-    pos3 = generatePos({B4, B7, C2, D2, E2, F2});
-    pos4 = generatePos({B4, B5, B6, B7, C2, D2, E2, F2, G2});
-    assertEquals<int>(ROOK_MOVES_INDEX, rookMovesIndex(pos1, square), rookMovesIndex(pos2, square), 16);
-    assertEquals<int>(ROOK_MOVES_INDEX, rookMovesIndex(pos2, square), rookMovesIndex(pos3, square), 17);
-    assertEquals<int>(ROOK_MOVES_INDEX, rookMovesIndex(pos3, square), rookMovesIndex(pos4, square), 18);
-
-    square = B3;
-    pos1 = generatePos({B2, B4, C3});
-    pos2 = generatePos({B2, B4, B5, B6, C3, G3, D3});
-    pos3 = generatePos({B2, B4, B7, C3, D3, E3, F3});
-    pos4 = generatePos({B2, B4, B5, B6, B7, C3, D3, E3, F3, G3});
-    assertEquals<int>(ROOK_MOVES_INDEX, rookMovesIndex(pos1, square), rookMovesIndex(pos2, square), 19);
-    assertEquals<int>(ROOK_MOVES_INDEX, rookMovesIndex(pos2, square), rookMovesIndex(pos3, square), 20);
-    assertEquals<int>(ROOK_MOVES_INDEX, rookMovesIndex(pos3, square), rookMovesIndex(pos4, square), 21);
-
-    square = B4;
-    pos1 = generatePos({B5, D4});
-    pos2 = generatePos({B5, B6, D4, E4});
-    pos3 = generatePos({B5, B6, D4, E4, F4});
-    pos4 = generatePos({B5, B6, B7, D4, E4, F4, G4});
-    assertEquals<int>(ROOK_MOVES_INDEX, rookMovesIndex(pos1, square), rookMovesIndex(pos2, square), 22);
-    assertEquals<int>(ROOK_MOVES_INDEX, rookMovesIndex(pos2, square), rookMovesIndex(pos3, square), 23);
-    assertEquals<int>(ROOK_MOVES_INDEX, rookMovesIndex(pos3, square), rookMovesIndex(pos4, square), 24);
-
-    square = C1;
-    pos1 = generatePos({C4, D1});
-    pos2 = generatePos({C4, C5, C6, D1, E1, F1});
-    pos3 = generatePos({C4, C7, D1, G1});
-    pos4 = generatePos({C4, C5, C6, C7, D1, E1, F1, G1});
-    assertEquals<int>(ROOK_MOVES_INDEX, rookMovesIndex(pos1, square), rookMovesIndex(pos2, square), 25);
-    assertEquals<int>(ROOK_MOVES_INDEX, rookMovesIndex(pos2, square), rookMovesIndex(pos3, square), 26);
-    assertEquals<int>(ROOK_MOVES_INDEX, rookMovesIndex(pos3, square), rookMovesIndex(pos4, square), 27);
-
-    square = C2;
-    pos1 = generatePos({C4, D2});
-    pos2 = generatePos({C4, C5, C6, D2, E2, F2});
-    pos3 = generatePos({C4, C7, D2, G2});
-    pos4 = generatePos({C4, C5, C6, C7, D2, E2, F2, G2});
-    assertEquals<int>(ROOK_MOVES_INDEX, rookMovesIndex(pos1, square), rookMovesIndex(pos2, square), 28);
-    assertEquals<int>(ROOK_MOVES_INDEX, rookMovesIndex(pos2, square), rookMovesIndex(pos3, square), 29);
-    assertEquals<int>(ROOK_MOVES_INDEX, rookMovesIndex(pos3, square), rookMovesIndex(pos4, square), 30);
-
-    square = C3;
-    pos1 = generatePos({C4, D3});
-    pos2 = generatePos({C4, C5, C6, D3, E3, F3});
-    pos3 = generatePos({C4, C7, D3, G3});
-    pos4 = generatePos({C4, C5, C6, C7, D3, E3, F3, G3});
-    assertEquals<int>(ROOK_MOVES_INDEX, rookMovesIndex(pos1, square), rookMovesIndex(pos2, square), 31);
-    assertEquals<int>(ROOK_MOVES_INDEX, rookMovesIndex(pos2, square), rookMovesIndex(pos3, square), 32);
-    assertEquals<int>(ROOK_MOVES_INDEX, rookMovesIndex(pos3, square), rookMovesIndex(pos4, square), 33);
-
-    square = C4;
-    pos1 = generatePos({C2, C5, D4});
-    pos2 = generatePos({C2, C5, C6, D4, E4, F4});
-    pos3 = generatePos({C2, C5, C7, D4, G4});
-    pos4 = generatePos({C2, C5, C6, C7, D4, E4, F4, G4});
-    assertEquals<int>(ROOK_MOVES_INDEX, rookMovesIndex(pos1, square), rookMovesIndex(pos2, square), 34);
-    assertEquals<int>(ROOK_MOVES_INDEX, rookMovesIndex(pos2, square), rookMovesIndex(pos3, square), 35);
-    assertEquals<int>(ROOK_MOVES_INDEX, rookMovesIndex(pos3, square), rookMovesIndex(pos4, square), 36);
-
-    square = D1;
-    pos1 = generatePos({D4, B1, F1});
-    pos2 = generatePos({D4, D5, B1, F1});
-    pos3 = generatePos({D4, D5, B1, F1, G1});
-    pos4 = generatePos({D4, D5, D6, D7, B1, F1, G1});
-    assertEquals<int>(ROOK_MOVES_INDEX, rookMovesIndex(pos1, square), rookMovesIndex(pos2, square), 37);
-    assertEquals<int>(ROOK_MOVES_INDEX, rookMovesIndex(pos2, square), rookMovesIndex(pos3, square), 38);
-    assertEquals<int>(ROOK_MOVES_INDEX, rookMovesIndex(pos3, square), rookMovesIndex(pos4, square), 39);
-
-    square = D2;
-    pos1 = generatePos({D4, B2, F2});
-    pos2 = generatePos({D4, D5, B2, F2});
-    pos3 = generatePos({D4, D5, B2, F2, G2});
-    pos4 = generatePos({D4, D5, D6, D7, B2, F2, G2});
-    assertEquals<int>(ROOK_MOVES_INDEX, rookMovesIndex(pos1, square), rookMovesIndex(pos2, square), 40);
-    assertEquals<int>(ROOK_MOVES_INDEX, rookMovesIndex(pos2, square), rookMovesIndex(pos3, square), 41);
-    assertEquals<int>(ROOK_MOVES_INDEX, rookMovesIndex(pos3, square), rookMovesIndex(pos4, square), 42);
-
-    square = D3;
-    pos1 = generatePos({D2, D4, B3, F3});
-    pos2 = generatePos({D2, D4, D5, B3, F3});
-    pos3 = generatePos({D2, D4, D5, B3, F3, G3});
-    pos4 = generatePos({D2, D4, D5, D6, D7, B3, F3, G3});
-    assertEquals<int>(ROOK_MOVES_INDEX, rookMovesIndex(pos1, square), rookMovesIndex(pos2, square), 43);
-    assertEquals<int>(ROOK_MOVES_INDEX, rookMovesIndex(pos2, square), rookMovesIndex(pos3, square), 44);
-    assertEquals<int>(ROOK_MOVES_INDEX, rookMovesIndex(pos3, square), rookMovesIndex(pos4, square), 45);
-
-    square = D4;
-    pos1 = generatePos({D2, D3, D5, B4, F4});
-    pos2 = generatePos({D2, D3, D5, B4, F4});
-    pos3 = generatePos({D2, D3, D5, B4, F4, G4});
-    pos4 = generatePos({D2, D3, D5, D6, D7, B4, F4, G4});
-    assertEquals<int>(ROOK_MOVES_INDEX, rookMovesIndex(pos1, square), rookMovesIndex(pos2, square), 46);
-    assertEquals<int>(ROOK_MOVES_INDEX, rookMovesIndex(pos2, square), rookMovesIndex(pos3, square), 47);
-    assertEquals<int>(ROOK_MOVES_INDEX, rookMovesIndex(pos3, square), rookMovesIndex(pos4, square), 48);
+        if (bad) {
+            TESTS_FAILED++;
+            std::cout << testName << "\t[ \033[0;31mFAILED\033[0m ]\tSquare: " << squareName[sq] << '\n';
+        } else {
+            TESTS_PASSED++;
+            std::cout << testName << "\t[ \033[0;32mPASSED\033[0m ]\t" << '\n';
+        }
+    }
 }
 
 void run_getBishopReachIndex_tests() {
@@ -654,7 +569,7 @@ void printFinalResult() {
 
 int main(int argc, char const *argv[]) {
     run_getRookReachIndex_tests();
-    // run_getRookMovesIndex_tests();
+    run_getRookMovesIndex_tests();
     run_getBishopReachIndex_tests();
     // run_getBishopMovesIndex_tests();
     printFinalResult();
