@@ -135,6 +135,16 @@ inline int getKnightMovesIndex(Bitboard reach, Square square) {
 }
 
 /**
+ * @brief Gets the king index into the precomputed moves arrays.
+ * @param reach The reach of the piece. Each set bit is a legal destination square.
+ * @param square The square the king of concern is on.
+ * @return Index into the precomputed king moves array.
+ */
+inline int getKingMovesIndex(Bitboard reach, Square square) {
+    return (reach * kingMagicNumbers[square]) >> kingShifts[square];
+}
+
+/**
  * Hash the ordered integers in values to a unique index.
  * @param values: Ordered collection of integers.
  * @param ranges: The number ranges[i] is the cardinality of the set from which values[i] comes from.
