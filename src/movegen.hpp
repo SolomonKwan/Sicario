@@ -28,14 +28,13 @@ enum KnightDirection {
     NWN = +15,
 };
 
-// TODO might be changing
 /**
  * Compute pseudolegal moves of the king on each square.
  * @return: Array of vectors of pseudolegal moves.
  * @note: Does not take into account king potentially moving into check.
  * @note: Does not take into account king potentially taking own pieces.
  */
-std::array<std::vector<Move>, 64> computeKingMoves();
+std::array<std::vector<std::vector<Move>>, 64> computeKingMoves();
 
 // TODO might be changing
 /**
