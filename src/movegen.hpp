@@ -43,7 +43,7 @@ std::array<std::vector<std::vector<Move>>, 64> computeKingMoves();
  * @note: Does not take into account if the knight is pinned.
  * @note: Does not take into account if knight takes own pieces.
  */
-std::array<std::vector<Move>, 64> computeKnightMoves();
+std::array<std::vector<std::vector<Move>>, 64> computeKnightMoves();
 
 // TODO might be changing
 /**

@@ -11,7 +11,7 @@
  */
 namespace Moves {
     const std::array<std::vector<std::vector<Move>>, 64> KING = computeKingMoves();
-    const std::array<std::vector<Move>, 64> KNIGHT = computeKnightMoves();
+    const std::array<std::vector<std::vector<Move>>, 64> KNIGHT = computeKnightMoves();
     const std::array<std::array<std::vector<Move>, 64>, 2> PAWN = computePawnMoves();
     const std::array<std::vector<std::vector<Move>>, 64> ROOK = computeRookMoves();
     const std::array<std::vector<std::vector<Move>>, 64> BISHOP = computeBishopMoves();

@@ -46,18 +46,40 @@ std::array<std::vector<std::vector<Move>>, 64> computeKingMoves() {
     return kingMoves;
 }
 
-std::array<std::vector<Move>, 64> computeKnightMoves() {
-    std::array<std::vector<Move>, 64> knightMoves;
+std::array<std::vector<std::vector<Move>>, 64> computeKnightMoves() {
+    std::array<std::vector<std::vector<Move>>, 64> knightMoves;
     for (int square = A1; square <= H8; square++) {
-        std::vector<Move>& moves = knightMoves[square];
-        if (square / 8 < 6 && square % 8 < 7) moves.push_back(square | (square + NNE) << 6);
-        if (square / 8 < 7 && square % 8 < 6) moves.push_back(square | (square + ENE) << 6);
-        if (square / 8 > 0 && square % 8 < 6) moves.push_back(square | (square + ESE) << 6);
-        if (square / 8 > 1 && square % 8 < 7) moves.push_back(square | (square + SES) << 6);
-        if (square / 8 > 1 && square % 8 > 0) moves.push_back(square | (square + SWS) << 6);
-        if (square / 8 > 0 && square % 8 > 1) moves.push_back(square | (square + WSW) << 6);
-        if (square / 8 < 7 && square % 8 > 1) moves.push_back(square | (square + WNW) << 6);
-        if (square / 8 < 6 && square % 8 > 0) moves.push_back(square | (square + NWN) << 6);
+        std::vector<std::vector<Move>>& moveSet = knightMoves[square];
+        std::vector<Square> destinations;
+        if (square / 8 < 6 && square % 8 < 7) destinations.push_back((Square) (square + NNE));
+        if (square / 8 < 7 && square % 8 < 6) destinations.push_back((Square) (square + ENE));
+        if (square / 8 > 0 && square % 8 < 6) destinations.push_back((Square) (square + ESE));
+        if (square / 8 > 1 && square % 8 < 7) destinations.push_back((Square) (square + SES));
+        if (square / 8 > 1 && square % 8 > 0) destinations.push_back((Square) (square + SWS));
+        if (square / 8 > 0 && square % 8 > 1) destinations.push_back((Square) (square + WSW));
+        if (square / 8 < 7 && square % 8 > 1) destinations.push_back((Square) (square + WNW));
+        if (square / 8 < 6 && square % 8 > 0) destinations.push_back((Square) (square + NWN));
+
+        uint16_t maxOccupancy = (uint16_t)pow(2, destinations.size());
+        moveSet.resize(maxOccupancy);
+
+        // Build occupancy bitboard
+        for (uint16_t j = 0; j < maxOccupancy; j++) {
+            std::vector<Move> moves;
+
+            uint64_t occ = 0ULL;
+            int shift = 0;
+            for (Square dest : destinations) {
+                if ((j >> shift) & 1UL) {
+                    moves.push_back(square | (dest << 6));
+                }
+                occ |= ((j >> shift) & 1UL) << dest;
+                shift++;
+            }
+
+            uint16_t magicIndex = getKnightMovesIndex(occ, (Square) square);
+            moveSet[magicIndex] = moves;
+        }
     }
     return knightMoves;
 }
