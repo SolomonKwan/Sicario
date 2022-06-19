@@ -8,18 +8,40 @@
 #include "game.hpp"
 #include "utils.hpp"
 
-std::array<std::vector<Move>, 64> computeKingMoves() {
-    std::array<std::vector<Move>, 64> kingMoves;
+std::array<std::vector<std::vector<Move>>, 64> computeKingMoves() {
+    std::array<std::vector<std::vector<Move>>, 64> kingMoves;
     for (int square = A1; square <= H8; square++) {
-        std::vector<Move>& moves = kingMoves[square];
-        if (square / 8 != 7) moves.push_back(square | (square + N) << 6);
-        if (square / 8 != 7 && square % 8 != 7) moves.push_back(square | (square + NE) << 6);
-        if (square % 8 != 7) moves.push_back(square | (square + E) << 6);
-        if (square / 8 != 0 && square % 8 != 7) moves.push_back(square | (square + SE) << 6);
-        if (square / 8 != 0) moves.push_back(square | (square + S) << 6);
-        if (square / 8 != 0 && square % 8 != 0) moves.push_back(square | (square + SW) << 6);
-        if (square % 8 != 0) moves.push_back(square | (square + W) << 6);
-        if (square / 8 != 7 && square % 8 != 0) moves.push_back(square | (square + NW) << 6);
+        std::vector<std::vector<Move>>& moveSet = kingMoves[square];
+        std::vector<Square> destinations;
+        if (square / 8 != 7) destinations.push_back((Square) (square + N));
+        if (square / 8 != 7 && square % 8 != 7) destinations.push_back((Square) (square + NE));
+        if (square % 8 != 7) destinations.push_back((Square) (square + E));
+        if (square / 8 != 0 && square % 8 != 7) destinations.push_back((Square) (square + SE));
+        if (square / 8 != 0) destinations.push_back((Square) (square + S));
+        if (square / 8 != 0 && square % 8 != 0) destinations.push_back((Square) (square + SW));
+        if (square % 8 != 0) destinations.push_back((Square) (square + W));
+        if (square / 8 != 7 && square % 8 != 0) destinations.push_back((Square) (square + NW));
+
+        uint16_t maxOccupancy = (uint16_t)pow(2, destinations.size());
+        moveSet.resize(maxOccupancy);
+
+        // Build occupancy bitboard
+        for (uint16_t j = 0; j < maxOccupancy; j++) {
+            std::vector<Move> moves;
+
+            uint64_t occ = 0ULL;
+            int shift = 0;
+            for (Square dest : destinations) {
+                if ((j >> shift) & 1UL) {
+                    moves.push_back(square | (dest << 6));
+                }
+                occ |= ((j >> shift) & 1UL) << dest;
+                shift++;
+            }
+
+            uint16_t magicIndex = getKingMovesIndex(occ, (Square) square);
+            moveSet[magicIndex] = moves;
+        }
     }
     return kingMoves;
 }

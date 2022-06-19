@@ -28,14 +28,13 @@ enum KnightDirection {
     NWN = +15,
 };
 
-// TODO might be changing
 /**
  * Compute pseudolegal moves of the king on each square.
  * @return: Array of vectors of pseudolegal moves.
  * @note: Does not take into account king potentially moving into check.
  * @note: Does not take into account king potentially taking own pieces.
  */
-std::array<std::vector<Move>, 64> computeKingMoves();
+std::array<std::vector<std::vector<Move>>, 64> computeKingMoves();
 
 // TODO might be changing
 /**
@@ -132,6 +131,16 @@ inline int getBishopMovesIndex(Bitboard reach, Square square) {
  */
 inline int getKnightMovesIndex(Bitboard reach, Square square) {
     return (reach * knightMagicNumbers[square]) >> knightShifts[square];
+}
+
+/**
+ * @brief Gets the king index into the precomputed moves arrays.
+ * @param reach The reach of the piece. Each set bit is a legal destination square.
+ * @param square The square the king of concern is on.
+ * @return Index into the precomputed king moves array.
+ */
+inline int getKingMovesIndex(Bitboard reach, Square square) {
+    return (reach * kingMagicNumbers[square]) >> kingShifts[square];
 }
 
 /**
