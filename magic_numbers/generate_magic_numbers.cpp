@@ -452,6 +452,160 @@ void findKingMovesMNs() {
     }
 }
 
+void findBlackPawnMNs() {
+    std::vector<uint64_t> magicNums;
+    std::vector<int> shifts;
+
+    for (int sq = A2; sq <= H7; sq++) {
+        std::vector<int> destinations;
+
+        destinations.push_back(sq + S);
+        if (sq / 8 == 6) destinations.push_back(sq + S + S);
+        if (sq % 8 != 0) destinations.push_back(sq + SW);
+        if (sq % 8 != 7) destinations.push_back(sq + SE);
+
+        int totalSize = destinations.size();
+        uint16_t maxOccupancy = (uint16_t)pow(2, totalSize);
+        uint64_t magicNum;
+
+        int attempt = 0;
+        float prob = 0.05;
+        while (true) {
+            if (attempt > 100000) {
+                attempt = 0;
+                prob += 0.05;
+            }
+
+            if (prob >= 1) {
+                magicNums.push_back(0ULL);
+                shifts.push_back(0);
+                break;
+            }
+            magicNum = randomMagicNumber(prob);
+            unordered_set<int> indices;
+            bool duplicate = false;
+
+            // Build occupancy bitboard
+            for (uint16_t j = 0; j < maxOccupancy; j++) {
+                uint64_t occ = 0ULL;
+                int shift = 0;
+                for (int dest : destinations) {
+                    occ |= ((j >> shift) & 1UL) << dest;
+                    shift++;
+                }
+
+                uint16_t magicIndex = ((occ * magicNum) >> (64 - totalSize));
+                if (indices.find(magicIndex) != indices.end()) {
+                    duplicate = true;
+                    break;
+                }
+
+                indices.insert(magicIndex);
+            }
+
+            if (!duplicate) {
+                magicNums.push_back(magicNum);
+                shifts.push_back(64 - totalSize);
+                break;
+            }
+            attempt++;
+        }
+    }
+
+    int count = 0;
+    for (uint64_t i : magicNums) {
+        cout << std::hex << "0x" << i << ", " << std::dec;
+        if (count % 8 == 7) cout << '\n';
+        count++;
+    }
+
+    cout  << "\n\n\n";
+
+    count = 0;
+    for (int i : shifts) {
+        cout << i << ", ";
+        if (count % 8 == 7) cout << '\n';
+        count++;
+    }
+}
+
+void findWhitePawnMNs() {
+    std::vector<uint64_t> magicNums;
+    std::vector<int> shifts;
+
+    for (int sq = A2; sq <= H7; sq++) {
+        std::vector<int> destinations;
+
+        destinations.push_back(sq + N);
+        if (sq / 8 == 6) destinations.push_back(sq + N + N);
+        if (sq % 8 != 0) destinations.push_back(sq + NW);
+        if (sq % 8 != 7) destinations.push_back(sq + NE);
+
+        int totalSize = destinations.size();
+        uint16_t maxOccupancy = (uint16_t)pow(2, totalSize);
+        uint64_t magicNum;
+
+        int attempt = 0;
+        float prob = 0.05;
+        while (true) {
+            if (attempt > 100000) {
+                attempt = 0;
+                prob += 0.05;
+            }
+
+            if (prob >= 1) {
+                magicNums.push_back(0ULL);
+                shifts.push_back(0);
+                break;
+            }
+            magicNum = randomMagicNumber(prob);
+            unordered_set<int> indices;
+            bool duplicate = false;
+
+            // Build occupancy bitboard
+            for (uint16_t j = 0; j < maxOccupancy; j++) {
+                uint64_t occ = 0ULL;
+                int shift = 0;
+                for (int dest : destinations) {
+                    occ |= ((j >> shift) & 1UL) << dest;
+                    shift++;
+                }
+
+                uint16_t magicIndex = ((occ * magicNum) >> (64 - totalSize));
+                if (indices.find(magicIndex) != indices.end()) {
+                    duplicate = true;
+                    break;
+                }
+
+                indices.insert(magicIndex);
+            }
+
+            if (!duplicate) {
+                magicNums.push_back(magicNum);
+                shifts.push_back(64 - totalSize);
+                break;
+            }
+            attempt++;
+        }
+    }
+
+    int count = 0;
+    for (uint64_t i : magicNums) {
+        cout << std::hex << "0x" << i << ", " << std::dec;
+        if (count % 8 == 7) cout << '\n';
+        count++;
+    }
+
+    cout  << "\n\n\n";
+
+    count = 0;
+    for (int i : shifts) {
+        cout << i << ", ";
+        if (count % 8 == 7) cout << '\n';
+        count++;
+    }
+}
+
 void generateRookMasks() {
 
 }
@@ -472,5 +626,7 @@ int main(int argc, char* argv[]) {
     // findRookMovesMNs();
     // findBishopMovesMNs();
     // findKnightMovesMNs();
-    findKingMovesMNs();
+    // findKingMovesMNs();
+    // findBlackPawnMNs();
+    findWhitePawnMNs();
 }

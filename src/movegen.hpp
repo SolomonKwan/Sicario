@@ -36,7 +36,6 @@ enum KnightDirection {
  */
 std::array<std::vector<std::vector<Move>>, 64> computeKingMoves();
 
-// TODO might be changing
 /**
  * Compute pseudolegal moves of the knight on each square.
  * @return: Array of vectors of pseudolegal moves.
@@ -141,6 +140,17 @@ inline int getKnightMovesIndex(Bitboard reach, Square square) {
  */
 inline int getKingMovesIndex(Bitboard reach, Square square) {
     return (reach * kingMagicNumbers[square]) >> kingShifts[square];
+}
+
+/**
+ * @brief Gets the pawn index into the precomputed moves arrays.
+ * @param reach The reach of the piece. Each set bit is a legal destination square.
+ * @param square The square the pawn of concern is on.
+ * @param player Which sides pawn.
+ * @return Index into the precomputed pawn moves array.
+ */
+inline int getPawnMovesIndex(Bitboard reach, Square square, Player player) {
+    return (reach * pawnMagicNumbers[player][square]) >> pawnShifts[square];
 }
 
 /**
