@@ -857,6 +857,7 @@ Bitboard Position::getKnightCheckers(Square square, Bitboard& checkers_only) {
     // Bitboard result = 0;
     // checkers_only |= Moves::KNIGHT[square].reach & this->sides[1 - this->turn] & this->knights;
     // return result;
+    return 0ULL;
 }
 
 bool Position::inDoubleCheck() {
@@ -870,6 +871,7 @@ bool Position::inDoubleCheck() {
  */
 MovesStruct* Position::getRookFamily(Square square) {
     // return &Moves::ROOK[Indices::ROOK[square][rookIndex(this->sides[BLACK], this->sides[WHITE], square)]];
+    return nullptr;
 }
 
 /**
@@ -881,6 +883,7 @@ MovesStruct* Position::getRookFamily(Square square) {
  */
 MovesStruct* Position::getBishopFamily(Square square) {
     // return &Moves::BISHOP[Indices::BISHOP[square][bishopIndex(this->sides[BLACK], this->sides[WHITE], square)]];
+    return nullptr;
 }
 
 /**
@@ -1025,6 +1028,7 @@ Bitboard Position::isAttacked(const Square sq, const Player player, const bool i
     // Bitboard knights = Moves::KNIGHT[sq].reach & this->knights & this->sides[turn];
     // Bitboard pawns = Moves::PAWN[!turn][sq].reach & this->pawns & this->sides[turn] & ~files[sq % 8];
     // return rooks, bishops, knights, pawns;
+    return 0ULL;
 }
 
 /**
@@ -1042,6 +1046,7 @@ Bitboard Position::getKingAttackers(const Square sq, const bool turn) const {
     // Bitboard knights = Moves::KNIGHT[sq].reach & this->knights & this->sides[turn];
     // Bitboard pawns = Moves::PAWN[!turn][sq].reach & this->pawns & this->sides[turn] & ~files[sq % 8];
     // return (rooks, bishops, knights, pawns);
+    return 0ULL;
 }
 
 Hash Position::getHash() {
@@ -2195,6 +2200,7 @@ void runPerft(int depth, Position game) {
  */
 ExitCode handleGame(Position position) {
     // return position.run();
+    return NORMAL_PLY;
 }
 
 /**
