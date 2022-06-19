@@ -17,20 +17,23 @@ enum TestType {
     ROOK_MOVES_INDEX,
     BISHOP_REACH_INDEX,
     BISHOP_MOVES_INDEX,
+    KNIGHT_MAGIC_NUMS,
 };
 
 std::unordered_map<TestType, int> TESTS_COUNTS = {
     {ROOK_REACH_INDEX, 0},
     {ROOK_MOVES_INDEX, 0},
     {BISHOP_REACH_INDEX, 0},
-    {BISHOP_MOVES_INDEX, 0}
+    {BISHOP_MOVES_INDEX, 0},
+    {KNIGHT_MAGIC_NUMS, 0},
 };
 
 std::unordered_map<TestType, std::string> TESTS_NAMES = {
     {ROOK_REACH_INDEX, "getRookReachIndex"},
     {ROOK_MOVES_INDEX, "getRookMovesIndex"},
     {BISHOP_REACH_INDEX, "getBishopReachIndex"},
-    {BISHOP_MOVES_INDEX, "getBishopMovesIndex"}
+    {BISHOP_MOVES_INDEX, "getBishopMovesIndex"},
+    {KNIGHT_MAGIC_NUMS, "knightMagicNums"},
 };
 
 int TOTAL_TEST_COUNT = 0;
@@ -446,6 +449,53 @@ void run_getBishopMovesIndex_tests() {
     }
 }
 
+void run_knightMagicNums_tests() {
+    for (int sq = 0; sq < 64; sq++) {
+        TOTAL_TEST_COUNT++;
+        TESTS_COUNTS[KNIGHT_MAGIC_NUMS]++;
+        std::string testName = TESTS_NAMES[KNIGHT_MAGIC_NUMS] + std::to_string(TESTS_COUNTS[KNIGHT_MAGIC_NUMS]);
+
+        std::vector<int> destinations;
+        if (sq / 8 < 6 && sq % 8 < 7) destinations.push_back(sq + NNE);
+        if (sq / 8 < 7 && sq % 8 < 6) destinations.push_back(sq + ENE);
+        if (sq / 8 > 0 && sq % 8 < 6) destinations.push_back(sq + ESE);
+        if (sq / 8 > 1 && sq % 8 < 7) destinations.push_back(sq + SES);
+        if (sq / 8 > 1 && sq % 8 > 0) destinations.push_back(sq + SWS);
+        if (sq / 8 > 0 && sq % 8 > 1) destinations.push_back(sq + WSW);
+        if (sq / 8 < 7 && sq % 8 > 1) destinations.push_back(sq + WNW);
+        if (sq / 8 < 6 && sq % 8 > 0) destinations.push_back(sq + NWN);
+
+        uint16_t maxOccupancy = (uint16_t)pow(2, destinations.size());
+        bool duplicate = false;
+        std::unordered_set<int> indices;
+
+        // Build occupancy bitboard
+        for (uint16_t j = 0; j < maxOccupancy; j++) {
+            uint64_t occ = 0ULL;
+            int shift = 0;
+            for (int dest : destinations) {
+                occ |= ((j >> shift) & 1UL) << dest;
+                shift++;
+            }
+
+            uint16_t magicIndex = getKnightMovesIndex(occ, (Square) sq);
+            if (indices.find(magicIndex) != indices.end()) {
+                duplicate = true;
+                break;
+            }
+            indices.insert(magicIndex);
+        }
+
+        if (duplicate) {
+            TESTS_FAILED++;
+            std::cout << testName << "\t[ \033[0;31mFAILED\033[0m ]\tSquare: " << squareName[sq] << '\n';
+        } else {
+            TESTS_PASSED++;
+            std::cout << testName << "\t[ \033[0;32mPASSED\033[0m ]\t" << '\n';
+        }
+    }
+}
+
 void printFinalResult() {
     std::cout << "\nPASSED: \033[0;32m" << std::to_string(TESTS_PASSED) << "\033[0m\t";
     std::cout << "FAILED: \033[0;31m" << std::to_string(TESTS_FAILED) << "\033[0m\n";
@@ -457,6 +507,7 @@ int main(int argc, char const *argv[]) {
     run_getRookMovesIndex_tests();
     run_getBishopReachIndex_tests();
     run_getBishopMovesIndex_tests();
+    run_knightMagicNums_tests();
     printFinalResult();
     return 0;
 }
