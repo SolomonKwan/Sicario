@@ -10,6 +10,7 @@
 #include <sstream>
 #include <vector>
 #include "../src/constants.hpp"
+#include "../src/movegen.hpp"
 
 using namespace std;
 
@@ -19,17 +20,6 @@ using namespace std;
 // cout << bitset<64>(_pext_u64(0b100101ULL, 0b101101ULL)) << '\n';
 // cout << _popcnt64(9ULL) << '\n';
 // cout << _popcnt64(0ULL) << '\n';
-
-enum Direction {
-    N =  8,
-    NE = 9,
-    E = 1,
-    SE = -7,
-    S = -8,
-    SW = -9,
-    W = -1,
-    NW = 7
-};
 
 void displayBB(uint64_t position) {
     string positionString = bitset<64>(position).to_string();
@@ -63,27 +53,6 @@ uint64_t randomMagicNumber(float dist) {
         res |= 1ULL << squares[i];
     }
 
-    return res;
-}
-
-void generateCombo(std::array<int, 4> sizes, std::array<int, 4>& curr, std::vector<std::array<int, 4>>& res) {
-    res.push_back(curr);
-    if (curr == sizes) return;
-
-    curr[0]++;
-    for (int i = 0; i < (int)curr.size(); i++) {
-        if (curr[i] > sizes[i]) {
-            curr[i] = 0;
-            if (i != (int)curr.size() - 1) curr[i + 1]++;
-        }
-    }
-    generateCombo(sizes, curr, res);
-}
-
-std::vector<std::array<int, 4>> getEndCombinations(std::array<int, 4> sizes) {
-    std::vector<std::array<int, 4>> res;
-    std::array<int, 4> curr = {0, 0, 0, 0};
-    generateCombo(sizes, curr, res);
     return res;
 }
 

@@ -33,6 +33,7 @@ Node::Node(Move incoming_move, bool is_root, Hash hash, bool turn, int depth) {
 float Node::UCB1() const {
     // if (this->visits == 0) return INFINITY;
     // return (this->value / this->visits) + searcher.c * std::sqrt(std::log(this->parent->visits) / this->visits);
+    return 0;
 }
 
 /**
@@ -46,6 +47,7 @@ Node* Node::select() {
     // Node* bestChild = this->bestChild(searcher);
     // searcher.pos.makeMove(bestChild->incoming_move);
     // return bestChild->select(searcher);
+    return nullptr;
 }
 
 /**
@@ -78,6 +80,7 @@ Node* Node::expand() {
     // int index = randomIndex(rng);
     // searcher.pos.makeMove(this->children[index]->incoming_move);
     // return this->children[index];
+    return nullptr;
 }
 
 /**
@@ -109,6 +112,7 @@ float Node::simulate() {
     //     return -1.0;
     // }
     // return 0.0;
+    return 0.0;
 }
 
 /**
@@ -195,6 +199,7 @@ Node* Node::bestChild() {
     // std::mt19937 rng(dev());
     // std::uniform_int_distribution<> randomIndex(0, maximal_nodes.size() - 1);
     // return maximal_nodes[randomIndex(rng)];
+    return nullptr;
 }
 
 /**

@@ -168,17 +168,6 @@ const Bitboard rookReachMagicNumbers[64] = {
     0x02000804A0100AULL, 0x91005802040001ULL, 0x01000400820001ULL, 0x090000804A0A21ULL
 };
 
-const Bitboard rookMovesMagicNumbers[64] = {
-    0xa6d02837c93f707aULL, 0x3eec9c49c592b8ccULL, 0xdc71f7857f05dee4ULL, 0x59d74e2ff0d1265ULL, 0xe82a97c714bf2199ULL, 0xf4fff5d6b47a97f3ULL, 0x85c43edf781a0bc9ULL, 0xde1a324853536d1fULL,
-    0x9a89392f39b540f6ULL, 0xa896c7955c22717dULL, 0xc4f5ccb6de10c913ULL, 0x6b9b6475bfa26e2fULL, 0xffaff7fefff7eff7ULL, 0x5afefffb6dfaf35dULL, 0x970171e2fc3a8e55ULL, 0x4d2b791590f4f073ULL,
-    0x39fdd950ae692134ULL, 0x53acf11ef0ab92a1ULL, 0x75ff3bd7fa7c1cf3ULL, 0x4f9538e949cc9627ULL, 0xfbfdf2fffafff9fbULL, 0xd399f4fffe6cf91fULL, 0x476e042386b7f2eaULL, 0xf0cbf45cfffefffdULL,
-    0x4d6bb0c5b4ae8cacULL, 0x9e466b525bda20baULL, 0x66070f3711d2b973ULL, 0x3db84a69d8a4d15dULL, 0xadfd01b0bbe6582fULL, 0xdfcfbb76fffeffefULL, 0xbccde9984e0c35d2ULL, 0xfffeebfedeffaf9fULL,
-    0x6e55d230f782cb61ULL, 0x7517d6645a9b6445ULL, 0xf7f7ffd7f7feff7fULL, 0xbf3222afd6d2a627ULL, 0xd7be7e2b2ffefdefULL, 0xeffbfdfafcfffcf7ULL, 0x5de253e5291cf63dULL, 0xbef47f7bbb12ffffULL,
-    0xda774f37dcdcfd9fULL, 0x6fffbfffbfff1fffULL, 0x97ffa7ffe9fcff7dULL, 0xfdefdfafee3f1f8bULL, 0xdeddc70ca1092d6aULL, 0xff79e14f76feffedULL, 0xd5fdf31bfdbaffd7ULL, 0xe19e245f8a22e8d7ULL,
-    0x76c09955657a61e3ULL, 0x611297f85e4a7a5cULL, 0x7f77fc2bfbdab45dULL, 0x5fd688829894db5eULL, 0xa532e26d19d30f6cULL, 0xace353dd9d2c9c74ULL, 0xd5f7f75ed777f97eULL, 0x2171d8dbb6986bbULL,
-    0x76a795e1440f1397ULL, 0xf118ab5db92edb49ULL, 0xdf79d866ac48beedULL, 0x1da9466b71074e3bULL, 0x6f9abb5b38fe4ecfULL, 0xea462b890769778bULL, 0xbb7c798d7bcfacd9ULL, 0x3d6305bf99fc0846ULL,
-};
-
 /**
  * Shifts for finding rook indices.
  */
@@ -191,6 +180,22 @@ const int rookReachShifts[64] = {
     53, 54, 54, 54, 54, 54, 54, 53,
     53, 54, 54, 54, 54, 54, 54, 53,
     52, 53, 53, 53, 53, 53, 53, 52,
+};
+
+const Bitboard rookMovesMagicNumbers[64] = {
+    0xa6d02837c93f707aULL, 0x3eec9c49c592b8ccULL, 0xdc71f7857f05dee4ULL, 0x059d74e2ff0d1265ULL, 0xe82a97c714bf2199ULL,
+    0xf4fff5d6b47a97f3ULL, 0x85c43edf781a0bc9ULL, 0xde1a324853536d1fULL, 0x9a89392f39b540f6ULL, 0xa896c7955c22717dULL,
+    0xc4f5ccb6de10c913ULL, 0x6b9b6475bfa26e2fULL, 0xffaff7fefff7eff7ULL, 0x5afefffb6dfaf35dULL, 0x970171e2fc3a8e55ULL,
+    0x4d2b791590f4f073ULL, 0x39fdd950ae692134ULL, 0x53acf11ef0ab92a1ULL, 0x75ff3bd7fa7c1cf3ULL, 0x4f9538e949cc9627ULL,
+    0xfbfdf2fffafff9fbULL, 0xd399f4fffe6cf91fULL, 0x476e042386b7f2eaULL, 0xf0cbf45cfffefffdULL, 0x4d6bb0c5b4ae8cacULL,
+    0x9e466b525bda20baULL, 0x66070f3711d2b973ULL, 0x3db84a69d8a4d15dULL, 0xadfd01b0bbe6582fULL, 0xdfcfbb76fffeffefULL,
+    0xbccde9984e0c35d2ULL, 0xfffeebfedeffaf9fULL, 0x6e55d230f782cb61ULL, 0x7517d6645a9b6445ULL, 0xf7f7ffd7f7feff7fULL,
+    0xbf3222afd6d2a627ULL, 0xd7be7e2b2ffefdefULL, 0xeffbfdfafcfffcf7ULL, 0x5de253e5291cf63dULL, 0xbef47f7bbb12ffffULL,
+    0xda774f37dcdcfd9fULL, 0x6fffbfffbfff1fffULL, 0x97ffa7ffe9fcff7dULL, 0xfdefdfafee3f1f8bULL, 0xdeddc70ca1092d6aULL,
+    0xff79e14f76feffedULL, 0xd5fdf31bfdbaffd7ULL, 0xe19e245f8a22e8d7ULL, 0x76c09955657a61e3ULL, 0x611297f85e4a7a5cULL,
+    0x7f77fc2bfbdab45dULL, 0x5fd688829894db5eULL, 0xa532e26d19d30f6cULL, 0xace353dd9d2c9c74ULL, 0xd5f7f75ed777f97eULL,
+    0x02171d8dbb6986bbULL, 0x76a795e1440f1397ULL, 0xf118ab5db92edb49ULL, 0xdf79d866ac48beedULL, 0x1da9466b71074e3bULL,
+    0x6f9abb5b38fe4ecfULL, 0xea462b890769778bULL, 0xbb7c798d7bcfacd9ULL, 0x3d6305bf99fc0846ULL
 };
 
 const int rookMovesShifts[64] = {
@@ -240,17 +245,6 @@ const Bitboard bishopReachMagicNumbers[64] = {
     0x00000040050102, 0x00800410420200, 0x002004C1080100, 0x20204101010010
 };
 
-const Bitboard bishopMovesMagicNumbers[64] = {
-    0xf595f2102713b0ddULL, 0xfd9f408bac4f8229ULL, 0x2be56992e4b44da5ULL, 0xea16a3dec07a88dcULL, 0xd4ae1df28d6d048bULL, 0xe80318fc54cbad4fULL, 0xd025035c36eef61eULL, 0x1bd8f40dbaf48c29ULL,
-    0x42562d998e6bcb8bULL, 0xfbfff7f6fdfeff7fULL, 0x2ff6fdfbf87ad7e0ULL, 0x97ffebebeff7fbf4ULL, 0x6fbf3f77f9dfbf7bULL, 0xef3d6f9ef0890daeULL, 0xdeffef7fbd8dfbafULL, 0xd97dfe30548c482bULL,
-    0x8e6f973a94d9589ULL, 0xa9cb619a4e4e46abULL, 0xad0bdf5f7cd7bfd5ULL, 0x4fa95ee73b440b0aULL, 0xac8bbcc417b0eeeULL, 0x2820eecacb33a95fULL, 0xef9bcf5afefba0d7ULL, 0x93036c14d5abb8f9ULL,
-    0xe992a24eb7b41e62ULL, 0x8f7926bfb2015389ULL, 0xfffbf7efebfdfeffULL, 0xfeff7fbff7dffbdfULL, 0xeffbf5fbeaffbdffULL, 0xf7ff7dfeefdfefffULL, 0x7bfed6fff77fbfbfULL, 0xcc306c56ced7c9c2ULL,
-    0x22b70d5c771ba398ULL, 0x59f9fab7fec3efffULL, 0xfff67fedfffbfdffULL, 0xfeb347dbf5eebe72ULL, 0x70bef5647e5bffefULL, 0xfefb9beddfffbf7fULL, 0x97937fb7d43797ffULL, 0x49c4ea382f67c1f4ULL,
-    0xf49ab4d42998763cULL, 0x6e2ee0cdcdcbfdbfULL, 0xfeefcfbff6fcefffULL, 0x3fd39ddfbf7ff7feULL, 0x6bfdce6f9fbffdffULL, 0xb56fdb7cf7f580ffULL, 0x78ccac6ebefffb6fULL, 0x6d6a5e9ef068222dULL,
-    0x48c35bdd537386c1ULL, 0x9b2edfc46f542ee0ULL, 0xfbf250b36a2b1170ULL, 0x5f7368f9e3e15548ULL, 0xb13dc6ff9f018184ULL, 0xc3c6153eb02af92eULL, 0x6be76d1e806480efULL, 0xbb8bb68d4860be8aULL,
-    0x1097d0e7e9e7e430ULL, 0xeb5e9f3440c7212eULL, 0x4fd029705c0976dfULL, 0x2d41cab3c83c6e3bULL, 0x15188e74a9e789deULL, 0xbb18adb45b6d1509ULL, 0x67abafd14128e465ULL, 0xbbde1b299238c781ULL
-};
-
 /**
  * Shifts for finding bishop indices.
  */
@@ -263,6 +257,22 @@ const int bishopReachShifts[64] = {
     59, 59, 57, 57, 57, 57, 59, 59,
     59, 59, 59, 59, 59, 59, 59, 59,
     58, 59, 59, 59, 59, 59, 59, 58
+};
+
+const Bitboard bishopMovesMagicNumbers[64] = {
+    0xf595f2102713b0ddULL, 0xfd9f408bac4f8229ULL, 0x2be56992e4b44da5ULL, 0xea16a3dec07a88dcULL, 0xd4ae1df28d6d048bULL,
+    0xe80318fc54cbad4fULL, 0xd025035c36eef61eULL, 0x1bd8f40dbaf48c29ULL, 0x42562d998e6bcb8bULL, 0xfbfff7f6fdfeff7fULL,
+    0x2ff6fdfbf87ad7e0ULL, 0x97ffebebeff7fbf4ULL, 0x6fbf3f77f9dfbf7bULL, 0xef3d6f9ef0890daeULL, 0xdeffef7fbd8dfbafULL,
+    0xd97dfe30548c482bULL, 0x08e6f973a94d9589ULL, 0xa9cb619a4e4e46abULL, 0xad0bdf5f7cd7bfd5ULL, 0x4fa95ee73b440b0aULL,
+    0x0ac8bbcc417b0eeeULL, 0x2820eecacb33a95fULL, 0xef9bcf5afefba0d7ULL, 0x93036c14d5abb8f9ULL, 0xe992a24eb7b41e62ULL,
+    0x8f7926bfb2015389ULL, 0xfffbf7efebfdfeffULL, 0xfeff7fbff7dffbdfULL, 0xeffbf5fbeaffbdffULL, 0xf7ff7dfeefdfefffULL,
+    0x7bfed6fff77fbfbfULL, 0xcc306c56ced7c9c2ULL, 0x22b70d5c771ba398ULL, 0x59f9fab7fec3efffULL, 0xfff67fedfffbfdffULL,
+    0xfeb347dbf5eebe72ULL, 0x70bef5647e5bffefULL, 0xfefb9beddfffbf7fULL, 0x97937fb7d43797ffULL, 0x49c4ea382f67c1f4ULL,
+    0xf49ab4d42998763cULL, 0x6e2ee0cdcdcbfdbfULL, 0xfeefcfbff6fcefffULL, 0x3fd39ddfbf7ff7feULL, 0x6bfdce6f9fbffdffULL,
+    0xb56fdb7cf7f580ffULL, 0x78ccac6ebefffb6fULL, 0x6d6a5e9ef068222dULL, 0x48c35bdd537386c1ULL, 0x9b2edfc46f542ee0ULL,
+    0xfbf250b36a2b1170ULL, 0x5f7368f9e3e15548ULL, 0xb13dc6ff9f018184ULL, 0xc3c6153eb02af92eULL, 0x6be76d1e806480efULL,
+    0xbb8bb68d4860be8aULL, 0x1097d0e7e9e7e430ULL, 0xeb5e9f3440c7212eULL, 0x4fd029705c0976dfULL, 0x2d41cab3c83c6e3bULL,
+    0x15188e74a9e789deULL, 0xbb18adb45b6d1509ULL, 0x67abafd14128e465ULL, 0xbbde1b299238c781ULL
 };
 
 const int bishopMovesShifts[64] = {

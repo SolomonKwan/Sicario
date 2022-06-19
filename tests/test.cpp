@@ -40,27 +40,6 @@ int TESTS_FAILED = 0;
 const std::array<std::vector<int>, 64> ROOK_REACH_INDICES = computeRookReachIndices();
 const std::array<std::vector<int>, 64> BISHOP_REACH_INDICES = computeBishopReachIndices();
 
-void generateCombo(std::array<int, 4> sizes, std::array<int, 4>& curr, std::vector<std::array<int, 4>>& res) {
-    res.push_back(curr);
-    if (curr == sizes) return;
-
-    curr[0]++;
-    for (int i = 0; i < (int)curr.size(); i++) {
-        if (curr[i] > sizes[i]) {
-            curr[i] = 0;
-            if (i != (int)curr.size() - 1) curr[i + 1]++;
-        }
-    }
-    generateCombo(sizes, curr, res);
-}
-
-std::vector<std::array<int, 4>> getEndCombinations(std::array<int, 4> sizes) {
-    std::vector<std::array<int, 4>> res;
-    std::array<int, 4> curr = {0, 0, 0, 0};
-    generateCombo(sizes, curr, res);
-    return res;
-}
-
 template <typename T>
 void assertEquals(TestType testType, T expected, T actual, int testNum) {
     TOTAL_TEST_COUNT++;

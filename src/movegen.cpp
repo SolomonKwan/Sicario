@@ -104,105 +104,84 @@ std::array<std::array<std::vector<Move>, 64>, 2> computePawnMoves() {
     return pawnMoves;
 }
 
-// CHECK Maybe I can improve and not use the second for loop?
 std::array<std::vector<std::vector<Move>>, 64> computeRookMoves() {
     std::array<std::vector<std::vector<Move>>, 64> rookMoves;
     for (int square = A1; square <= H8; square++) {
-        int northSize = std::max(6 - (square / 8), 0);
-        int southSize = std::max(square / 8 - 1, 0);
-        int eastSize = std::max(6 - (square % 8), 0);
-        int westSize = std::max(square % 8 - 1, 0);
-        std::vector<std::vector<Move>>& moveFamily = rookMoves[square];
-        moveFamily.resize((northSize ? northSize + 1 : 1) * (southSize ? southSize + 1 : 1) *
-                (eastSize ? eastSize + 1 : 1) * (westSize ? westSize + 1 : 1));
+        int northSize = std::max(7 - (square / 8), 0);
+        int southSize = std::max(square / 8, 0);
+        int eastSize = std::max(7 - (square % 8), 0);
+        int westSize = std::max(square % 8, 0);
+        std::vector<std::vector<Move>>& movesSet = rookMoves[square];
+        movesSet.resize((int)std::pow(2, 64 - rookMovesShifts[square]));
 
-        uint16_t maxOccupancy = pow(2, northSize + southSize + eastSize + westSize);
-        for (uint16_t j = 0; j < maxOccupancy; j++) {
+        for (std::array<int, 4> selection : getEndCombinations({northSize, eastSize, southSize, westSize})) {
+            uint64_t reach = 0ULL;
             std::vector<Move> moves;
-            int northBlock = 0, eastBlock = 0, southBlock = 0, westBlock = 0;
-            uint64_t occ = 0ULL;
-            int shift = 0;
-            for (int k = 0; k < northSize; k++, shift++) {
-                occ |= ((j >> shift) & 1UL) << (square + N * (k + 1));
-                if (!northBlock) moves.push_back(square | (square + (N * (k + 1))) << 6);
-                if (!northBlock && ((j >> shift) & 1UL)) northBlock = k + 1;
-            }
-            for (int k = 0; k < southSize; k++, shift++) {
-                occ |= ((j >> shift) & 1UL) << (square + S * (k + 1));
-                if (!southBlock) moves.push_back(square | (square + (S * (k + 1))) << 6);
-                if (!southBlock && ((j >> shift) & 1UL)) southBlock = k + 1;
-            }
-            for (int k = 0; k < eastSize; k++, shift++) {
-                occ |= ((j >> shift) & 1UL) << (square + E * (k + 1));
-                if (!eastBlock) moves.push_back(square | (square + (E * (k + 1))) << 6);
-                if (!eastBlock && ((j >> shift) & 1UL)) eastBlock = k + 1;
-            }
-            for (int k = 0; k < westSize; k++, shift++) {
-                occ |= ((j >> shift) & 1UL) << (square + W * (k + 1));
-                if (!westBlock) moves.push_back(square | (square + (W * (k + 1))) << 6);
-                if (!westBlock && ((j >> shift) & 1UL)) westBlock = k + 1;
+
+            for (int i = 0; i < selection[0]; i++) {
+                reach |= 1ULL << (square + N * (i + 1));
+                moves.push_back(square | ((square + N * (i + 1)) << 6));
             }
 
-            int mappedIndex = getIndex(
-                {northBlock, eastBlock, southBlock, westBlock},
-                {northSize ? northSize + 1 : 0, eastSize ? eastSize + 1 : 0, southSize ? southSize + 1 : 0,
-                        westSize ? westSize + 1 : 0}
-            );
+            for (int i = 0; i < selection[1]; i++) {
+                reach |= 1ULL << (square + E * (i + 1));
+                moves.push_back(square | ((square + E * (i + 1)) << 6));
+            }
 
-            if (moveFamily[mappedIndex].size() != 0) continue;
-            moveFamily[mappedIndex] = moves;
+            for (int i = 0; i < selection[2]; i++) {
+                reach |= 1ULL << (square + S * (i + 1));
+                moves.push_back(square | ((square + S * (i + 1)) << 6));
+            }
+
+            for (int i = 0; i < selection[3]; i++) {
+                reach |= 1ULL << (square + W * (i + 1));
+                moves.push_back(square | ((square + W * (i + 1)) << 6));
+            }
+
+            int magicIndex = getRookMovesIndex(reach, (Square) square);
+            movesSet[magicIndex] = moves;
         }
     }
     return rookMoves;
 }
 
-// CHECK Maybe I can improve and not use the second for loop?
 std::array<std::vector<std::vector<Move>>, 64> computeBishopMoves() {
     std::array<std::vector<std::vector<Move>>, 64> bishopMoves;
     for (int square = A1; square <= H8; square++) {
-        int northeastSize = std::max(std::min(6 - square / 8, 6 - square % 8), 0);
-        int southeastSize = std::max(std::min(square / 8 - 1, 6 - square % 8), 0);
-        int southwestSize = std::max(std::min(square / 8 - 1, square % 8 - 1), 0);
-        int northwestSize = std::max(std::min(6 - square / 8, square % 8 - 1), 0);
-        std::vector<std::vector<Move>>& moveFamily = bishopMoves[square];
-        moveFamily.resize((northeastSize ? northeastSize + 1 : 1) * (southeastSize ? southeastSize + 1 : 1) *
-                (southwestSize ? southwestSize + 1 : 1) * (northwestSize ? northwestSize + 1 : 1));
+        int northEastSize = std::max(std::min(7 - square / 8, 7 - square % 8), 0);
+        int southEastSize = std::max(std::min(square / 8, 7 - square % 8), 0);
+        int southWestSize = std::max(std::min(square / 8, square % 8), 0);
+        int northWestSize = std::max(std::min(7 - square / 8, square % 8), 0);
+        std::vector<std::vector<Move>>& movesSet = bishopMoves[square];
+        movesSet.resize((int)std::pow(2, 64 - bishopMovesShifts[square]));
 
-        uint16_t maxOccupancy = pow(2, northeastSize + southeastSize + southwestSize + northwestSize);
-        for (uint16_t j = 0; j < maxOccupancy; j++) {
+        for (std::array<int, 4> selection : getEndCombinations({northEastSize, southEastSize, southWestSize,
+                northWestSize})) {
+            uint64_t reach = 0ULL;
             std::vector<Move> moves;
-            int northeastBlock = 0, southeastBlock = 0, southwestBlock = 0, northwestBlock = 0;
-            uint64_t occ = 0ULL;
-            int shift = 0;
-            for (int k = 0; k < northeastSize; k++, shift++) {
-                occ |= ((j >> shift) & 1UL) << (square + NE * (k + 1));
-                if (!northeastBlock) moves.push_back(square | (square + (NE * (k + 1))) << 6);
-                if (!northeastBlock && ((j >> shift) & 1UL)) northeastBlock = k + 1;
-            }
-            for (int k = 0; k < southeastSize; k++, shift++) {
-                occ |= ((j >> shift) & 1UL) << (square + SE * (k + 1));
-                if (!southeastBlock) moves.push_back(square | (square + (SE * (k + 1))) << 6);
-                if (!southeastBlock && ((j >> shift) & 1UL)) southeastBlock = k + 1;
-            }
-            for (int k = 0; k < southwestSize; k++, shift++) {
-                occ |= ((j >> shift) & 1UL) << (square + SW * (k + 1));
-                if (!southwestBlock) moves.push_back(square | (square + (SW * (k + 1))) << 6);
-                if (!southwestBlock && ((j >> shift) & 1UL)) southwestBlock = k + 1;
-            }
-            for (int k = 0; k < northwestSize; k++, shift++) {
-                occ |= ((j >> shift) & 1UL) << (square + NW * (k + 1));
-                if (!northwestBlock) moves.push_back(square | (square + (NW * (k + 1))) << 6);
-                if (!northwestBlock && ((j >> shift) & 1UL)) northwestBlock = k + 1;
+
+            for (int i = 0; i < selection[0]; i++) {
+                reach |= 1ULL << (square + NE * (i + 1));
+                moves.push_back(square | ((square + NE * (i + 1)) << 6));
             }
 
-            int mappedIndex = getIndex(
-                {northeastBlock, southeastBlock, southwestBlock, northwestBlock},
-                {northeastSize ? northeastSize + 1 : 0, southeastSize ? southeastSize + 1 : 0,
-                        southwestSize ? southwestSize + 1 : 0, northwestSize ? northwestSize + 1 : 0}
-            );
+            for (int i = 0; i < selection[1]; i++) {
+                reach |= 1ULL << (square + SE * (i + 1));
+                moves.push_back(square | ((square + SE * (i + 1)) << 6));
+            }
 
-            if (moveFamily[mappedIndex].size() != 0) continue;
-            moveFamily[mappedIndex] = moves;
+            for (int i = 0; i < selection[2]; i++) {
+                reach |= 1ULL << (square + SW * (i + 1));
+                moves.push_back(square | ((square + SW * (i + 1)) << 6));
+            }
+
+            for (int i = 0; i < selection[3]; i++) {
+                reach |= 1ULL << (square + NW * (i + 1));
+                moves.push_back(square | ((square + NW * (i + 1)) << 6));
+            }
+
+            int magicIndex = getBishopMovesIndex(reach, (Square) square);
+            movesSet[magicIndex] = moves;
         }
     }
     return bishopMoves;
@@ -324,4 +303,29 @@ int pairingFunction(int n, int m, int N, int M) {
     } else {
         return n + m * N;
     }
+}
+
+void generateCombination(std::array<int, 4> sizes, std::array<int, 4>& curr, std::vector<std::array<int, 4>>& res) {
+    res.push_back(curr);
+    if (curr == sizes) return;
+
+    // Increment first number
+    curr[0]++;
+
+    // If there is an overflow, carry over the overflow.
+    for (int i = 0; i < (int)curr.size(); i++) {
+        if (curr[i] > sizes[i]) {
+            curr[i] = 0;
+            if (i != (int)curr.size() - 1) curr[i + 1]++;
+        }
+    }
+
+    generateCombination(sizes, curr, res);
+}
+
+std::vector<std::array<int, 4>> getEndCombinations(std::array<int, 4> sizes) {
+    std::vector<std::array<int, 4>> res;
+    std::array<int, 4> curr = {0, 0, 0, 0};
+    generateCombination(sizes, curr, res);
+    return res;
 }

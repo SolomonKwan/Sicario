@@ -6,8 +6,6 @@
 #include <vector>
 #include "constants.hpp"
 
-#define UNSET 0xFFFFFFFFFFFFFFFF // CHECK
-
 enum Direction {
     N = 8,
     NE = 9,
@@ -30,6 +28,7 @@ enum KnightDirection {
     NWN = +15,
 };
 
+// TODO might be changing
 /**
  * Compute pseudolegal moves of the king on each square.
  * @return: Array of vectors of pseudolegal moves.
@@ -38,6 +37,7 @@ enum KnightDirection {
  */
 std::array<std::vector<Move>, 64> computeKingMoves();
 
+// TODO might be changing
 /**
  * Compute pseudolegal moves of the knight on each square.
  * @return: Array of vectors of pseudolegal moves.
@@ -46,6 +46,7 @@ std::array<std::vector<Move>, 64> computeKingMoves();
  */
 std::array<std::vector<Move>, 64> computeKnightMoves();
 
+// TODO might be changing
 /**
  * Compute pseudolegal moves of the pawn on each square.
  * @return: Array of array of vectors of pseudolegal moves.
@@ -56,7 +57,7 @@ std::array<std::vector<Move>, 64> computeKnightMoves();
 std::array<std::array<std::vector<Move>, 64>,2> computePawnMoves();
 
 /**
- * Compute pseudolegal moves of the rook on each square.
+ * Compute legal moves of the rook on each square.
  * @return: Array of vectors of pseudolegal moves.
  * @note: Does not take into account if the rook is pinned.
  * @note: Does not take into account if rook captures own pieces.
@@ -64,7 +65,7 @@ std::array<std::array<std::vector<Move>, 64>,2> computePawnMoves();
 std::array<std::vector<std::vector<Move>>, 64> computeRookMoves();
 
 /**
- * Compute pseudolegal moves of the bishop on each square.
+ * Compute legal moves of the bishop on each square.
  * @return: Array of vectors of pseudolegal moves.
  * @note: Does not take into account if the bishop is pinned.
  * @note: Does not take into account if bishop captures own pieces.
@@ -140,6 +141,24 @@ int getIndex(std::vector<int> values, std::vector<int> ranges);
  * @return: A unique integer from the set {0, 1, ..., N * M - 1} for each ordered pair (n, m).
  */
 int pairingFunction(int n, int m, int N, int M);
+
+/**
+ * @brief Adds the curr combination to the res vector and increments curr[0]. If an overflow occurs, it resolves the
+ * overflow by doing the necessary increments to the remaining array and performs a recursive call on the new updated
+ * curr array. Recursion stops when curr == sizes;
+ * @param sizes Array of ints. Each int is the cardinality of the set of possible position of the first blocking bit.
+ * @param curr The current array combination.
+ * @param res Vector of arrays to store the results.
+ */
+void generateCombination(std::array<int, 4> sizes, std::array<int, 4>& curr, std::vector<std::array<int, 4>>& res);
+
+/**
+ * @brief Calls generateCombination and returns a vector of arrays of all different end combinations depending on values
+ * in the sizes array. The values in sizes is ordered N, E, S, W for rooks and NE, SE, SW, NW for bishops.
+ * @param sizes Array of ints. Each int is the cardinality of the set of possible position of the first blocking bit.
+ * @return Vector of arrays of possible end combinations that are no larger than the corresponding size.
+ */
+std::vector<std::array<int, 4>> getEndCombinations(std::array<int, 4> sizes);
 
 /**
  * A struct holding the move families.
