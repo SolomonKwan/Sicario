@@ -147,6 +147,43 @@ std::array<std::vector<std::vector<Move>>, 64> computeRookMoves() {
 
 std::array<std::vector<std::vector<Move>>, 64> computeBishopMoves() {
     std::array<std::vector<std::vector<Move>>, 64> bishopMoves;
+    for (int square = A1; square <= H8; square++) {
+        int northEastSize = std::max(std::min(7 - square / 8, 7 - square % 8), 0);
+        int southEastSize = std::max(std::min(square / 8, 7 - square % 8), 0);
+        int southWestSize = std::max(std::min(square / 8, square % 8), 0);
+        int northWestSize = std::max(std::min(7 - square / 8, square % 8), 0);
+        std::vector<std::vector<Move>>& movesSet = bishopMoves[square];
+        movesSet.resize((int)std::pow(2, 64 - bishopMovesShifts[square]));
+
+        for (std::array<int, 4> selection : getEndCombinations({northEastSize, southEastSize, southWestSize,
+                northWestSize})) {
+            uint64_t reach = 0ULL;
+            std::vector<Move> moves;
+
+            for (int i = 0; i < selection[0]; i++) {
+                reach |= 1ULL << (square + NE * (i + 1));
+                moves.push_back(square | ((square + NE * (i + 1)) << 6));
+            }
+
+            for (int i = 0; i < selection[1]; i++) {
+                reach |= 1ULL << (square + SE * (i + 1));
+                moves.push_back(square | ((square + SE * (i + 1)) << 6));
+            }
+
+            for (int i = 0; i < selection[2]; i++) {
+                reach |= 1ULL << (square + SW * (i + 1));
+                moves.push_back(square | ((square + SW * (i + 1)) << 6));
+            }
+
+            for (int i = 0; i < selection[3]; i++) {
+                reach |= 1ULL << (square + NW * (i + 1));
+                moves.push_back(square | ((square + NW * (i + 1)) << 6));
+            }
+
+            int magicIndex = getBishopMovesIndex(reach, (Square) square);
+            movesSet[magicIndex] = moves;
+        }
+    }
     return bishopMoves;
 }
 

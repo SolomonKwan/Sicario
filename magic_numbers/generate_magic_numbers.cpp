@@ -229,6 +229,69 @@ void findBishopReachMNs() {
     }
 }
 
+void findBishopMovesMNs() {
+    for (int sq = 0; sq < 64; sq++) {
+        if (sq == A1 || sq == B1 || sq == C1 || sq == D1 || sq == E1 || sq == F1 || sq == G1 || sq == H1 || sq == A2 ||
+                sq == C2 || sq == D2 || sq == F2 || sq == H2 || sq == A3 || sq == B3 || sq == G3 || sq == H3 ||
+                sq == A4 || sq == B4 || sq == G4 || sq == H4 || sq == A5 || sq == B5 || sq == G5 || sq == H5 ||
+                sq == A6 || sq == B6 || sq == G6 || sq == H6 || sq == A7 || sq == C7 || sq == D7 || sq == E7 ||
+                sq == F7 || sq == G7 || sq == H7 || sq == A8 || sq == B8 || sq == C8 || sq == D8 || sq == E8 ||
+                sq == F8 || sq == G8 || sq == H8 || sq == B2 || sq == G2 || sq == B7 || sq == E2 || sq == F3 ||
+                sq == F4 || sq == C5 || sq == C6 || sq == F6 || sq == F5 || sq == D6 || sq == E6 || sq == C4 ||
+                sq == C3) continue;
+        int northEastSize = max(min(7 - sq / 8, 7 - sq % 8), 0);
+        int southEastSize = max(min(sq / 8, 7 - sq % 8), 0);
+        int southWestSize = max(min(sq / 8, sq % 8), 0);
+        int northWestSize = max(min(7 - sq / 8, sq % 8), 0);
+        int totalSize = (northEastSize ? northEastSize + 1 : 1) * (southEastSize ? southEastSize + 1 : 1) *
+                (southWestSize ? southWestSize + 1 : 1) * (northWestSize ? northWestSize + 1 : 1);
+        totalSize = (int)floor(log2(totalSize)) + 3;
+        auto combos = getEndCombinations({northEastSize, southEastSize, southWestSize, northWestSize});
+
+        int attempt = 0;
+        float prob = 0.5;
+        while (true) {
+            if (attempt > 100000) {
+                attempt = 0;
+                prob += 0.05;
+            }
+
+            if (prob > 1) {
+                cout << "Welp, the square " << squareName[sq] << " was fucked..." << '\n';
+                break;
+            }
+            uint64_t magicNum = randomMagicNumber(prob);
+
+            unordered_set<int> indices;
+            bool duplicate = false;
+
+            // Build occupancy bitboard
+            for (std::array<int, 4> selection : combos) {
+                uint64_t occ = 0ULL;
+
+                for (int i = 0; i < selection[0]; i++) occ |= 1ULL << (sq + NE * (i + 1));
+                for (int i = 0; i < selection[1]; i++) occ |= 1ULL << (sq + SE * (i + 1));
+                for (int i = 0; i < selection[2]; i++) occ |= 1ULL << (sq + SW * (i + 1));
+                for (int i = 0; i < selection[3]; i++) occ |= 1ULL << (sq + NW * (i + 1));
+
+                uint16_t magicIndex = ((occ * magicNum) >> (64 - totalSize));
+                if (indices.find(magicIndex) != indices.end()) {
+                    duplicate = true;
+                    break;
+                }
+
+                indices.insert(magicIndex);
+            }
+
+            if (!duplicate) {
+                cout << squareName[sq] << " 0x" << std::hex << magicNum << " \t" << std::dec << (64 - totalSize) << '\n';
+                break;
+            }
+            attempt++;
+        }
+    }
+}
+
 void generateRookMasks() {
 
 }
@@ -246,5 +309,6 @@ int main(int argc, char* argv[]) {
     // findRookReachMNs();
     // cout << "Bishop magic numbers" << '\n';
     // findBishopReachMNs();
-    findRookMovesMNs();
+    // findRookMovesMNs();
+    findBishopMovesMNs();
 }
