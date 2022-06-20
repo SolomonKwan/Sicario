@@ -84,65 +84,57 @@ std::array<std::vector<std::vector<Move>>, 64> computeKnightMoves() {
     return knightMoves;
 }
 
-std::array<std::array<std::vector<Move>, 64>, 2> computePawnMoves() {
-    std::array<std::array<std::vector<Move>, 64>, 2> pawnMoves;
-    for (int square = A2; square <= H7; square++) {
-        std::vector<Move>& whiteMoves = pawnMoves[WHITE][square];
-        std::vector<Move>& blackMoves = pawnMoves[BLACK][square];
+std::array<std::array<std::vector<std::vector<Move>>, 64>, 2> computePawnMoves() {
+    std::array<std::array<std::vector<std::vector<Move>>, 64>, 2> pawnMoves = {
+        computePawnMovesBySide(BLACK),
+        computePawnMovesBySide(WHITE)
+    };
+    return pawnMoves;
+}
 
-        if (square / 8 == 1) {
-            whiteMoves.push_back(square | (square + N) << 6);
-            whiteMoves.push_back(square | (square + N + N) << 6);
-            blackMoves.push_back(square | (square + S) | PROMOTION | pKNIGHT);
-            blackMoves.push_back(square | (square + S) | PROMOTION | pBISHOP);
-            blackMoves.push_back(square | (square + S) | PROMOTION | pROOK);
-            blackMoves.push_back(square | (square + S) | PROMOTION | pQUEEN);
-            if (square % 8 != 0) {
-                whiteMoves.push_back(square | (square + NW) << 6);
-                blackMoves.push_back(square | (square + SW) | PROMOTION | pKNIGHT);
-                blackMoves.push_back(square | (square + SW) | PROMOTION | pBISHOP);
-                blackMoves.push_back(square | (square + SW) | PROMOTION | pROOK);
-                blackMoves.push_back(square | (square + SW) | PROMOTION | pQUEEN);
-            }
-            if (square % 8 != 7) {
-                whiteMoves.push_back(square | (square + NE) << 6);
-                blackMoves.push_back(square | (square + SE) | PROMOTION | pKNIGHT);
-                blackMoves.push_back(square | (square + SE) | PROMOTION | pBISHOP);
-                blackMoves.push_back(square | (square + SE) | PROMOTION | pROOK);
-                blackMoves.push_back(square | (square + SE) | PROMOTION | pQUEEN);
-            }
-        } else if (square / 8 == 6) {
-            blackMoves.push_back(square | (square + S) << 6);
-            blackMoves.push_back(square | (square + S + S) << 6);
-            whiteMoves.push_back(square | (square + N) | PROMOTION | pKNIGHT);
-            whiteMoves.push_back(square | (square + N) | PROMOTION | pBISHOP);
-            whiteMoves.push_back(square | (square + N) | PROMOTION | pROOK);
-            whiteMoves.push_back(square | (square + N) | PROMOTION | pQUEEN);
-            if (square % 8 != 0) {
-                blackMoves.push_back(square | (square + SW) << 6);
-                whiteMoves.push_back(square | (square + NW) | PROMOTION | pKNIGHT);
-                whiteMoves.push_back(square | (square + NW) | PROMOTION | pBISHOP);
-                whiteMoves.push_back(square | (square + NW) | PROMOTION | pROOK);
-                whiteMoves.push_back(square | (square + NW) | PROMOTION | pQUEEN);
-            }
-            if (square % 8 != 7) {
-                blackMoves.push_back(square | (square + SE) << 6);
-                whiteMoves.push_back(square | (square + NE) | PROMOTION | pKNIGHT);
-                whiteMoves.push_back(square | (square + NE) | PROMOTION | pBISHOP);
-                whiteMoves.push_back(square | (square + NE) | PROMOTION | pROOK);
-                whiteMoves.push_back(square | (square + NE) | PROMOTION | pQUEEN);
-            }
+std::array<std::vector<std::vector<Move>>, 64> computePawnMovesBySide(Player player) {
+    std::array<std::vector<std::vector<Move>>, 64> pawnMoves;
+    for (int square = A2; square <= H7; square++) {
+        std::vector<std::vector<Move>>& moveSet = pawnMoves[square];
+        std::vector<int> destinations;
+        if (player == BLACK) {
+            destinations.push_back(square + S);
+            if (square / 8 == 6) destinations.push_back(square + S + S);
+            if (square % 8 != 0) destinations.push_back(square + SW);
+            if (square % 8 != 7) destinations.push_back(square + SE);
         } else {
-            whiteMoves.push_back(square | (square + N) << 6);
-            blackMoves.push_back(square | (square - S) << 6);
-            if (square % 8 != 0) {
-                whiteMoves.push_back(square | (square + NW) << 6);
-                blackMoves.push_back(square | (square + SW) << 6);
+            destinations.push_back(square + N);
+            if (square / 8 == 1) destinations.push_back(square + N + N);
+            if (square % 8 != 0) destinations.push_back(square + NW);
+            if (square % 8 != 7) destinations.push_back(square + NE);
+        }
+
+        int totalSize = destinations.size();
+        uint16_t maxOccupancy = (uint16_t)pow(2, totalSize);
+        moveSet.resize(maxOccupancy);
+
+        for (uint16_t j = 0; j < maxOccupancy; j++) {
+            std::vector<Move> moves;
+
+            uint64_t occ = 0ULL;
+            int shift = 0;
+            for (int dest : destinations) {
+                if ((j >> shift) & 1UL) {
+                    if (dest / 8 == 0 || dest / 8 == 7) {
+                        moves.push_back(square | (dest << 6) | PROMOTION | pQUEEN);
+                        moves.push_back(square | (dest << 6) | PROMOTION | pROOK);
+                        moves.push_back(square | (dest << 6) | PROMOTION | pBISHOP);
+                        moves.push_back(square | (dest << 6) | PROMOTION | pKNIGHT);
+                    } else {
+                        moves.push_back(square | (dest << 6));
+                    }
+                }
+                occ |= ((j >> shift) & 1UL) << dest;
+                shift++;
             }
-            if (square % 8 != 7) {
-                whiteMoves.push_back(square | (square + NE) << 6);
-                blackMoves.push_back(square | (square + SE) << 6);
-            }
+
+            uint16_t magicIndex = getPawnMovesIndex(occ, (Square) square, player);
+            moveSet[magicIndex] = moves;
         }
     }
     return pawnMoves;

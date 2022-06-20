@@ -29,34 +29,41 @@ enum KnightDirection {
 };
 
 /**
- * Compute pseudolegal moves of the king on each square.
- * @return: Array of vectors of pseudolegal moves.
+ * Compute moves of the king on each square. Does not compute castling moves.
+ * @return: Array of vectors of moves.
  * @note: Does not take into account king potentially moving into check.
  * @note: Does not take into account king potentially taking own pieces.
  */
 std::array<std::vector<std::vector<Move>>, 64> computeKingMoves();
 
 /**
- * Compute pseudolegal moves of the knight on each square.
- * @return: Array of vectors of pseudolegal moves.
+ * Compute  moves of the knight on each square.
+ * @return: Array of vectors of moves.
  * @note: Does not take into account if the knight is pinned.
  * @note: Does not take into account if knight takes own pieces.
  */
 std::array<std::vector<std::vector<Move>>, 64> computeKnightMoves();
 
-// TODO might be changing
 /**
- * Compute pseudolegal moves of the pawn on each square.
- * @return: Array of array of vectors of pseudolegal moves.
+ * Makes calls to computePawnMovesBySide to create the pawn moves arrays.
+ * @return: Array of array of vectors of moves.
  * @note: Does not take into account if the pawn is pinned.
  * @note: Does not take into account capturing own pieces.
  * @note: Black array is 0, white array is 1.
  */
-std::array<std::array<std::vector<Move>, 64>,2> computePawnMoves();
+std::array<std::array<std::vector<std::vector<Move>>, 64>,2> computePawnMoves();
+
+/**
+ * Computes moves of the pawn on each square for a particular side. Does not compute en-passant moves.
+ * @return: Array of vectors of moves.
+ * @note: Does not take into account if the knight is pinned.
+ * @note: Does not take into account if knight takes own pieces.
+ */
+std::array<std::vector<std::vector<Move>>, 64> computePawnMovesBySide(Player player);
 
 /**
  * Compute legal moves of the rook on each square.
- * @return: Array of vectors of pseudolegal moves.
+ * @return: Array of vectors of moves.
  * @note: Does not take into account if the rook is pinned.
  * @note: Does not take into account if rook captures own pieces.
  */
@@ -64,7 +71,7 @@ std::array<std::vector<std::vector<Move>>, 64> computeRookMoves();
 
 /**
  * Compute legal moves of the bishop on each square.
- * @return: Array of vectors of pseudolegal moves.
+ * @return: Array of vectors of moves.
  * @note: Does not take into account if the bishop is pinned.
  * @note: Does not take into account if bishop captures own pieces.
  */
@@ -150,7 +157,7 @@ inline int getKingMovesIndex(Bitboard reach, Square square) {
  * @return Index into the precomputed pawn moves array.
  */
 inline int getPawnMovesIndex(Bitboard reach, Square square, Player player) {
-    return (reach * pawnMagicNumbers[player][square]) >> pawnShifts[square];
+    return (reach * pawnMagicNumbers[player][square]) >> pawnShifts[player][square];
 }
 
 /**
