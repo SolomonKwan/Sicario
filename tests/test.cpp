@@ -21,6 +21,7 @@ enum TestType {
     KING_MAGIC_NUMS,
     BLACK_PAWN_MAGIC_NUMS,
     WHITE_PAWN_MAGIC_NUMS,
+    ROOK_BLOCK_MAGIC_NUMS,
 };
 
 std::unordered_map<TestType, int> TESTS_COUNTS = {
@@ -32,6 +33,7 @@ std::unordered_map<TestType, int> TESTS_COUNTS = {
     {KING_MAGIC_NUMS, 0},
     {BLACK_PAWN_MAGIC_NUMS, 0},
     {WHITE_PAWN_MAGIC_NUMS, 0},
+    {ROOK_BLOCK_MAGIC_NUMS, 0},
 };
 
 std::unordered_map<TestType, std::string> TESTS_NAMES = {
@@ -43,6 +45,7 @@ std::unordered_map<TestType, std::string> TESTS_NAMES = {
     {KING_MAGIC_NUMS, "kingMagicNums"},
     {BLACK_PAWN_MAGIC_NUMS, "blackPawnMagicNums"},
     {WHITE_PAWN_MAGIC_NUMS, "whitePawnMagicNums"},
+    {ROOK_BLOCK_MAGIC_NUMS, "rookBlockMagicNums"},
 };
 
 int TOTAL_TEST_COUNT = 0;
@@ -638,6 +641,48 @@ void run_whitePawnMagicNums_tests() {
     }
 }
 
+void run_rookBlockMagicNums_tests() {
+    for (int sq = 0; sq < 64; sq++) {
+        TOTAL_TEST_COUNT++;
+        TESTS_COUNTS[ROOK_BLOCK_MAGIC_NUMS]++;
+        std::string testName = TESTS_NAMES[ROOK_BLOCK_MAGIC_NUMS] + std::to_string(TESTS_COUNTS[ROOK_BLOCK_MAGIC_NUMS]);
+
+        int northSize = std::max(7 - (sq / 8), 0);
+        int southSize = std::max(sq / 8, 0);
+        int eastSize = std::max(7 - (sq % 8), 0);
+        int westSize = std::max(sq % 8, 0);
+        auto combos = getEndBlockSquares({northSize, eastSize, southSize, westSize});
+
+        bool duplicate = false;
+        std::unordered_set<int> indices;
+
+        // Build occupancy bitboard
+        for (std::array<int, 4> selection : combos) {
+            uint64_t occ = 0ULL;
+            if (selection[0]) occ |= 1ULL << (sq + (N * selection[0]));
+            if (selection[1]) occ |= 1ULL << (sq + (E * selection[1]));
+            if (selection[2]) occ |= 1ULL << (sq + (S * selection[2]));
+            if (selection[3]) occ |= 1ULL << (sq + (W * selection[3]));
+
+            uint16_t magicIndex = getRookBlockIndex(occ, (Square) sq);
+            if (indices.find(magicIndex) != indices.end()) {
+                duplicate = true;
+                break;
+            }
+
+            indices.insert(magicIndex);
+        }
+
+        if (duplicate) {
+            TESTS_FAILED++;
+            std::cout << testName << "\t[ \033[0;31mFAILED\033[0m ]\tSquare: " << squareName[sq] << '\n';
+        } else {
+            TESTS_PASSED++;
+            std::cout << testName << "\t[ \033[0;32mPASSED\033[0m ]" << '\n';
+        }
+    }
+}
+
 void printFinalResult() {
     std::cout << "\nPASSED: \033[0;32m" << std::to_string(TESTS_PASSED) << "\033[0m\t";
     std::cout << "FAILED: \033[0;31m" << std::to_string(TESTS_FAILED) << "\033[0m\n";
@@ -653,6 +698,7 @@ int main(int argc, char const *argv[]) {
     run_kingMagicNums_tests();
     run_blackPawnMagicNums_tests();
     run_whitePawnMagicNums_tests();
+    run_rookBlockMagicNums_tests();
     printFinalResult();
     return 0;
 }

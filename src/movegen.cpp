@@ -223,6 +223,45 @@ std::array<std::vector<std::vector<Move>>, 64> computeBishopMoves() {
     return bishopMoves;
 }
 
+std::array<std::vector<std::vector<Move>>, 64> computeRookBlockMoves() {
+    std::array<std::vector<std::vector<Move>>, 64> rookBlockMoves;
+    for (int square = A1; square <= H8; square++) {
+        int northSize = std::max(7 - (square / 8), 0);
+        int southSize = std::max(square / 8, 0);
+        int eastSize = std::max(7 - (square % 8), 0);
+        int westSize = std::max(square % 8, 0);
+        std::vector<std::vector<Move>>& movesSet = rookBlockMoves[square];
+        movesSet.resize((int)std::pow(2, 64 - rookBlockShifts[square]));
+
+        for (std::array<int, 4> selection : getEndBlockSquares({northSize, eastSize, southSize, westSize})) {
+            std::vector<Move> moves;
+            uint64_t occ = 0ULL;
+            if (selection[0]) {
+                moves.push_back(square | (square + (N * selection[0])) << 6);
+                occ |= 1ULL << (square + (N * selection[0]));
+            }
+
+            if (selection[1]) {
+                moves.push_back(square | (square + (E * selection[1])) << 6);
+                occ |= 1ULL << (square + (E * selection[1]));
+            }
+
+            if (selection[2]) {
+                moves.push_back(square | (square + (S * selection[2])) << 6);
+                occ |= 1ULL << (square + (S * selection[2]));
+            }
+
+            if (selection[3]) {
+                moves.push_back(square | (square + (W * selection[3])) << 6);
+                occ |= 1ULL << (square + (W * selection[3]));
+            }
+
+            movesSet[getRookBlockIndex(occ, (Square) square)] = moves;
+        }
+    }
+    return rookBlockMoves;
+}
+
 std::array<std::vector<int>, 64> computeRookReachIndices() {
     std::array<std::vector<int>, 64> rookIndices;
     for (int square = A1; square <= H8; square++) {
@@ -361,7 +400,59 @@ void generateCombination(std::array<int, 4> sizes, std::array<int, 4>& curr, std
 
 std::vector<std::array<int, 4>> getEndCombinations(std::array<int, 4> sizes) {
     std::vector<std::array<int, 4>> res;
-    std::array<int, 4> curr = {0, 0, 0, 0};
+    std::array<int, 4> curr = {0, 0, 0, 0}; // CHECK might be able to get rid of this by making it pass by value instead
     generateCombination(sizes, curr, res);
+    return res;
+}
+
+void generateLoneSquares(std::array<int, 4> sizes, std::vector<std::array<int, 4>>& res) {
+    for (int i = 0; i < sizes.size(); i++) {
+        for (int j = 0; j <= sizes[i]; j++) {
+            std::array<int, 4> combo = {0, 0, 0, 0};
+            combo[i] = j;
+            if (std::find(res.begin(), res.end(), combo) == res.end()) {
+                res.push_back(combo);
+            }
+        }
+    }
+}
+
+void generatePairSquares(std::array<int, 4> sizes, std::array<int, 4>& curr, std::vector<std::array<int, 4>>& res) {
+    // Find limiting ray length and indices of pairs to increment.
+    int smallerSize;
+    int first = -1, second = -1;
+    for (int i = 0; i < sizes.size(); i++) {
+        if (first == -1 && sizes[i]) {
+            smallerSize = sizes[i];
+            first = i;
+        } else if (sizes[i]) {
+            smallerSize = std::min(smallerSize, sizes[i]);
+            second = i;
+            break;
+        }
+    }
+
+    // There are no pairs to generate which are both greater than 0.
+    if (first == -1 || second == -1) return;
+
+    // Generate the pairs
+    for (int i = 0; i <= smallerSize; i++) {
+        std::array<int, 4> combo = {0, 0, 0, 0};
+        combo[first] = i;
+        combo[second] = i;
+        if (std::find(res.begin(), res.end(), combo) == res.end()) {
+            res.push_back(combo);
+        }
+    }
+}
+
+std::vector<std::array<int, 4>> getEndBlockSquares(std::array<int, 4> sizes) {
+    std::vector<std::array<int, 4>> res;
+    std::array<int, 4> curr = {0, 0, 0, 0}; // CHECK might be able to get rid of this by making it pass by value instead
+    generateLoneSquares(sizes, res);
+    generatePairSquares({sizes[0], sizes[1], 0, 0}, curr, res);
+    generatePairSquares({0, sizes[1], sizes[2], 0}, curr, res);
+    generatePairSquares({0, 0, sizes[2], sizes[3]}, curr, res);
+    generatePairSquares({sizes[0], 0, 0, sizes[3]}, curr, res);
     return res;
 }

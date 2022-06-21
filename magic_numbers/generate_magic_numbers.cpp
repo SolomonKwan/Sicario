@@ -618,6 +618,82 @@ void generateKnightMask() {
 
 }
 
+void generateRookBlockMNs() {
+    std::vector<uint64_t> magicNums;
+    std::vector<int> shifts;
+
+    for (int sq = 0; sq < 64; sq++) {
+        if (sq != E4) continue;
+        int northSize = max(7 - (sq / 8), 0);
+        int southSize = max(sq / 8, 0);
+        int eastSize = max(7 - (sq % 8), 0);
+        int westSize = max(sq % 8, 0);
+        auto combos = getEndBlockSquares({northSize, eastSize, southSize, westSize});
+        int totalSize = (int)floor(log2(combos.size())) + 1;
+
+        int attempt = 0;
+        float prob = 0.5;
+        while (true) {
+            if (attempt > 10000000) {
+                attempt = 0;
+                prob += 0.05;
+            }
+
+            if (prob > 1) {
+                // magicNums.push_back(0ULL);
+                // shifts.push_back(0);
+                cout << squareName[sq] << " is fucked" << '\n';
+                break;
+            }
+            uint64_t magicNum = randomMagicNumber(prob);
+
+            unordered_set<int> indices;
+            bool duplicate = false;
+
+            // Build occupancy bitboard
+            for (std::array<int, 4> selection : combos) {
+                uint64_t occ = 0ULL;
+                if (selection[0]) occ |= 1ULL << (sq + (N * selection[0]));
+                if (selection[1]) occ |= 1ULL << (sq + (E * selection[1]));
+                if (selection[2]) occ |= 1ULL << (sq + (S * selection[2]));
+                if (selection[3]) occ |= 1ULL << (sq + (W * selection[3]));
+
+                uint16_t magicIndex = ((occ * magicNum) >> (64 - totalSize));
+                if (indices.find(magicIndex) != indices.end()) {
+                    duplicate = true;
+                    break;
+                }
+
+                indices.insert(magicIndex);
+            }
+
+            if (!duplicate) {
+                cout << squareName[sq] << " " << std::hex << "0x" << magicNum << ", " << std::dec << (64 - totalSize) << '\n';
+                magicNums.push_back(magicNum);
+                shifts.push_back(64 - totalSize);
+                break;
+            }
+            attempt++;
+        }
+    }
+
+    // int count = 0;
+    // for (uint64_t i : magicNums) {
+    //     cout << std::hex << "0x" << i << ", " << std::dec;
+    //     if (count % 8 == 7) cout << '\n';
+    //     count++;
+    // }
+
+    // cout  << "\n\n\n";
+
+    // count = 0;
+    // for (int i : shifts) {
+    //     cout << i << ", ";
+    //     if (count % 8 == 7) cout << '\n';
+    //     count++;
+    // }
+}
+
 int main(int argc, char* argv[]) {
     // cout << "Rook magic numbers" << '\n';
     // findRookReachMNs();
@@ -628,5 +704,6 @@ int main(int argc, char* argv[]) {
     // findKnightMovesMNs();
     // findKingMovesMNs();
     // findBlackPawnMNs();
-    findWhitePawnMNs();
+    // findWhitePawnMNs();
+    generateRookBlockMNs();
 }
