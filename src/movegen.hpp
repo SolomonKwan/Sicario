@@ -86,6 +86,13 @@ std::array<std::vector<std::vector<Move>>, 64> computeRookMoves();
 std::array<std::vector<std::vector<Move>>, 64> computeBishopMoves();
 
 /**
+ * @brief
+ *
+ * @return std::array<std::vector<std::vector<Move>>, 64>
+ */
+std::array<std::vector<std::vector<Move>>, 64> computeRookBlockMoves();
+
+/**
  * @brief Compute the rook indices into the reach index array.
  * @return Array of vectors of ints of the rook index into the move set.
  */

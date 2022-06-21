@@ -645,14 +645,13 @@ void run_rookBlockMagicNums_tests() {
     for (int sq = 0; sq < 64; sq++) {
         TOTAL_TEST_COUNT++;
         TESTS_COUNTS[ROOK_BLOCK_MAGIC_NUMS]++;
-        std::string testName = TESTS_NAMES[ROOK_BLOCK_MAGIC_NUMS] + std::to_string(TESTS_COUNTS[ROOK_BLOCK_MAGIC_NUMS]) + "\t";
+        std::string testName = TESTS_NAMES[ROOK_BLOCK_MAGIC_NUMS] + std::to_string(TESTS_COUNTS[ROOK_BLOCK_MAGIC_NUMS]);
 
         int northSize = std::max(7 - (sq / 8), 0);
         int southSize = std::max(sq / 8, 0);
         int eastSize = std::max(7 - (sq % 8), 0);
         int westSize = std::max(sq % 8, 0);
         auto combos = getEndBlockSquares({northSize, eastSize, southSize, westSize});
-        int totalSize = (int)floor(log2(combos.size())) + 1;
 
         bool duplicate = false;
         std::unordered_set<int> indices;
@@ -679,7 +678,7 @@ void run_rookBlockMagicNums_tests() {
             std::cout << testName << "\t[ \033[0;31mFAILED\033[0m ]\tSquare: " << squareName[sq] << '\n';
         } else {
             TESTS_PASSED++;
-            std::cout << testName << "\t[ \033[0;32mPASSED\033[0m ]\t" << '\n';
+            std::cout << testName << "\t[ \033[0;32mPASSED\033[0m ]" << '\n';
         }
     }
 }
