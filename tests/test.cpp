@@ -606,7 +606,7 @@ void run_whitePawnMagicNums_tests() {
 
         std::vector<int> destinations;
         destinations.push_back(sq + N);
-        if (sq / 8 == 6) destinations.push_back(sq + N + N);
+        if (sq / 8 == 1) destinations.push_back(sq + N + N);
         if (sq % 8 != 0) destinations.push_back(sq + NW);
         if (sq % 8 != 7) destinations.push_back(sq + NE);
 
@@ -691,14 +691,14 @@ void printFinalResult() {
 }
 
 int main(int argc, char const *argv[]) {
-    // run_getRookReachIndex_tests();
-    // run_getRookMovesIndex_tests();
-    // run_getBishopReachIndex_tests();
-    // run_getBishopMovesIndex_tests();
-    // run_knightMagicNums_tests();
-    // run_kingMagicNums_tests();
-    // run_blackPawnMagicNums_tests();
-    // run_whitePawnMagicNums_tests();
+    run_getRookReachIndex_tests();
+    run_getRookMovesIndex_tests();
+    run_getBishopReachIndex_tests();
+    run_getBishopMovesIndex_tests();
+    run_knightMagicNums_tests();
+    run_kingMagicNums_tests();
+    run_blackPawnMagicNums_tests();
+    run_whitePawnMagicNums_tests();
     run_rookBlockMagicNums_tests();
     printFinalResult();
     return 0;
