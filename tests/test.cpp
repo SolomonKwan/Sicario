@@ -22,6 +22,7 @@ enum TestType {
     BLACK_PAWN_MAGIC_NUMS,
     WHITE_PAWN_MAGIC_NUMS,
     ROOK_BLOCK_MAGIC_NUMS,
+    BISHOP_BLOCK_MAGIC_NUMS
 };
 
 std::unordered_map<TestType, int> TESTS_COUNTS = {
@@ -34,6 +35,7 @@ std::unordered_map<TestType, int> TESTS_COUNTS = {
     {BLACK_PAWN_MAGIC_NUMS, 0},
     {WHITE_PAWN_MAGIC_NUMS, 0},
     {ROOK_BLOCK_MAGIC_NUMS, 0},
+    {BISHOP_BLOCK_MAGIC_NUMS, 0}
 };
 
 std::unordered_map<TestType, std::string> TESTS_NAMES = {
@@ -46,6 +48,7 @@ std::unordered_map<TestType, std::string> TESTS_NAMES = {
     {BLACK_PAWN_MAGIC_NUMS, "blackPawnMagicNums"},
     {WHITE_PAWN_MAGIC_NUMS, "whitePawnMagicNums"},
     {ROOK_BLOCK_MAGIC_NUMS, "rookBlockMagicNums"},
+    {BISHOP_BLOCK_MAGIC_NUMS, "bishopBlockMagicNums"}
 };
 
 int TOTAL_TEST_COUNT = 0;
@@ -683,6 +686,48 @@ void run_rookBlockMagicNums_tests() {
     }
 }
 
+void run_bishopBlockMagicNums_tests() {
+    for (int sq = 0; sq < 64; sq++) {
+        TOTAL_TEST_COUNT++;
+        TESTS_COUNTS[BISHOP_BLOCK_MAGIC_NUMS]++;
+        std::string testName = TESTS_NAMES[BISHOP_BLOCK_MAGIC_NUMS] + std::to_string(TESTS_COUNTS[BISHOP_BLOCK_MAGIC_NUMS]);
+
+        int northEastSize = std::max(std::min(7 - sq / 8, 7 - sq % 8), 0);
+        int southEastSize = std::max(std::min(sq / 8, 7 - sq % 8), 0);
+        int southWestSize = std::max(std::min(sq / 8, sq % 8), 0);
+        int northWestSize = std::max(std::min(7 - sq / 8, sq % 8), 0);
+        auto combos = getEndBlockSquares({northEastSize, southEastSize, southWestSize, northWestSize});
+
+        bool duplicate = false;
+        std::unordered_set<int> indices;
+
+        // Build occupancy bitboard
+        for (std::array<int, 4> selection : combos) {
+            uint64_t occ = 0ULL;
+            if (selection[0]) occ |= 1ULL << (sq + (NE * selection[0]));
+            if (selection[1]) occ |= 1ULL << (sq + (SE * selection[1]));
+            if (selection[2]) occ |= 1ULL << (sq + (SW * selection[2]));
+            if (selection[3]) occ |= 1ULL << (sq + (NW * selection[3]));
+
+            uint16_t magicIndex = getBishopBlockIndex(occ, (Square) sq);
+            if (indices.find(magicIndex) != indices.end()) {
+                duplicate = true;
+                break;
+            }
+
+            indices.insert(magicIndex);
+        }
+
+        if (duplicate) {
+            TESTS_FAILED++;
+            std::cout << testName << "\t[ \033[0;31mFAILED\033[0m ]\tSquare: " << squareName[sq] << '\n';
+        } else {
+            TESTS_PASSED++;
+            std::cout << testName << "\t[ \033[0;32mPASSED\033[0m ]" << '\n';
+        }
+    }
+}
+
 void printFinalResult() {
     std::cout << "\nPASSED: \033[0;32m" << std::to_string(TESTS_PASSED) << "\033[0m\t";
     std::cout << "FAILED: \033[0;31m" << std::to_string(TESTS_FAILED) << "\033[0m\n";
@@ -699,6 +744,7 @@ int main(int argc, char const *argv[]) {
     run_blackPawnMagicNums_tests();
     run_whitePawnMagicNums_tests();
     run_rookBlockMagicNums_tests();
+    run_bishopBlockMagicNums_tests();
     printFinalResult();
     return 0;
 }
