@@ -67,14 +67,14 @@ class Position {
 
         // Accessors
         Hash getHash();
-        bool getTurn();
+        Player getTurn();
 
         // Checkers
         ExitCode isEOG(MoveList&);
 
     private:
         // Non-position information
-        bool turn;
+        Player turn;
         int castling;
         Square en_passant;
         int halfmove, fullmove;
@@ -87,7 +87,7 @@ class Position {
         Bitboard bishop_pins;
         Bitboard kEnemy_attacks;
         Bitboard check_rays;
-        Bitboard checkers;
+        Bitboard checkers = 0ULL;
 
         // Piece positions
         int piece_index[12];
