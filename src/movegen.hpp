@@ -93,6 +93,13 @@ std::array<std::vector<std::vector<Move>>, 64> computeBishopMoves();
 std::array<std::vector<std::vector<Move>>, 64> computeRookBlockMoves();
 
 /**
+ * @brief
+ *
+ * @return std::array<std::vector<std::vector<Move>>, 64>
+ */
+std::array<std::vector<std::vector<Move>>, 64> computeBishopBlockMoves();
+
+/**
  * @brief Compute the rook indices into the reach index array.
  * @return Array of vectors of ints of the rook index into the move set.
  */
@@ -177,6 +184,10 @@ inline int getPawnMovesIndex(Bitboard reach, Square square, Player player) {
 
 inline int getRookBlockIndex(Bitboard reach, Square square) {
     return (reach * rookBlockMagicNumbers[square]) >> rookBlockShifts[square];
+}
+
+inline int getBishopBlockIndex(Bitboard reach, Square square) {
+    return (reach * bishopBlockMagicNumbers[square]) >> bishopBlockShifts[square];
 }
 
 /**

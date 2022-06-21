@@ -262,6 +262,46 @@ std::array<std::vector<std::vector<Move>>, 64> computeRookBlockMoves() {
     return rookBlockMoves;
 }
 
+std::array<std::vector<std::vector<Move>>, 64> computeBishopBlockMoves() {
+    std::array<std::vector<std::vector<Move>>, 64> bishopBlockMoves;
+    for (int square = A1; square <= H8; square++) {
+        int northEastSize = std::max(std::min(7 - square / 8, 7 - square % 8), 0);
+        int southEastSize = std::max(std::min(square / 8, 7 - square % 8), 0);
+        int southWestSize = std::max(std::min(square / 8, square % 8), 0);
+        int northWestSize = std::max(std::min(7 - square / 8, square % 8), 0);
+        std::vector<std::vector<Move>>& movesSet = bishopBlockMoves[square];
+        movesSet.resize((int)std::pow(2, 64 - bishopBlockShifts[square]));
+
+        for (std::array<int, 4> selection : getEndBlockSquares({northEastSize, southEastSize, southWestSize,
+                northWestSize})) {
+            std::vector<Move> moves;
+            uint64_t occ = 0ULL;
+            if (selection[0]) {
+                moves.push_back(square | (square + (NE * selection[0])) << 6);
+                occ |= 1ULL << (square + (NE * selection[0]));
+            }
+
+            if (selection[1]) {
+                moves.push_back(square | (square + (SE * selection[1])) << 6);
+                occ |= 1ULL << (square + (SE * selection[1]));
+            }
+
+            if (selection[2]) {
+                moves.push_back(square | (square + (SW * selection[2])) << 6);
+                occ |= 1ULL << (square + (SW * selection[2]));
+            }
+
+            if (selection[3]) {
+                moves.push_back(square | (square + (NW * selection[3])) << 6);
+                occ |= 1ULL << (square + (NW * selection[3]));
+            }
+
+            movesSet[getBishopBlockIndex(occ, (Square) square)] = moves;
+        }
+    }
+    return bishopBlockMoves;
+}
+
 std::array<std::vector<int>, 64> computeRookReachIndices() {
     std::array<std::vector<int>, 64> rookIndices;
     for (int square = A1; square <= H8; square++) {
