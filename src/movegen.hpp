@@ -168,6 +168,10 @@ inline int getPawnMovesIndex(Bitboard reach, Square square, Player player) {
     return (reach * pawnMagicNumbers[player][square]) >> pawnShifts[player][square];
 }
 
+inline int getRookBlockIndex(Bitboard reach, Square square) {
+    return (reach * rookBlockMagicNumbers[square]) >> rookBlockShifts[square];
+}
+
 /**
  * @brief Hash the ordered integers in values to a unique index.
  * @param values Ordered collection of integers.
