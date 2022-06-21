@@ -603,7 +603,7 @@ void run_whitePawnMagicNums_tests() {
 
         std::vector<int> destinations;
         destinations.push_back(sq + N);
-        if (sq / 8 == 6) destinations.push_back(sq + N + N);
+        if (sq / 8 == 1) destinations.push_back(sq + N + N);
         if (sq % 8 != 0) destinations.push_back(sq + NW);
         if (sq % 8 != 7) destinations.push_back(sq + NE);
 
