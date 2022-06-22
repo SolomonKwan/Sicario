@@ -9,7 +9,7 @@ all: test sicario generate
 movegen.o: $(SRC)/movegen.cpp $(SRC)/movegen.hpp $(SRC)/constants.hpp $(SRC)/game.hpp
 	$(FLAGS) -c $(SRC)/movegen.cpp -o $(SRC)/movegen.o
 
-game.o: $(SRC)/game.cpp $(SRC)/game.hpp $(SRC)/constants.hpp $(SRC)/movegen.hpp $(SRC)/utils.hpp
+game.o: $(SRC)/game.cpp $(SRC)/game.hpp $(SRC)/constants.hpp $(SRC)/movegen.hpp $(SRC)/utils.hpp $(SRC)/bitboard.hpp
 	$(FLAGS) -c $(SRC)/game.cpp -o $(SRC)/game.o
 
 mcts.o: $(SRC)/mcts.cpp $(SRC)/mcts.hpp $(SRC)/constants.hpp $(SRC)/movegen.hpp

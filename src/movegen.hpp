@@ -5,6 +5,7 @@
 #include <unordered_map>
 #include <vector>
 #include "constants.hpp"
+#include "bitboard.hpp"
 
 enum Direction {
     N = 8,
@@ -30,6 +31,7 @@ enum KnightDirection {
 
 /**
  * @brief Compute moves of the king on each square. Does not compute castling moves.
+ *
  * @return Array of vectors of moves.
  * @note Does not take into account king potentially moving into check.
  * @note Does not take into account king potentially taking own pieces.
@@ -37,7 +39,26 @@ enum KnightDirection {
 std::array<std::vector<std::vector<Move>>, 64> computeKingMoves();
 
 /**
+ * @brief Compute legal moves of the rook on each square.
+ *
+ * @return Array of vectors of moves.
+ * @note Does not take into account if the rook is pinned.
+ * @note Does not take into account if rook captures own pieces.
+ */
+std::array<std::vector<std::vector<Move>>, 64> computeRookMoves();
+
+/**
+ * @brief Compute legal moves of the bishop on each square.
+ *
+ * @return Array of vectors of moves.
+ * @note Does not take into account if the bishop is pinned.
+ * @note Does not take into account if bishop captures own pieces.
+ */
+std::array<std::vector<std::vector<Move>>, 64> computeBishopMoves();
+
+/**
  * @brief Compute moves of the knight on each square.
+ *
  * @return Array of vectors of moves.
  * @note Does not take into account if the knight is pinned.
  * @note Does not take into account if knight takes own pieces.
@@ -46,6 +67,7 @@ std::array<std::vector<std::vector<Move>>, 64> computeKnightMoves();
 
 /**
  * @brief Makes calls to computePawnMovesBySide to create the pawn moves arrays.
+ *
  * @return Array of array of vectors of moves.
  * @note Does not take into account if the pawn is pinned.
  * @note Does not take into account capturing own pieces.
@@ -55,6 +77,7 @@ std::array<std::array<std::vector<std::vector<Move>>, 64>,2> computePawnMoves();
 
 /**
  * Computes moves of the pawn on each square for a particular side. Does not compute en-passant moves.
+ *
  * @return: Array of vectors of moves.
  * @note: Does not take into account if the knight is pinned.
  * @note: Does not take into account if knight takes own pieces.
@@ -63,27 +86,12 @@ std::array<std::vector<std::vector<Move>>, 64> computePawnMovesBySide(Player pla
 
 /**
  * @brief Computes moves of the pawn on each square for a particular side. Does not compute en-passant moves.
+ *
  * @return Array of vectors of moves.
  * @note Does not take into account if the knight is pinned.
  * @note Does not take into account if knight takes own pieces.
  */
 std::array<std::vector<std::vector<Move>>, 64> computePawnMovesBySide(Player player);
-
-/**
- * @brief Compute legal moves of the rook on each square.
- * @return Array of vectors of moves.
- * @note Does not take into account if the rook is pinned.
- * @note Does not take into account if rook captures own pieces.
- */
-std::array<std::vector<std::vector<Move>>, 64> computeRookMoves();
-
-/**
- * @brief Compute legal moves of the bishop on each square.
- * @return Array of vectors of moves.
- * @note Does not take into account if the bishop is pinned.
- * @note Does not take into account if bishop captures own pieces.
- */
-std::array<std::vector<std::vector<Move>>, 64> computeBishopMoves();
 
 /**
  * @brief
