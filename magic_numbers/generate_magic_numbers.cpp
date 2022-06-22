@@ -768,6 +768,82 @@ void generateBishopBlockMNs() {
     }
 }
 
+void generateKingMasks() {
+    std::vector<Bitboard> masks;
+    for (int square = 0; square < 64; square++) {
+        Bitboard mask = 0ULL;
+        if (square / 8 != 7) mask |= (1ULL << (square + N));
+        if (square / 8 != 7 && square % 8 != 7) mask |= (1ULL << (square + NE));
+        if (square % 8 != 7) mask |= (1ULL << (square + E));
+        if (square / 8 != 0 && square % 8 != 7) mask |= (1ULL << (square + SE));
+        if (square / 8 != 0) mask |= (1ULL << (square + S));
+        if (square / 8 != 0 && square % 8 != 0) mask |= (1ULL << (square + SW));
+        if (square % 8 != 0) mask |= (1ULL << (square + W));
+        if (square / 8 != 7 && square % 8 != 0) mask |= (1ULL << (square + NW));
+        masks.push_back(mask);
+    }
+
+    for (int i = 0; i < 64; i++) {
+        std::cout << std::hex << "0x" << std::setw(16) << std::setfill('0') << masks[i] << ", ";
+        if (i % 5 == 4) std::cout << '\n';
+    }
+}
+
+void generateKnightMasks() {
+    std::vector<Bitboard> masks;
+    for (int square = 0; square < 64; square++) {
+        Bitboard mask = 0ULL;
+        if (square / 8 < 6 && square % 8 < 7) mask |= (1ULL << (square + NNE));
+        if (square / 8 < 7 && square % 8 < 6) mask |= (1ULL << (square + ENE));
+        if (square / 8 > 0 && square % 8 < 6) mask |= (1ULL << (square + ESE));
+        if (square / 8 > 1 && square % 8 < 7) mask |= (1ULL << (square + SES));
+        if (square / 8 > 1 && square % 8 > 0) mask |= (1ULL << (square + SWS));
+        if (square / 8 > 0 && square % 8 > 1) mask |= (1ULL << (square + WSW));
+        if (square / 8 < 7 && square % 8 > 1) mask |= (1ULL << (square + WNW));
+        if (square / 8 < 6 && square % 8 > 0) mask |= (1ULL << (square + NWN));
+        masks.push_back(mask);
+    }
+
+    for (int i = 0; i < 64; i++) {
+        std::cout << std::hex << "0x" << std::setw(16) << std::setfill('0') << masks[i] << ", ";
+        if (i % 5 == 4) std::cout << '\n';
+    }
+}
+
+void generateBlackPawnMasks() {
+    std::vector<Bitboard> masks;
+    for (int square = 0; square < 64; square++) {
+        Bitboard mask = 0ULL;
+        mask |= (1ULL << (square + S));
+        if (square / 8 == 6) mask |= (1ULL << (square + S + S));
+        if (square % 8 != 0) mask |= (1ULL << (square + SW));
+        if (square % 8 != 7) mask |= (1ULL << (square + SE));
+        masks.push_back(mask);
+    }
+
+    for (int i = 0; i < 64; i++) {
+        std::cout << std::hex << "0x" << std::setw(16) << std::setfill('0') << masks[i] << ", ";
+        if (i % 5 == 4) std::cout << '\n';
+    }
+}
+
+void generateWhitePawnMasks() {
+    std::vector<Bitboard> masks;
+    for (int square = 0; square < 64; square++) {
+        Bitboard mask = 0ULL;
+        mask |= (1ULL << (square + N));
+        if (square / 8 == 1) mask |= (1ULL << (square + N + N));
+        if (square % 8 != 0) mask |= (1ULL << (square + NW));
+        if (square % 8 != 7) mask |= (1ULL << (square + NE));
+        masks.push_back(mask);
+    }
+
+    for (int i = 0; i < 64; i++) {
+        std::cout << std::hex << "0x" << std::setw(16) << std::setfill('0') << masks[i] << ", ";
+        if (i % 5 == 4) std::cout << '\n';
+    }
+}
+
 int main(int argc, char* argv[]) {
     // cout << "Rook magic numbers" << '\n';
     // findRookReachMNs();
@@ -780,5 +856,10 @@ int main(int argc, char* argv[]) {
     // findBlackPawnMNs();
     // findWhitePawnMNs();
     // generateRookBlockMNs();
-    generateBishopBlockMNs();
+    // generateBishopBlockMNs();
+    // generateKnightMasks();
+    // generateKingMasks();
+    generateBlackPawnMasks();
+    std::cout << '\n';
+    generateWhitePawnMasks();
 }
