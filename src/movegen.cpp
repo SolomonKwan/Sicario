@@ -525,6 +525,47 @@ std::array<std::vector<std::vector<Square>>, 64> computeKingReachSquares() {
     return kingReaches;
 }
 
+std::vector<std::vector<Bitboard>> computeLevelRays() {
+    std::vector<std::vector<Bitboard>> rays;
+    for (int king = A1; king <= H8; king++) {
+        std::vector<Bitboard> rays2;
+        for (int piece = A1; piece <= H8; piece++) {
+            Bitboard ray = 0ULL;
+            if (king % 8 == piece % 8) {
+                for (int i = piece; i != king;  king > piece ? i += 8 : i -= 8) {
+                    ray |= 1ULL << i;
+                }
+            } else if (king / 8 == piece / 8) {
+                for (int i = piece; i != king;  king > piece ? i++ : i--) {
+                    ray |= 1ULL << i;
+                }
+            }
+            rays2.push_back(ray);
+        }
+        rays.push_back(rays2);
+    }
+    return rays;
+}
+
+std::vector<std::vector<Bitboard>> computeDiagonalRays() {
+    std::vector<std::vector<Bitboard>> rays;
+    for (int king = A1; king <= H8; king++) {
+        std::vector<Bitboard> rays2;
+        for (int piece = A1; piece <= H8; piece++) {
+            Bitboard ray = 0ULL;
+            if (std::abs(king / 8 - piece / 8) == std::abs(king % 8 - piece % 8) && king != piece) {
+                int inc = king > piece ? (king % 8 > piece % 8 ? 9 : 7) : (king % 8 > piece % 8 ? -7 : -9);
+                for (int i = piece; i != king; i += inc) {
+                    ray |= 1ULL << i;
+                }
+            }
+            rays2.push_back(ray);
+        }
+        rays.push_back(rays2);
+    }
+    return rays;
+}
+
 int getIndex(std::vector<int> values, std::vector<int> ranges) {
     if (values.size() == 0) return values[0];
 

@@ -41,6 +41,14 @@ namespace KingReach {
 }
 
 /**
+ * Rays bitboards from start (exlusive) to end (inclusive).
+ */
+namespace Rays {
+    const std::vector<std::vector<Bitboard>> LEVEL = computeLevelRays();
+    const std::vector<std::vector<Bitboard>> DIAGONAL = computeDiagonalRays();
+}
+
+/**
  * Hashes used for zobrist.
  */
 namespace Hashes {
