@@ -5,6 +5,7 @@
 
 #include "game.hpp"
 #include "utils.hpp"
+#include "bitboard.hpp"
 
 /**
  * Precomputed moves information.
@@ -31,8 +32,12 @@ namespace Indices {
 }
 
 namespace Reach {
-    // const std::array<std::vector<Bitboard>, 64> ROOK = computeRookReaches();
-    // const std::array<std::vector<Bitboard>, 64> BISHOP = computeBishopReaches();
+    const std::array<std::vector<Bitboard>, 64> ROOK = computeRookReaches();
+    const std::array<std::vector<Bitboard>, 64> BISHOP = computeBishopReaches();
+}
+
+namespace KingReach {
+    const std::array<std::vector<std::vector<Square>>, 64> SQUARES = computeKingReachSquares();
 }
 
 /**
@@ -392,7 +397,7 @@ bool Position::insufficientMaterial() {
 }
 
 bool Position::inCheck() {
-    return this->checkers;
+    return checkers;
 }
 
 /**
@@ -409,12 +414,18 @@ Bitboard Position::getKingAttackBitBoard() const {
 }
 
 void Position::getKingMoves(int& moves_index, MoveListArray pos_moves) {
-    // Get king reach bitboard
-    // Mask out own pieces
-    // For each square in the Moore neighbourhood, if it is not a friendly piece, check if it is attacked.
-    //      If not attacked, set position to 0 in bitboard.
-    // Use bitboard to get king moves via the magic indexing.
-    // NOTE when using isAttacked, pass ignoreKing = true
+    Square kingSquare = piece_list[turn][0];
+    Bitboard reachBB = kingMasks[kingSquare] & ~sides[turn];
+
+    if (reachBB == 0ULL) return;
+
+    for (Square square : KingReach::SQUARES[kingSquare][getKingMovesIndex(reachBB, kingSquare)]) {
+        if (isAttacked(square, (Player) !turn, true)) {
+            reachBB &= ~(1ULL << square);
+        }
+    }
+
+    pos_moves[moves_index++] = &Moves::KING[kingSquare][getKingMovesIndex(reachBB, kingSquare)];
 }
 
 void Position::getCheckMoves(int& moves_index, MoveListArray pos_moves) {
@@ -563,7 +574,7 @@ Bitboard Position::getPawnCheckers(Square square, Bitboard& checkers_only) {
  * @param pos_moves: Array of 16 bit unsigned int move vectors.
  * @param moves_index: Pointer to number of move struct in pos_moves.
  */
-void Position::getCheckedEp(uint64_t checkers, MoveListArray pos_moves, int& moves_index) {
+// void Position::getCheckedEp(uint64_t checkers, MoveListArray pos_moves, int& moves_index) {
     // if (this->en_passant != NONE) {
     //     int rank_offset = this->turn ? -8 : 8;
     //     int ep = this->en_passant;
@@ -628,7 +639,7 @@ void Position::getCheckedEp(uint64_t checkers, MoveListArray pos_moves, int& mov
     //         }
     //     }
     // }
-}
+// }
 
 /**
  * Computes the initial hash of the position. Basically, just computes the current hash.
@@ -699,6 +710,14 @@ void Position::getPawnMoves(int& moves_index, MoveListArray pos_moves) {
     // Else proceed as normal
 }
 
+inline Bitboard Position::getRookReachBB(Bitboard occupancy, Square square) {
+    return Reach::ROOK[square][getRookReachIndex(occupancy, square)];
+}
+
+inline Bitboard Position::getBishopReachBB(Bitboard occupancy, Square square) {
+    return Reach::BISHOP[square][getBishopReachIndex(occupancy, square)];
+}
+
 /**
  * Get the arguments for the pawn index function for pawns.
  * @param game: Pointer to game struct.
@@ -736,8 +755,8 @@ void Position::getCastlingMoves(int& moves_index, MoveListArray pos_moves) {
  * @param pos_moves: Array of 16 bit unsigned int move vectors.
  * @param moves_index: Pointer to number of move struct in pos_moves.
  */
-void Position::horizontalPinEp(int king, bool turn, int attacker_sq, int captured_pawn, int ep,
-        MoveListArray pos_moves, int& moves_index) {
+// void Position::horizontalPinEp(int king, bool turn, int attacker_sq, int captured_pawn, int ep,
+        // MoveListArray pos_moves, int& moves_index) {
     // int rank = (king / 8) * 8, rank_end = rank + 7;
     // PieceType e_rook = turn ? B_ROOK : W_ROOK;
     // PieceType e_queen = turn ? B_QUEEN : W_QUEEN;
@@ -777,7 +796,7 @@ void Position::horizontalPinEp(int king, bool turn, int attacker_sq, int capture
     //         if (move_set->size() != 0) pos_moves[(moves_index)++] = move_set;
     //     }
     // }
-}
+// }
 
 /**
  * Gets en-passant moves involving diagonal pins. Such a case example is
@@ -794,8 +813,8 @@ void Position::horizontalPinEp(int king, bool turn, int attacker_sq, int capture
  * @param pos_moves: Array of 16 bit unsigned int move vectors.
  * @param moves_index: Pointer to number of move struct in pos_moves.
  */
-void Position::diagonalPinEp(int king, bool turn, int attacker_sq, int captured_pawn, int ep, std::vector<Move>*
-        pos_moves[MOVESET_SIZE], int& moves_index) {
+// void Position::diagonalPinEp(int king, bool turn, int attacker_sq, int captured_pawn, int ep, std::vector<Move>*
+        // pos_moves[MOVESET_SIZE], int& moves_index) {
     // if (ep > attacker_sq && ep % 8 < attacker_sq % 8) { // Upper left.
     //     if ((king > attacker_sq && king % 8 < attacker_sq % 8) || (king < attacker_sq && king % 8 > attacker_sq % 8)) {
     //         if (attacker_sq % 8 < ep % 8) {
@@ -853,7 +872,7 @@ void Position::diagonalPinEp(int king, bool turn, int attacker_sq, int captured_
     //         }
     //     }
     // }
-}
+// }
 
 /**
  * Gets a bitboard of knight checkers.
@@ -871,7 +890,7 @@ Bitboard Position::getKnightCheckers(Square square, Bitboard& checkers_only) {
 }
 
 bool Position::inDoubleCheck() {
-    return (this->checkers & (this->checkers - 1)) != 0;
+    return (checkers & (checkers - 1)) != 0;
 }
 
 /**
@@ -1028,17 +1047,26 @@ ExitCode Position::isEOG(MoveList& move_list) {
     return NORMAL_PLY;
 }
 
-Bitboard Position::isAttacked(const Square sq, const Player player, const bool ignoreKing) {
-    // Bitboard pieces = this->sides[WHITE], this->sides[BLACK];
-    // Bitboard king = Moves::KING[sq].reach & this->sides[turn] & this->kings;
-    // Bitboard rooks = Moves::ROOK[Indices::ROOK[sq][rookIndex(pieces, sq)]].reach & this->sides[turn] & (this->queens |
-    //         this->rooks);
-    // Bitboard bishops = Moves::BISHOP[Indices::BISHOP[sq][bishopIndex(pieces, sq)]].reach & this->sides[turn] &
-    //         (this->queens, this->bishops);
-    // Bitboard knights = Moves::KNIGHT[sq].reach & this->knights & this->sides[turn];
-    // Bitboard pawns = Moves::PAWN[!turn][sq].reach & this->pawns & this->sides[turn] & ~files[sq % 8];
-    // return rooks, bishops, knights, pawns;
-    return 0ULL;
+Bitboard Position::isAttacked(const Square square, const Player player, const bool ignoreKing) {
+    // Get bitboard of all pieces and mask out !"player" king if indicated.
+    Bitboard pieces = (sides[WHITE] | sides[BLACK]) ^ (ignoreKing ? 1ULL << piece_list[!player][0] : 0ULL);
+
+    // Check if square is attacked by "player" king.
+    Bitboard king = kingMasks[square] & this->sides[turn] & this->kings;
+
+    // Check if square is attacked by "player" queen or rook horizontally or vertically.
+    Bitboard rooks = getRookReachBB(rookMasks[square] & pieces, square) & sides[player] & (queens | rooks);
+
+    // Check if square is attacked by "player" queen or bishop diagonally.
+    Bitboard bishops = getBishopReachBB(bishopMasks[square] & pieces, square) & sides[player] & (queens | bishops);
+
+    // Check if square is attacked by "player" knight.
+    Bitboard knights = knightMasks[square] & sides[player] & knights;
+
+    // Check if square is attacked by "player" pawn.
+    Bitboard pawns = pawnMasks[!player][square] & ~files[square % 8] & sides[player] & pawns;
+
+    return king | rooks | bishops | knights | pawns;
 }
 
 /**
@@ -1908,18 +1936,18 @@ void Position::incrementHash(Move move) {
  * @param moves_index: Pointer to int of number of move vectors in pos_moves.
  * @return: The number of moves in the position.
  */
-int countMoves(Position* game, MoveListArray pos_moves, int* moves_index) {
-    int count = 0;
-    for (int i = 0; i < *moves_index; i++) {
-        std::vector<Move>* pointer = pos_moves[i];
-        for (Move move : *pointer) {
-            std::cout << squareName[move & 0b111111] << " " << squareName[(move >> 6) & 0b111111] << " " <<
-                    moveName[(move >> 12) & 0b11] << " " << promoName[(move >> 14) & 0b11] << '\n';
-            count++;
-        }
-    }
-    return count;
-}
+// int countMoves(Position* game, MoveListArray pos_moves, int* moves_index) {
+//     int count = 0;
+//     for (int i = 0; i < *moves_index; i++) {
+//         std::vector<Move>* pointer = pos_moves[i];
+//         for (Move move : *pointer) {
+//             std::cout << squareName[move & 0b111111] << " " << squareName[(move >> 6) & 0b111111] << " " <<
+//                     moveName[(move >> 12) & 0b11] << " " << promoName[(move >> 14) & 0b11] << '\n';
+//             count++;
+//         }
+//     }
+//     return count;
+// }
 
 /**
  * Checks if a given move is valid.

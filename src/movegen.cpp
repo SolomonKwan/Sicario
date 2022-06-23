@@ -487,6 +487,44 @@ std::array<std::vector<Bitboard>, 64> computeBishopReaches() {
     return reaches;
 }
 
+std::array<std::vector<std::vector<Square>>, 64> computeKingReachSquares() {
+    std::array<std::vector<std::vector<Square>>, 64> kingReaches;
+    for (int square = A1; square <= H8; square++) {
+        std::vector<std::vector<Square>>& reachSet = kingReaches[square];
+        std::vector<Square> destinations;
+        if (square / 8 != 7) destinations.push_back((Square) (square + N));
+        if (square / 8 != 7 && square % 8 != 7) destinations.push_back((Square) (square + NE));
+        if (square % 8 != 7) destinations.push_back((Square) (square + E));
+        if (square / 8 != 0 && square % 8 != 7) destinations.push_back((Square) (square + SE));
+        if (square / 8 != 0) destinations.push_back((Square) (square + S));
+        if (square / 8 != 0 && square % 8 != 0) destinations.push_back((Square) (square + SW));
+        if (square % 8 != 0) destinations.push_back((Square) (square + W));
+        if (square / 8 != 7 && square % 8 != 0) destinations.push_back((Square) (square + NW));
+
+        uint16_t maxOccupancy = (uint16_t)pow(2, destinations.size());
+        reachSet.resize(maxOccupancy);
+
+        // Build occupancy bitboard
+        for (uint16_t j = 0; j < maxOccupancy; j++) {
+            std::vector<Square> reach;
+
+            uint64_t occ = 0ULL;
+            int shift = 0;
+            for (Square dest : destinations) {
+                if ((j >> shift) & 1UL) {
+                    reach.push_back(dest);
+                }
+                occ |= ((j >> shift) & 1UL) << dest;
+                shift++;
+            }
+
+            uint16_t magicIndex = getKingMovesIndex(occ, (Square) square);
+            reachSet[magicIndex] = reach;
+        }
+    }
+    return kingReaches;
+}
+
 int getIndex(std::vector<int> values, std::vector<int> ranges) {
     if (values.size() == 0) return values[0];
 

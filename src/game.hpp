@@ -12,7 +12,7 @@
 #define MOVESET_SIZE 32
 #define DEFAULT_HASH_SIZE 16
 
-typedef std::vector<Move>* MoveListArray[MOVESET_SIZE];
+typedef const std::vector<Move>* MoveListArray[MOVESET_SIZE];
 
 void printMove(Move move, bool extraInfo);
 
@@ -125,8 +125,8 @@ class Position {
          * @brief Checks if the specified square is attacked by the specified player.
          * @param square Square to check if attacked by "player".
          * @param player Attacking player to check.
-         * @param ignoreKing Ignore the ~"player" king when calculating. Used for king check moves.
-         * @return Bitboard whose set bits indicate a piece belonging to "player" that attacks the square.
+         * @param ignoreKing Ignore the !"player" king when calculating. Used for king check moves.
+         * @return Bitboard whose set bits indicate a piece belonging to "player" that attacks the given square.
          */
         Bitboard isAttacked(const Square square, const Player player, const bool ignoreKing = false);
 
@@ -245,12 +245,29 @@ class Position {
 
         /**
          * @brief Retrives and adds the vector of legal pawn moves of the side to move to the pos_moves array.
+         *
          * @param moves_index Current index of the first empty position in the pos_moves array.
          * @param pos_moves Array that holds pointers to vectors of moves.
          */
         void getPawnMoves(int& moves_index, MoveListArray pos_moves);
 
+        /**
+         * @brief Get the reach bitboard of a rook on the indicated square.
+         *
+         * @param occupancy The occupancy bitboard.
+         * @param square The square of concern.
+         * @return Bitboard of the rook reach from the square.
+         */
+        Bitboard getRookReachBB(Bitboard occupancy, Square square);
 
+        /**
+         * @brief Get the reach bitboard of a bishop on the indicated square.
+         *
+         * @param occupancy The occupancy bitboard.
+         * @param square The square of concern.
+         * @return Bitboard of the bishop reach from the square.
+         */
+        Bitboard getBishopReachBB(Bitboard occupancy, Square square);
 
 
 
@@ -306,11 +323,11 @@ class Position {
         Bitboard pawnMoveArgs(Square);
 
         // Normal move generation
-        void horizontalPinEp(int, bool, int, int, int, std::vector<Move>*[MOVESET_SIZE], int&);
-        void diagonalPinEp(int, bool, int, int, int, std::vector<Move>*[MOVESET_SIZE], int&);
+        // void horizontalPinEp(int, bool, int, int, int, std::vector<Move>*[MOVESET_SIZE], int&);
+        // void diagonalPinEp(int, bool, int, int, int, std::vector<Move>*[MOVESET_SIZE], int&);
 
         // Check move generation
-        void getCheckedEp(Bitboard, std::vector<Move>*[MOVESET_SIZE], int&);
+        // void getCheckedEp(Bitboard, std::vector<Move>*[MOVESET_SIZE], int&);
 
         // Move reading and parsing
         Move chooseMove(MoveList&);

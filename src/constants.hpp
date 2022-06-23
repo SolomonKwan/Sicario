@@ -22,7 +22,7 @@ typedef uint16_t Move;
  * Player side enum.
  */
 enum Player {
-    BLACK, WHITE
+    BLACK, WHITE // TODO Maybe change this to another type so that we can do logical operations without casting.
 };
 
 /**
