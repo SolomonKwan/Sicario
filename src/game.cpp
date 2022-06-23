@@ -30,6 +30,11 @@ namespace Indices {
     const std::array<std::vector<int>, 64> BISHOP = computeBishopReachIndices();
 }
 
+namespace Reach {
+    // const std::array<std::vector<Bitboard>, 64> ROOK = computeRookReaches();
+    // const std::array<std::vector<Bitboard>, 64> BISHOP = computeBishopReaches();
+}
+
 /**
  * Hashes used for zobrist.
  */

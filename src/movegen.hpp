@@ -115,9 +115,24 @@ std::array<std::vector<int>, 64> computeRookReachIndices();
 
 /**
  * @brief Compute the bishop indices into the reach index array.
+ *
  * @return Array of vectors of ints of the bishop index into the move set.
  */
 std::array<std::vector<int>, 64> computeBishopReachIndices();
+
+/**
+ * @brief Computed the reach bitboards for the different occupancies of the rook on each square.
+ *
+ * @return Array of vectors of bitboards of reaches.
+ */
+std::array<std::vector<Bitboard>, 64> computeRookReaches();
+
+/**
+ * @brief Computed the reach bitboards for the different occupancies of the bishop on each square.
+ *
+ * @return Array of vectors of bitboards of reaches.
+ */
+std::array<std::vector<Bitboard>, 64> computeBishopReaches();
 
 /**
  * @brief Gets the rook index into the precomputed reach index array.
