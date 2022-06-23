@@ -422,7 +422,6 @@ const int rookBlockShifts[64] = {
     59, 59, 59, 59, 59, 59, 59, 59
 };
 
-
 /**
  * Magic numbers for bishop block moves.
  */

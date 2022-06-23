@@ -392,6 +392,101 @@ std::array<std::vector<int>, 64> computeBishopReachIndices() {
     return bishopIndices;
 }
 
+std::array<std::vector<Bitboard>, 64> computeRookReaches() {
+    const std::array<std::vector<int>, 64> ROOK = computeRookReachIndices();
+    std::array<std::vector<Bitboard>, 64> reaches;
+    for (int square = A1; square <= H8; square++) {
+        std::vector<Bitboard>& reachSet = reaches[square];
+        int northSize = std::max(6 - (square / 8), 0);
+        int southSize = std::max(square / 8 - 1, 0);
+        int eastSize = std::max(6 - (square % 8), 0);
+        int westSize = std::max(square % 8 - 1, 0);
+        reachSet.resize(*std::max_element(ROOK[square].begin(), ROOK[square].end()) + 1);
+        std::vector<std::array<int, 4>> combos = getEndCombinations({northSize, eastSize, southSize, westSize});
+
+        for (std::array<int, 4> combo : combos) {
+            Bitboard occ = 0ULL;
+            if (combo[0]) occ |= (1ULL << (square + N * combo[0]));
+            if (combo[1]) occ |= (1ULL << (square + E * combo[1]));
+            if (combo[2]) occ |= (1ULL << (square + S * combo[2]));
+            if (combo[3]) occ |= (1ULL << (square + W * combo[3]));
+
+            Bitboard reach = 0ULL;
+            if (northSize && !combo[0]) combo[0] = northSize + 1;
+            for (int i = 1; combo[0] > 0; combo[0]--, i++) {
+                reach |= (1ULL << (square + i * N));
+            }
+
+            if (eastSize && !combo[1]) combo[1] = eastSize + 1;
+            for (int i = 1; combo[1] > 0; combo[1]--, i++) {
+                reach |= (1ULL << (square + i * E));
+            }
+
+            if (southSize && !combo[2]) combo[2] = southSize + 1;
+            for (int i = 1; combo[2] > 0; combo[2]--, i++) {
+                reach |= (1ULL << (square + i * S));
+            }
+
+            if (westSize && !combo[3]) combo[3] = westSize + 1;
+            for (int i = 1; combo[3] > 0; combo[3]--, i++) {
+                reach |= (1ULL << (square + i * W));
+            }
+
+            reachSet[ROOK[square][getRookReachIndex(occ, (Square) square)]] = reach;
+        }
+    }
+    return reaches;
+}
+
+std::array<std::vector<Bitboard>, 64> computeBishopReaches() {
+    const std::array<std::vector<int>, 64> BISHOP = computeBishopReachIndices();
+    std::array<std::vector<Bitboard>, 64> reaches;
+    for (int square = A1; square <= H8; square++) {
+        std::vector<Bitboard>& reachSet = reaches[square];
+        int northeastSize = std::max(std::min(6 - square / 8, 6 - square % 8), 0);
+        int southeastSize = std::max(std::min(square / 8 - 1, 6 - square % 8), 0);
+        int southwestSize = std::max(std::min(square / 8 - 1, square % 8 - 1), 0);
+        int northwestSize = std::max(std::min(6 - square / 8, square % 8 - 1), 0);
+        reachSet.resize(*std::max_element(BISHOP[square].begin(), BISHOP[square].end()) + 1);
+        std::vector<std::array<int, 4>> combos = getEndCombinations({northeastSize, southeastSize, southwestSize,
+                northwestSize});
+
+        for (std::array<int, 4> combo : combos) {
+            std::array<int, 4> foo = combo;
+
+            Bitboard occ = 0ULL;
+            if (combo[0]) occ |= (1ULL << (square + NE * combo[0]));
+            if (combo[1]) occ |= (1ULL << (square + SE * combo[1]));
+            if (combo[2]) occ |= (1ULL << (square + SW * combo[2]));
+            if (combo[3]) occ |= (1ULL << (square + NW * combo[3]));
+
+            Bitboard reach = 0ULL;
+            if (northeastSize && !combo[0]) combo[0] = northeastSize + 1;
+            for (int i = 1; combo[0] > 0; combo[0]--, i++) {
+                reach |= (1ULL << (square + i * NE));
+            }
+
+            if (southeastSize && !combo[1]) combo[1] = southeastSize + 1;
+            for (int i = 1; combo[1] > 0; combo[1]--, i++) {
+                reach |= (1ULL << (square + i * SE));
+            }
+
+            if (southwestSize && !combo[2]) combo[2] = southwestSize + 1;
+            for (int i = 1; combo[2] > 0; combo[2]--, i++) {
+                reach |= (1ULL << (square + i * SW));
+            }
+
+            if (northwestSize && !combo[3]) combo[3] = northwestSize + 1;
+            for (int i = 1; combo[3] > 0; combo[3]--, i++) {
+                reach |= (1ULL << (square + i * NW));
+            }
+
+            reachSet[BISHOP[square][getBishopReachIndex(occ, (Square) square)]] = reach;
+        }
+    }
+    return reaches;
+}
+
 int getIndex(std::vector<int> values, std::vector<int> ranges) {
     if (values.size() == 0) return values[0];
 
