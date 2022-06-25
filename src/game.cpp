@@ -120,26 +120,11 @@ inline bool isDark(int square) {
     return (DARK >> square) & 1;
 }
 
-/**
- * Returns whether or not a fen is valid.
- * @param fen: The fen string to check.
- * @return: True if valid, else false.
- */
-bool goodFen(std::string fen) {
-    return true; // TODO
-}
-
-/**
- * Parses the fen string into a game struct.
- * @param game: Pointer to game struct.
- * @param fen: The fen string.
- * @return: INVALID_FEN if fen is invalid, else NORMAL_PLY.
- */
-ExitCode Position::parseFen(std::string fen) {
-    if (!goodFen(fen)) return INVALID_FEN;
+void Position::parseFen(std::string fen) {
+    // TODO Check that a FEN is valid (see https://chess.stackexchange.com/questions/1482/how-do-you-know-when-a-fen-position-is-legal)
 
     // Zero out variables.
-    this->zero();
+    this->resetPosition();
 
     // Split the string into parts and ranks
     std::vector<std::string> parts = split(fen, " ");
@@ -233,9 +218,9 @@ ExitCode Position::parseFen(std::string fen) {
 
                 // Set sides and piece count
                 if (std::isupper(static_cast<unsigned char>(c))) {
-                    this->sides[WHITE] |= (8 * rank + file);
+                    this->sides[WHITE] |= 1ULL << (8 * rank + file);
                 } else {
-                    this->sides[BLACK] |= (8 * rank + file);
+                    this->sides[BLACK] |= 1ULL << (8 * rank + file);
                 }
                 this->piece_cnt++;
 
@@ -291,33 +276,52 @@ ExitCode Position::parseFen(std::string fen) {
     // Set ply and position hash to zero.
     this->ply = 0;
     this->hash = 0ULL;
-
-    return NORMAL_PLY;
 }
 
-/**
- * Zeros out the position information.
- */
-void Position::zero() {
-    this->sides[WHITE] = 0ULL;
-    this->sides[BLACK] = 0ULL;
-    this->kings = 0ULL;
-    this->queens = 0ULL;
-    this->rooks = 0ULL;
-    this->bishops = 0ULL;
-    this->knights = 0ULL;
-    this->pawns = 0ULL;
+void Position::resetPosition() {
+    // Non-positional variables
+    turn = WHITE;
+    castling = 0;
+    en_passant = NONE;
+    halfmove = 0;
+    fullmove = 0;
 
-    std::fill(this->piece_list[0] + 0, this->piece_list[12] + 10, NONE);
-    std::fill(std::begin(this->piece_index), std::end(this->piece_index), 0);
-    std::fill(std::begin(this->pieces), std::end(this->pieces), NO_PIECE);
+    // Bitboards
+    sides[WHITE] = 0ULL;
+    sides[BLACK] = 0ULL;
+    kings = 0ULL;
+    queens = 0ULL;
+    rooks = 0ULL;
+    bishops = 0ULL;
+    knights = 0ULL;
+    pawns = 0ULL;
+    rook_pins = 0ULL;
+    bishop_pins = 0ULL;
+    check_rays = 0ULL;
+    checkers = 0ULL;
 
-    this->piece_cnt = 0;
-    this->knight_cnt = 0;
-    this->wdsb_cnt = 0;
-    this->wlsb_cnt = 0;
-    this->bdsb_cnt = 0;
-    this->blsb_cnt = 0;
+    // Piece positions
+    std::fill(std::begin(piece_index), std::end(piece_index), 0);
+    std::fill(piece_list[0] + 0, piece_list[12] + 10, NONE);
+    std::fill(std::begin(pieces), std::end(pieces), NO_PIECE);
+
+    // Piece counts
+    piece_cnt = 0;
+    knight_cnt = 0;
+    wdsb_cnt = 0;
+    wlsb_cnt = 0;
+    bdsb_cnt = 0;
+    blsb_cnt = 0;
+
+    // History
+    last_move = 0;
+    piece_moved = NO_PIECE;
+    piece_captured = NO_PIECE;
+    last_move_type = NORMAL;
+    history.clear();
+    hashes.clear(); // TODO reset this to whatever the default hash size is.
+    hash = 0ULL;
+    ply = 0;
 }
 
 /**
@@ -1668,9 +1672,6 @@ void Position::checkCastlingEnPassantMoves(uint start, uint end, Move& move) {
     }
 }
 
-/**
- * Position class constructor.
- */
 Position::Position(std::string fen) : history(MAX_MOVES) {
     this->parseFen(fen);
     this->initialiseHash();
