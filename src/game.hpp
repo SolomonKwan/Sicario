@@ -12,7 +12,7 @@
 #define MOVESET_SIZE 32
 #define DEFAULT_HASH_SIZE 16
 
-typedef const std::vector<Move>* MoveListArray[MOVESET_SIZE];
+typedef std::vector<Move> const* MoveSet;
 
 void printMove(Move move, bool extraInfo);
 
@@ -58,7 +58,7 @@ class Position {
          * @param moves_index Current index of the first empty position in the pos_moves array.
          * @param pos_moves Array that holds pointers to vectors of moves.
          */
-        void getMoves(int& moves_index, MoveListArray pos_moves);
+        void getMoves(int& moves_index, MoveSet pos_moves[MOVESET_SIZE]);
 
         // Tree search
         void makeMove(Move);
@@ -82,10 +82,8 @@ class Position {
         // Bitboards
         Bitboard sides[2];
         Bitboard kings, queens, rooks, bishops, knights, pawns;
-        Bitboard enemy_attacks;
         Bitboard rook_pins;
         Bitboard bishop_pins;
-        Bitboard kEnemy_attacks;
         Bitboard check_rays;
         Bitboard checkers = 0ULL;
 
@@ -110,16 +108,8 @@ class Position {
         Hash hash;
         int ply;
 
-        // Miscellaneous info
-        PlayerType white = HUMAN, black = COMPUTER;
-        bool unicodeMode = true;
-        bool quiteMode = false;
-
         // Perft hashing
         std::unordered_map<Bitboard, uint64_t> perft_hash;
-
-        // Evaluation and search
-        int depth = 3;
 
         /**
          * @brief Checks if the specified square is attacked by the specified player.
@@ -136,9 +126,9 @@ class Position {
         void setCheckers();
 
         /**
-         * @brief Sets the bitboard of pinned pieces.
+         * @brief Sets the rook_pins, bishop_pins and check_ray bitboards.
          */
-        void setPinnedPieces();
+        void setPinAndCheckRayBitboards();
 
         /**
          * @brief Checks if king of the current player to move is in double-check.
@@ -157,91 +147,91 @@ class Position {
          * @param moves_index Current index of the first empty position in the pos_moves array.
          * @param pos_moves Array that holds pointers to vectors of moves.
          */
-        void getKingMoves(int& moves_index, MoveListArray pos_moves);
+        void getKingMoves(int& moves_index, MoveSet pos_moves[MOVESET_SIZE]);
 
         /**
          * @brief Calls other functions to add the legal moves for when the king is in check.
          * @param moves_index Current index of the first empty position in the pos_moves array.
          * @param pos_moves Array that holds pointers to vectors of moves.
          */
-        void getCheckMoves(int& moves_index, MoveListArray pos_moves);
+        void getCheckMoves(int& moves_index, MoveSet pos_moves[MOVESET_SIZE]);
 
         /**
          * @brief Retries and adds the vector of legal moves for the queens when king is in check.
          * @param moves_index Current index of the first empty position in the pos_moves array.
          * @param pos_moves Array that holds pointers to vectors of moves.
          */
-        void getQueenCheckedMoves(int& moves_index, MoveListArray pos_moves);
+        void getQueenCheckedMoves(int& moves_index, MoveSet pos_moves[MOVESET_SIZE]);
 
         /**
          * @brief Retries and adds the vector of legal moves for the rooks when king is in check.
          * @param moves_index Current index of the first empty position in the pos_moves array.
          * @param pos_moves Array that holds pointers to vectors of moves.
          */
-        void getRookCheckedMoves(int& moves_index, MoveListArray pos_moves);
+        void getRookCheckedMoves(int& moves_index, MoveSet pos_moves[MOVESET_SIZE]);
 
         /**
          * @brief Retries and adds the vector of legal moves for the bishop when king is in check.
          * @param moves_index Current index of the first empty position in the pos_moves array.
          * @param pos_moves Array that holds pointers to vectors of moves.
          */
-        void getBishopCheckedMoves(int& moves_index, MoveListArray pos_moves);
+        void getBishopCheckedMoves(int& moves_index, MoveSet pos_moves[MOVESET_SIZE]);
 
         /**
          * @brief Retries and adds the vector of legal moves for the knight when king is in check.
          * @param moves_index Current index of the first empty position in the pos_moves array.
          * @param pos_moves Array that holds pointers to vectors of moves.
          */
-        void getKnightCheckedMoves(int& moves_index, MoveListArray pos_moves);
+        void getKnightCheckedMoves(int& moves_index, MoveSet pos_moves[MOVESET_SIZE]);
 
         /**
          * @brief Retries and adds the vector of legal moves for the pawn when king is in check.
          * @param moves_index Current index of the first empty position in the pos_moves array.
          * @param pos_moves Array that holds pointers to vectors of moves.
          */
-        void getPawnCheckedMoves(int& moves_index, MoveListArray pos_moves);
+        void getPawnCheckedMoves(int& moves_index, MoveSet pos_moves[MOVESET_SIZE]);
 
         /**
          * @brief Calls other functions to add the legal moves for when there is no check.
          * @param moves_index Current index of the first empty position in the pos_moves array.
          * @param pos_moves Array that holds pointers to vectors of moves.
          */
-        void getNormalMoves(int& moves_index, MoveListArray pos_moves);
+        void getNormalMoves(int& moves_index, MoveSet pos_moves[MOVESET_SIZE]);
 
         /**
          * @brief Retrives and adds the vector of legal queen moves of the side to move to the pos_moves array.
          * @param moves_index Current index of the first empty position in the pos_moves array.
          * @param pos_moves Array that holds pointers to vectors of moves.
          */
-        void getQueenMoves(int& moves_index, MoveListArray pos_moves);
+        void getQueenMoves(int& moves_index, MoveSet pos_moves[MOVESET_SIZE]);
 
         /**
          * @brief Retrives and adds the vector of legal rook moves of the side to move to the pos_moves array.
          * @param moves_index Current index of the first empty position in the pos_moves array.
          * @param pos_moves Array that holds pointers to vectors of moves.
          */
-        void getRookMoves(int& moves_index, MoveListArray pos_moves);
+        void getRookMoves(int& moves_index, MoveSet pos_moves[MOVESET_SIZE]);
 
         /**
          * @brief Retrives and adds the vector of legal bishop moves of the side to move to the pos_moves array.
          * @param moves_index Current index of the first empty position in the pos_moves array.
          * @param pos_moves Array that holds pointers to vectors of moves.
          */
-        void getBishopMoves(int& moves_index, MoveListArray pos_moves);
+        void getBishopMoves(int& moves_index, MoveSet pos_moves[MOVESET_SIZE]);
 
         /**
          * @brief Retrives and adds the vector of legal knight moves of the side to move to the pos_moves array.
          * @param moves_index Current index of the first empty position in the pos_moves array.
          * @param pos_moves Array that holds pointers to vectors of moves.
          */
-        void getKnightMoves(int& moves_index, MoveListArray pos_moves);
+        void getKnightMoves(int& moves_index, MoveSet pos_moves[MOVESET_SIZE]);
 
         /**
          * @brief Retrives and adds the vector of legal castling moves of the side to move to the pos_moves array.
          * @param moves_index Current index of the first empty position in the pos_moves array.
          * @param pos_moves Array that holds pointers to vectors of moves.
          */
-        void getCastlingMoves(int& moves_index, MoveListArray pos_moves);
+        void getCastlingMoves(int& moves_index, MoveSet pos_moves[MOVESET_SIZE]);
 
         /**
          * @brief Retrives and adds the vector of legal pawn moves of the side to move to the pos_moves array.
@@ -249,7 +239,7 @@ class Position {
          * @param moves_index Current index of the first empty position in the pos_moves array.
          * @param pos_moves Array that holds pointers to vectors of moves.
          */
-        void getPawnMoves(int& moves_index, MoveListArray pos_moves);
+        void getPawnMoves(int& moves_index, MoveSet pos_moves[MOVESET_SIZE]);
 
         /**
          * @brief Get the reach bitboard of a rook on the indicated square.
@@ -292,7 +282,6 @@ class Position {
         Bitboard getKnightCheckers(Square, Bitboard&);
         const int rookBlockIndex(Bitboard, Square);
         Bitboard isOccupied(const Square);
-        bool oneBitSet(Bitboard);
         Bitboard getKingAttackers(const Square, const bool) const;
         Bitboard getKingAttackBitBoard() const;
 
@@ -317,7 +306,6 @@ class Position {
         void undoEnPassant();
 
         // Move generation
-        void getEnemyAttacks();
         MovesStruct* getRookFamily(Square);
         MovesStruct* getBishopFamily(Square);
         Bitboard pawnMoveArgs(Square);
@@ -347,13 +335,12 @@ class MoveList {
     public:
         MoveList(Position&);
         uint64_t size();
-        Move randomMove();
 
         struct Iterator {
-            Iterator(int, int, int, std::vector<Move>**, Move&);
+            Iterator(int vecCnt, int i, int j, MoveSet* pos_moves, const Move* endMove);
 
-            Move& operator*() const;
-            Move* operator->();
+            const Move& operator*() const;
+            const Move* operator->() const;
 
             Iterator& operator++(); // Prefix
             Iterator operator++(int); // Postfix
@@ -367,18 +354,18 @@ class MoveList {
             }
 
             private:
-                Move* ptr;
-                std::vector<Move>** moves;
-                int vec_cnt, i, j;
-                Move* endAddr;
+                const Move* ptr;
+                MoveSet* moves;
+                int vecCnt, i, j;
+                const Move* endAddr;
         };
 
         Iterator begin();
         Iterator end();
 
-        std::vector<Move>* moveSets[MOVESET_SIZE];
         int moves_index = 0;
-        Move endMove; // Dummy move for end of iterator. Just need the address.
+        MoveSet moveSets[MOVESET_SIZE];
+        const Move* endMove = nullptr; // Dummy move for end of iterator. Just need the address.
 };
 
 std::string concatFEN(std::vector<std::string> strings);
