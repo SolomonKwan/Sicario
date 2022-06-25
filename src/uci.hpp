@@ -22,6 +22,9 @@ enum UciInput {
 
     // Custom commands to engine
     PERFT,
+    MOVE,
+    UNDO,
+    DISPLAY,
 
     // Sentinel for invalid command
     INVALID_COMMAND

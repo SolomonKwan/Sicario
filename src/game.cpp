@@ -491,32 +491,29 @@ void Position::getPawnCheckedMoves(int& moves_index, MoveSet pos_moves[MOVESET_S
 }
 
 Player Position::getTurn() {
-    return this->turn;
+    return turn;
 }
 
-/**
- * Computes the initial hash of the position. Basically, just computes the current hash.
- */
 void Position::initialiseHash() {
-    // this->hash = 0ULL;
+    hash = 0ULL;
 
-    // // Hash the pieces
-    // for (int sq = A1; sq <= H8; sq++) {
-    //     if (this->pieces[sq] != NO_PIECE) {
-    //         this->hash ^= Hashes::PIECES[this->pieces[sq]][sq];
-    //     }
-    // }
+    // Hash the pieces
+    for (int sq = A1; sq <= H8; sq++) {
+        if (pieces[sq] != NO_PIECE) {
+            hash ^= Hashes::PIECES[pieces[sq]][sq];
+        }
+    }
 
-    // // Hash turn
-    // if (this->turn == BLACK) this->hash ^= Hashes::TURN;
+    // Hash turn
+    if (turn == BLACK) hash ^= Hashes::TURN;
 
-    // // Hash the castling
-    // this->hash ^= Hashes::CASTLING[this->castling];
+    // Hash the castling
+    hash ^= Hashes::CASTLING[castling];
 
-    // // Hash en-passant
-    // if (this->en_passant != NONE) {
-    //     this->hash ^= Hashes::EN_PASSANT[this->en_passant % 8];
-    // }
+    // Hash en-passant
+    if (en_passant != NONE) {
+        hash ^= Hashes::EN_PASSANT[en_passant % 8];
+    }
 }
 
 void Position::getNormalMoves(int& moves_index, MoveSet pos_moves[MOVESET_SIZE]) {
@@ -896,39 +893,39 @@ void Position::removePiece() {
  * @param game: Pointer to game struct.
  */
 void Position::handleCastle() {
-    // int start, end;
-    // int last_end = (this->last_move >> 6) & 0b111111;
-    // PieceType rook;
+    int start, end;
+    int last_end = (this->last_move >> 6) & 0b111111;
+    PieceType rook;
 
-    // if (last_end  == G1) {
-    //     start = H1;
-    //     end = F1;
-    //     rook = W_ROOK;
-    // } else if (last_end == C1) {
-    //     start = A1;
-    //     end = D1;
-    //     rook = W_ROOK;
-    // } else if (last_end == G8) {
-    //     start = H8;
-    //     end = F8;
-    //     rook = B_ROOK;
-    // } else {
-    //     start = A8;
-    //     end = D8;
-    //     rook = B_ROOK;
-    // }
+    if (last_end  == G1) {
+        start = H1;
+        end = F1;
+        rook = W_ROOK;
+    } else if (last_end == C1) {
+        start = A1;
+        end = D1;
+        rook = W_ROOK;
+    } else if (last_end == G8) {
+        start = H8;
+        end = F8;
+        rook = B_ROOK;
+    } else {
+        start = A8;
+        end = D8;
+        rook = B_ROOK;
+    }
 
-    // this->sides[this->turn] &= ~(start);
-    // this->sides[this->turn] |= end;
-    // this->pieces[start] = NO_PIECE;
-    // this->hash ^= Hashes::PIECES[rook][start];
-    // this->pieces[end] = rook;
-    // this->hash ^= Hashes::PIECES[rook][end];
+    this->sides[this->turn] &= ~(start);
+    this->sides[this->turn] |= end;
+    this->pieces[start] = NO_PIECE;
+    this->hash ^= Hashes::PIECES[rook][start];
+    this->pieces[end] = rook;
+    this->hash ^= Hashes::PIECES[rook][end];
 
-    // this->findAndRemovePiece(rook, (Square) start);
-    // this->addPiece(rook, (Square) end);
-    // this->rooks &= ~(start);
-    // this->rooks |= end;
+    this->findAndRemovePiece(rook, (Square) start);
+    this->addPiece(rook, (Square) end);
+    this->rooks &= ~(start);
+    this->rooks |= end;
 }
 
 /**
@@ -1044,82 +1041,75 @@ void printMove(Move move, bool extraInfo) {
  * @param game: Pointer to game struct.
  */
 void Position::makePawnMoves(Move move) {
-//     this->removePiece();
-//     int start = move & 0b111111;
-//     int end = (move >> 6) & 0b111111;
-//     int move_type = move & (0b11 << 12);
-//     int promo = move & (0b11 << 14);
-//     bool pawn = false;
-//     int ep = end + (this->turn ? -8 : 8);
-//     PieceType piece = this->turn ? W_PAWN : B_PAWN;
-//     this->findAndRemovePiece(piece, (Square) start);
+    this->removePiece();
+    int start = move & 0b111111;
+    int end = (move >> 6) & 0b111111;
+    int move_type = move & (0b11 << 12);
+    int promo = move & (0b11 << 14);
+    bool pawn = false;
+    int ep = end + (this->turn ? -8 : 8);
+    PieceType piece = this->turn ? W_PAWN : B_PAWN;
+    this->findAndRemovePiece(piece, (Square) start);
 
-//     if (move_type == PROMOTION) {
-//         if (this->turn) {
-//             piece = promo == pQUEEN ? W_QUEEN : promo == pROOK ? W_ROOK : promo == pBISHOP ? W_BISHOP : W_KNIGHT;
-//         } else {
-//             piece = promo == pQUEEN ? B_QUEEN : promo == pROOK ? B_ROOK : promo == pBISHOP ? B_BISHOP : B_KNIGHT;
-//         }
+    if (move_type == PROMOTION) {
+        if (this->turn) {
+            piece = promo == pQUEEN ? W_QUEEN : promo == pROOK ? W_ROOK : promo == pBISHOP ? W_BISHOP : W_KNIGHT;
+        } else {
+            piece = promo == pQUEEN ? B_QUEEN : promo == pROOK ? B_ROOK : promo == pBISHOP ? B_BISHOP : B_KNIGHT;
+        }
 
-//         if (promo == pQUEEN) {
-//             this->queens |= end;
-//             PieceType queen = this->turn ? W_QUEEN : B_QUEEN;
-//             this->addPiece(queen, (Square) end);
-//         } else if (promo == pROOK) {
-//             this->rooks |= end;
-//             PieceType ROOK = this->turn ? W_ROOK : B_ROOK;
-//             this->addPiece(ROOK, (Square) end);
-//         } else if (promo == pBISHOP) {
-//             this->bishops |= end;
-//             PieceType bishop = this->turn ? W_BISHOP : B_BISHOP;
-//             this->addPiece(bishop, (Square) end);
-//         } else {
-//             this->knights |= end;
-//             PieceType knight = this->turn ? W_KNIGHT : B_KNIGHT;
-//             this->addPiece(knight, (Square) end);
-//         }
-//         this->pieces[end] = piece;
-//         this->hash ^= Hashes::PIECES[piece][end];
-//     } else if (move_type == EN_PASSANT) {
-//         pawn = true;
-//         this->addPiece(piece, (Square) end);
-//         piece = this->turn ? B_PAWN : W_PAWN;
-//         this->findAndRemovePiece(piece, (Square) ep);
-//         this->pawns &= ~(ep);
-//         this->sides[1 - this->turn] &= ~(ep);
-//         this->pieces[ep] = NO_PIECE;
-//         this->hash ^= Hashes::PIECES[piece][ep];
-//     } else {
-//         pawn = true;
-//         this->addPiece(piece, (Square) end);
-//         int rank_diff = end / 8 - start / 8;
-//         if (std::abs(rank_diff) != 1) {
-//             this->en_passant = (Square) (start + 8 * (rank_diff - (rank_diff > 0 ? 1 : -1)));
-//             this->hash ^= Hashes::EN_PASSANT[this->en_passant % 8];
-//         }
-//     }
+        if (promo == pQUEEN) {
+            this->queens |= end;
+            PieceType queen = this->turn ? W_QUEEN : B_QUEEN;
+            this->addPiece(queen, (Square) end);
+        } else if (promo == pROOK) {
+            this->rooks |= end;
+            PieceType ROOK = this->turn ? W_ROOK : B_ROOK;
+            this->addPiece(ROOK, (Square) end);
+        } else if (promo == pBISHOP) {
+            this->bishops |= end;
+            PieceType bishop = this->turn ? W_BISHOP : B_BISHOP;
+            this->addPiece(bishop, (Square) end);
+        } else {
+            this->knights |= end;
+            PieceType knight = this->turn ? W_KNIGHT : B_KNIGHT;
+            this->addPiece(knight, (Square) end);
+        }
+        this->pieces[end] = piece;
+        this->hash ^= Hashes::PIECES[piece][end];
+    } else if (move_type == EN_PASSANT) {
+        pawn = true;
+        this->addPiece(piece, (Square) end);
+        piece = this->turn ? B_PAWN : W_PAWN;
+        this->findAndRemovePiece(piece, (Square) ep);
+        this->pawns &= ~(ep);
+        this->sides[1 - this->turn] &= ~(ep);
+        this->pieces[ep] = NO_PIECE;
+        this->hash ^= Hashes::PIECES[piece][ep];
+    } else {
+        pawn = true;
+        this->addPiece(piece, (Square) end);
+        int rank_diff = end / 8 - start / 8;
+        if (std::abs(rank_diff) != 1) {
+            this->en_passant = (Square) (start + 8 * (rank_diff - (rank_diff > 0 ? 1 : -1)));
+            this->hash ^= Hashes::EN_PASSANT[this->en_passant % 8];
+        }
+    }
 
-//     this->pawns &= ~(start);
-//     this->pawns |= (uint64_t)pawn << end;
-// }
+    this->pawns &= ~(start);
+    this->pawns |= (uint64_t)pawn << end;
+}
 
-// /**
-//  * Save game state to history for undoing moves.
-//  * @param game: Pointer to game struct.
-//  * @param move: The move to made.
-//  */
-// void Position::saveHistory(Move move) {
-//     this->history[this->ply].castling = this->castling;
-//     this->history[this->ply].en_passant = this->en_passant;
-//     this->history[this->ply].halfmove = this->halfmove;
-//     this->history[this->ply].move = move;
-//     this->history[this->ply].captured = this->pieces[(move >> 6) & 0b111111];
-//     this->history[this->ply].hash = this->hash;
-//     this->ply++;
-
-//     if (this->ply >= MAX_MOVES) {
-//         this->history.resize(2 * MAX_MOVES);
-//     }
+void Position::saveHistory(Move move) {
+    history.push_back({
+        castling,
+        en_passant,
+        halfmove,
+        move,
+        pieces[(move >> 6) & 0b111111],
+        hash,
+    });
+    ply++;
 }
 
 /**
@@ -1127,88 +1117,88 @@ void Position::makePawnMoves(Move move) {
  * @param game: Pointer to game struct.
  */
 void Position::undoNormal() {
-    // // Change game history
-    // this->ply--;
-    // History previous_pos = this->history[this->ply];
+    // Change game history
+    this->ply--;
+    History previous_pos = this->history[this->ply];
 
-    // // Retrieve last move information
-    // Move move = previous_pos.move;
-    // int start = move & 0b111111;
-    // int end = (move >> 6) & 0b111111;
-    // PieceType moved = this->pieces[end];
-    // PieceType captured = previous_pos.captured;
+    // Retrieve last move information
+    Move move = previous_pos.move;
+    int start = move & 0b111111;
+    int end = (move >> 6) & 0b111111;
+    PieceType moved = this->pieces[end];
+    PieceType captured = previous_pos.captured;
 
-    // // Change turn
-    // turn = (Player)!turn;
-    // bool turn = this->turn;
+    // Change turn
+    turn = (Player)!turn;
+    bool turn = this->turn;
 
-    // // Change sides bitboards
-    // this->sides[turn] &= ~(end);
-    // this->sides[turn] |= start;
-    // if (captured != NO_PIECE) this->sides[!turn] |= end;
+    // Change sides bitboards
+    this->sides[turn] &= ~(end);
+    this->sides[turn] |= start;
+    if (captured != NO_PIECE) this->sides[!turn] |= end;
 
-    // // Change pieces bitboards, piece list and indices and piece counts
-    // if (moved == B_PAWN || moved == W_PAWN) {
-    //     this->pawns &= ~(end);
-    //     this->findAndRemovePiece(moved, (Square) end);
-    //     this->pawns |= start;
-    //     this->addPiece(moved, (Square) start);
-    // } else if (moved == B_KNIGHT || moved == W_KNIGHT) {
-    //     this->knights &= ~(end);
-    //     this->findAndRemovePiece(moved, (Square) end);
-    //     this->knights |= start;
-    //     this->addPiece(moved, (Square) start);
-    // } else if (moved == B_BISHOP || moved == W_BISHOP) {
-    //     this->bishops &= ~(end);
-    //     this->findAndRemovePiece(moved, (Square) end);
-    //     this->bishops |= start;
-    //     this->addPiece(moved, (Square) start);
-    // } else if (moved == B_ROOK || moved == W_ROOK) {
-    //     this->rooks &= ~(end);
-    //     this->findAndRemovePiece(moved, (Square) end);
-    //     this->rooks |= start;
-    //     this->addPiece(moved, (Square) start);
-    // } else if (moved == B_QUEEN || moved == W_QUEEN) {
-    //     this->queens &= ~(end);
-    //     this->findAndRemovePiece(moved, (Square) end);
-    //     this->queens |= start;
-    //     this->addPiece(moved, (Square) start);
-    // } else {
-    //     this->kings &= ~(end);
-    //     this->findAndRemovePiece(moved, (Square) end);
-    //     this->kings |= start;
-    //     this->addPiece(moved, (Square) start);
-    // }
+    // Change pieces bitboards, piece list and indices and piece counts
+    if (moved == B_PAWN || moved == W_PAWN) {
+        this->pawns &= ~(end);
+        this->findAndRemovePiece(moved, (Square) end);
+        this->pawns |= start;
+        this->addPiece(moved, (Square) start);
+    } else if (moved == B_KNIGHT || moved == W_KNIGHT) {
+        this->knights &= ~(end);
+        this->findAndRemovePiece(moved, (Square) end);
+        this->knights |= start;
+        this->addPiece(moved, (Square) start);
+    } else if (moved == B_BISHOP || moved == W_BISHOP) {
+        this->bishops &= ~(end);
+        this->findAndRemovePiece(moved, (Square) end);
+        this->bishops |= start;
+        this->addPiece(moved, (Square) start);
+    } else if (moved == B_ROOK || moved == W_ROOK) {
+        this->rooks &= ~(end);
+        this->findAndRemovePiece(moved, (Square) end);
+        this->rooks |= start;
+        this->addPiece(moved, (Square) start);
+    } else if (moved == B_QUEEN || moved == W_QUEEN) {
+        this->queens &= ~(end);
+        this->findAndRemovePiece(moved, (Square) end);
+        this->queens |= start;
+        this->addPiece(moved, (Square) start);
+    } else {
+        this->kings &= ~(end);
+        this->findAndRemovePiece(moved, (Square) end);
+        this->kings |= start;
+        this->addPiece(moved, (Square) start);
+    }
 
-    // if (captured == NO_PIECE) {
-    //     /* Do nothing */
-    // } else if (captured == B_PAWN || captured == W_PAWN) {
-    //     this->pawns |= end;
-    //     this->addPiece(captured, (Square) end);
-    // } else if (captured == B_KNIGHT || captured == W_KNIGHT) {
-    //     this->knights |= end;
-    //     this->addPiece(captured, (Square) end);
-    // } else if (captured == B_BISHOP || captured == W_BISHOP) {
-    //     this->bishops |= end;
-    //     addPiece(captured, (Square) end);
-    // } else if (captured == B_ROOK || captured == W_ROOK) {
-    //     this->rooks |= end;
-    //     this->addPiece(captured, (Square) end);
-    // } else {
-    //     this->queens |= end;
-    //     this->addPiece(captured, (Square) end);
-    // }
+    if (captured == NO_PIECE) {
+        /* Do nothing */
+    } else if (captured == B_PAWN || captured == W_PAWN) {
+        this->pawns |= end;
+        this->addPiece(captured, (Square) end);
+    } else if (captured == B_KNIGHT || captured == W_KNIGHT) {
+        this->knights |= end;
+        this->addPiece(captured, (Square) end);
+    } else if (captured == B_BISHOP || captured == W_BISHOP) {
+        this->bishops |= end;
+        addPiece(captured, (Square) end);
+    } else if (captured == B_ROOK || captured == W_ROOK) {
+        this->rooks |= end;
+        this->addPiece(captured, (Square) end);
+    } else {
+        this->queens |= end;
+        this->addPiece(captured, (Square) end);
+    }
 
-    // // Undo fullmove and History struct information
-    // if (turn) this->fullmove--;
-    // this->castling = previous_pos.castling;
-    // this->en_passant = previous_pos.en_passant;
-    // this->halfmove = previous_pos.halfmove;
-    // this->hash = previous_pos.hash;
+    // Undo fullmove and History struct information
+    if (turn) this->fullmove--;
+    this->castling = previous_pos.castling;
+    this->en_passant = previous_pos.en_passant;
+    this->halfmove = previous_pos.halfmove;
+    this->hash = previous_pos.hash;
 
-    // // Update pieces array
-    // this->pieces[start] = moved;
-    // this->pieces[end] = captured;
+    // Update pieces array
+    this->pieces[start] = moved;
+    this->pieces[end] = captured;
 }
 
 /**
@@ -1216,64 +1206,64 @@ void Position::undoNormal() {
  * @param game: Pointer to game struct.
  */
 void Position::undoPromotion() {
-    // // Change game history
-    // this->ply--;
-    // History previous_pos = this->history[this->ply];
+    // Change game history
+    this->ply--;
+    History previous_pos = this->history[this->ply];
 
-    // // Change turn
-    // this->turn = 1 - this->turn;
-    // bool turn = this->turn;
+    // Change turn
+    this->turn = (Player)!this->turn;
+    bool turn = this->turn;
 
-    // // Retrieve last move information
-    // Move move = previous_pos.move;
-    // int start = move & 0b111111;
-    // int end = (move >> 6) & 0b111111;
-    // PieceType promoted = this->pieces[end];
-    // PieceType captured = previous_pos.captured;
-    // PieceType pawn = turn ? W_PAWN : B_PAWN;
+    // Retrieve last move information
+    Move move = previous_pos.move;
+    int start = move & 0b111111;
+    int end = (move >> 6) & 0b111111;
+    PieceType promoted = this->pieces[end];
+    PieceType captured = previous_pos.captured;
+    PieceType pawn = turn ? W_PAWN : B_PAWN;
 
-    // // Remove promoted piece
-    // this->findAndRemovePiece(promoted, (Square) end);
-    // this->sides[turn] &= ~(end);
-    // this->pieces[end] = NO_PIECE;
-    // if (promoted == W_QUEEN || promoted == B_QUEEN) {
-    //     this->queens &= ~(end);
-    // } else if (promoted == W_ROOK || promoted == B_ROOK) {
-    //     this->rooks &= ~(end);
-    // } else if (promoted == W_BISHOP || promoted == B_BISHOP) {
-    //     this->bishops &= ~(end);
-    // } else { // Knight
-    //     this->knights &= ~(end);
-    // }
+    // Remove promoted piece
+    this->findAndRemovePiece(promoted, (Square) end);
+    this->sides[turn] &= ~(end);
+    this->pieces[end] = NO_PIECE;
+    if (promoted == W_QUEEN || promoted == B_QUEEN) {
+        this->queens &= ~(end);
+    } else if (promoted == W_ROOK || promoted == B_ROOK) {
+        this->rooks &= ~(end);
+    } else if (promoted == W_BISHOP || promoted == B_BISHOP) {
+        this->bishops &= ~(end);
+    } else { // Knight
+        this->knights &= ~(end);
+    }
 
-    // // Replace captured piece (if any)
-    // if (captured != NO_PIECE) {
-    //     this->addPiece(captured, (Square) end);
-    //     this->sides[!turn] |= end;
-    //     this->pieces[end] = captured;
-    //     if (captured == W_QUEEN || captured == B_QUEEN) {
-    //         this->queens |= end;
-    //     } else if (captured == W_ROOK || captured == B_ROOK) {
-    //         this->rooks |= end;
-    //     } else if (captured == W_BISHOP || captured == B_BISHOP) {
-    //         this->bishops |= end;
-    //     } else { // Knight
-    //         this->knights |= end;
-    //     }
-    // }
+    // Replace captured piece (if any)
+    if (captured != NO_PIECE) {
+        this->addPiece(captured, (Square) end);
+        this->sides[!turn] |= end;
+        this->pieces[end] = captured;
+        if (captured == W_QUEEN || captured == B_QUEEN) {
+            this->queens |= end;
+        } else if (captured == W_ROOK || captured == B_ROOK) {
+            this->rooks |= end;
+        } else if (captured == W_BISHOP || captured == B_BISHOP) {
+            this->bishops |= end;
+        } else { // Knight
+            this->knights |= end;
+        }
+    }
 
-    // // Replace pawn
-    // this->addPiece(pawn, (Square) start);
-    // this->sides[turn] |= start;
-    // this->pawns |= start;
-    // this->pieces[start] = pawn;
+    // Replace pawn
+    this->addPiece(pawn, (Square) start);
+    this->sides[turn] |= start;
+    this->pawns |= start;
+    this->pieces[start] = pawn;
 
-    // // Undo fullmove and History struct information
-    // if (turn) this->fullmove--;
-    // this->castling = previous_pos.castling;
-    // this->en_passant = previous_pos.en_passant;
-    // this->halfmove = previous_pos.halfmove;
-    // this->hash = previous_pos.hash;
+    // Undo fullmove and History struct information
+    if (turn) this->fullmove--;
+    this->castling = previous_pos.castling;
+    this->en_passant = previous_pos.en_passant;
+    this->halfmove = previous_pos.halfmove;
+    this->hash = previous_pos.hash;
 }
 
 /**
@@ -1281,48 +1271,48 @@ void Position::undoPromotion() {
  * @param game: Pointer to game struct.
  */
 void Position::undoEnPassant() {
-    // // Change game history
-    // this->ply--;
-    // History previous_pos = this->history[this->ply];
+    // Change game history
+    this->ply--;
+    History previous_pos = this->history[this->ply];
 
-    // // Change turn
-    // this->turn = 1 - this->turn;
-    // bool turn = this->turn;
+    // Change turn
+    this->turn = (Player)!this->turn;
+    bool turn = this->turn;
 
-    // // Retrieve last move information
-    // Move move = previous_pos.move;
-    // int start = move & 0b111111;
-    // int end = (move >> 6) & 0b111111;
-    // PieceType moved = this->pieces[end];
-    // PieceType captured = turn ? B_PAWN : W_PAWN;
-    // int captured_sq = end + (turn ? -8 : 8);
+    // Retrieve last move information
+    Move move = previous_pos.move;
+    int start = move & 0b111111;
+    int end = (move >> 6) & 0b111111;
+    PieceType moved = this->pieces[end];
+    PieceType captured = turn ? B_PAWN : W_PAWN;
+    int captured_sq = end + (turn ? -8 : 8);
 
-    // // Change sides bitboards
-    // this->sides[turn] &= ~(end);
-    // this->sides[turn] |= start;
-    // this->sides[!turn] |= captured_sq;
+    // Change sides bitboards
+    this->sides[turn] &= ~(end);
+    this->sides[turn] |= start;
+    this->sides[!turn] |= captured_sq;
 
-    // // Change pawn bitboards
-    // this->pawns &= ~(end);
-    // this->pawns |= start;
-    // this->pawns |= captured_sq;
+    // Change pawn bitboards
+    this->pawns &= ~(end);
+    this->pawns |= start;
+    this->pawns |= captured_sq;
 
-    // // Undo fullmove and History struct information
-    // if (turn) this->fullmove--;
-    // this->castling = previous_pos.castling;
-    // this->en_passant = previous_pos.en_passant;
-    // this->halfmove = previous_pos.halfmove;
-    // this->hash = previous_pos.hash;
+    // Undo fullmove and History struct information
+    if (turn) this->fullmove--;
+    this->castling = previous_pos.castling;
+    this->en_passant = previous_pos.en_passant;
+    this->halfmove = previous_pos.halfmove;
+    this->hash = previous_pos.hash;
 
-    // // Update piece list, indices and counts
-    // this->findAndRemovePiece(moved, (Square) end);
-    // this->addPiece(moved, (Square) start);
-    // this->addPiece(captured, (Square) captured_sq);
+    // Update piece list, indices and counts
+    this->findAndRemovePiece(moved, (Square) end);
+    this->addPiece(moved, (Square) start);
+    this->addPiece(captured, (Square) captured_sq);
 
-    // // Update pieces array
-    // this->pieces[start] = moved;
-    // this->pieces[end] = NO_PIECE;
-    // this->pieces[captured_sq] = captured;
+    // Update pieces array
+    this->pieces[start] = moved;
+    this->pieces[end] = NO_PIECE;
+    this->pieces[captured_sq] = captured;
 }
 
 /**
@@ -1330,69 +1320,69 @@ void Position::undoEnPassant() {
  * @param game: Pointer to game struct.
  */
 void Position::undoCastling() {
-    // // Change game history
-    // this->ply--;
-    // History previous_pos = this->history[this->ply];
+    // Change game history
+    this->ply--;
+    History previous_pos = this->history[this->ply];
 
-    // // Change turn
-    // this->turn = 1 - this->turn;
-    // bool turn = this->turn;
+    // Change turn
+    this->turn = (Player)!this->turn;
+    bool turn = this->turn;
 
-    // // Retrieve last move information
-    // Move move = previous_pos.move;
-    // int start = move & 0b111111;
-    // int end = (move >> 6) & 0b111111;
-    // PieceType moved = this->pieces[end];
+    // Retrieve last move information
+    Move move = previous_pos.move;
+    int start = move & 0b111111;
+    int end = (move >> 6) & 0b111111;
+    PieceType moved = this->pieces[end];
 
-    // // Rook changes
-    // int rook_start, rook_end;
-    // PieceType rook = turn ? W_ROOK : B_ROOK;
-    // if (end == G1) {
-    //     rook_start = H1;
-    //     rook_end = F1;
-    // } else if (end == C1) {
-    //     rook_start = A1;
-    //     rook_end = D1;
-    // } else if (end == G8) {
-    //     rook_start = H8;
-    //     rook_end = F8;
-    // } else {
-    //     rook_start = A8;
-    //     rook_end = D8;
-    // }
+    // Rook changes
+    int rook_start, rook_end;
+    PieceType rook = turn ? W_ROOK : B_ROOK;
+    if (end == G1) {
+        rook_start = H1;
+        rook_end = F1;
+    } else if (end == C1) {
+        rook_start = A1;
+        rook_end = D1;
+    } else if (end == G8) {
+        rook_start = H8;
+        rook_end = F8;
+    } else {
+        rook_start = A8;
+        rook_end = D8;
+    }
 
-    // // Change sides bitboards
-    // this->sides[turn] &= ~(end);
-    // this->sides[turn] |= start;
-    // this->sides[turn] &= ~(rook_end);
-    // this->sides[turn] |= rook_start;
+    // Change sides bitboards
+    this->sides[turn] &= ~(end);
+    this->sides[turn] |= start;
+    this->sides[turn] &= ~(rook_end);
+    this->sides[turn] |= rook_start;
 
-    // // Change king bitboards
-    // this->kings &= ~(end);
-    // this->kings |= start;
+    // Change king bitboards
+    this->kings &= ~(end);
+    this->kings |= start;
 
-    // // Change rook bitboards
-    // this->rooks &= ~(rook_end);
-    // this->rooks |= rook_start;
+    // Change rook bitboards
+    this->rooks &= ~(rook_end);
+    this->rooks |= rook_start;
 
-    // // Undo fullmove and History struct information (some is not necessary i think? Done out of principle)
-    // if (turn) this->fullmove--;
-    // this->castling = previous_pos.castling;
-    // this->en_passant = previous_pos.en_passant;
-    // this->halfmove = previous_pos.halfmove;
-    // this->hash = previous_pos.hash;
+    // Undo fullmove and History struct information (some is not necessary i think? Done out of principle)
+    if (turn) this->fullmove--;
+    this->castling = previous_pos.castling;
+    this->en_passant = previous_pos.en_passant;
+    this->halfmove = previous_pos.halfmove;
+    this->hash = previous_pos.hash;
 
-    // // Update piece list, indices and counts
-    // this->findAndRemovePiece(moved, (Square) end);
-    // this->addPiece(moved, (Square) start);
-    // this->findAndRemovePiece(rook, (Square) rook_end);
-    // this->addPiece(rook, (Square) rook_start);
+    // Update piece list, indices and counts
+    this->findAndRemovePiece(moved, (Square) end);
+    this->addPiece(moved, (Square) start);
+    this->findAndRemovePiece(rook, (Square) rook_end);
+    this->addPiece(rook, (Square) rook_start);
 
-    // // Update pieces array
-    // this->pieces[start] = moved;
-    // this->pieces[end] = NO_PIECE;
-    // this->pieces[rook_start] = rook;
-    // this->pieces[rook_end] = NO_PIECE;
+    // Update pieces array
+    this->pieces[start] = moved;
+    this->pieces[end] = NO_PIECE;
+    this->pieces[rook_start] = rook;
+    this->pieces[rook_end] = NO_PIECE;
 }
 
 /**
@@ -1411,11 +1401,6 @@ void Position::decrementHash(const Bitboard hash) {
  * @param game: Pointer to game struct.
  */
 void Position::undoMove() {
-    if (this->ply == 0) {
-        std::cout << "Nothing to undo...\n";
-        return;
-    }
-
     this->decrementHash(this->hash);
     int type = this->history[this->ply - 1].move & (0b11 << 12);
     if (type == NORMAL) {
@@ -1429,111 +1414,101 @@ void Position::undoMove() {
     }
 }
 
-/**
- * Make the moves.
- * @param move: The moves to make.
- * @param game: Pointer to game struct.
- */
 void Position::makeMove(Move move) {
-    // if (move == 0) {
-    //     this->undoMove();
-    //     return;
-    // }
+    // Save current position and move to make to history.
+    this->saveHistory(move);
 
-    // // Save current position and move to make to history.
-    // this->saveHistory(move);
+    int start = move & 0b111111;
+    int end = (move >> 6) & 0b111111;
+    int move_type = move & (0b11 << 12);
 
-    // int start = move & 0b111111;
-    // int end = (move >> 6) & 0b111111;
-    // int move_type = move & (0b11 << 12);
+    this->last_move = move;
+    this->last_move_type = (MoveType) move_type;
+    this->piece_captured = this->pieces[end];
+    this->piece_moved = this->pieces[start];
 
-    // this->last_move = move;
-    // this->last_move_type = (MoveType) move_type;
-    // this->piece_captured = this->pieces[end];
-    // this->piece_moved = this->pieces[start];
+    // Remove en-passant and its hash
+    if (this->en_passant != NONE) {
+        this->hash ^= Hashes::EN_PASSANT[this->en_passant % 8];
+        this->en_passant = NONE;
+    }
 
-    // // Remove en-passant and its hash
-    // if (this->en_passant != NONE) {
-    //     this->hash ^= Hashes::EN_PASSANT[this->en_passant % 8];
-    //     this->en_passant = NONE;
-    // }
+    this->sides[this->turn] &= ~(start);
+    this->sides[this->turn] |= end;
+    this->sides[1 - this->turn] &= ~(end);
+    this->pieces[start] = NO_PIECE;
+    this->hash ^= Hashes::PIECES[this->piece_moved][start];
+    this->pieces[end] = this->piece_moved;
+    if (this->piece_captured != NO_PIECE) {
+        this->hash ^= Hashes::PIECES[this->piece_captured][end];
+    }
+    this->hash ^= Hashes::PIECES[this->piece_moved][end];
 
-    // this->sides[this->turn] &= ~(start);
-    // this->sides[this->turn] |= end;
-    // this->sides[1 - this->turn] &= ~(end);
-    // this->pieces[start] = NO_PIECE;
-    // this->hash ^= Hashes::PIECES[this->piece_moved][start];
-    // this->pieces[end] = this->piece_moved;
-    // if (this->piece_captured != NO_PIECE) {
-    //     this->hash ^= Hashes::PIECES[this->piece_captured][end];
-    // }
-    // this->hash ^= Hashes::PIECES[this->piece_moved][end];
+    // Change castling privileges.
+    if (start == E1 && 0b11 & this->castling) {
+        this->hash ^= Hashes::CASTLING[this->castling];
+        this->castling &= 0b1100;
+        this->hash ^= Hashes::CASTLING[this->castling];
+    }
 
-    // // Change castling privileges.
-    // if (start == E1 && 0b11 & this->castling) {
-    //     this->hash ^= Hashes::CASTLING[this->castling];
-    //     this->castling &= 0b1100;
-    //     this->hash ^= Hashes::CASTLING[this->castling];
-    // }
+    if (start == E8 && (0b11 << 2) & this->castling) {
+        this->hash ^= Hashes::CASTLING[this->castling];
+        this->castling &= 0b0011;
+        this->hash ^= Hashes::CASTLING[this->castling];
+    }
 
-    // if (start == E8 && (0b11 << 2) & this->castling) {
-    //     this->hash ^= Hashes::CASTLING[this->castling];
-    //     this->castling &= 0b0011;
-    //     this->hash ^= Hashes::CASTLING[this->castling];
-    // }
+    if ((start == H1 || end == H1) && this->castling & (1 << WKSC)) {
+        this->hash ^= Hashes::CASTLING[this->castling];
+        this->castling &= ~(1 << WKSC);
+        this->hash ^= Hashes::CASTLING[this->castling];
+    }
 
-    // if ((start == H1 || end == H1) && this->castling & (1 << WKSC)) {
-    //     this->hash ^= Hashes::CASTLING[this->castling];
-    //     this->castling &= ~(1 << WKSC);
-    //     this->hash ^= Hashes::CASTLING[this->castling];
-    // }
+    if ((start == A1 || end == A1) && this->castling & (1 << WQSC)) {
+        this->hash ^= Hashes::CASTLING[this->castling];
+        this->castling &= ~(1 << WQSC);
+        this->hash ^= Hashes::CASTLING[this->castling];
+    }
 
-    // if ((start == A1 || end == A1) && this->castling & (1 << WQSC)) {
-    //     this->hash ^= Hashes::CASTLING[this->castling];
-    //     this->castling &= ~(1 << WQSC);
-    //     this->hash ^= Hashes::CASTLING[this->castling];
-    // }
+    if ((start == H8 || end == H8) && this->castling & (1 << BKSC)) {
+        this->hash ^= Hashes::CASTLING[this->castling];
+        this->castling &= ~(1 << BKSC);
+        this->hash ^= Hashes::CASTLING[this->castling];
+    }
 
-    // if ((start == H8 || end == H8) && this->castling & (1 << BKSC)) {
-    //     this->hash ^= Hashes::CASTLING[this->castling];
-    //     this->castling &= ~(1 << BKSC);
-    //     this->hash ^= Hashes::CASTLING[this->castling];
-    // }
+    if ((start == A8 || end == A8) && this->castling & (1 << BQSC)) {
+        this->hash ^= Hashes::CASTLING[this->castling];
+        this->castling &= ~(1 << BQSC);
+        this->hash ^= Hashes::CASTLING[this->castling];
+    }
 
-    // if ((start == A8 || end == A8) && this->castling & (1 << BQSC)) {
-    //     this->hash ^= Hashes::CASTLING[this->castling];
-    //     this->castling &= ~(1 << BQSC);
-    //     this->hash ^= Hashes::CASTLING[this->castling];
-    // }
+    PieceType moved = this->piece_moved;
+    if (moved == W_KING || moved == B_KING) {
+        this->makeKingMoves(move);
+    } else if (moved == W_QUEEN || moved == B_QUEEN) {
+        this->makeQueenMoves(move);
+    } else if (moved == W_ROOK || moved == B_ROOK) {
+        this->makeRookMoves(move);
+    } else if (moved == W_BISHOP || moved == B_BISHOP) {
+        this->makeBishopMoves(move);
+    } else if (moved == W_KNIGHT || moved == B_KNIGHT) {
+        this->makeKnightMoves(move);
+    } else {
+        this->makePawnMoves(move);
+    }
 
-    // PieceType moved = this->piece_moved;
-    // if (moved == W_KING || moved == B_KING) {
-    //     this->makeKingMoves(move);
-    // } else if (moved == W_QUEEN || moved == B_QUEEN) {
-    //     this->makeQueenMoves(move);
-    // } else if (moved == W_ROOK || moved == B_ROOK) {
-    //     this->makeRookMoves(move);
-    // } else if (moved == W_BISHOP || moved == B_BISHOP) {
-    //     this->makeBishopMoves(move);
-    // } else if (moved == W_KNIGHT || moved == B_KNIGHT) {
-    //     this->makeKnightMoves(move);
-    // } else {
-    //     this->makePawnMoves(move);
-    // }
+    this->turn = (Player) !this->turn;
+    if (this->turn == BLACK) {
+        this->fullmove++;
+        this->hash ^= Hashes::TURN;
+    }
+    if (moved == W_PAWN || moved == B_PAWN || this->piece_captured != NO_PIECE) {
+        this->halfmove = 0;
+    } else {
+        this->halfmove++;
+    }
 
-    // this->turn = 1 - this->turn;
-    // if (this->turn == BLACK) {
-    //     this->fullmove++;
-    //     this->hash ^= Hashes::TURN;
-    // }
-    // if (moved == W_PAWN || moved == B_PAWN || this->piece_captured != NO_PIECE) {
-    //     this->halfmove = 0;
-    // } else {
-    //     this->halfmove++;
-    // }
-
-    // // Increment position hash counter
-    // this->incrementHash(move);
+    // Increment position hash counter
+    this->incrementHash(move);
 }
 
 void Position::incrementHash(Move move) {
@@ -1560,82 +1535,6 @@ bool Position::validMove(Move move, MoveList& move_list) {
         }
     }
     return false;
-}
-
-/**
- * Get and return the FEN string of the current position.
- * @param game: Pointer to game struct.
- */
-std::string Position::getFEN() {
-    std::string fen = "";
-    int no_piece_count = 0;
-    for (int rank = 7; rank >= 0; rank--) {
-        for (int file = 0; file <= 7; file++) {
-            int sq = rank * 8 + file;
-
-            if (sq % 8 == 0 && sq != A8) {
-                if (no_piece_count != 0) {
-                    fen += no_piece_count + '0';
-                    no_piece_count = 0;
-                }
-                fen += "/";
-            }
-
-            PieceType piece = this->pieces[sq];
-            if (piece == NO_PIECE) {
-                no_piece_count++;
-            } else {
-                if (no_piece_count != 0) {
-                    fen += no_piece_count + '0';
-                    no_piece_count = 0;
-                }
-                if (piece == B_KING) fen += 'k';
-                else if (piece == B_QUEEN) fen += 'q';
-                else if (piece == B_ROOK) fen += 'r';
-                else if (piece == B_BISHOP) fen += 'b';
-                else if (piece == B_KNIGHT) fen += 'n';
-                else if (piece == B_PAWN) fen += 'p';
-                else if (piece == W_KING) fen += 'K';
-                else if (piece == W_QUEEN) fen += 'Q';
-                else if (piece == W_ROOK) fen += 'R';
-                else if (piece == W_BISHOP) fen += 'B';
-                else if (piece == W_KNIGHT) fen += 'N';
-                else fen += 'P';
-            }
-        }
-    }
-    if (no_piece_count != 0) {
-        fen += no_piece_count + '0';
-        no_piece_count = 0;
-    }
-
-    if (this->turn) {
-        fen += " w ";
-    } else {
-        fen += " b ";
-    }
-
-    if (this->castling == 0) {
-        fen += "-";
-    } else {
-        if (this->castling & (1 << WKSC)) fen += "K";
-        if (this->castling & (1 << WQSC)) fen += "Q";
-        if (this->castling & (1 << BKSC)) fen += "k";
-        if (this->castling & (1 << BQSC)) fen += "q";
-    }
-    fen += " ";
-
-    if (this->en_passant == NONE) {
-        fen += "- ";
-    } else {
-        fen += squareName[this->en_passant] + " ";
-    }
-
-    fen += this->halfmove + '0';
-    fen += " ";
-    fen += this->fullmove + '0';
-
-    return fen;
 }
 
 /**
@@ -1698,9 +1597,102 @@ void Position::checkCastlingEnPassantMoves(uint start, uint end, Move& move) {
     }
 }
 
-Position::Position(std::string fen) : history(MAX_MOVES) {
+Position::Position(std::string fen) {
     this->parseFen(fen);
     this->initialiseHash();
+}
+
+void Position::display() {
+    bool light_mode = true; // TODO implement later.
+    bool unicodeMode = false; // TODO implement later.
+
+    // Print the pieces
+    for (int rank = 7; rank >= 0; rank--) {
+        std::string rank_string = "";
+        rank_string += (rank - 7) + '8';
+        rank_string += " ";
+        for (int file = 0; file < 8; file++) {
+            int square = 8 * rank + file;
+            PieceType piece = this->pieces[square];
+            if (piece == W_KING || piece == B_KING) {
+                if (this->sides[WHITE] & (1ULL << square)) {
+                    rank_string += unicodeMode ? "K " : (light_mode ? "\u265A " : "\u2654 ");
+                } else {
+                    rank_string += unicodeMode ? "k " : (light_mode ? "\u2654 " : "\u265A ");
+                }
+            } else if (piece == W_QUEEN || piece == B_QUEEN) {
+                if (this->sides[WHITE] & (1ULL << square)) {
+                    rank_string += unicodeMode ? "Q " : (light_mode ? "\u265B " : "\u2655 ");
+                } else {
+                    rank_string += unicodeMode ? "q " : (light_mode ? "\u2655 " : "\u265B ");
+                }
+            } else if (piece == W_ROOK || piece == B_ROOK) {
+                if (this->sides[WHITE] & (1ULL << square)) {
+                    rank_string += unicodeMode ? "R " : (light_mode ? "\u265C " : "\u2656 ");
+                } else {
+                    rank_string += unicodeMode ? "r " : (light_mode ? "\u2656 " : "\u265C ");
+                }
+            } else if (piece == W_BISHOP || piece == B_BISHOP) {
+                if (this->sides[WHITE] & (1ULL << square)) {
+                    rank_string += unicodeMode ? "B " : (light_mode ? "\u265D " : "\u2657 ");
+                } else {
+                    rank_string += unicodeMode ? "b " : (light_mode ? "\u2657 " : "\u265D ");
+                }
+            } else if (piece == W_KNIGHT || piece == B_KNIGHT) {
+                if (this->sides[WHITE] & (1ULL << square)) {
+                    rank_string += unicodeMode ? "N " : (light_mode ? "\u265E " : "\u2658 ");
+                } else {
+                    rank_string += unicodeMode ? "n " : (light_mode ? "\u2658 " : "\u265E ");
+                }
+            } else if (piece == W_PAWN || piece == B_PAWN) {
+                if (this->sides[WHITE] & (1ULL << square)) {
+                    rank_string += unicodeMode ? "P " : (light_mode ? "\u265F " : "\u2659 ");
+                } else {
+                    rank_string += unicodeMode ? "p " : (light_mode ? "\u2659 " : "\u265F ");
+                }
+            } else {
+                rank_string += "  ";
+            }
+        }
+        std::cout << rank_string << '\n';
+    }
+    std::cout << "  a b c d e f g h\n";
+
+    // Print turn
+    if (this->turn) {
+        std::cout << "Turn: white\n";
+    } else {
+        std::cout << "Turn: black\n";
+    }
+
+    // Print castling
+    std::string castling = "Castling: ";
+    if (this->castling & (1 << WKSC)) castling += "K";
+    if (this->castling & (1 << WQSC)) castling += "Q";
+    if (this->castling & (1 << BKSC)) castling += "k";
+    if (this->castling & (1 << BQSC)) castling += "q";
+    if (!(this->castling & (1 << WKSC)) && !(this->castling & (1 << WQSC)) &&
+            !(this->castling & (1 << BKSC)) &&
+            !(this->castling & (1 << BQSC))) {
+        castling += "-";
+    }
+    std::cout << castling << '\n';
+
+    // Print en-passant
+    std::string ep = "En-passant: ";
+    if (this->en_passant == NONE) {
+        ep += "-\n";
+    } else {
+        ep += squareName[this->en_passant] + "\n";
+    }
+    std::cout << ep;
+
+    // Clock cycles
+    std::cout << "Halfmove: " << this->halfmove << '\n';
+    std::cout << "Fullmove: " << this->fullmove << '\n';
+
+    // New line for spacing
+    std::cout << '\n';
 }
 
 /**
@@ -1724,6 +1716,15 @@ uint64_t MoveList::size() {
         count += moveSets[i]->size();
     }
     return count;
+}
+
+bool MoveList::contains(Move targetMove) {
+    for (int i = 0; i < moves_index; i++) {
+        for (Move move : *moveSets[i]) {
+            if (move == targetMove) return true;
+        }
+    }
+    return false;
 }
 
 MoveList::Iterator::Iterator(int vecCnt, int i, int j, MoveSet* moves, const Move* endMove) : endAddr{endMove} {
