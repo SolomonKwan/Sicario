@@ -121,18 +121,39 @@ std::array<std::vector<int>, 64> computeRookReachIndices();
 std::array<std::vector<int>, 64> computeBishopReachIndices();
 
 /**
- * @brief Computed the reach bitboards for the different occupancies of the rook on each square.
+ * @brief Compute the reach bitboards for the different occupancies of the rook on each square.
  *
  * @return Array of vectors of bitboards of reaches.
  */
 std::array<std::vector<Bitboard>, 64> computeRookReaches();
 
 /**
- * @brief Computed the reach bitboards for the different occupancies of the bishop on each square.
+ * @brief Compute the reach bitboards for the different occupancies of the bishop on each square.
  *
  * @return Array of vectors of bitboards of reaches.
  */
 std::array<std::vector<Bitboard>, 64> computeBishopReaches();
+
+/**
+ * @brief Compute the squares of the reach of the king for different occupancies on each square.
+ *
+ * @return Squares of the reach of the king for different occupancies on each square.
+ */
+std::array<std::vector<std::vector<Square>>, 64> computeKingReachSquares();
+
+/**
+ * @brief Computed the level rays from first square (exclusive) to second square (inclusive).
+ *
+ * @return Bitboard of the different arrays.
+ */
+std::vector<std::vector<Bitboard>> computeLevelRays();
+
+/**
+ * @brief Computed the diagonal rays from first square (exclusive) to second square (inclusive).
+ *
+ * @return Bitboard of the different arrays.
+ */
+std::vector<std::vector<Bitboard>> computeDiagonalRays();
 
 /**
  * @brief Gets the rook index into the precomputed reach index array.
