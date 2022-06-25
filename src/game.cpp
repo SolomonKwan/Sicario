@@ -429,107 +429,76 @@ void Position::getCheckMoves(int& moves_index, MoveSet pos_moves[MOVESET_SIZE]) 
 }
 
 void Position::getQueenCheckedMoves(int& moves_index, MoveSet pos_moves[MOVESET_SIZE]) {
-    // For each queen
-    //      if not pinned
-    //            find rook equivalent blocks and capturing moves
-    //            find bishop equivalent block and capturing moves
+    PieceType queen = turn == WHITE ? W_QUEEN : B_QUEEN;
+    Bitboard pieces = sides[WHITE] | sides[BLACK];
+
+    for (int i = 0; i < piece_index[queen]; i++) {
+        Square queenSquare = piece_list[queen][i];
+        if (!isPinned(queenSquare)) {
+            Bitboard reach = getRookReachBB(rookMasks[queenSquare] & pieces, queenSquare) & check_rays;
+            pos_moves[moves_index++] = &Moves::Blocks::ROOK[queenSquare][getRookBlockIndex(reach, queenSquare)];
+
+            reach = getBishopReachBB(bishopMasks[queenSquare] & pieces, queenSquare) & check_rays;
+            pos_moves[moves_index++] = &Moves::Blocks::BISHOP[queenSquare][getBishopBlockIndex(reach, queenSquare)];
+        }
+    }
 }
 
 void Position::getRookCheckedMoves(int& moves_index, MoveSet pos_moves[MOVESET_SIZE]) {
-    // For rook
-    //      if not pinned
-    //          find block and capturing moves
+    PieceType rook = turn == WHITE ? W_ROOK : B_ROOK;
+    Bitboard pieces = sides[WHITE] | sides[BLACK];
+
+    for (int i = 0; i < piece_index[rook]; i++) {
+        Square rookSquare = piece_list[rook][i];
+        if (!isPinned(rookSquare)) {
+            Bitboard reach = getRookReachBB(rookMasks[rookSquare] & pieces, rookSquare) & check_rays;
+            pos_moves[moves_index++] = &Moves::Blocks::ROOK[rookSquare][getRookBlockIndex(reach, rookSquare)];
+        }
+    }
 }
 
 void Position::getBishopCheckedMoves(int& moves_index, MoveSet pos_moves[MOVESET_SIZE]) {
-    // For bishop
-    //      if not pinned
-    //          find block and capturing moves
+    PieceType bishop = turn == WHITE ? W_BISHOP : B_BISHOP;
+    Bitboard pieces = sides[WHITE] | sides[BLACK];
+
+    for (int i = 0; i < piece_index[bishop]; i++) {
+        Square bishopSquare = piece_list[bishop][i];
+        if (!isPinned(bishopSquare)) {
+            Bitboard reach = getBishopReachBB(bishopMasks[bishopSquare] & pieces, bishopSquare) & check_rays;
+            pos_moves[moves_index++] = &Moves::Blocks::BISHOP[bishopSquare][getBishopBlockIndex(reach, bishopSquare)];
+        }
+    }
 }
 
 void Position::getKnightCheckedMoves(int& moves_index, MoveSet pos_moves[MOVESET_SIZE]) {
-    // For knight
-    //      if not pinned
-    //          find block and capturing moves
+    PieceType knight = turn == WHITE ? W_KNIGHT : B_KNIGHT;
+    Bitboard pieces = sides[WHITE] | sides[BLACK];
+
+    for (int i = 0; i < piece_index[knight]; i++) {
+        Square knightSquare = piece_list[knight][i];
+        if (!isPinned(knightSquare)) {
+            Bitboard reach = knightMasks[knightSquare] & check_rays;
+            pos_moves[moves_index++] = &Moves::KNIGHT[reach][getKnightMovesIndex(reach, knightSquare)];
+        }
+    }
 }
 
 void Position::getPawnCheckedMoves(int& moves_index, MoveSet pos_moves[MOVESET_SIZE]) {
-    // For pawn
-    //      if not pinned
-    //          find block and capturing moves
-}
+    PieceType pawn = turn == WHITE ? W_PAWN : B_PAWN;
+    Bitboard pieces = sides[WHITE] | sides[BLACK];
 
-/**
- * Gets a bitboard of the rays between the bishop (queen) checkers and the king
- * being checked.
- *
- * @param game: A pointer to game struct.
- * @param moves: A pointer to precomputed moves.
- * @param square: The square of the king in check.
- * @param checkers_only: Pointer to bit board of checkers only.
- */
-Bitboard Position::getBishopCheckRays(Square square, Bitboard& checkers_only) {
-    Bitboard result = 0;
-    bool turn = this->turn;
-    Square king_sq = this->piece_list[turn][0];
-    Bitboard king_rays = this->getBishopFamily(king_sq)->reach & ~this->sides[turn];
-    checkers_only |= (this->queens, this->bishops) & this->sides[!turn] & king_rays;
-    PieceType queen = turn ? B_QUEEN : W_QUEEN;
-    PieceType bishop = turn ? B_BISHOP : W_BISHOP;
-
-    for (int i = 0; i < this->piece_index[queen]; i++) {
-        Square piece = this->piece_list[queen][i];
-        if (std::abs(piece % 8 - king_sq % 8) == std::abs(piece / 8 - king_sq / 8)) {
-            result |= (this->getBishopFamily((Square) piece)->reach & ~this->sides[!turn] & king_rays);
+    for (int i = 0; i < piece_index[pawn]; i++) {
+        Square pawnSquare = piece_list[pawn][i];
+        if (!isPinned(pawnSquare)) {
+            Bitboard reach = (pawnMasks[turn][pawnSquare] & files[pawnSquare % 8]) & (check_rays & ~sides[!turn]);
+            reach |= pawnMasks[turn][pawnSquare] & ~files[pawnSquare % 8] & (check_rays & sides[!turn]);
+            pos_moves[moves_index++] = &Moves::PAWN[turn][pawnSquare][getPawnMovesIndex(reach, pawnSquare, turn)];
         }
     }
-
-    for (int i = 0; i < this->piece_index[bishop]; i++) {
-        Square piece = this->piece_list[bishop][i];
-        if (std::abs(piece % 8 - king_sq % 8) == std::abs(piece / 8 - king_sq / 8)) {
-            result |= (this->getBishopFamily((Square) piece)->reach & ~this->sides[!turn] & king_rays);
-        }
-    }
-
-    return result;
 }
 
 Player Position::getTurn() {
     return this->turn;
-}
-
-/**
- * Gets a bitboard of the rays between the rook (queen) checkers and the king
- * being checked.
- * @param game: A pointer to game struct.
- * @param moves: A pointer to precomputed moves.
- * @param square: The square of the king in check.
- * @param checkers: Bitboard of checkers.
- * @return: Check rays of rooks and queens.
- */
-Bitboard Position::getRookCheckRays(Square square, Bitboard& checkers) {
-    Bitboard result = 0;
-    Square king_sq = this->piece_list[this->turn][0];
-    uint64_t king_rays = this->getRookFamily(king_sq)->reach & ~this->sides[this->turn];
-    checkers |= (this->queens, this->rooks) & this->sides[1 - this->turn] & king_rays;
-    PieceType queen = this->turn ? B_QUEEN : W_QUEEN;
-    PieceType rook = this->turn ? B_ROOK : W_ROOK;
-
-    for (int i = 0; i < this->piece_index[queen]; i++) {
-        Square queen_sq = this->piece_list[queen][i];
-        if (queen_sq % 8 == king_sq % 8 || queen_sq / 8 == king_sq / 8) {
-            result |= (this->getRookFamily((Square) queen_sq)->reach & ~this->sides[1 - this->turn] & king_rays);
-        }
-    }
-
-    for (int i = 0; i < this->piece_index[rook]; i++) {
-        Square rook_sq = this->piece_list[rook][i];
-        if (rook_sq % 8 == king_sq % 8 || rook_sq / 8 == king_sq / 8) {
-            result |= (this->getRookFamily((Square) rook_sq)->reach & ~this->sides[1 - this->turn] & king_rays);
-        }
-    }
-
-    return result;
 }
 
 /**
@@ -582,12 +551,12 @@ void Position::initialiseHash() {
 
 void Position::getNormalMoves(int& moves_index, MoveSet pos_moves[MOVESET_SIZE]) {
     this->getKingMoves(moves_index, pos_moves);
-    // this->getQueenMoves(moves_index, pos_moves);
-    // this->getRookMoves(moves_index, pos_moves);
-    // this->getBishopMoves(moves_index, pos_moves);
-    // this->getKnightMoves(moves_index, pos_moves);
-    // this->getPawnMoves(moves_index, pos_moves);
-    // this->getCastlingMoves(moves_index, pos_moves);
+    this->getQueenMoves(moves_index, pos_moves);
+    this->getRookMoves(moves_index, pos_moves);
+    this->getBishopMoves(moves_index, pos_moves);
+    this->getKnightMoves(moves_index, pos_moves);
+    this->getPawnMoves(moves_index, pos_moves);
+    this->getCastlingMoves(moves_index, pos_moves);
 }
 
 void Position::getQueenMoves(int& moves_index, MoveSet pos_moves[MOVESET_SIZE]) {

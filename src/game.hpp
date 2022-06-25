@@ -127,6 +127,36 @@ class Position {
         Bitboard isAttacked(const Square square, const Player player, const bool ignoreKing = false);
 
         /**
+         * @brief Check if a piece located on "square" is pinned.
+         *
+         * @param square The square of the piece to check.
+         * @return True if the piece on "square" is pinned, else false.
+         */
+        inline bool isPinned(const Square square) {
+            return isPinnedByRook(square) || isPinnedByBishop(square);
+        }
+
+        /**
+         * @brief Check if a piece located on "square" is pinned by a rook (or queen in the same manner).
+         *
+         * @param square The square of the piece to check.
+         * @return True if the piece on "square" is pinned, else false.
+         */
+        inline bool isPinnedByRook(const Square square) {
+            return (1ULL << square) & rook_pins;
+        }
+
+        /**
+         * @brief Check if a piece located on "square" is pinned by a bishop (or queen in the same manner).
+         *
+         * @param square The square of the piece to check.
+         * @return True if the piece on "square" is pinned, else false.
+         */
+        inline bool isPinnedByBishop(const Square square) {
+            return (1ULL << square) & bishop_pins;
+        }
+
+        /**
          * @brief Sets the bitboard of checkers.
          */
         void setCheckers();
@@ -285,8 +315,6 @@ class Position {
         // Game logic
         void checkCastlingEnPassantMoves(uint, uint, Move&);
         bool validMove(Move, MoveList&);
-        Bitboard getBishopCheckRays(Square, Bitboard&);
-        Bitboard getRookCheckRays(Square, Bitboard&);
         Bitboard getPawnCheckers(Square, Bitboard&);
         Bitboard getKnightCheckers(Square, Bitboard&);
         const int rookBlockIndex(Bitboard, Square);
