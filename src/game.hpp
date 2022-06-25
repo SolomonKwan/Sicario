@@ -296,6 +296,25 @@ class Position {
         Bitboard getBishopReachBB(Bitboard occupancy, Square square);
 
         /**
+         * @brief Get the diagonal ranged moves for a diagonally pinned piece on "square".
+         *
+         * @param moves_index Current index of the first empty position in the pos_moves array.
+         * @param pos_moves Array that holds pointers to vectors of moves.
+         * @param square The square of the piece of concern.
+         */
+        void getBishopPinMoves(int& moves_index, MoveSet pos_moves[MOVESET_SIZE], Square square);
+
+        /**
+         * @brief Get the horizontal and vertical ranged moves for a horizontally or vertically  pinned piece on
+         * "square".
+         *
+         * @param moves_index Current index of the first empty position in the pos_moves array.
+         * @param pos_moves Array that holds pointers to vectors of moves.
+         * @param square The square of the piece of concern.
+         */
+        void getRookPinMoves(int& moves_index, MoveSet pos_moves[MOVESET_SIZE], Square square);
+
+        /**
          * @brief Zeros out the class variables to make way for parsing a new FEN string.
          */
         void resetPosition();
@@ -315,7 +334,6 @@ class Position {
         // Game logic
         void checkCastlingEnPassantMoves(uint, uint, Move&);
         bool validMove(Move, MoveList&);
-        Bitboard getPawnCheckers(Square, Bitboard&);
         Bitboard getKnightCheckers(Square, Bitboard&);
         const int rookBlockIndex(Bitboard, Square);
         Bitboard isOccupied(const Square);
