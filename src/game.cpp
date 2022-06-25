@@ -1602,9 +1602,16 @@ Position::Position(std::string fen) {
     this->initialiseHash();
 }
 
+std::string darkSquare(std::string str) {
+    return "\033[1;30;44m" + str + " \033[0m";
+}
+
+std::string lightSquare(std::string str) {
+    return "\033[1;30;47m" + str + " \033[0m";
+}
+
 void Position::display() {
-    bool light_mode = true; // TODO implement later.
-    bool unicodeMode = false; // TODO implement later.
+    bool letterMode = false; // TODO implement later.
 
     // Print the pieces
     for (int rank = 7; rank >= 0; rank--) {
@@ -1612,46 +1619,47 @@ void Position::display() {
         rank_string += (rank - 7) + '8';
         rank_string += " ";
         for (int file = 0; file < 8; file++) {
-            int square = 8 * rank + file;
+            Square square = (Square)(8 * rank + file);
             PieceType piece = this->pieces[square];
-            if (piece == W_KING || piece == B_KING) {
-                if (this->sides[WHITE] & (1ULL << square)) {
-                    rank_string += unicodeMode ? "K " : (light_mode ? "\u265A " : "\u2654 ");
-                } else {
-                    rank_string += unicodeMode ? "k " : (light_mode ? "\u2654 " : "\u265A ");
-                }
-            } else if (piece == W_QUEEN || piece == B_QUEEN) {
-                if (this->sides[WHITE] & (1ULL << square)) {
-                    rank_string += unicodeMode ? "Q " : (light_mode ? "\u265B " : "\u2655 ");
-                } else {
-                    rank_string += unicodeMode ? "q " : (light_mode ? "\u2655 " : "\u265B ");
-                }
-            } else if (piece == W_ROOK || piece == B_ROOK) {
-                if (this->sides[WHITE] & (1ULL << square)) {
-                    rank_string += unicodeMode ? "R " : (light_mode ? "\u265C " : "\u2656 ");
-                } else {
-                    rank_string += unicodeMode ? "r " : (light_mode ? "\u2656 " : "\u265C ");
-                }
-            } else if (piece == W_BISHOP || piece == B_BISHOP) {
-                if (this->sides[WHITE] & (1ULL << square)) {
-                    rank_string += unicodeMode ? "B " : (light_mode ? "\u265D " : "\u2657 ");
-                } else {
-                    rank_string += unicodeMode ? "b " : (light_mode ? "\u2657 " : "\u265D ");
-                }
-            } else if (piece == W_KNIGHT || piece == B_KNIGHT) {
-                if (this->sides[WHITE] & (1ULL << square)) {
-                    rank_string += unicodeMode ? "N " : (light_mode ? "\u265E " : "\u2658 ");
-                } else {
-                    rank_string += unicodeMode ? "n " : (light_mode ? "\u2658 " : "\u265E ");
-                }
-            } else if (piece == W_PAWN || piece == B_PAWN) {
-                if (this->sides[WHITE] & (1ULL << square)) {
-                    rank_string += unicodeMode ? "P " : (light_mode ? "\u265F " : "\u2659 ");
-                } else {
-                    rank_string += unicodeMode ? "p " : (light_mode ? "\u2659 " : "\u265F ");
-                }
-            } else {
-                rank_string += "  ";
+            switch (piece) {
+                case W_KING:
+                    rank_string += letterMode ? "K " : isDark(square) ? darkSquare("\u2654") : lightSquare("\u2654");
+                    break;
+                case B_KING:
+                    rank_string += letterMode ? "k " : isDark(square) ? darkSquare("\u265A") : lightSquare("\u265A");
+                    break;
+                case W_QUEEN:
+                    rank_string += letterMode ? "Q " : isDark(square) ? darkSquare("\u2655") : lightSquare("\u2655");
+                    break;
+                case B_QUEEN:
+                    rank_string += letterMode ? "q " : isDark(square) ? darkSquare("\u265B") : lightSquare("\u265B");
+                    break;
+                case W_ROOK:
+                    rank_string += letterMode ? "R " : isDark(square) ? darkSquare("\u2656") : lightSquare("\u2656");
+                    break;
+                case B_ROOK:
+                    rank_string += letterMode ? "r " : isDark(square) ? darkSquare("\u265C") : lightSquare("\u265C");
+                    break;
+                case W_BISHOP:
+                    rank_string += letterMode ? "B " : isDark(square) ? darkSquare("\u2657") : lightSquare("\u2657");
+                    break;
+                case B_BISHOP:
+                    rank_string += letterMode ? "b " : isDark(square) ? darkSquare("\u265D") : lightSquare("\u265D");
+                    break;
+                case W_KNIGHT:
+                    rank_string += letterMode ? "N " : isDark(square) ? darkSquare("\u2658") : lightSquare("\u2658");
+                    break;
+                case B_KNIGHT:
+                    rank_string += letterMode ? "n " : isDark(square) ? darkSquare("\u265E") : lightSquare("\u265E");
+                    break;
+                case W_PAWN:
+                    rank_string += letterMode ? "P " : isDark(square) ? darkSquare("\u2659") : lightSquare("\u2659");
+                    break;
+                case B_PAWN:
+                    rank_string += letterMode ? "p " : isDark(square) ? darkSquare("\u265F") : lightSquare("\u265F");
+                    break;
+                default:
+                    rank_string += isDark(square) ? darkSquare(" ") : lightSquare(" ");
             }
         }
         std::cout << rank_string << '\n';
