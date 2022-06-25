@@ -49,9 +49,17 @@ struct GoParams;
  */
 class Position {
     public:
+        /**
+         * @brief Initialise the Position object. Uses a FEN string of a normal starting position if none is given.
+         */
         Position(std::string = STANDARD_GAME);
-        ExitCode parseFen(std::string);
-        void display() const;
+
+        /**
+         * @brief Parses the given FEN string.
+         *
+         * @param fen The FEN string to parse.
+         */
+        void parseFen(std::string fen);
 
         /**
          * @brief Retrives all legal moves of the current position.
@@ -85,7 +93,7 @@ class Position {
         Bitboard rook_pins;
         Bitboard bishop_pins;
         Bitboard check_rays;
-        Bitboard checkers = 0ULL;
+        Bitboard checkers;
 
         // Piece positions
         int piece_index[12];
@@ -108,11 +116,9 @@ class Position {
         Hash hash;
         int ply;
 
-        // Perft hashing
-        std::unordered_map<Bitboard, uint64_t> perft_hash;
-
         /**
          * @brief Checks if the specified square is attacked by the specified player.
+         *
          * @param square Square to check if attacked by "player".
          * @param player Attacking player to check.
          * @param ignoreKing Ignore the !"player" king when calculating. Used for king check moves.
@@ -259,7 +265,10 @@ class Position {
          */
         Bitboard getBishopReachBB(Bitboard occupancy, Square square);
 
-
+        /**
+         * @brief Zeros out the class variables to make way for parsing a new FEN string.
+         */
+        void resetPosition();
 
 
 
@@ -326,7 +335,6 @@ class Position {
         void showEOG(ExitCode);
         std::string getFEN();
         void saveHistory(Move);
-        void zero();
         void incrementHash(Move);
         void decrementHash(Hash);
 };
