@@ -210,10 +210,10 @@ void Sicario::handleUciNewGame() {
 }
 
 void Sicario::handlePosition(std::vector<std::string>& inputs) {
-    // Insert dummy command at start to use concatFEN
-    // CHECK
-    inputs.insert(inputs.begin(), "set");
-    this->position.parseFen(concatFEN(inputs));
+    // TODO play out moves as well and handle startpos command and unknown commands
+    if (inputs[1] == "fen") {
+        this->position.parseFen(concatFEN(inputs));
+    }
 }
 
 void Sicario::handleGo(std::vector<std::string>& commands) {
