@@ -91,7 +91,7 @@ class Sicario {
         void mcts();
 
         // Perft
-        uint64_t perft(int depth, bool print = false);
+        uint64_t perft(int depth, bool root = false);
 };
 
 #endif

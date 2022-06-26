@@ -14,19 +14,22 @@ ExitCode Sicario::run() {
     return ExitCode::NORMAL_PLY;
 }
 
-uint64_t Sicario::perft(int depth, bool print) {
+uint64_t Sicario::perft(int depth, bool root) {
     uint64_t nodes = 0;
-    if (depth == 1) {
-        return MoveList(position).size();
-    }
+    uint64_t current_node_count = 0;
 
     for (Move move: MoveList(position)) {
-        position.makeMove(move);
-        uint64_t current_node_count = perft(depth - 1);
-        position.undoMove();
-        nodes += current_node_count;
+        if (depth <= 1) {
+            current_node_count = 1;
+            nodes++;
+        } else {
+            position.makeMove(move);
+            current_node_count = depth == 2 ? MoveList(position).size() : perft(depth - 1);
+            position.undoMove();
+            nodes += current_node_count;
+        }
 
-        if (print) {
+        if (root) {
             printMove(move, false);
             std::cout << ": " << current_node_count << '\n';
         }
