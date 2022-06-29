@@ -375,7 +375,6 @@ class Position {
         bool validMove(Move, MoveList&);
         Bitboard getKnightCheckers(Square, Bitboard&);
         const int rookBlockIndex(Bitboard, Square);
-        Bitboard isOccupied(const Square);
         Bitboard getKingAttackers(const Square, const bool) const;
         Bitboard getKingAttackBitBoard() const;
 
@@ -402,7 +401,6 @@ class Position {
         // Move generation
         MovesStruct* getRookFamily(Square);
         MovesStruct* getBishopFamily(Square);
-        Bitboard pawnMoveArgs(Square);
 
         // Normal move generation
         // void horizontalPinEp(int, bool, int, int, int, std::vector<Move>*[MOVESET_SIZE], int&);

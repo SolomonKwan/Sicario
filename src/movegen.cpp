@@ -452,8 +452,6 @@ std::array<std::vector<Bitboard>, 64> computeBishopReaches() {
                 northwestSize});
 
         for (std::array<int, 4> combo : combos) {
-            std::array<int, 4> foo = combo;
-
             Bitboard occ = 0ULL;
             if (combo[0]) occ |= (1ULL << (square + NE * combo[0]));
             if (combo[1]) occ |= (1ULL << (square + SE * combo[1]));
@@ -620,7 +618,7 @@ std::vector<std::array<int, 4>> getEndCombinations(std::array<int, 4> sizes) {
 }
 
 void generateLoneSquares(std::array<int, 4> sizes, std::vector<std::array<int, 4>>& res) {
-    for (int i = 0; i < sizes.size(); i++) {
+    for (uint i = 0; i < sizes.size(); i++) {
         for (int j = 0; j <= sizes[i]; j++) {
             std::array<int, 4> combo = {0, 0, 0, 0};
             combo[i] = j;
@@ -635,7 +633,7 @@ void generatePairSquares(std::array<int, 4> sizes, std::array<int, 4>& curr, std
     // Find limiting ray length and indices of pairs to increment.
     int smallerSize;
     int first = -1, second = -1;
-    for (int i = 0; i < sizes.size(); i++) {
+    for (uint i = 0; i < sizes.size(); i++) {
         if (first == -1 && sizes[i]) {
             smallerSize = sizes[i];
             first = i;

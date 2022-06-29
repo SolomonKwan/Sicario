@@ -460,8 +460,6 @@ void Position::getBishopCheckedMoves(int& moves_index, MoveSet pos_moves[MOVESET
 
 void Position::getKnightCheckedMoves(int& moves_index, MoveSet pos_moves[MOVESET_SIZE]) {
     PieceType knight = turn == WHITE ? W_KNIGHT : B_KNIGHT;
-    Bitboard pieces = sides[WHITE] | sides[BLACK];
-
     for (int i = 0; i < piece_index[knight]; i++) {
         Square knightSquare = piece_list[knight][i];
         if (!isPinned(knightSquare)) {
@@ -475,8 +473,6 @@ void Position::getKnightCheckedMoves(int& moves_index, MoveSet pos_moves[MOVESET
 
 void Position::getPawnCheckedMoves(int& moves_index, MoveSet pos_moves[MOVESET_SIZE]) {
     PieceType pawn = turn == WHITE ? W_PAWN : B_PAWN;
-    Bitboard pieces = sides[WHITE] | sides[BLACK];
-
     for (int i = 0; i < piece_index[pawn]; i++) {
         Square pawnSquare = piece_list[pawn][i];
         if (!isPinned(pawnSquare)) {
@@ -590,8 +586,6 @@ void Position::getBishopMoves(int& moves_index, MoveSet pos_moves[MOVESET_SIZE])
 
 void Position::getKnightMoves(int& moves_index, MoveSet pos_moves[MOVESET_SIZE]) {
     PieceType knight = turn == WHITE ? W_KNIGHT : B_KNIGHT;
-    Bitboard pieces = sides[WHITE] | sides[BLACK];
-
     for (int i = 0; i < piece_index[knight]; i++) {
         Square knightSquare = piece_list[knight][i];
         if (isPinnedByBishop(knightSquare) || isPinnedByRook(knightSquare)) {
@@ -653,25 +647,6 @@ void Position::getBishopPinMoves(int& moves_index, MoveSet pos_moves[MOVESET_SIZ
 void Position::getRookPinMoves(int& moves_index, MoveSet pos_moves[MOVESET_SIZE], Square square) {
     if (rook_pins == 0) return;
     pos_moves[moves_index++] = &Moves::ROOK[square][getRookMovesIndex(rook_pins & ~(1ULL << square), square)];
-}
-
-/**
- * Get the arguments for the pawn index function for pawns.
- * @param game: Pointer to game struct.
- * @param square: Square of pawn.
- */
-uint64_t Position::pawnMoveArgs(Square square) {
-    bool turn = this->turn;
-    return (this->sides[!turn], (this->sides[turn] & Masks::FILE[square % 8]));
-}
-
-/**
- * Check if sq is occupied by a piece.
- * @param sq: Square to check.
- * @return: True if occupied, else false.
- */
-Bitboard Position::isOccupied(const Square sq) {
-    return ((this->sides[WHITE], this->sides[BLACK]) & (sq));
 }
 
 void Position::getCastlingMoves(int& moves_index, MoveSet pos_moves[MOVESET_SIZE]) {
@@ -761,21 +736,21 @@ Bitboard Position::isAttacked(const Square square, const Player player, const bo
     Bitboard pieces = (sides[WHITE] | sides[BLACK]) ^ (ignoreKing ? 1ULL << piece_list[!player][0] : 0ULL);
 
     // Check if square is attacked by "player" king.
-    Bitboard king = Masks::KING[square] & this->sides[turn] & this->kings;
+    Bitboard kingBB = Masks::KING[square] & this->sides[turn] & this->kings;
 
     // Check if square is attacked by "player" queen or rook horizontally or vertically.
-    Bitboard rooks = getRookReachBB(Masks::ROOK[square] & pieces, square) & sides[player] & (queens | rooks);
+    Bitboard rooksBB = getRookReachBB(Masks::ROOK[square] & pieces, square) & sides[player] & (queens | rooks);
 
     // Check if square is attacked by "player" queen or bishop diagonally.
-    Bitboard bishops = getBishopReachBB(Masks::BISHOP[square] & pieces, square) & sides[player] & (queens | bishops);
+    Bitboard bishopsBB = getBishopReachBB(Masks::BISHOP[square] & pieces, square) & sides[player] & (queens | bishops);
 
     // Check if square is attacked by "player" knight.
-    Bitboard knights = Masks::KNIGHT[square] & sides[player] & knights;
+    Bitboard knightsBB = Masks::KNIGHT[square] & sides[player] & knights;
 
     // Check if square is attacked by "player" pawn.
-    Bitboard pawns = Masks::PAWN[!player][square] & ~Masks::FILE[square % 8] & sides[player] & pawns;
+    Bitboard pawnsBB = Masks::PAWN[!player][square] & ~Masks::FILE[square % 8] & sides[player] & pawns;
 
-    return king | rooks | bishops | knights | pawns;
+    return kingBB | rooksBB | bishopsBB | knightsBB | pawnsBB;
 }
 
 /**
@@ -942,9 +917,9 @@ void Position::makeKingMoves(Move move) {
 
     // Remove castling rights
     if (this->turn) {
-        this->castling &= ~(1 << WKSC, 1 << WQSC);
+        this->castling &= ~(1 << WKSC | 1 << WQSC);
     } else {
-        this->castling &= ~(1 << BKSC, 1 << BQSC);
+        this->castling &= ~(1 << BKSC | 1 << BQSC);
     }
 
     if (move_type == CASTLING) {
