@@ -27,8 +27,8 @@ namespace Moves::Blocks {
  * Vector of indices for rook and bishop indexing.
  */
 namespace Indices {
-    const std::array<std::vector<int>, 64> ROOK = computeRookReachIndices();
-    const std::array<std::vector<int>, 64> BISHOP = computeBishopReachIndices();
+    const std::array<std::vector<uint>, 64> ROOK = computeRookReachIndices();
+    const std::array<std::vector<uint>, 64> BISHOP = computeBishopReachIndices();
 }
 
 namespace Reach {
@@ -44,8 +44,8 @@ namespace KingReach {
  * Rays bitboards from start (exlusive) to end (inclusive).
  */
 namespace Rays {
-    const std::vector<std::vector<Bitboard>> LEVEL = computeLevelRays();
-    const std::vector<std::vector<Bitboard>> DIAGONAL = computeDiagonalRays();
+    const std::array<std::vector<Bitboard>, 64> LEVEL = computeLevelRays();
+    const std::array<std::vector<Bitboard>, 64> DIAGONAL = computeDiagonalRays();
 }
 
 /**
@@ -322,16 +322,6 @@ void Position::resetPosition() {
     hashes.clear(); // TODO reset this to whatever the default hash size is.
     hash = 0ULL;
     ply = 0;
-}
-
-/**
- * Computes the index (in this case the key) into the ROOK_BLOCK moves map.
- * @param position: The uint64_t with possible destination squares from the param square set.
- * @param square: The square from which the piece moves.
- * @return: Index into the ROOK_BLOCK array.
- */
-const int Position::rookBlockIndex(uint64_t position, Square square) {
-    return position & this->getRookFamily(square)->reach;
 }
 
 /**
@@ -670,28 +660,6 @@ Bitboard Position::getKnightCheckers(Square square, Bitboard& checkers_only) {
 
 bool Position::inDoubleCheck() {
     return (checkers & (checkers - 1)) != 0;
-}
-
-/**
- * Finds and returns a pointer to a rook move family.
- * @param square: The square on which the rook is on.
- * @return Pointer to moves struct.
- */
-MovesStruct* Position::getRookFamily(Square square) {
-    // return &Moves::ROOK[Indices::ROOK[square][rookIndex(this->sides[BLACK], this->sides[WHITE], square)]];
-    return nullptr;
-}
-
-/**
- * Finds and returns a pointer to a bishop move family.
- *
- * @param game: A pointer to a game struct representing the state of the game.
- * @param moves: A struct of the precomputed moves.
- * @param square: The square on which the bishop is on.
- */
-MovesStruct* Position::getBishopFamily(Square square) {
-    // return &Moves::BISHOP[Indices::BISHOP[square][bishopIndex(this->sides[BLACK], this->sides[WHITE], square)]];
-    return nullptr;
 }
 
 /**

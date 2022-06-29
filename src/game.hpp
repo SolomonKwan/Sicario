@@ -374,7 +374,6 @@ class Position {
         void checkCastlingEnPassantMoves(uint, uint, Move&);
         bool validMove(Move, MoveList&);
         Bitboard getKnightCheckers(Square, Bitboard&);
-        const int rookBlockIndex(Bitboard, Square);
         Bitboard getKingAttackers(const Square, const bool) const;
         Bitboard getKingAttackBitBoard() const;
 
@@ -397,10 +396,6 @@ class Position {
         void undoCastling();
         void undoPromotion();
         void undoEnPassant();
-
-        // Move generation
-        MovesStruct* getRookFamily(Square);
-        MovesStruct* getBishopFamily(Square);
 
         // Normal move generation
         // void horizontalPinEp(int, bool, int, int, int, std::vector<Move>*[MOVESET_SIZE], int&);

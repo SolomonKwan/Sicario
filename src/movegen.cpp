@@ -302,10 +302,10 @@ std::array<std::vector<std::vector<Move>>, 64> computeBishopBlockMoves() {
     return bishopBlockMoves;
 }
 
-std::array<std::vector<int>, 64> computeRookReachIndices() {
-    std::array<std::vector<int>, 64> rookIndices;
+std::array<std::vector<uint>, 64> computeRookReachIndices() {
+    std::array<std::vector<uint>, 64> rookIndices;
     for (int square = A1; square <= H8; square++) {
-        std::vector<int>& indices = rookIndices[square];
+        std::vector<uint>& indices = rookIndices[square];
         int northSize = std::max(6 - (square / 8), 0);
         int southSize = std::max(square / 8 - 1, 0);
         int eastSize = std::max(6 - (square % 8), 0);
@@ -347,10 +347,10 @@ std::array<std::vector<int>, 64> computeRookReachIndices() {
     return rookIndices;
 }
 
-std::array<std::vector<int>, 64> computeBishopReachIndices() {
-    std::array<std::vector<int>, 64> bishopIndices;
+std::array<std::vector<uint>, 64> computeBishopReachIndices() {
+    std::array<std::vector<uint>, 64> bishopIndices;
     for (int square = A1; square <= H8; square++) {
-        std::vector<int>& indices = bishopIndices[square];
+        std::vector<uint>& indices = bishopIndices[square];
         int northeastSize = std::max(std::min(6 - square / 8, 6 - square % 8), 0);
         int southeastSize = std::max(std::min(square / 8 - 1, 6 - square % 8), 0);
         int southwestSize = std::max(std::min(square / 8 - 1, square % 8 - 1), 0);
@@ -393,7 +393,7 @@ std::array<std::vector<int>, 64> computeBishopReachIndices() {
 }
 
 std::array<std::vector<Bitboard>, 64> computeRookReaches() {
-    const std::array<std::vector<int>, 64> ROOK = computeRookReachIndices();
+    const std::array<std::vector<uint>, 64> ROOK = computeRookReachIndices();
     std::array<std::vector<Bitboard>, 64> reaches;
     for (int square = A1; square <= H8; square++) {
         std::vector<Bitboard>& reachSet = reaches[square];
@@ -439,7 +439,7 @@ std::array<std::vector<Bitboard>, 64> computeRookReaches() {
 }
 
 std::array<std::vector<Bitboard>, 64> computeBishopReaches() {
-    const std::array<std::vector<int>, 64> BISHOP = computeBishopReachIndices();
+    const std::array<std::vector<uint>, 64> BISHOP = computeBishopReachIndices();
     std::array<std::vector<Bitboard>, 64> reaches;
     for (int square = A1; square <= H8; square++) {
         std::vector<Bitboard>& reachSet = reaches[square];
@@ -523,8 +523,8 @@ std::array<std::vector<std::vector<Square>>, 64> computeKingReachSquares() {
     return kingReaches;
 }
 
-std::vector<std::vector<Bitboard>> computeLevelRays() {
-    std::vector<std::vector<Bitboard>> rays;
+std::array<std::vector<Bitboard>, 64> computeLevelRays() {
+    std::array<std::vector<Bitboard>, 64> rays;
     for (int king = A1; king <= H8; king++) {
         std::vector<Bitboard> rays2;
         for (int piece = A1; piece <= H8; piece++) {
@@ -540,13 +540,13 @@ std::vector<std::vector<Bitboard>> computeLevelRays() {
             }
             rays2.push_back(ray);
         }
-        rays.push_back(rays2);
+        rays[king] = rays2;
     }
     return rays;
 }
 
-std::vector<std::vector<Bitboard>> computeDiagonalRays() {
-    std::vector<std::vector<Bitboard>> rays;
+std::array<std::vector<Bitboard>, 64> computeDiagonalRays() {
+    std::array<std::vector<Bitboard>, 64> rays;
     for (int king = A1; king <= H8; king++) {
         std::vector<Bitboard> rays2;
         for (int piece = A1; piece <= H8; piece++) {
@@ -559,7 +559,7 @@ std::vector<std::vector<Bitboard>> computeDiagonalRays() {
             }
             rays2.push_back(ray);
         }
-        rays.push_back(rays2);
+        rays[king] = rays2;
     }
     return rays;
 }

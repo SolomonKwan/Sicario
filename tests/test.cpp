@@ -55,8 +55,8 @@ int TOTAL_TEST_COUNT = 0;
 int TESTS_PASSED = 0;
 int TESTS_FAILED = 0;
 
-const std::array<std::vector<int>, 64> ROOK_REACH_INDICES = computeRookReachIndices();
-const std::array<std::vector<int>, 64> BISHOP_REACH_INDICES = computeBishopReachIndices();
+const std::array<std::vector<uint>, 64> ROOK_REACH_INDICES = computeRookReachIndices();
+const std::array<std::vector<uint>, 64> BISHOP_REACH_INDICES = computeBishopReachIndices();
 
 template <typename T>
 void assertEquals(TestType testType, T expected, T actual, int testNum) {
