@@ -162,7 +162,7 @@ std::vector<std::vector<Bitboard>> computeDiagonalRays();
  * @return Index into the precomputed rook reach array.
  */
 inline int getRookReachIndex(Bitboard occupancy, Square square) {
-    return (occupancy * rookReachMagicNumbers[square]) >> rookReachShifts[square];
+    return (occupancy * MagicNums::Reach::ROOK[square]) >> Shifts::Reach::ROOK[square];
 }
 
 /**
@@ -172,7 +172,7 @@ inline int getRookReachIndex(Bitboard occupancy, Square square) {
  * @return Index into the precomputed rook moves array.
  */
 inline int getRookMovesIndex(Bitboard reach, Square square) {
-    return (reach * rookMovesMagicNumbers[square]) >> rookMovesShifts[square];
+    return (reach * MagicNums::Moves::ROOK[square]) >> Shifts::Moves::ROOK[square];
 }
 
 /**
@@ -182,7 +182,7 @@ inline int getRookMovesIndex(Bitboard reach, Square square) {
  * @return Index into the precomputed bishop reach array.
  */
 inline int getBishopReachIndex(Bitboard occupancy, Square square) {
-    return (occupancy * bishopReachMagicNumbers[square]) >> bishopReachShifts[square];
+    return (occupancy * MagicNums::Reach::BISHOP[square]) >> Shifts::Reach::BISHOP[square];
 }
 
 /**
@@ -192,7 +192,7 @@ inline int getBishopReachIndex(Bitboard occupancy, Square square) {
  * @return Index into the precomputed bishop moves array.
  */
 inline int getBishopMovesIndex(Bitboard reach, Square square) {
-    return (reach * bishopMovesMagicNumbers[square]) >> bishopMovesShifts[square];
+    return (reach * MagicNums::Moves::BISHOP[square]) >> Shifts::Moves::BISHOP[square];
 }
 
 /**
@@ -202,7 +202,7 @@ inline int getBishopMovesIndex(Bitboard reach, Square square) {
  * @return Index into the precomputed knight moves array.
  */
 inline int getKnightMovesIndex(Bitboard reach, Square square) {
-    return (reach * knightMagicNumbers[square]) >> knightShifts[square];
+    return (reach * MagicNums::KNIGHT[square]) >> Shifts::KNIGHT[square];
 }
 
 /**
@@ -212,7 +212,7 @@ inline int getKnightMovesIndex(Bitboard reach, Square square) {
  * @return Index into the precomputed king moves array.
  */
 inline int getKingMovesIndex(Bitboard reach, Square square) {
-    return (reach * kingMagicNumbers[square]) >> kingShifts[square];
+    return (reach * MagicNums::KING[square]) >> Shifts::KING[square];
 }
 
 /**
@@ -223,15 +223,15 @@ inline int getKingMovesIndex(Bitboard reach, Square square) {
  * @return Index into the precomputed pawn moves array.
  */
 inline int getPawnMovesIndex(Bitboard reach, Square square, Player player) {
-    return (reach * pawnMagicNumbers[player][square]) >> pawnShifts[player][square];
+    return (reach * MagicNums::PAWN[player][square]) >> Shifts::PAWN[player][square];
 }
 
 inline int getRookBlockIndex(Bitboard reach, Square square) {
-    return (reach * rookBlockMagicNumbers[square]) >> rookBlockShifts[square];
+    return (reach * MagicNums::Block::ROOK[square]) >> Shifts::Block::ROOK[square];
 }
 
 inline int getBishopBlockIndex(Bitboard reach, Square square) {
-    return (reach * bishopBlockMagicNumbers[square]) >> bishopBlockShifts[square];
+    return (reach * MagicNums::Block::BISHOP[square]) >> Shifts::Block::BISHOP[square];
 }
 
 /**

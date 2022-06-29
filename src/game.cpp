@@ -385,7 +385,7 @@ Bitboard Position::getKingAttackBitBoard() const {
 
 void Position::getKingMoves(int& moves_index, MoveSet pos_moves[MOVESET_SIZE]) {
     Square kingSquare = piece_list[turn][0];
-    Bitboard reachBB = kingMasks[kingSquare] & ~sides[turn];
+    Bitboard reachBB = Masks::KING[kingSquare] & ~sides[turn];
 
     if (reachBB == 0ULL) return;
 
@@ -415,12 +415,12 @@ void Position::getQueenCheckedMoves(int& moves_index, MoveSet pos_moves[MOVESET_
     for (int i = 0; i < piece_index[queen]; i++) {
         Square queenSquare = piece_list[queen][i];
         if (!isPinned(queenSquare)) {
-            Bitboard reach = getRookReachBB(rookMasks[queenSquare] & pieces, queenSquare) & check_rays;
+            Bitboard reach = getRookReachBB(Masks::ROOK[queenSquare] & pieces, queenSquare) & check_rays;
             if (reach != 0) {
                 pos_moves[moves_index++] = &Moves::Blocks::ROOK[queenSquare][getRookBlockIndex(reach, queenSquare)];
             }
 
-            reach = getBishopReachBB(bishopMasks[queenSquare] & pieces, queenSquare) & check_rays;
+            reach = getBishopReachBB(Masks::BISHOP[queenSquare] & pieces, queenSquare) & check_rays;
             if (reach != 0) {
                 pos_moves[moves_index++] = &Moves::Blocks::BISHOP[queenSquare][getBishopBlockIndex(reach, queenSquare)];
             }
@@ -435,7 +435,7 @@ void Position::getRookCheckedMoves(int& moves_index, MoveSet pos_moves[MOVESET_S
     for (int i = 0; i < piece_index[rook]; i++) {
         Square rookSquare = piece_list[rook][i];
         if (!isPinned(rookSquare)) {
-            Bitboard reach = getRookReachBB(rookMasks[rookSquare] & pieces, rookSquare) & check_rays;
+            Bitboard reach = getRookReachBB(Masks::ROOK[rookSquare] & pieces, rookSquare) & check_rays;
             if (reach != 0) {
                 pos_moves[moves_index++] = &Moves::Blocks::ROOK[rookSquare][getRookBlockIndex(reach, rookSquare)];
             }
@@ -450,7 +450,7 @@ void Position::getBishopCheckedMoves(int& moves_index, MoveSet pos_moves[MOVESET
     for (int i = 0; i < piece_index[bishop]; i++) {
         Square bishopSquare = piece_list[bishop][i];
         if (!isPinned(bishopSquare)) {
-            Bitboard reach = getBishopReachBB(bishopMasks[bishopSquare] & pieces, bishopSquare) & check_rays;
+            Bitboard reach = getBishopReachBB(Masks::BISHOP[bishopSquare] & pieces, bishopSquare) & check_rays;
             if (reach != 0) {
                 pos_moves[moves_index++] = &Moves::Blocks::BISHOP[bishopSquare][getBishopBlockIndex(reach, bishopSquare)];
             }
@@ -465,7 +465,7 @@ void Position::getKnightCheckedMoves(int& moves_index, MoveSet pos_moves[MOVESET
     for (int i = 0; i < piece_index[knight]; i++) {
         Square knightSquare = piece_list[knight][i];
         if (!isPinned(knightSquare)) {
-            Bitboard reach = knightMasks[knightSquare] & check_rays;
+            Bitboard reach = Masks::KNIGHT[knightSquare] & check_rays;
             if (reach != 0) {
                 pos_moves[moves_index++] = &Moves::KNIGHT[reach][getKnightMovesIndex(reach, knightSquare)];
             }
@@ -481,8 +481,8 @@ void Position::getPawnCheckedMoves(int& moves_index, MoveSet pos_moves[MOVESET_S
         Square pawnSquare = piece_list[pawn][i];
         if (!isPinned(pawnSquare)) {
             // TODO Need to check that a pawn doesn't jump over a piece.
-            Bitboard reach = (pawnMasks[turn][pawnSquare] & files[pawnSquare % 8]) & (check_rays & ~sides[!turn]);
-            reach |= pawnMasks[turn][pawnSquare] & ~files[pawnSquare % 8] & (check_rays & sides[!turn]);
+            Bitboard reach = (Masks::PAWN[turn][pawnSquare] & Masks::FILE[pawnSquare % 8]) & (check_rays & ~sides[!turn]);
+            reach |= Masks::PAWN[turn][pawnSquare] & ~Masks::FILE[pawnSquare % 8] & (check_rays & sides[!turn]);
             if (reach != 0) {
                 pos_moves[moves_index++] = &Moves::PAWN[turn][pawnSquare][getPawnMovesIndex(reach, pawnSquare, turn)];
             }
@@ -537,12 +537,12 @@ void Position::getQueenMoves(int& moves_index, MoveSet pos_moves[MOVESET_SIZE]) 
         } else if (isPinnedByRook(queenSquare)) {
             getRookPinMoves(moves_index, pos_moves, queenSquare);
         } else {
-            Bitboard reach = getBishopReachBB(bishopMasks[queenSquare] & pieces, queenSquare) & ~sides[turn];
+            Bitboard reach = getBishopReachBB(Masks::BISHOP[queenSquare] & pieces, queenSquare) & ~sides[turn];
             if (reach != 0) {
                 pos_moves[moves_index++] = &Moves::BISHOP[queenSquare][getBishopMovesIndex(reach, queenSquare)];
             }
 
-            reach = getRookReachBB(rookMasks[queenSquare] & pieces, queenSquare) & ~sides[turn];
+            reach = getRookReachBB(Masks::ROOK[queenSquare] & pieces, queenSquare) & ~sides[turn];
             if (reach != 0) {
                 pos_moves[moves_index++] = &Moves::ROOK[queenSquare][getRookMovesIndex(reach, queenSquare)];
             }
@@ -561,7 +561,7 @@ void Position::getRookMoves(int& moves_index, MoveSet pos_moves[MOVESET_SIZE]) {
         } else if (isPinnedByRook(rookSquare)) {
             getRookPinMoves(moves_index, pos_moves, rookSquare);
         } else {
-            Bitboard reach = getRookReachBB(rookMasks[rookSquare] & pieces, rookSquare) & ~sides[turn];
+            Bitboard reach = getRookReachBB(Masks::ROOK[rookSquare] & pieces, rookSquare) & ~sides[turn];
             if (reach != 0) {
                 pos_moves[moves_index++] = &Moves::ROOK[rookSquare][getRookMovesIndex(reach, rookSquare)];
             }
@@ -580,7 +580,7 @@ void Position::getBishopMoves(int& moves_index, MoveSet pos_moves[MOVESET_SIZE])
         } else if (isPinnedByRook(bishopSquare)) {
             continue;
         } else {
-            Bitboard reach = getBishopReachBB(bishopMasks[bishopSquare] & pieces, bishopSquare) & ~sides[turn];
+            Bitboard reach = getBishopReachBB(Masks::BISHOP[bishopSquare] & pieces, bishopSquare) & ~sides[turn];
             if (reach != 0) {
                 pos_moves[moves_index++] = &Moves::BISHOP[bishopSquare][getBishopMovesIndex(reach, bishopSquare)];
             }
@@ -597,7 +597,7 @@ void Position::getKnightMoves(int& moves_index, MoveSet pos_moves[MOVESET_SIZE])
         if (isPinnedByBishop(knightSquare) || isPinnedByRook(knightSquare)) {
             continue;
         } else {
-            Bitboard reach = knightMasks[knightSquare] & ~sides[turn];
+            Bitboard reach = Masks::KNIGHT[knightSquare] & ~sides[turn];
             if (reach != 0) {
                 pos_moves[moves_index++] = &Moves::KNIGHT[knightSquare][getKnightMovesIndex(reach, knightSquare)];
             }
@@ -614,7 +614,7 @@ void Position::getPawnMoves(int& moves_index, MoveSet pos_moves[MOVESET_SIZE]) {
     for (int i = 0; i < piece_index[pawn]; i++) {
         Square pawnSquare = piece_list[pawn][i];
         if (isPinnedByBishop(pawnSquare)) {
-            Bitboard reach = (pawnMasks[turn][pawnSquare] & ~files[pawnSquare % 8]);
+            Bitboard reach = (Masks::PAWN[turn][pawnSquare] & ~Masks::FILE[pawnSquare % 8]);
             reach &= bishop_pins & (sides[!turn] & (queens | bishops));
             if (reach != 0) {
                 pos_moves[moves_index++] = &Moves::PAWN[turn][pawnSquare][getPawnMovesIndex(reach, pawnSquare, turn)];
@@ -622,7 +622,7 @@ void Position::getPawnMoves(int& moves_index, MoveSet pos_moves[MOVESET_SIZE]) {
         } else if (isPinnedByRook(pawnSquare)) {
             continue;
         } else {
-            Bitboard reach = pawnMasks[turn][pawnSquare] & ~files[pawnSquare % 8] & sides[!turn];
+            Bitboard reach = Masks::PAWN[turn][pawnSquare] & ~Masks::FILE[pawnSquare % 8] & sides[!turn];
             if (!(1ULL << (pawnSquare + advance) & pieces)) {
                 reach |= 1ULL << (pawnSquare + advance);
                 if (pawnSquare / 8 == startRank && !(1ULL << (pawnSquare + advance + advance) & pieces)) {
@@ -662,7 +662,7 @@ void Position::getRookPinMoves(int& moves_index, MoveSet pos_moves[MOVESET_SIZE]
  */
 uint64_t Position::pawnMoveArgs(Square square) {
     bool turn = this->turn;
-    return (this->sides[!turn], (this->sides[turn] & files[square % 8]));
+    return (this->sides[!turn], (this->sides[turn] & Masks::FILE[square % 8]));
 }
 
 /**
@@ -761,19 +761,19 @@ Bitboard Position::isAttacked(const Square square, const Player player, const bo
     Bitboard pieces = (sides[WHITE] | sides[BLACK]) ^ (ignoreKing ? 1ULL << piece_list[!player][0] : 0ULL);
 
     // Check if square is attacked by "player" king.
-    Bitboard king = kingMasks[square] & this->sides[turn] & this->kings;
+    Bitboard king = Masks::KING[square] & this->sides[turn] & this->kings;
 
     // Check if square is attacked by "player" queen or rook horizontally or vertically.
-    Bitboard rooks = getRookReachBB(rookMasks[square] & pieces, square) & sides[player] & (queens | rooks);
+    Bitboard rooks = getRookReachBB(Masks::ROOK[square] & pieces, square) & sides[player] & (queens | rooks);
 
     // Check if square is attacked by "player" queen or bishop diagonally.
-    Bitboard bishops = getBishopReachBB(bishopMasks[square] & pieces, square) & sides[player] & (queens | bishops);
+    Bitboard bishops = getBishopReachBB(Masks::BISHOP[square] & pieces, square) & sides[player] & (queens | bishops);
 
     // Check if square is attacked by "player" knight.
-    Bitboard knights = knightMasks[square] & sides[player] & knights;
+    Bitboard knights = Masks::KNIGHT[square] & sides[player] & knights;
 
     // Check if square is attacked by "player" pawn.
-    Bitboard pawns = pawnMasks[!player][square] & ~files[square % 8] & sides[player] & pawns;
+    Bitboard pawns = Masks::PAWN[!player][square] & ~Masks::FILE[square % 8] & sides[player] & pawns;
 
     return king | rooks | bishops | knights | pawns;
 }

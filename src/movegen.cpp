@@ -148,7 +148,7 @@ std::array<std::vector<std::vector<Move>>, 64> computeRookMoves() {
         int eastSize = std::max(7 - (square % 8), 0);
         int westSize = std::max(square % 8, 0);
         std::vector<std::vector<Move>>& movesSet = rookMoves[square];
-        movesSet.resize((int)std::pow(2, 64 - rookMovesShifts[square]));
+        movesSet.resize((int)std::pow(2, 64 - Shifts::Moves::ROOK[square]));
 
         for (std::array<int, 4> selection : getEndCombinations({northSize, eastSize, southSize, westSize})) {
             uint64_t reach = 0ULL;
@@ -189,7 +189,7 @@ std::array<std::vector<std::vector<Move>>, 64> computeBishopMoves() {
         int southWestSize = std::max(std::min(square / 8, square % 8), 0);
         int northWestSize = std::max(std::min(7 - square / 8, square % 8), 0);
         std::vector<std::vector<Move>>& movesSet = bishopMoves[square];
-        movesSet.resize((int)std::pow(2, 64 - bishopMovesShifts[square]));
+        movesSet.resize((int)std::pow(2, 64 - Shifts::Moves::BISHOP[square]));
 
         for (std::array<int, 4> selection : getEndCombinations({northEastSize, southEastSize, southWestSize,
                 northWestSize})) {
@@ -231,7 +231,7 @@ std::array<std::vector<std::vector<Move>>, 64> computeRookBlockMoves() {
         int eastSize = std::max(7 - (square % 8), 0);
         int westSize = std::max(square % 8, 0);
         std::vector<std::vector<Move>>& movesSet = rookBlockMoves[square];
-        movesSet.resize((int)std::pow(2, 64 - rookBlockShifts[square]));
+        movesSet.resize((int)std::pow(2, 64 - Shifts::Block::ROOK[square]));
 
         for (std::array<int, 4> selection : getEndBlockSquares({northSize, eastSize, southSize, westSize})) {
             std::vector<Move> moves;
@@ -270,7 +270,7 @@ std::array<std::vector<std::vector<Move>>, 64> computeBishopBlockMoves() {
         int southWestSize = std::max(std::min(square / 8, square % 8), 0);
         int northWestSize = std::max(std::min(7 - square / 8, square % 8), 0);
         std::vector<std::vector<Move>>& movesSet = bishopBlockMoves[square];
-        movesSet.resize((int)std::pow(2, 64 - bishopBlockShifts[square]));
+        movesSet.resize((int)std::pow(2, 64 - Shifts::Block::BISHOP[square]));
 
         for (std::array<int, 4> selection : getEndBlockSquares({northEastSize, southEastSize, southWestSize,
                 northWestSize})) {
@@ -335,7 +335,7 @@ std::array<std::vector<int>, 64> computeRookReachIndices() {
                 if (!westBlock && ((j >> shift) & 1UL)) westBlock = k + 1;
             }
 
-            uint16_t magicIndex = ((occ * rookReachMagicNumbers[square]) >> rookReachShifts[square]);
+            uint16_t magicIndex = ((occ * MagicNums::Reach::ROOK[square]) >> Shifts::Reach::ROOK[square]);
             int mappedIndex = getIndex(
                 {northBlock, eastBlock, southBlock, westBlock},
                 {northSize ? northSize + 1 : 0, eastSize ? eastSize + 1 : 0, southSize ? southSize + 1 : 0,
@@ -380,7 +380,7 @@ std::array<std::vector<int>, 64> computeBishopReachIndices() {
                 if (!northwestBlock && ((j >> shift) & 1UL)) northwestBlock = k + 1;
             }
 
-            uint16_t magicIndex = ((occ * bishopReachMagicNumbers[square]) >> bishopReachShifts[square]);
+            uint16_t magicIndex = ((occ * MagicNums::Reach::BISHOP[square]) >> Shifts::Reach::BISHOP[square]);
             int mappedIndex = getIndex(
                 {northeastBlock, southeastBlock, southwestBlock, northwestBlock},
                 {northeastSize ? northeastSize + 1 : 0, southeastSize ? southeastSize + 1 : 0,
