@@ -294,6 +294,7 @@ class Position {
 
         /**
          * @brief Retrives and adds the vector of legal castling moves of the side to move to the pos_moves array.
+         * Assumes that the king is not in check.
          *
          * @param moves_index Current index of the first empty position in the pos_moves array.
          * @param pos_moves Array that holds pointers to vectors of moves.
@@ -344,6 +345,14 @@ class Position {
          * @param square The square of the piece of concern.
          */
         void getRookPinMoves(int& moves_index, MoveSet pos_moves[MOVESET_SIZE], Square square);
+
+        /**
+         * @brief Checks if the given square is occupied.
+         *
+         * @param square The square to check.
+         * @return True if the square is occupied, else false.
+         */
+        Bitboard isOccupied(const Square square);
 
         /**
          * @brief Zeros out the class variables to make way for parsing a new FEN string.

@@ -354,6 +354,12 @@ void Sicario::handleDisplay() {
 
 void Sicario::handleMoves() {
     MoveList moves = MoveList(position);
+
+    std::cout << moves.moves_index << '\n';
+    for (int i = 0; i < moves.moves_index; i++) {
+        std::cout << moves.moveSets[i]->size() << '\n';
+    }
+
     std::cout << "There are " << moves.size() << " moves" << '\n';
     for (Move move : moves) {
         printMove(move, true);

@@ -223,6 +223,15 @@ std::array<std::vector<std::vector<Move>>, 64> computeBishopMoves() {
     return bishopMoves;
 }
 
+std::array<std::vector<Move>, 4> computeCastlingMoves() {
+    std::array<std::vector<Move>, 4> moves;
+    moves[WKSC] = {E1 | G1 << 6 | CASTLING};
+    moves[WQSC] = {E1 | C1 << 6 | CASTLING};
+    moves[BKSC] = {E8 | G8 << 6 | CASTLING};
+    moves[BQSC] = {E8 | C8 << 6 | CASTLING};
+    return moves;
+}
+
 std::array<std::vector<std::vector<Move>>, 64> computeRookBlockMoves() {
     std::array<std::vector<std::vector<Move>>, 64> rookBlockMoves;
     for (int square = A1; square <= H8; square++) {

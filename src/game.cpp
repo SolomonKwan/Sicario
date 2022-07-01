@@ -16,6 +16,7 @@ namespace Moves {
     const std::array<std::vector<std::vector<Move>>, 64> BISHOP = computeBishopMoves();
     const std::array<std::vector<std::vector<Move>>, 64> KNIGHT = computeKnightMoves();
     const std::array<std::array<std::vector<std::vector<Move>>, 64>, 2> PAWN = computePawnMoves();
+    const std::array<std::vector<Move>, 4> CASTLING = computeCastlingMoves();
 }
 
 namespace Moves::Blocks {
@@ -378,13 +379,13 @@ void Position::getKingMoves(int& moves_index, MoveSet pos_moves[MOVESET_SIZE]) {
     Bitboard reachBB = Masks::KING[kingSquare] & ~sides[turn];
 
     if (reachBB == 0ULL) return;
-
     for (Square square : KingReach::SQUARES[kingSquare][getKingMovesIndex(reachBB, kingSquare)]) {
         if (isAttacked(square, (Player) !turn, true)) {
             reachBB &= ~(1ULL << square);
         }
     }
 
+    if (reachBB == 0ULL) return;
     pos_moves[moves_index++] = &Moves::KING[kingSquare][getKingMovesIndex(reachBB, kingSquare)];
 }
 
@@ -639,8 +640,38 @@ void Position::getRookPinMoves(int& moves_index, MoveSet pos_moves[MOVESET_SIZE]
     pos_moves[moves_index++] = &Moves::ROOK[square][getRookMovesIndex(rook_pins & ~(1ULL << square), square)];
 }
 
-void Position::getCastlingMoves(int& moves_index, MoveSet pos_moves[MOVESET_SIZE]) {
+Bitboard Position::isOccupied(const Square square) {
+    return ((this->sides[WHITE] | this->sides[BLACK]) & (1ULL << square));
+}
 
+void Position::getCastlingMoves(int& moves_index, MoveSet pos_moves[MOVESET_SIZE]) {
+    if (turn) {
+        if (castling & (1 << WKSC)) {
+            if (!isOccupied(F1) && !isOccupied(G1) && !isAttacked(F1, (Player)!turn) && !isAttacked(G1, (Player)!turn)) {
+                pos_moves[moves_index++] = &Moves::CASTLING[WKSC];
+            }
+        }
+
+        if (castling & (1 << WQSC)) {
+            if (!isOccupied(D1) && !isOccupied(C1) && !isOccupied(B1) && !isAttacked(D1, (Player)!turn) &&
+                    !isAttacked(C1, (Player)!turn)) {
+                pos_moves[moves_index++] = &Moves::CASTLING[WQSC];
+            }
+        }
+    } else {
+        if (castling & (1 << BKSC)) {
+            if (!isOccupied(F8) && !isOccupied(G8) && !isAttacked(F8, (Player)!turn) && !isAttacked(G8, (Player)!turn)) {
+                pos_moves[moves_index++] = &Moves::CASTLING[BKSC];
+            }
+        }
+
+        if (castling & (1 << BQSC)) {
+            if (!isOccupied(C8) && !isOccupied(B8) && !isOccupied(D8) && !isAttacked(D8, (Player)!turn) &&
+                    !isAttacked(C8, (Player)!turn)) {
+                pos_moves[moves_index++] = &Moves::CASTLING[BQSC];
+            }
+        }
+    }
 }
 
 /**
@@ -704,7 +735,7 @@ Bitboard Position::isAttacked(const Square square, const Player player, const bo
     Bitboard pieces = (sides[WHITE] | sides[BLACK]) ^ (ignoreKing ? 1ULL << piece_list[!player][0] : 0ULL);
 
     // Check if square is attacked by "player" king.
-    Bitboard kingBB = Masks::KING[square] & this->sides[turn] & this->kings;
+    Bitboard kingBB = Masks::KING[square] & this->sides[player] & this->kings;
 
     // Check if square is attacked by "player" queen or rook horizontally or vertically.
     Bitboard rooksBB = getRookReachBB(Masks::ROOK[square] & pieces, square) & sides[player] & (queens | rooks);

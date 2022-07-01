@@ -75,6 +75,13 @@ std::array<std::array<std::vector<std::vector<Move>>, 64>,2> computePawnMoves();
 std::array<std::vector<std::vector<Move>>, 64> computePawnMovesBySide(Player player);
 
 /**
+ * @brief Computed the castling moves for both sides. Black array is 0, white array is 1.
+ *
+ * @return Array of move vectors.
+ */
+std::array<std::vector<Move>, 4> computeCastlingMoves();
+
+/**
  * @brief Computes the move sets for rook moves on each square based on legal destinations when the own side is in
  * check.
  *

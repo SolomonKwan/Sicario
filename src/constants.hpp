@@ -25,6 +25,10 @@ enum Player {
     BLACK, WHITE // TODO Maybe change this to another type so that we can do logical operations without casting.
 };
 
+// inline Player operator!(const Player& player) {
+//     return !player;
+// }
+
 /**
  * The squares of the board and their associated numbers. NONE (64) used as a sentinel value.
  */
