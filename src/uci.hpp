@@ -25,6 +25,8 @@ enum UciInput {
     MOVE,
     UNDO,
     DISPLAY,
+    MOVES,
+    BITBOARDS,
 
     // Sentinel for invalid command
     INVALID_COMMAND

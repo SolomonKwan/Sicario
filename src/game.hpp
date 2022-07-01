@@ -86,6 +86,8 @@ class Position {
          */
         void display();
 
+        void displayBitboards();
+
         Move pseudoRandomMove(MoveList&, Player);
 
         // Accessors

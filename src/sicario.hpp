@@ -37,8 +37,10 @@ class Sicario {
         // Handlers for custom commands
         void handlePerft(std::vector<std::string>&);
         void handleMove(std::vector<std::string>&);
-        void handleUndo(std::vector<std::string>&);
-        void handleDisplay(std::vector<std::string>&);
+        void handleUndo();
+        void handleDisplay();
+        void handleMoves();
+        void handleBitboards();
 
         // GUI messaging
         void communicate(std::string);

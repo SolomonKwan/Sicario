@@ -70,10 +70,16 @@ void Sicario::processInput(std::string& input) {
             handleMove(commands);
             break;
         case UNDO:
-            handleUndo(commands);
+            handleUndo();
             break;
         case DISPLAY:
-            handleDisplay(commands);
+            handleDisplay();
+            break;
+        case MOVES:
+            handleMoves();
+            break;
+        case BITBOARDS:
+            handleBitboards();
             break;
     }
 }
@@ -96,6 +102,8 @@ UciInput Sicario::hashCommandInput(std::string& input) {
     if (input == "move") return MOVE;
     if (input == "undo") return UNDO;
     if (input == "display") return DISPLAY;
+    if (input == "moves") return MOVES;
+    if (input == "bitboards") return BITBOARDS;
 
     return INVALID_COMMAND;
 }
@@ -336,14 +344,26 @@ void Sicario::handleMove(std::vector<std::string>& commands) {
     position.makeMove(move);
 }
 
-void Sicario::handleUndo(std::vector<std::string>& commands) {
+void Sicario::handleUndo() {
     position.undoMove();
 }
 
-void Sicario::handleDisplay(std::vector<std::string>& commands) {
+void Sicario::handleDisplay() {
     position.display();
 }
 
+void Sicario::handleMoves() {
+    MoveList moves = MoveList(position);
+    std::cout << "There are " << moves.size() << " moves" << '\n';
+    for (Move move : moves) {
+        printMove(move, true);
+        std::cout << '\n';
+    }
+}
+
+void Sicario::handleBitboards() {
+    position.displayBitboards();
+}
 
 /**
  * Prints all messages to Uci communication to stdin. Used to distinguish from other print commands.

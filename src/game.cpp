@@ -718,6 +718,13 @@ Bitboard Position::isAttacked(const Square square, const Player player, const bo
     // Check if square is attacked by "player" pawn.
     Bitboard pawnsBB = Masks::PAWN[!player][square] & ~Masks::FILE[square % 8] & sides[player] & pawns;
 
+    // displayBB(pieces);
+    // displayBB(kingBB);
+    // displayBB(rooksBB);
+    // displayBB(bishopsBB);
+    // displayBB(knightsBB);
+    // displayBB(pawnsBB);
+
     return kingBB | rooksBB | bishopsBB | knightsBB | pawnsBB;
 }
 
@@ -895,8 +902,8 @@ void Position::makeKingMoves(Move move) {
     }
 
     // Update bitboards.
-    this->kings &= ~(start);
-    this->kings |= end;
+    this->kings &= ~(1ULL << start);
+    this->kings |= 1ULL << end;
 }
 
 /**
@@ -911,8 +918,8 @@ void Position::makeQueenMoves(Move move) {
     PieceType queen = this->turn ? W_QUEEN : B_QUEEN;
     this->findAndRemovePiece(queen, (Square) start);
     this->addPiece(queen, (Square) end);
-    this->queens &= ~(start);
-    this->queens |= end;
+    this->queens &= ~(1ULL << start);
+    this->queens |= 1ULL << end;
 }
 
 /**
@@ -927,8 +934,8 @@ void Position::makeRookMoves(Move move) {
     PieceType rook = this->turn ? W_ROOK : B_ROOK;
     this->findAndRemovePiece(rook, (Square) start);
     this->addPiece(rook, (Square) end);
-    this->rooks &= ~(start);
-    this->rooks |= end;
+    this->rooks &= ~(1ULL << start);
+    this->rooks |= 1ULL << end;
 }
 
 /**
@@ -943,8 +950,8 @@ void Position::makeBishopMoves(Move move) {
     PieceType bishop = this->turn ? W_BISHOP : B_BISHOP;
     this->findAndRemovePiece(bishop, (Square) start);
     this->addPiece(bishop, (Square) end);
-    this->bishops &= ~(start);
-    this->bishops |= end;
+    this->bishops &= ~(1ULL << start);
+    this->bishops |= 1ULL << end;
 }
 
 /**
@@ -959,8 +966,8 @@ void Position::makeKnightMoves(Move move) {
     PieceType knight = this->turn ? W_KNIGHT : B_KNIGHT;
     this->findAndRemovePiece(knight, (Square) start);
     this->addPiece(knight, (Square) end);
-    this->knights &= ~(start);
-    this->knights |= end;
+    this->knights &= ~(1ULL << start);
+    this->knights |= 1ULL << end;
 }
 
 /**
@@ -1002,19 +1009,19 @@ void Position::makePawnMoves(Move move) {
         }
 
         if (promo == pQUEEN) {
-            this->queens |= end;
+            this->queens |= 1ULL << end;
             PieceType queen = this->turn ? W_QUEEN : B_QUEEN;
             this->addPiece(queen, (Square) end);
         } else if (promo == pROOK) {
-            this->rooks |= end;
+            this->rooks |= 1ULL << end;
             PieceType ROOK = this->turn ? W_ROOK : B_ROOK;
             this->addPiece(ROOK, (Square) end);
         } else if (promo == pBISHOP) {
-            this->bishops |= end;
+            this->bishops |= 1ULL << end;
             PieceType bishop = this->turn ? W_BISHOP : B_BISHOP;
             this->addPiece(bishop, (Square) end);
         } else {
-            this->knights |= end;
+            this->knights |= 1ULL << end;
             PieceType knight = this->turn ? W_KNIGHT : B_KNIGHT;
             this->addPiece(knight, (Square) end);
         }
@@ -1025,8 +1032,8 @@ void Position::makePawnMoves(Move move) {
         this->addPiece(piece, (Square) end);
         piece = this->turn ? B_PAWN : W_PAWN;
         this->findAndRemovePiece(piece, (Square) ep);
-        this->pawns &= ~(ep);
-        this->sides[1 - this->turn] &= ~(ep);
+        this->pawns &= ~(1ULL << ep);
+        this->sides[1 - this->turn] &= ~(1ULL << ep);
         this->pieces[ep] = NO_PIECE;
         this->hash ^= Hashes::PIECES[piece][ep];
     } else {
@@ -1039,20 +1046,22 @@ void Position::makePawnMoves(Move move) {
         }
     }
 
-    this->pawns &= ~(start);
+    this->pawns &= ~(1ULL << start);
     this->pawns |= (uint64_t)pawn << end;
 }
 
 void Position::saveHistory(Move move) {
-    history.push_back({
-        castling,
-        en_passant,
-        halfmove,
-        move,
-        pieces[(move >> 6) & 0b111111],
-        hash,
-    });
-    ply++;
+    this->history[this->ply].castling = this->castling;
+    this->history[this->ply].en_passant = this->en_passant;
+    this->history[this->ply].halfmove = this->halfmove;
+    this->history[this->ply].move = move;
+    this->history[this->ply].captured = this->pieces[(move >> 6) & 0b111111];
+    this->history[this->ply].hash = this->hash;
+    this->ply++;
+
+    if (this->ply >= MAX_MOVES) {
+        this->history.resize(2 * MAX_MOVES);
+    }
 }
 
 /**
@@ -1076,59 +1085,59 @@ void Position::undoNormal() {
     bool turn = this->turn;
 
     // Change sides bitboards
-    this->sides[turn] &= ~(end);
-    this->sides[turn] |= start;
-    if (captured != NO_PIECE) this->sides[!turn] |= end;
+    this->sides[turn] &= ~(1ULL << end);
+    this->sides[turn] |= 1ULL << start;
+    if (captured != NO_PIECE) this->sides[!turn] |= 1ULL << end;
 
     // Change pieces bitboards, piece list and indices and piece counts
     if (moved == B_PAWN || moved == W_PAWN) {
-        this->pawns &= ~(end);
+        this->pawns &= ~(1ULL << end);
         this->findAndRemovePiece(moved, (Square) end);
-        this->pawns |= start;
+        this->pawns |= 1ULL << start;
         this->addPiece(moved, (Square) start);
     } else if (moved == B_KNIGHT || moved == W_KNIGHT) {
-        this->knights &= ~(end);
+        this->knights &= ~(1ULL << end);
         this->findAndRemovePiece(moved, (Square) end);
-        this->knights |= start;
+        this->knights |= 1ULL << start;
         this->addPiece(moved, (Square) start);
     } else if (moved == B_BISHOP || moved == W_BISHOP) {
-        this->bishops &= ~(end);
+        this->bishops &= ~(1ULL << end);
         this->findAndRemovePiece(moved, (Square) end);
-        this->bishops |= start;
+        this->bishops |= 1ULL << start;
         this->addPiece(moved, (Square) start);
     } else if (moved == B_ROOK || moved == W_ROOK) {
-        this->rooks &= ~(end);
+        this->rooks &= ~(1ULL << end);
         this->findAndRemovePiece(moved, (Square) end);
-        this->rooks |= start;
+        this->rooks |= 1ULL << start;
         this->addPiece(moved, (Square) start);
     } else if (moved == B_QUEEN || moved == W_QUEEN) {
-        this->queens &= ~(end);
+        this->queens &= ~(1ULL << end);
         this->findAndRemovePiece(moved, (Square) end);
-        this->queens |= start;
+        this->queens |= 1ULL << start;
         this->addPiece(moved, (Square) start);
     } else {
-        this->kings &= ~(end);
+        this->kings &= ~(1ULL << end);
         this->findAndRemovePiece(moved, (Square) end);
-        this->kings |= start;
+        this->kings |= 1ULL << start;
         this->addPiece(moved, (Square) start);
     }
 
     if (captured == NO_PIECE) {
         /* Do nothing */
     } else if (captured == B_PAWN || captured == W_PAWN) {
-        this->pawns |= end;
+        this->pawns |= 1ULL << end;
         this->addPiece(captured, (Square) end);
     } else if (captured == B_KNIGHT || captured == W_KNIGHT) {
-        this->knights |= end;
+        this->knights |= 1ULL << end;
         this->addPiece(captured, (Square) end);
     } else if (captured == B_BISHOP || captured == W_BISHOP) {
-        this->bishops |= end;
+        this->bishops |= 1ULL << end;
         addPiece(captured, (Square) end);
     } else if (captured == B_ROOK || captured == W_ROOK) {
-        this->rooks |= end;
+        this->rooks |= 1ULL << end;
         this->addPiece(captured, (Square) end);
     } else {
-        this->queens |= end;
+        this->queens |= 1ULL << end;
         this->addPiece(captured, (Square) end);
     }
 
@@ -1376,9 +1385,9 @@ void Position::makeMove(Move move) {
         this->en_passant = NONE;
     }
 
-    this->sides[this->turn] &= ~(start);
-    this->sides[this->turn] |= end;
-    this->sides[1 - this->turn] &= ~(end);
+    this->sides[this->turn] &= ~(1ULL << start);
+    this->sides[this->turn] |= 1ULL << end;
+    this->sides[1 - this->turn] &= ~(1ULL << end);
     this->pieces[start] = NO_PIECE;
     this->hash ^= Hashes::PIECES[this->piece_moved][start];
     this->pieces[end] = this->piece_moved;
@@ -1540,7 +1549,7 @@ void Position::checkCastlingEnPassantMoves(uint start, uint end, Move& move) {
     }
 }
 
-Position::Position(std::string fen) {
+Position::Position(std::string fen) : history(MAX_MOVES) {
     this->parseFen(fen);
     this->initialiseHash();
 }
@@ -1644,6 +1653,17 @@ void Position::display() {
 
     // New line for spacing
     std::cout << '\n';
+}
+
+void Position::displayBitboards() {
+    displayBB(sides[0]);
+    displayBB(sides[1]);
+    displayBB(kings);
+    displayBB(queens);
+    displayBB(rooks);
+    displayBB(bishops);
+    displayBB(knights);
+    displayBB(pawns);
 }
 
 /**
