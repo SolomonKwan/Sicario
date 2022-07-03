@@ -81,6 +81,8 @@ std::array<std::vector<std::vector<Move>>, 64> computePawnMovesBySide(Player pla
  */
 std::array<std::vector<Move>, 4> computeCastlingMoves();
 
+std::array<std::vector<std::vector<std::vector<Move>>>, 2> computeEnPassantMoves();
+
 /**
  * @brief Computes the move sets for rook moves on each square based on legal destinations when the own side is in
  * check.

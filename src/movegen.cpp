@@ -232,6 +232,33 @@ std::array<std::vector<Move>, 4> computeCastlingMoves() {
     return moves;
 }
 
+std::array<std::vector<std::vector<std::vector<Move>>>, 2> computeEnPassantMoves() { // TODO this is ugly, clean it
+    std::array<std::vector<std::vector<std::vector<Move>>>, 2> moves;
+    std::vector<std::vector<std::vector<Move>>>& blackMove = moves[BLACK];
+    std::vector<std::vector<std::vector<Move>>>& whiteMove = moves[WHITE];
+    blackMove = {
+        {{B4 | A3 << 6 | EN_PASSANT}, {B4 | A3 << 6 | EN_PASSANT}},
+        {{A4 | B3 << 6 | EN_PASSANT}, {C4 | B3 << 6 | EN_PASSANT}},
+        {{B4 | C3 << 6 | EN_PASSANT}, {D4 | C3 << 6 | EN_PASSANT}},
+        {{C4 | D3 << 6 | EN_PASSANT}, {E4 | D3 << 6 | EN_PASSANT}},
+        {{D4 | E3 << 6 | EN_PASSANT}, {F4 | E3 << 6 | EN_PASSANT}},
+        {{E4 | F3 << 6 | EN_PASSANT}, {G4 | F3 << 6 | EN_PASSANT}},
+        {{F4 | G3 << 6 | EN_PASSANT}, {H4 | G3 << 6 | EN_PASSANT}},
+        {{G4 | H3 << 6 | EN_PASSANT}, {G4 | H3 << 6 | EN_PASSANT}}
+    };
+    whiteMove = {
+        {{B5 | A6 << 6 | EN_PASSANT}, {B5 | A6 << 6 | EN_PASSANT}},
+        {{A5 | B6 << 6 | EN_PASSANT}, {C5 | B6 << 6 | EN_PASSANT}},
+        {{B5 | C6 << 6 | EN_PASSANT}, {D5 | C6 << 6 | EN_PASSANT}},
+        {{C5 | D6 << 6 | EN_PASSANT}, {E5 | D6 << 6 | EN_PASSANT}},
+        {{D5 | E6 << 6 | EN_PASSANT}, {F5 | E6 << 6 | EN_PASSANT}},
+        {{E5 | F6 << 6 | EN_PASSANT}, {G5 | F6 << 6 | EN_PASSANT}},
+        {{F5 | G6 << 6 | EN_PASSANT}, {H5 | G6 << 6 | EN_PASSANT}},
+        {{G5 | H6 << 6 | EN_PASSANT}, {G5 | H6 << 6 | EN_PASSANT}}
+    };
+    return moves;
+}
+
 std::array<std::vector<std::vector<Move>>, 64> computeRookBlockMoves() {
     std::array<std::vector<std::vector<Move>>, 64> rookBlockMoves;
     for (int square = A1; square <= H8; square++) {

@@ -17,6 +17,7 @@ namespace Moves {
     const std::array<std::vector<std::vector<Move>>, 64> KNIGHT = computeKnightMoves();
     const std::array<std::array<std::vector<std::vector<Move>>, 64>, 2> PAWN = computePawnMoves();
     const std::array<std::vector<Move>, 4> CASTLING = computeCastlingMoves();
+    const std::array<std::vector<std::vector<std::vector<Move>>>, 2> EN_PASSANT = computeEnPassantMoves();
 }
 
 namespace Moves::Blocks {
@@ -511,6 +512,7 @@ void Position::getNormalMoves(int& moves_index, MoveSet pos_moves[MOVESET_SIZE])
     this->getKnightMoves(moves_index, pos_moves);
     this->getPawnMoves(moves_index, pos_moves);
     this->getCastlingMoves(moves_index, pos_moves);
+    this->getEnPassantMoves(moves_index, pos_moves);
 }
 
 void Position::getQueenMoves(int& moves_index, MoveSet pos_moves[MOVESET_SIZE]) {
@@ -670,6 +672,22 @@ void Position::getCastlingMoves(int& moves_index, MoveSet pos_moves[MOVESET_SIZE
                     !isAttacked(C8, (Player)!turn)) {
                 pos_moves[moves_index++] = &Moves::CASTLING[BQSC];
             }
+        }
+    }
+}
+
+void Position::getEnPassantMoves(int& moves_index, MoveSet pos_moves[MOVESET_SIZE]) {
+    if (en_passant && en_passant % 8 != 0) {
+        Square pawnSquare = (Square) (en_passant + turn == WHITE ? SW : NW);
+        if (pieces[pawnSquare] == W_PAWN && !isPinnedByBishop(pawnSquare) && !isPinnedByRook(pawnSquare)) {
+            pos_moves[moves_index++] = &Moves::EN_PASSANT[turn][en_passant % 8][pawnSquare % 8 < en_passant % 8 ? 0 : 1];
+        }
+    }
+
+    if (en_passant && en_passant % 8 != 7) {
+        Square pawnSquare = (Square) (en_passant + (turn == WHITE ? SE : NE));
+        if (pieces[pawnSquare] == B_PAWN && !isPinnedByBishop(pawnSquare) && !isPinnedByRook(pawnSquare)) {
+            pos_moves[moves_index++] = &Moves::EN_PASSANT[turn][en_passant % 8][pawnSquare % 8 < en_passant % 8 ? 0 : 1];
         }
     }
 }

@@ -302,6 +302,14 @@ class Position {
         void getCastlingMoves(int& moves_index, MoveSet pos_moves[MOVESET_SIZE]);
 
         /**
+         * @brief Retrives and adds the vector of legal en-passant moves of the side to move to the pos_moves array.
+         *
+         * @param moves_index Current index of the first empty position in the pos_moves array.
+         * @param pos_moves Array that holds pointers to vectors of moves.
+         */
+        void getEnPassantMoves(int& moves_index, MoveSet pos_moves[MOVESET_SIZE]);
+
+        /**
          * @brief Retrives and adds the vector of legal pawn moves of the side to move to the pos_moves array.
          *
          * @param moves_index Current index of the first empty position in the pos_moves array.
