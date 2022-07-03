@@ -852,19 +852,19 @@ void Position::removePiece() {
     if (captured == NO_PIECE) return;
     int end = (this->last_move >> 6) & 0b111111;
     if (captured == W_QUEEN || captured == B_QUEEN) {
-        this->queens &= ~(end);
+        this->queens &= ~(1ULL << end);
         this->findAndRemovePiece(captured, (Square) end);
     } else if (captured == W_ROOK || captured == B_ROOK) {
-        this->rooks &= ~(end);
+        this->rooks &= ~(1ULL << end);
         this->findAndRemovePiece(captured, (Square) end);
     } else if (captured == W_BISHOP || captured == B_BISHOP) {
-        this->bishops &= ~(end);
+        this->bishops &= ~(1ULL << end);
         this->findAndRemovePiece(captured, (Square) end);
     } else if (captured == W_KNIGHT || captured == B_KNIGHT) {
-        this->knights &= ~(end);
+        this->knights &= ~(1ULL << end);
         this->findAndRemovePiece(captured, (Square) end);
     } else if (captured == W_PAWN || captured == B_PAWN) {
-        this->pawns &= ~(end);
+        this->pawns &= ~(1ULL << end);
         this->findAndRemovePiece(captured, (Square) end);
     }
 }
@@ -1586,11 +1586,11 @@ Position::Position(std::string fen) : history(MAX_MOVES) {
 }
 
 std::string darkSquare(std::string str) {
-    return "\033[1;30;44m" + str + " \033[0m";
+    return "\033[1;30;44m" + str + " \033[0m"; // TODO bold outline?
 }
 
 std::string lightSquare(std::string str) {
-    return "\033[1;30;47m" + str + " \033[0m";
+    return "\033[1;30;47m" + str + " \033[0m"; // TODO bold outline?
 }
 
 void Position::display() {

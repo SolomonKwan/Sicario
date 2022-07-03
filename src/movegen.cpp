@@ -452,43 +452,39 @@ std::array<std::vector<Bitboard>, 64> computeBishopReaches() {
     std::array<std::vector<Bitboard>, 64> reaches;
     for (int square = A1; square <= H8; square++) {
         std::vector<Bitboard>& reachSet = reaches[square];
-        int northeastSize = std::max(std::min(6 - square / 8, 6 - square % 8), 0);
-        int southeastSize = std::max(std::min(square / 8 - 1, 6 - square % 8), 0);
-        int southwestSize = std::max(std::min(square / 8 - 1, square % 8 - 1), 0);
-        int northwestSize = std::max(std::min(6 - square / 8, square % 8 - 1), 0);
+        int northeastSize = std::max(std::min(7 - square / 8, 7 - square % 8), 0);
+        int southeastSize = std::max(std::min(square / 8, 7 - square % 8), 0);
+        int southwestSize = std::max(std::min(square / 8, square % 8), 0);
+        int northwestSize = std::max(std::min(7 - square / 8, square % 8), 0);
         reachSet.resize(*std::max_element(BISHOP[square].begin(), BISHOP[square].end()) + 1);
         std::vector<std::array<int, 4>> combos = getEndCombinations({northeastSize, southeastSize, southwestSize,
                 northwestSize});
 
         for (std::array<int, 4> combo : combos) {
             Bitboard occ = 0ULL;
-            if (combo[0]) occ |= (1ULL << (square + NE * combo[0]));
+            if (combo[0]) occ |= (1ULL << (square + NE * combo[0])); // TODO R.E. the todo below, the problem is that this will set a bit on the edge on occasion. Why doesnt this seem to haoppenf or the rook???
             if (combo[1]) occ |= (1ULL << (square + SE * combo[1]));
             if (combo[2]) occ |= (1ULL << (square + SW * combo[2]));
             if (combo[3]) occ |= (1ULL << (square + NW * combo[3]));
 
             Bitboard reach = 0ULL;
-            if (northeastSize && !combo[0]) combo[0] = northeastSize + 1;
             for (int i = 1; combo[0] > 0; combo[0]--, i++) {
                 reach |= (1ULL << (square + i * NE));
             }
 
-            if (southeastSize && !combo[1]) combo[1] = southeastSize + 1;
             for (int i = 1; combo[1] > 0; combo[1]--, i++) {
                 reach |= (1ULL << (square + i * SE));
             }
 
-            if (southwestSize && !combo[2]) combo[2] = southwestSize + 1;
             for (int i = 1; combo[2] > 0; combo[2]--, i++) {
                 reach |= (1ULL << (square + i * SW));
             }
 
-            if (northwestSize && !combo[3]) combo[3] = northwestSize + 1;
             for (int i = 1; combo[3] > 0; combo[3]--, i++) {
                 reach |= (1ULL << (square + i * NW));
             }
 
-            reachSet[BISHOP[square][getBishopReachIndex(occ, (Square) square)]] = reach;
+            reachSet[BISHOP[square][getBishopReachIndex(occ & ~BORDER, (Square) square)]] = reach; // TODO the border thing is stupid. this whole function need looking at.
         }
     }
     return reaches;

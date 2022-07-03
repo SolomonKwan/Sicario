@@ -309,6 +309,8 @@ namespace Masks {
     };
 }
 
+const Bitboard BORDER = Masks::FILE[0] | Masks::FILE[7] | Masks::RANK[0] | Masks::RANK[7]; // TODO This is for a hacky fix, need to clean up.
+
 namespace Shifts {
     const int KING[64] = {
         61, 59, 59, 59, 59, 59, 59, 61,
