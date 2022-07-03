@@ -340,7 +340,7 @@ class Position {
          * @param square The square of concern.
          * @return Bitboard of the rook reach from the square.
          */
-        Bitboard getRookReachBB(Bitboard occupancy, Square square);
+        Bitboard getRookReachBB(Bitboard occupancy, Square square) const;
 
         /**
          * @brief Get the reach bitboard of a bishop on the indicated square.
@@ -349,7 +349,7 @@ class Position {
          * @param square The square of concern.
          * @return Bitboard of the bishop reach from the square.
          */
-        Bitboard getBishopReachBB(Bitboard occupancy, Square square);
+        Bitboard getBishopReachBB(Bitboard occupancy, Square square) const;
 
         /**
          * @brief Get the diagonal ranged moves for a diagonally pinned piece on "square".
@@ -358,7 +358,7 @@ class Position {
          * @param pos_moves Array that holds pointers to vectors of moves.
          * @param square The square of the piece of concern.
          */
-        void getBishopPinMoves(int& moves_index, MoveSet pos_moves[MOVESET_SIZE], Square square);
+        void getBishopPinMoves(int& moves_index, MoveSet pos_moves[MOVESET_SIZE], Square square) const;
 
         /**
          * @brief Get the horizontal and vertical ranged moves for a horizontally or vertically  pinned piece on
@@ -368,7 +368,7 @@ class Position {
          * @param pos_moves Array that holds pointers to vectors of moves.
          * @param square The square of the piece of concern.
          */
-        void getRookPinMoves(int& moves_index, MoveSet pos_moves[MOVESET_SIZE], Square square);
+        void getRookPinMoves(int& moves_index, MoveSet pos_moves[MOVESET_SIZE], Square square) const;
 
         /**
          * @brief Checks if the given square is occupied.

@@ -486,7 +486,7 @@ void Position::getPawnCheckedMoves(int& moves_index, MoveSet pos_moves[MOVESET_S
             if (!(1ULL << (pawnSquare + advance) & pieces)) {
                 if ((1ULL << (pawnSquare + advance)) & (check_rays & ~sides[!turn])) {
                     reach |= 1ULL << (pawnSquare + advance);
-                } else if (!(1ULL << (pawnSquare + advance + advance) & pieces) && (1ULL << (pawnSquare + advance + advance)) & (check_rays & ~sides[!turn])) {
+                } else if (pawnSquare / 8 == startRank && !(1ULL << (pawnSquare + advance + advance) & pieces) && (1ULL << (pawnSquare + advance + advance)) & (check_rays & ~sides[!turn])) {
                     reach |= 1ULL << (pawnSquare + advance + advance);
                 }
             }
@@ -650,22 +650,26 @@ void Position::getPawnMoves(int& moves_index, MoveSet pos_moves[MOVESET_SIZE]) {
     }
 }
 
-inline Bitboard Position::getRookReachBB(Bitboard occupancy, Square square) {
+inline Bitboard Position::getRookReachBB(Bitboard occupancy, Square square) const {
     return Reach::ROOK[square][Indices::ROOK[square][getRookReachIndex(occupancy, square)]];
 }
 
-inline Bitboard Position::getBishopReachBB(Bitboard occupancy, Square square) {
+inline Bitboard Position::getBishopReachBB(Bitboard occupancy, Square square) const {
     return Reach::BISHOP[square][Indices::BISHOP[square][getBishopReachIndex(occupancy, square)]];
 }
 
-void Position::getBishopPinMoves(int& moves_index, MoveSet pos_moves[MOVESET_SIZE], Square square) {
-    if (bishop_pins == 0) return;
-    pos_moves[moves_index++] = &Moves::BISHOP[square][getBishopMovesIndex(bishop_pins & ~(1ULL << square), square)];
+void Position::getBishopPinMoves(int& moves_index, MoveSet pos_moves[MOVESET_SIZE], Square square) const {
+    Bitboard pieces = (sides[WHITE] | sides[BLACK]);
+    Bitboard reach = bishop_pins & ~(1ULL << square) & getBishopReachBB(Masks::BISHOP[square] & pieces, square);
+    if (reach == 0ULL) return;
+    pos_moves[moves_index++] = &Moves::BISHOP[square][getBishopMovesIndex(reach, square)];
 }
 
-void Position::getRookPinMoves(int& moves_index, MoveSet pos_moves[MOVESET_SIZE], Square square) {
-    if (rook_pins == 0) return;
-    pos_moves[moves_index++] = &Moves::ROOK[square][getRookMovesIndex(rook_pins & ~(1ULL << square), square)];
+void Position::getRookPinMoves(int& moves_index, MoveSet pos_moves[MOVESET_SIZE], Square square) const {
+    Bitboard pieces = (sides[WHITE] | sides[BLACK]);
+    Bitboard reach = rook_pins & ~(1ULL << square) & getRookReachBB(Masks::ROOK[square] & pieces, square);
+    if (reach == 0ULL) return;
+    pos_moves[moves_index++] = &Moves::ROOK[square][getRookMovesIndex(reach, square)];
 }
 
 Bitboard Position::isOccupied(const Square square) {
