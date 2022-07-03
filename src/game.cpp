@@ -475,11 +475,22 @@ void Position::getKnightCheckedMoves(int& moves_index, MoveSet pos_moves[MOVESET
 
 void Position::getPawnCheckedMoves(int& moves_index, MoveSet pos_moves[MOVESET_SIZE]) {
     PieceType pawn = turn == WHITE ? W_PAWN : B_PAWN;
+    int advance = turn == WHITE ? N : S;
+    int startRank = turn == WHITE ? 1 : 6;
+    Bitboard pieces = sides[WHITE] | sides[BLACK];
+
     for (int i = 0; i < piece_index[pawn]; i++) {
         Square pawnSquare = piece_list[pawn][i];
         if (!isPinned(pawnSquare)) {
-            // TODO Need to check that a pawn doesn't jump over a piece.
-            Bitboard reach = (Masks::PAWN[turn][pawnSquare] & Masks::FILE[pawnSquare % 8]) & (check_rays & ~sides[!turn]);
+            Bitboard reach = 0ULL;
+            if (!(1ULL << (pawnSquare + advance) & pieces)) {
+                if ((1ULL << (pawnSquare + advance)) & (check_rays & ~sides[!turn])) {
+                    reach |= 1ULL << (pawnSquare + advance);
+                } else if (!(1ULL << (pawnSquare + advance + advance) & pieces) && (1ULL << (pawnSquare + advance + advance)) & (check_rays & ~sides[!turn])) {
+                    reach |= 1ULL << (pawnSquare + advance + advance);
+                }
+            }
+
             reach |= Masks::PAWN[turn][pawnSquare] & ~Masks::FILE[pawnSquare % 8] & (check_rays & sides[!turn]);
             if (reach != 0) {
                 pos_moves[moves_index++] = &Moves::PAWN[turn][pawnSquare][getPawnMovesIndex(reach, pawnSquare, turn)];
