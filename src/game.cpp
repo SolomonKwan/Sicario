@@ -457,7 +457,7 @@ void Position::getKnightCheckedMoves(int& moves_index, MoveSet pos_moves[MOVESET
         if (!isPinned(knightSquare)) {
             Bitboard reach = Masks::KNIGHT[knightSquare] & check_rays;
             if (reach != 0) {
-                pos_moves[moves_index++] = &Moves::KNIGHT[reach][getKnightMovesIndex(reach, knightSquare)];
+                pos_moves[moves_index++] = &Moves::KNIGHT[knightSquare][getKnightMovesIndex(reach, knightSquare)];
             }
         }
     }
@@ -914,8 +914,8 @@ void Position::handleCastle() {
         rook = B_ROOK;
     }
 
-    this->sides[this->turn] &= ~(start);
-    this->sides[this->turn] |= end;
+    this->sides[this->turn] &= ~(1ULL << start);
+    this->sides[this->turn] |= 1ULL << end;
     this->pieces[start] = NO_PIECE;
     this->hash ^= Hashes::PIECES[rook][start];
     this->pieces[end] = rook;
@@ -923,8 +923,8 @@ void Position::handleCastle() {
 
     this->findAndRemovePiece(rook, (Square) start);
     this->addPiece(rook, (Square) end);
-    this->rooks &= ~(start);
-    this->rooks |= end;
+    this->rooks &= ~(1ULL << start);
+    this->rooks |= 1ULL << end;
 }
 
 /**
@@ -1130,7 +1130,7 @@ void Position::undoNormal() {
     PieceType captured = previous_pos.captured;
 
     // Change turn
-    turn = (Player)!turn;
+    this->turn = (Player)(1 - this->turn);
     bool turn = this->turn;
 
     // Change sides bitboards
@@ -1212,7 +1212,7 @@ void Position::undoPromotion() {
     History previous_pos = this->history[this->ply];
 
     // Change turn
-    this->turn = (Player)!this->turn;
+    this->turn = (Player)(1 - this->turn);
     bool turn = this->turn;
 
     // Retrieve last move information
@@ -1225,38 +1225,38 @@ void Position::undoPromotion() {
 
     // Remove promoted piece
     this->findAndRemovePiece(promoted, (Square) end);
-    this->sides[turn] &= ~(end);
+    this->sides[turn] &= ~(1ULL << end);
     this->pieces[end] = NO_PIECE;
     if (promoted == W_QUEEN || promoted == B_QUEEN) {
-        this->queens &= ~(end);
+        this->queens &= ~(1ULL << end);
     } else if (promoted == W_ROOK || promoted == B_ROOK) {
-        this->rooks &= ~(end);
+        this->rooks &= ~(1ULL << end);
     } else if (promoted == W_BISHOP || promoted == B_BISHOP) {
-        this->bishops &= ~(end);
+        this->bishops &= ~(1ULL << end);
     } else { // Knight
-        this->knights &= ~(end);
+        this->knights &= ~(1ULL << end);
     }
 
     // Replace captured piece (if any)
     if (captured != NO_PIECE) {
         this->addPiece(captured, (Square) end);
-        this->sides[!turn] |= end;
+        this->sides[!turn] |= 1ULL << end;
         this->pieces[end] = captured;
         if (captured == W_QUEEN || captured == B_QUEEN) {
-            this->queens |= end;
+            this->queens |= 1ULL << end;
         } else if (captured == W_ROOK || captured == B_ROOK) {
-            this->rooks |= end;
+            this->rooks |= 1ULL << end;
         } else if (captured == W_BISHOP || captured == B_BISHOP) {
-            this->bishops |= end;
+            this->bishops |= 1ULL << end;
         } else { // Knight
-            this->knights |= end;
+            this->knights |= 1ULL << end;
         }
     }
 
     // Replace pawn
     this->addPiece(pawn, (Square) start);
-    this->sides[turn] |= start;
-    this->pawns |= start;
+    this->sides[turn] |= 1ULL << start;
+    this->pawns |= 1ULL << start;
     this->pieces[start] = pawn;
 
     // Undo fullmove and History struct information
@@ -1277,7 +1277,7 @@ void Position::undoEnPassant() {
     History previous_pos = this->history[this->ply];
 
     // Change turn
-    this->turn = (Player)!this->turn;
+    this->turn = (Player)(1 - this->turn);
     bool turn = this->turn;
 
     // Retrieve last move information
@@ -1289,14 +1289,14 @@ void Position::undoEnPassant() {
     int captured_sq = end + (turn ? -8 : 8);
 
     // Change sides bitboards
-    this->sides[turn] &= ~(end);
-    this->sides[turn] |= start;
-    this->sides[!turn] |= captured_sq;
+    this->sides[turn] &= ~(1ULL << end);
+    this->sides[turn] |= 1ULL << start;
+    this->sides[!turn] |= 1ULL << captured_sq;
 
     // Change pawn bitboards
-    this->pawns &= ~(end);
-    this->pawns |= start;
-    this->pawns |= captured_sq;
+    this->pawns &= ~(1ULL << end);
+    this->pawns |= 1ULL << start;
+    this->pawns |= 1ULL << captured_sq;
 
     // Undo fullmove and History struct information
     if (turn) this->fullmove--;
@@ -1326,7 +1326,7 @@ void Position::undoCastling() {
     History previous_pos = this->history[this->ply];
 
     // Change turn
-    this->turn = (Player)!this->turn;
+    this->turn = (Player)(1 - this->turn);
     bool turn = this->turn;
 
     // Retrieve last move information
@@ -1353,18 +1353,18 @@ void Position::undoCastling() {
     }
 
     // Change sides bitboards
-    this->sides[turn] &= ~(end);
-    this->sides[turn] |= start;
-    this->sides[turn] &= ~(rook_end);
-    this->sides[turn] |= rook_start;
+    this->sides[turn] &= ~(1ULL << end);
+    this->sides[turn] |= 1ULL << start;
+    this->sides[turn] &= ~(1ULL << rook_end);
+    this->sides[turn] |= 1ULL << rook_start;
 
     // Change king bitboards
-    this->kings &= ~(end);
-    this->kings |= start;
+    this->kings &= ~(1ULL << end);
+    this->kings |= 1ULL << start;
 
     // Change rook bitboards
-    this->rooks &= ~(rook_end);
-    this->rooks |= rook_start;
+    this->rooks &= ~(1ULL << rook_end);
+    this->rooks |= 1ULL << rook_start;
 
     // Undo fullmove and History struct information (some is not necessary i think? Done out of principle)
     if (turn) this->fullmove--;
@@ -1497,7 +1497,7 @@ void Position::makeMove(Move move) {
         this->makePawnMoves(move);
     }
 
-    this->turn = (Player) !this->turn;
+    this->turn = (Player)(1 - this->turn);
     if (this->turn == BLACK) {
         this->fullmove++;
         this->hash ^= Hashes::TURN;
