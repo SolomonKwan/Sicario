@@ -433,10 +433,10 @@ std::array<std::vector<Bitboard>, 64> computeRookReaches() {
     std::array<std::vector<Bitboard>, 64> reaches;
     for (int square = A1; square <= H8; square++) {
         std::vector<Bitboard>& reachSet = reaches[square];
-        int northSize = std::max(6 - (square / 8), 0);
-        int southSize = std::max(square / 8 - 1, 0);
-        int eastSize = std::max(6 - (square % 8), 0);
-        int westSize = std::max(square % 8 - 1, 0);
+        int northSize = std::max(7 - (square / 8), 0);
+        int southSize = std::max(square / 8, 0);
+        int eastSize = std::max(7 - (square % 8), 0);
+        int westSize = std::max(square % 8, 0);
         reachSet.resize(*std::max_element(ROOK[square].begin(), ROOK[square].end()) + 1);
         std::vector<std::array<int, 4>> combos = getEndCombinations({northSize, eastSize, southSize, westSize});
 
@@ -448,27 +448,23 @@ std::array<std::vector<Bitboard>, 64> computeRookReaches() {
             if (combo[3]) occ |= (1ULL << (square + W * combo[3]));
 
             Bitboard reach = 0ULL;
-            if (northSize && !combo[0]) combo[0] = northSize + 1;
             for (int i = 1; combo[0] > 0; combo[0]--, i++) {
                 reach |= (1ULL << (square + i * N));
             }
 
-            if (eastSize && !combo[1]) combo[1] = eastSize + 1;
             for (int i = 1; combo[1] > 0; combo[1]--, i++) {
                 reach |= (1ULL << (square + i * E));
             }
 
-            if (southSize && !combo[2]) combo[2] = southSize + 1;
             for (int i = 1; combo[2] > 0; combo[2]--, i++) {
                 reach |= (1ULL << (square + i * S));
             }
 
-            if (westSize && !combo[3]) combo[3] = westSize + 1;
             for (int i = 1; combo[3] > 0; combo[3]--, i++) {
                 reach |= (1ULL << (square + i * W));
             }
 
-            reachSet[ROOK[square][getRookReachIndex(occ, (Square) square)]] = reach;
+            reachSet[ROOK[square][getRookReachIndex(occ & Masks::ROOK[square], (Square) square)]] = reach;
         }
     }
     return reaches;
@@ -511,7 +507,7 @@ std::array<std::vector<Bitboard>, 64> computeBishopReaches() {
                 reach |= (1ULL << (square + i * NW));
             }
 
-            reachSet[BISHOP[square][getBishopReachIndex(occ & ~BORDER, (Square) square)]] = reach; // TODO the border thing is stupid. this whole function need looking at.
+            reachSet[BISHOP[square][getBishopReachIndex(occ & Masks::BISHOP[square], (Square) square)]] = reach; // TODO the border thing is stupid. this whole function need looking at.
         }
     }
     return reaches;

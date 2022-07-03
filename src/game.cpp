@@ -65,12 +65,22 @@ void Position::setCheckers() {
     checkers = isAttacked(piece_list[turn][0], (Player) !turn);
 }
 
+bool Position::isPawnPinnedByRookHorizontally(const Square square) {
+    if ((piece_list[turn][0] / 8 == square / 8) && isPinnedByRook(square)) return true;
+    return false;
+}
+
+bool Position::isPawnPinnedByRookVertically(const Square square) {
+    if ((piece_list[turn][0] % 8 == square % 8) && isPinnedByRook(square)) return true;
+    return false;
+}
+
 void Position::setPinAndCheckRayBitboards() {
     Square king_sq = piece_list[turn][0];
     Bitboard pieces = sides[WHITE] | sides[BLACK];
     rook_pins = 0ULL;
     bishop_pins = 0ULL;
-    check_rays = 0ULL;
+    check_rays = checkers;
 
     // Enemy queen rays
     PieceType eQueen = turn == WHITE ? B_QUEEN : W_QUEEN;
@@ -606,10 +616,15 @@ void Position::getPawnMoves(int& moves_index, MoveSet pos_moves[MOVESET_SIZE]) {
             if (reach != 0) {
                 pos_moves[moves_index++] = &Moves::PAWN[turn][pawnSquare][getPawnMovesIndex(reach, pawnSquare, turn)];
             }
-        } else if (isPinnedByRook(pawnSquare)) {
+        } else if (isPawnPinnedByRookHorizontally(pawnSquare)) { // Can't move if horizontally pinned to king.
             continue;
         } else {
-            Bitboard reach = Masks::PAWN[turn][pawnSquare] & ~Masks::FILE[pawnSquare % 8] & sides[!turn];
+            Bitboard reach = 0ULL;
+
+            if (!isPawnPinnedByRookVertically(pawnSquare)) { // Can't capture if vertically pinned to king.
+                reach |= Masks::PAWN[turn][pawnSquare] & ~Masks::FILE[pawnSquare % 8] & sides[!turn];
+            }
+
             if (!(1ULL << (pawnSquare + advance) & pieces)) {
                 reach |= 1ULL << (pawnSquare + advance);
                 if (pawnSquare / 8 == startRank && !(1ULL << (pawnSquare + advance + advance) & pieces)) {
@@ -677,17 +692,15 @@ void Position::getCastlingMoves(int& moves_index, MoveSet pos_moves[MOVESET_SIZE
 }
 
 void Position::getEnPassantMoves(int& moves_index, MoveSet pos_moves[MOVESET_SIZE]) {
-    if (en_passant && en_passant % 8 != 0) {
-        Square pawnSquare = (Square) (en_passant + turn == WHITE ? SW : NW);
-        if (pieces[pawnSquare] == W_PAWN && !isPinnedByBishop(pawnSquare) && !isPinnedByRook(pawnSquare)) {
-            pos_moves[moves_index++] = &Moves::EN_PASSANT[turn][en_passant % 8][pawnSquare % 8 < en_passant % 8 ? 0 : 1];
-        }
-    }
-
-    if (en_passant && en_passant % 8 != 7) {
-        Square pawnSquare = (Square) (en_passant + (turn == WHITE ? SE : NE));
-        if (pieces[pawnSquare] == B_PAWN && !isPinnedByBishop(pawnSquare) && !isPinnedByRook(pawnSquare)) {
-            pos_moves[moves_index++] = &Moves::EN_PASSANT[turn][en_passant % 8][pawnSquare % 8 < en_passant % 8 ? 0 : 1];
+    if (en_passant) {
+        std::vector<Square> pawnSquares;
+        if (en_passant % 8 != 0) pawnSquares.push_back((Square)(en_passant + (turn == WHITE ? SW : NW)));
+        if (en_passant % 8 != 7) pawnSquares.push_back((Square)(en_passant + (turn == WHITE ? SE : NE)));
+        for (Square square : pawnSquares) {
+            bool pawnExists = pieces[square] == (turn == WHITE ? W_PAWN : B_PAWN);
+            if (pawnExists && !isPinnedByBishop(square) && !isPinnedByRook(square)) {
+                pos_moves[moves_index++] = &Moves::EN_PASSANT[turn][en_passant % 8][square % 8 < en_passant % 8 ? 0 : 1];
+            }
         }
     }
 }

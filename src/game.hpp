@@ -174,6 +174,22 @@ class Position {
         }
 
         /**
+         * @brief Checks if a pawn is pinned by a rook horizontally.
+         *
+         * @param square The square that the pawn of concernis on.
+         * @return True if pinned by a rook/queen horizontally, else false.
+         */
+        bool isPawnPinnedByRookHorizontally(const Square square);
+
+        /**
+         * @brief Checks if a pawn is pinned by a rook vertically.
+         *
+         * @param square The square that the pawn of concernis on.
+         * @return True if pinned by a rook/queen vertically, else false.
+         */
+        bool isPawnPinnedByRookVertically(const Square square);
+
+        /**
          * @brief Sets the bitboard of checkers.
          */
         void setCheckers();

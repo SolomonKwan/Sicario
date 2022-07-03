@@ -41,7 +41,6 @@ perft() {
 	rm sf_result_sorted.txt
 
 	# Run sicario perft
-	make -C ../ -s
 	../src/sicario > ./sc_result.txt <<-EOF
 		position fen $FEN
 		perft $1
