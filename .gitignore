@@ -3,3 +3,5 @@ sicario
 *.o
 generate
 test
+sc_result.txt
+sf_result.txt

@@ -36,6 +36,11 @@ class Sicario {
 
         // Handlers for custom commands
         void handlePerft(std::vector<std::string>&);
+        void handleMove(std::vector<std::string>&);
+        void handleUndo();
+        void handleDisplay();
+        void handleMoves();
+        void handleBitboards();
 
         // GUI messaging
         void communicate(std::string);
@@ -86,6 +91,9 @@ class Sicario {
 
         // Tree search
         void mcts();
+
+        // Perft
+        uint64_t perft(int depth, bool root = false);
 };
 
 #endif

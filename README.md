@@ -65,3 +65,4 @@ for the move precomputation (at the price of clarity, maintenance, my time and m
 <strong>Bluefeversoft</strong> - For your YouTube tutorials and explanations for concepts I found difficult to grasp.</br>
 There are likely others that I have missed.</br>
 </br>
+TODO Program segfaults if you press enter without typing anything

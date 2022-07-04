@@ -148,7 +148,7 @@ std::array<std::vector<std::vector<Move>>, 64> computeRookMoves() {
         int eastSize = std::max(7 - (square % 8), 0);
         int westSize = std::max(square % 8, 0);
         std::vector<std::vector<Move>>& movesSet = rookMoves[square];
-        movesSet.resize((int)std::pow(2, 64 - rookMovesShifts[square]));
+        movesSet.resize((int)std::pow(2, 64 - Shifts::Moves::ROOK[square]));
 
         for (std::array<int, 4> selection : getEndCombinations({northSize, eastSize, southSize, westSize})) {
             uint64_t reach = 0ULL;
@@ -189,7 +189,7 @@ std::array<std::vector<std::vector<Move>>, 64> computeBishopMoves() {
         int southWestSize = std::max(std::min(square / 8, square % 8), 0);
         int northWestSize = std::max(std::min(7 - square / 8, square % 8), 0);
         std::vector<std::vector<Move>>& movesSet = bishopMoves[square];
-        movesSet.resize((int)std::pow(2, 64 - bishopMovesShifts[square]));
+        movesSet.resize((int)std::pow(2, 64 - Shifts::Moves::BISHOP[square]));
 
         for (std::array<int, 4> selection : getEndCombinations({northEastSize, southEastSize, southWestSize,
                 northWestSize})) {
@@ -223,6 +223,42 @@ std::array<std::vector<std::vector<Move>>, 64> computeBishopMoves() {
     return bishopMoves;
 }
 
+std::array<std::vector<Move>, 4> computeCastlingMoves() {
+    std::array<std::vector<Move>, 4> moves;
+    moves[WKSC] = {E1 | G1 << 6 | CASTLING};
+    moves[WQSC] = {E1 | C1 << 6 | CASTLING};
+    moves[BKSC] = {E8 | G8 << 6 | CASTLING};
+    moves[BQSC] = {E8 | C8 << 6 | CASTLING};
+    return moves;
+}
+
+std::array<std::vector<std::vector<std::vector<Move>>>, 2> computeEnPassantMoves() { // TODO this is ugly, clean it
+    std::array<std::vector<std::vector<std::vector<Move>>>, 2> moves;
+    std::vector<std::vector<std::vector<Move>>>& blackMove = moves[BLACK];
+    std::vector<std::vector<std::vector<Move>>>& whiteMove = moves[WHITE];
+    blackMove = {
+        {{B4 | A3 << 6 | EN_PASSANT}, {B4 | A3 << 6 | EN_PASSANT}},
+        {{A4 | B3 << 6 | EN_PASSANT}, {C4 | B3 << 6 | EN_PASSANT}},
+        {{B4 | C3 << 6 | EN_PASSANT}, {D4 | C3 << 6 | EN_PASSANT}},
+        {{C4 | D3 << 6 | EN_PASSANT}, {E4 | D3 << 6 | EN_PASSANT}},
+        {{D4 | E3 << 6 | EN_PASSANT}, {F4 | E3 << 6 | EN_PASSANT}},
+        {{E4 | F3 << 6 | EN_PASSANT}, {G4 | F3 << 6 | EN_PASSANT}},
+        {{F4 | G3 << 6 | EN_PASSANT}, {H4 | G3 << 6 | EN_PASSANT}},
+        {{G4 | H3 << 6 | EN_PASSANT}, {G4 | H3 << 6 | EN_PASSANT}}
+    };
+    whiteMove = {
+        {{B5 | A6 << 6 | EN_PASSANT}, {B5 | A6 << 6 | EN_PASSANT}},
+        {{A5 | B6 << 6 | EN_PASSANT}, {C5 | B6 << 6 | EN_PASSANT}},
+        {{B5 | C6 << 6 | EN_PASSANT}, {D5 | C6 << 6 | EN_PASSANT}},
+        {{C5 | D6 << 6 | EN_PASSANT}, {E5 | D6 << 6 | EN_PASSANT}},
+        {{D5 | E6 << 6 | EN_PASSANT}, {F5 | E6 << 6 | EN_PASSANT}},
+        {{E5 | F6 << 6 | EN_PASSANT}, {G5 | F6 << 6 | EN_PASSANT}},
+        {{F5 | G6 << 6 | EN_PASSANT}, {H5 | G6 << 6 | EN_PASSANT}},
+        {{G5 | H6 << 6 | EN_PASSANT}, {G5 | H6 << 6 | EN_PASSANT}}
+    };
+    return moves;
+}
+
 std::array<std::vector<std::vector<Move>>, 64> computeRookBlockMoves() {
     std::array<std::vector<std::vector<Move>>, 64> rookBlockMoves;
     for (int square = A1; square <= H8; square++) {
@@ -231,7 +267,7 @@ std::array<std::vector<std::vector<Move>>, 64> computeRookBlockMoves() {
         int eastSize = std::max(7 - (square % 8), 0);
         int westSize = std::max(square % 8, 0);
         std::vector<std::vector<Move>>& movesSet = rookBlockMoves[square];
-        movesSet.resize((int)std::pow(2, 64 - rookBlockShifts[square]));
+        movesSet.resize((int)std::pow(2, 64 - Shifts::Block::ROOK[square]));
 
         for (std::array<int, 4> selection : getEndBlockSquares({northSize, eastSize, southSize, westSize})) {
             std::vector<Move> moves;
@@ -270,7 +306,7 @@ std::array<std::vector<std::vector<Move>>, 64> computeBishopBlockMoves() {
         int southWestSize = std::max(std::min(square / 8, square % 8), 0);
         int northWestSize = std::max(std::min(7 - square / 8, square % 8), 0);
         std::vector<std::vector<Move>>& movesSet = bishopBlockMoves[square];
-        movesSet.resize((int)std::pow(2, 64 - bishopBlockShifts[square]));
+        movesSet.resize((int)std::pow(2, 64 - Shifts::Block::BISHOP[square]));
 
         for (std::array<int, 4> selection : getEndBlockSquares({northEastSize, southEastSize, southWestSize,
                 northWestSize})) {
@@ -302,10 +338,10 @@ std::array<std::vector<std::vector<Move>>, 64> computeBishopBlockMoves() {
     return bishopBlockMoves;
 }
 
-std::array<std::vector<int>, 64> computeRookReachIndices() {
-    std::array<std::vector<int>, 64> rookIndices;
+std::array<std::vector<uint>, 64> computeRookReachIndices() {
+    std::array<std::vector<uint>, 64> rookIndices;
     for (int square = A1; square <= H8; square++) {
-        std::vector<int>& indices = rookIndices[square];
+        std::vector<uint>& indices = rookIndices[square];
         int northSize = std::max(6 - (square / 8), 0);
         int southSize = std::max(square / 8 - 1, 0);
         int eastSize = std::max(6 - (square % 8), 0);
@@ -335,7 +371,7 @@ std::array<std::vector<int>, 64> computeRookReachIndices() {
                 if (!westBlock && ((j >> shift) & 1UL)) westBlock = k + 1;
             }
 
-            uint16_t magicIndex = ((occ * rookReachMagicNumbers[square]) >> rookReachShifts[square]);
+            uint16_t magicIndex = ((occ * MagicNums::Reach::ROOK[square]) >> Shifts::Reach::ROOK[square]);
             int mappedIndex = getIndex(
                 {northBlock, eastBlock, southBlock, westBlock},
                 {northSize ? northSize + 1 : 0, eastSize ? eastSize + 1 : 0, southSize ? southSize + 1 : 0,
@@ -347,10 +383,10 @@ std::array<std::vector<int>, 64> computeRookReachIndices() {
     return rookIndices;
 }
 
-std::array<std::vector<int>, 64> computeBishopReachIndices() {
-    std::array<std::vector<int>, 64> bishopIndices;
+std::array<std::vector<uint>, 64> computeBishopReachIndices() {
+    std::array<std::vector<uint>, 64> bishopIndices;
     for (int square = A1; square <= H8; square++) {
-        std::vector<int>& indices = bishopIndices[square];
+        std::vector<uint>& indices = bishopIndices[square];
         int northeastSize = std::max(std::min(6 - square / 8, 6 - square % 8), 0);
         int southeastSize = std::max(std::min(square / 8 - 1, 6 - square % 8), 0);
         int southwestSize = std::max(std::min(square / 8 - 1, square % 8 - 1), 0);
@@ -380,7 +416,7 @@ std::array<std::vector<int>, 64> computeBishopReachIndices() {
                 if (!northwestBlock && ((j >> shift) & 1UL)) northwestBlock = k + 1;
             }
 
-            uint16_t magicIndex = ((occ * bishopReachMagicNumbers[square]) >> bishopReachShifts[square]);
+            uint16_t magicIndex = ((occ * MagicNums::Reach::BISHOP[square]) >> Shifts::Reach::BISHOP[square]);
             int mappedIndex = getIndex(
                 {northeastBlock, southeastBlock, southwestBlock, northwestBlock},
                 {northeastSize ? northeastSize + 1 : 0, southeastSize ? southeastSize + 1 : 0,
@@ -393,14 +429,14 @@ std::array<std::vector<int>, 64> computeBishopReachIndices() {
 }
 
 std::array<std::vector<Bitboard>, 64> computeRookReaches() {
-    const std::array<std::vector<int>, 64> ROOK = computeRookReachIndices();
+    const std::array<std::vector<uint>, 64> ROOK = computeRookReachIndices();
     std::array<std::vector<Bitboard>, 64> reaches;
     for (int square = A1; square <= H8; square++) {
         std::vector<Bitboard>& reachSet = reaches[square];
-        int northSize = std::max(6 - (square / 8), 0);
-        int southSize = std::max(square / 8 - 1, 0);
-        int eastSize = std::max(6 - (square % 8), 0);
-        int westSize = std::max(square % 8 - 1, 0);
+        int northSize = std::max(7 - (square / 8), 0);
+        int southSize = std::max(square / 8, 0);
+        int eastSize = std::max(7 - (square % 8), 0);
+        int westSize = std::max(square % 8, 0);
         reachSet.resize(*std::max_element(ROOK[square].begin(), ROOK[square].end()) + 1);
         std::vector<std::array<int, 4>> combos = getEndCombinations({northSize, eastSize, southSize, westSize});
 
@@ -412,76 +448,66 @@ std::array<std::vector<Bitboard>, 64> computeRookReaches() {
             if (combo[3]) occ |= (1ULL << (square + W * combo[3]));
 
             Bitboard reach = 0ULL;
-            if (northSize && !combo[0]) combo[0] = northSize + 1;
             for (int i = 1; combo[0] > 0; combo[0]--, i++) {
                 reach |= (1ULL << (square + i * N));
             }
 
-            if (eastSize && !combo[1]) combo[1] = eastSize + 1;
             for (int i = 1; combo[1] > 0; combo[1]--, i++) {
                 reach |= (1ULL << (square + i * E));
             }
 
-            if (southSize && !combo[2]) combo[2] = southSize + 1;
             for (int i = 1; combo[2] > 0; combo[2]--, i++) {
                 reach |= (1ULL << (square + i * S));
             }
 
-            if (westSize && !combo[3]) combo[3] = westSize + 1;
             for (int i = 1; combo[3] > 0; combo[3]--, i++) {
                 reach |= (1ULL << (square + i * W));
             }
 
-            reachSet[ROOK[square][getRookReachIndex(occ, (Square) square)]] = reach;
+            reachSet[ROOK[square][getRookReachIndex(occ & Masks::ROOK[square], (Square) square)]] = reach;
         }
     }
     return reaches;
 }
 
 std::array<std::vector<Bitboard>, 64> computeBishopReaches() {
-    const std::array<std::vector<int>, 64> BISHOP = computeBishopReachIndices();
+    const std::array<std::vector<uint>, 64> BISHOP = computeBishopReachIndices();
     std::array<std::vector<Bitboard>, 64> reaches;
     for (int square = A1; square <= H8; square++) {
         std::vector<Bitboard>& reachSet = reaches[square];
-        int northeastSize = std::max(std::min(6 - square / 8, 6 - square % 8), 0);
-        int southeastSize = std::max(std::min(square / 8 - 1, 6 - square % 8), 0);
-        int southwestSize = std::max(std::min(square / 8 - 1, square % 8 - 1), 0);
-        int northwestSize = std::max(std::min(6 - square / 8, square % 8 - 1), 0);
+        int northeastSize = std::max(std::min(7 - square / 8, 7 - square % 8), 0);
+        int southeastSize = std::max(std::min(square / 8, 7 - square % 8), 0);
+        int southwestSize = std::max(std::min(square / 8, square % 8), 0);
+        int northwestSize = std::max(std::min(7 - square / 8, square % 8), 0);
         reachSet.resize(*std::max_element(BISHOP[square].begin(), BISHOP[square].end()) + 1);
         std::vector<std::array<int, 4>> combos = getEndCombinations({northeastSize, southeastSize, southwestSize,
                 northwestSize});
 
         for (std::array<int, 4> combo : combos) {
-            std::array<int, 4> foo = combo;
-
             Bitboard occ = 0ULL;
-            if (combo[0]) occ |= (1ULL << (square + NE * combo[0]));
+            if (combo[0]) occ |= (1ULL << (square + NE * combo[0])); // TODO R.E. the todo below, the problem is that this will set a bit on the edge on occasion. Why doesnt this seem to haoppenf or the rook???
             if (combo[1]) occ |= (1ULL << (square + SE * combo[1]));
             if (combo[2]) occ |= (1ULL << (square + SW * combo[2]));
             if (combo[3]) occ |= (1ULL << (square + NW * combo[3]));
 
             Bitboard reach = 0ULL;
-            if (northeastSize && !combo[0]) combo[0] = northeastSize + 1;
             for (int i = 1; combo[0] > 0; combo[0]--, i++) {
                 reach |= (1ULL << (square + i * NE));
             }
 
-            if (southeastSize && !combo[1]) combo[1] = southeastSize + 1;
             for (int i = 1; combo[1] > 0; combo[1]--, i++) {
                 reach |= (1ULL << (square + i * SE));
             }
 
-            if (southwestSize && !combo[2]) combo[2] = southwestSize + 1;
             for (int i = 1; combo[2] > 0; combo[2]--, i++) {
                 reach |= (1ULL << (square + i * SW));
             }
 
-            if (northwestSize && !combo[3]) combo[3] = northwestSize + 1;
             for (int i = 1; combo[3] > 0; combo[3]--, i++) {
                 reach |= (1ULL << (square + i * NW));
             }
 
-            reachSet[BISHOP[square][getBishopReachIndex(occ, (Square) square)]] = reach;
+            reachSet[BISHOP[square][getBishopReachIndex(occ & Masks::BISHOP[square], (Square) square)]] = reach; // TODO the border thing is stupid. this whole function need looking at.
         }
     }
     return reaches;
@@ -525,8 +551,8 @@ std::array<std::vector<std::vector<Square>>, 64> computeKingReachSquares() {
     return kingReaches;
 }
 
-std::vector<std::vector<Bitboard>> computeLevelRays() {
-    std::vector<std::vector<Bitboard>> rays;
+std::array<std::vector<Bitboard>, 64> computeLevelRays() {
+    std::array<std::vector<Bitboard>, 64> rays;
     for (int king = A1; king <= H8; king++) {
         std::vector<Bitboard> rays2;
         for (int piece = A1; piece <= H8; piece++) {
@@ -542,13 +568,13 @@ std::vector<std::vector<Bitboard>> computeLevelRays() {
             }
             rays2.push_back(ray);
         }
-        rays.push_back(rays2);
+        rays[king] = rays2;
     }
     return rays;
 }
 
-std::vector<std::vector<Bitboard>> computeDiagonalRays() {
-    std::vector<std::vector<Bitboard>> rays;
+std::array<std::vector<Bitboard>, 64> computeDiagonalRays() {
+    std::array<std::vector<Bitboard>, 64> rays;
     for (int king = A1; king <= H8; king++) {
         std::vector<Bitboard> rays2;
         for (int piece = A1; piece <= H8; piece++) {
@@ -561,7 +587,7 @@ std::vector<std::vector<Bitboard>> computeDiagonalRays() {
             }
             rays2.push_back(ray);
         }
-        rays.push_back(rays2);
+        rays[king] = rays2;
     }
     return rays;
 }
@@ -620,7 +646,7 @@ std::vector<std::array<int, 4>> getEndCombinations(std::array<int, 4> sizes) {
 }
 
 void generateLoneSquares(std::array<int, 4> sizes, std::vector<std::array<int, 4>>& res) {
-    for (int i = 0; i < sizes.size(); i++) {
+    for (uint i = 0; i < sizes.size(); i++) {
         for (int j = 0; j <= sizes[i]; j++) {
             std::array<int, 4> combo = {0, 0, 0, 0};
             combo[i] = j;
@@ -635,7 +661,7 @@ void generatePairSquares(std::array<int, 4> sizes, std::array<int, 4>& curr, std
     // Find limiting ray length and indices of pairs to increment.
     int smallerSize;
     int first = -1, second = -1;
-    for (int i = 0; i < sizes.size(); i++) {
+    for (uint i = 0; i < sizes.size(); i++) {
         if (first == -1 && sizes[i]) {
             smallerSize = sizes[i];
             first = i;

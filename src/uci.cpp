@@ -66,6 +66,21 @@ void Sicario::processInput(std::string& input) {
         case PERFT:
             handlePerft(commands);
             break;
+        case MOVE:
+            handleMove(commands);
+            break;
+        case UNDO:
+            handleUndo();
+            break;
+        case DISPLAY:
+            handleDisplay();
+            break;
+        case MOVES:
+            handleMoves();
+            break;
+        case BITBOARDS:
+            handleBitboards();
+            break;
     }
 }
 
@@ -84,6 +99,11 @@ UciInput Sicario::hashCommandInput(std::string& input) {
 
     // Custom command to engine
     if (input == "perft") return PERFT;
+    if (input == "move") return MOVE;
+    if (input == "undo") return UNDO;
+    if (input == "display") return DISPLAY;
+    if (input == "moves") return MOVES;
+    if (input == "bitboards") return BITBOARDS;
 
     return INVALID_COMMAND;
 }
@@ -198,10 +218,10 @@ void Sicario::handleUciNewGame() {
 }
 
 void Sicario::handlePosition(std::vector<std::string>& inputs) {
-    // Insert dummy command at start to use concatFEN
-    // CHECK
-    inputs.insert(inputs.begin(), "set");
-    this->position.parseFen(concatFEN(inputs));
+    // TODO play out moves as well and handle startpos command and unknown commands
+    if (inputs[1] == "fen") {
+        this->position.parseFen(concatFEN(inputs));
+    }
 }
 
 void Sicario::handleGo(std::vector<std::string>& commands) {
@@ -278,7 +298,77 @@ void Sicario::handlePonderHit() {
 }
 
 void Sicario::handlePerft(std::vector<std::string>& commands) {
-    // TODO
+    uint64_t totalNodes = perft(std::stoi(commands[1]), true);
+    std::cout << "Nodes searched: " << totalNodes << '\n';
+}
+
+void Sicario::handleMove(std::vector<std::string>& commands) {
+    // TODO chuck this in a parse move
+    std::string move_str = commands[1];
+    Move move = 0;
+    if (move_str[0] < 'a' || move_str[0] > 'h' || move_str[2] < 'a' || move_str[2] > 'h') {
+        communicate("Invalid move");
+        return;
+    }
+
+    if (move_str[1] < '1' || move_str[1] > '8' || move_str[3] < '1' || move_str[3] > '8') {
+        communicate("Invalid move");
+        return;
+    }
+
+    int start_file = move_str[0] - 'a';
+    int start_rank = move_str[1] - '1';
+    int end_file = move_str[2] - 'a';
+    int end_rank = move_str[3] - '1';
+
+    if (move_str.length() == 5) {
+        move |= PROMOTION;
+        if (move_str[4] == 'q') {
+            move |= pQUEEN;
+        } else if (move_str[4] == 'r') {
+            move |= pROOK;
+        } else if (move_str[4] == 'b') {
+            move |= pBISHOP;
+        }
+    }
+
+    move |= 8 * start_rank + start_file;
+    move |= ((8 * end_rank + end_file) << 6);
+
+    MoveList moves = MoveList(position);
+    if (!moves.contains(move)) {
+        communicate("Invalid move");
+        return;
+    }
+
+    position.makeMove(move);
+}
+
+void Sicario::handleUndo() {
+    position.undoMove();
+}
+
+void Sicario::handleDisplay() {
+    position.display();
+}
+
+void Sicario::handleMoves() {
+    MoveList moves = MoveList(position);
+
+    std::cout << moves.moves_index << '\n';
+    for (int i = 0; i < moves.moves_index; i++) {
+        std::cout << moves.moveSets[i]->size() << '\n';
+    }
+
+    std::cout << "There are " << moves.size() << " moves" << '\n';
+    for (Move move : moves) {
+        printMove(move, true);
+        std::cout << '\n';
+    }
+}
+
+void Sicario::handleBitboards() {
+    position.displayBitboards();
 }
 
 /**
