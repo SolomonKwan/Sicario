@@ -80,6 +80,7 @@ void Position::setPinAndCheckRayBitboards() {
     Bitboard pieces = sides[WHITE] | sides[BLACK];
     rook_pins = 0ULL;
     bishop_pins = 0ULL;
+    rook_ep_pins = 0ULL;
     check_rays = checkers;
 
     // Enemy queen rays
@@ -92,6 +93,7 @@ void Position::setPinAndCheckRayBitboards() {
         ray = Rays::LEVEL[king_sq][piece_list[eQueen][i]];
         if (oneBitSet(ray & sides[turn]) && oneBitSet(ray & sides[!turn])) rook_pins |= ray;
         if (oneBitSet(ray & pieces)) check_rays |= ray;
+        if (king_sq / 8 == piece_list[eQueen][i] / 8) rook_ep_pins |= ray;
     }
 
     // Enemy rooks
@@ -100,6 +102,7 @@ void Position::setPinAndCheckRayBitboards() {
         Bitboard ray = Rays::LEVEL[king_sq][piece_list[eRook][i]];
         if (oneBitSet(ray & sides[turn]) && oneBitSet(ray & sides[!turn])) rook_pins |= ray;
         if (oneBitSet(ray & pieces)) check_rays |= ray;
+        if (king_sq / 8 == piece_list[eRook][i] / 8) rook_ep_pins |= ray;
     }
 
     // Enemy bishops
@@ -311,6 +314,7 @@ void Position::resetPosition() {
     bishop_pins = 0ULL;
     check_rays = 0ULL;
     checkers = 0ULL;
+    rook_ep_pins = 0ULL;
 
     // Piece positions
     std::fill(std::begin(piece_index), std::end(piece_index), 0);
@@ -407,6 +411,7 @@ void Position::getCheckMoves(int& moves_index, MoveSet pos_moves[MOVESET_SIZE]) 
     getBishopCheckedMoves(moves_index, pos_moves);
     getKnightCheckedMoves(moves_index, pos_moves);
     getPawnCheckedMoves(moves_index, pos_moves);
+    getEnPassantMoves(moves_index, pos_moves);
     // TODO get check moves so far does not include knight checkers or pawn checkers.
 }
 
@@ -714,7 +719,8 @@ void Position::getEnPassantMoves(int& moves_index, MoveSet pos_moves[MOVESET_SIZ
         for (Square square : pawnSquares) {
             bool pawnExists = pieces[square] == (turn == WHITE ? W_PAWN : B_PAWN);
             if (pawnExists && !isPinnedByBishop(square) && !isPinnedByRook(square)) {
-                pos_moves[moves_index++] = &Moves::EN_PASSANT[turn][en_passant % 8][square % 8 < en_passant % 8 ? 0 : 1];
+                bool pinned = oneBitSet((sides[WHITE] | sides[BLACK]) & rook_ep_pins & ~(1ULL << square | 1ULL << (en_passant + (turn == WHITE ? S : N))));
+                if (!pinned) pos_moves[moves_index++] = &Moves::EN_PASSANT[turn][en_passant % 8][square % 8 < en_passant % 8 ? 0 : 1];
             }
         }
     }

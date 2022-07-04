@@ -111,6 +111,7 @@ class Position {
         Bitboard bishop_pins;
         Bitboard check_rays;
         Bitboard checkers;
+        Bitboard rook_ep_pins;
 
         // Piece positions
         int piece_index[12];
