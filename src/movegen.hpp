@@ -7,28 +7,6 @@
 #include "constants.hpp"
 #include "bitboard.hpp"
 
-enum Direction {
-    N = 8,
-    NE = 9,
-    E = 1,
-    SE = -7,
-    S = -8,
-    SW = -9,
-    W = -1,
-    NW = 7
-};
-
-enum KnightDirection {
-    NNE = +17,
-    ENE = +10,
-    ESE = -6,
-    SES = -15,
-    SWS = -17,
-    WSW = -10,
-    WNW = +6,
-    NWN = +15,
-};
-
 /**
  * @brief Computes move sets of the king on each square based on legal destinations. This does not compute castling
  * moves.

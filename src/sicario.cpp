@@ -3,6 +3,7 @@
 #include "sicario.hpp"
 #include "uci.hpp"
 #include "constants.hpp"
+#include "utils.hpp"
 
 ExitCode Sicario::run() {
     std::string input("");

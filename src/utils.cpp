@@ -76,3 +76,14 @@ void displayBB(uint64_t position) {
     }
     std::cout << '\n' << std::flush;
 }
+
+void printMove(Move move, bool extraInfo) {
+    if (extraInfo) {
+        std::cout << squareName[move & 0b111111] << squareName[(move >> 6) & 0b111111] << " " << moveName[(move >> 12) &
+                0b11] << " " << promoName[(move >> 14) & 0b11];
+    } else if ((move & (0b11 << 12)) == PROMOTION) {
+        std::cout << squareName[move & 0b111111] << squareName[(move >> 6) &0b111111] << promoName[(move >> 14) & 0b11];
+    } else {
+        std::cout << squareName[move & 0b111111] << squareName[(move >> 6) & 0b111111];
+    }
+}

@@ -12,26 +12,6 @@
 #define MOVESET_SIZE 32
 #define DEFAULT_HASH_SIZE 16
 
-typedef std::vector<Move> const* MoveSet;
-
-void printMove(Move move, bool extraInfo);
-
-inline MoveType type(Move move) {
-    return (MoveType)(move & (0b11 << 12));
-}
-
-inline Square end(Move move) {
-    return (Square)((move >> 6) & 0b111111);
-}
-
-inline Square start(Move move) {
-    return (Square)(move & 0b111111);
-}
-
-inline Promotion promo(Move move) {
-    return (Promotion)(move & (0b11 << 14));
-}
-
 /**
  * Forward declarations.
  */
@@ -135,6 +115,15 @@ class Position {
         int ply;
 
         /**
+         * @brief Get the king square.
+         *
+         * @return The king square.
+         */
+        inline Square getKingSquare() {
+            return piece_list[turn][KING_INDEX];
+        }
+
+        /**
          * @brief Checks if the specified square is attacked by the specified player.
          *
          * @param square Square to check if attacked by "player".
@@ -161,7 +150,7 @@ class Position {
          * @return True if the piece on "square" is pinned, else false.
          */
         inline bool isPinnedByRook(const Square square) {
-            return (1ULL << square) & rook_pins;
+            return (ONE_BB << square) & rook_pins;
         }
 
         /**
@@ -171,7 +160,7 @@ class Position {
          * @return True if the piece on "square" is pinned, else false.
          */
         inline bool isPinnedByBishop(const Square square) {
-            return (1ULL << square) & bishop_pins;
+            return (ONE_BB << square) & bishop_pins;
         }
 
         /**
@@ -409,9 +398,6 @@ class Position {
         // Game logic
         void checkCastlingEnPassantMoves(uint, uint, Move&);
         bool validMove(Move, MoveList&);
-        Bitboard getKnightCheckers(Square, Bitboard&);
-        Bitboard getKingAttackers(const Square, const bool) const;
-        Bitboard getKingAttackBitBoard() const;
 
         // Position updates
         void findAndRemovePiece(PieceType, Square);
@@ -432,17 +418,6 @@ class Position {
         void undoCastling();
         void undoPromotion();
         void undoEnPassant();
-
-        // Normal move generation
-        // void horizontalPinEp(int, bool, int, int, int, std::vector<Move>*[MOVESET_SIZE], int&);
-        // void diagonalPinEp(int, bool, int, int, int, std::vector<Move>*[MOVESET_SIZE], int&);
-
-        // Check move generation
-        // void getCheckedEp(Bitboard, std::vector<Move>*[MOVESET_SIZE], int&);
-
-        // Move reading and parsing
-        Move chooseMove(MoveList&);
-        void getSquares(std::string, Move&, uint&, uint&);
 
         // Miscellaneous
         void showEOG(ExitCode);
