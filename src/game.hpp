@@ -1,4 +1,3 @@
-
 #ifndef GAME_HPP
 #define GAME_HPP
 
@@ -42,7 +41,7 @@ class Position {
          * @param moves_index Current index of the first empty position in the pos_moves array.
          * @param pos_moves Array that holds pointers to vectors of moves.
          */
-        void getMoves(int& moves_index, MoveSet pos_moves[MOVESET_SIZE]);
+        void getMoves(uint& moves_index, MoveSet pos_moves[MOVESET_SIZE]);
 
         /**
          * @brief Performs the given move on the board position.
@@ -213,7 +212,7 @@ class Position {
          * @param moves_index Current index of the first empty position in the pos_moves array.
          * @param pos_moves Array that holds pointers to vectors of moves.
          */
-        void getKingMoves(int& moves_index, MoveSet pos_moves[MOVESET_SIZE]);
+        void getKingMoves(uint& moves_index, MoveSet pos_moves[MOVESET_SIZE]);
 
         /**
          * @brief Calls other functions to add the legal moves for when the king is in check.
@@ -221,7 +220,7 @@ class Position {
          * @param moves_index Current index of the first empty position in the pos_moves array.
          * @param pos_moves Array that holds pointers to vectors of moves.
          */
-        void getCheckMoves(int& moves_index, MoveSet pos_moves[MOVESET_SIZE]);
+        void getCheckMoves(uint& moves_index, MoveSet pos_moves[MOVESET_SIZE]);
 
         /**
          * @brief Retries and adds the vector of legal moves for the queens when king is in check.
@@ -229,7 +228,7 @@ class Position {
          * @param moves_index Current index of the first empty position in the pos_moves array.
          * @param pos_moves Array that holds pointers to vectors of moves.
          */
-        void getQueenCheckedMoves(int& moves_index, MoveSet pos_moves[MOVESET_SIZE]);
+        void getQueenCheckedMoves(uint& moves_index, MoveSet pos_moves[MOVESET_SIZE]);
 
         /**
          * @brief Retries and adds the vector of legal moves for the rooks when king is in check.
@@ -237,7 +236,7 @@ class Position {
          * @param moves_index Current index of the first empty position in the pos_moves array.
          * @param pos_moves Array that holds pointers to vectors of moves.
          */
-        void getRookCheckedMoves(int& moves_index, MoveSet pos_moves[MOVESET_SIZE]);
+        void getRookCheckedMoves(uint& moves_index, MoveSet pos_moves[MOVESET_SIZE]);
 
         /**
          * @brief Retries and adds the vector of legal moves for the bishop when king is in check.
@@ -245,7 +244,7 @@ class Position {
          * @param moves_index Current index of the first empty position in the pos_moves array.
          * @param pos_moves Array that holds pointers to vectors of moves.
          */
-        void getBishopCheckedMoves(int& moves_index, MoveSet pos_moves[MOVESET_SIZE]);
+        void getBishopCheckedMoves(uint& moves_index, MoveSet pos_moves[MOVESET_SIZE]);
 
         /**
          * @brief Retries and adds the vector of legal moves for the knight when king is in check.
@@ -253,7 +252,7 @@ class Position {
          * @param moves_index Current index of the first empty position in the pos_moves array.
          * @param pos_moves Array that holds pointers to vectors of moves.
          */
-        void getKnightCheckedMoves(int& moves_index, MoveSet pos_moves[MOVESET_SIZE]);
+        void getKnightCheckedMoves(uint& moves_index, MoveSet pos_moves[MOVESET_SIZE]);
 
         /**
          * @brief Retries and adds the vector of legal moves for the pawn when king is in check.
@@ -261,7 +260,7 @@ class Position {
          * @param moves_index Current index of the first empty position in the pos_moves array.
          * @param pos_moves Array that holds pointers to vectors of moves.
          */
-        void getPawnCheckedMoves(int& moves_index, MoveSet pos_moves[MOVESET_SIZE]);
+        void getPawnCheckedMoves(uint& moves_index, MoveSet pos_moves[MOVESET_SIZE]);
 
         /**
          * @brief Calls other functions to add the legal moves for when there is no check.
@@ -269,7 +268,7 @@ class Position {
          * @param moves_index Current index of the first empty position in the pos_moves array.
          * @param pos_moves Array that holds pointers to vectors of moves.
          */
-        void getNormalMoves(int& moves_index, MoveSet pos_moves[MOVESET_SIZE]);
+        void getNormalMoves(uint& moves_index, MoveSet pos_moves[MOVESET_SIZE]);
 
         /**
          * @brief Retrives and adds the vector of legal queen moves of the side to move to the pos_moves array.
@@ -277,7 +276,7 @@ class Position {
          * @param moves_index Current index of the first empty position in the pos_moves array.
          * @param pos_moves Array that holds pointers to vectors of moves.
          */
-        void getQueenMoves(int& moves_index, MoveSet pos_moves[MOVESET_SIZE]);
+        void getQueenMoves(uint& moves_index, MoveSet pos_moves[MOVESET_SIZE]);
 
         /**
          * @brief Retrives and adds the vector of legal rook moves of the side to move to the pos_moves array.
@@ -285,7 +284,7 @@ class Position {
          * @param moves_index Current index of the first empty position in the pos_moves array.
          * @param pos_moves Array that holds pointers to vectors of moves.
          */
-        void getRookMoves(int& moves_index, MoveSet pos_moves[MOVESET_SIZE]);
+        void getRookMoves(uint& moves_index, MoveSet pos_moves[MOVESET_SIZE]);
 
         /**
          * @brief Retrives and adds the vector of legal bishop moves of the side to move to the pos_moves array.
@@ -293,7 +292,7 @@ class Position {
          * @param moves_index Current index of the first empty position in the pos_moves array.
          * @param pos_moves Array that holds pointers to vectors of moves.
          */
-        void getBishopMoves(int& moves_index, MoveSet pos_moves[MOVESET_SIZE]);
+        void getBishopMoves(uint& moves_index, MoveSet pos_moves[MOVESET_SIZE]);
 
         /**
          * @brief Retrives and adds the vector of legal knight moves of the side to move to the pos_moves array.
@@ -301,7 +300,7 @@ class Position {
          * @param moves_index Current index of the first empty position in the pos_moves array.
          * @param pos_moves Array that holds pointers to vectors of moves.
          */
-        void getKnightMoves(int& moves_index, MoveSet pos_moves[MOVESET_SIZE]);
+        void getKnightMoves(uint& moves_index, MoveSet pos_moves[MOVESET_SIZE]);
 
         /**
          * @brief Retrives and adds the vector of legal castling moves of the side to move to the pos_moves array.
@@ -310,7 +309,7 @@ class Position {
          * @param moves_index Current index of the first empty position in the pos_moves array.
          * @param pos_moves Array that holds pointers to vectors of moves.
          */
-        void getCastlingMoves(int& moves_index, MoveSet pos_moves[MOVESET_SIZE]);
+        void getCastlingMoves(uint& moves_index, MoveSet pos_moves[MOVESET_SIZE]);
 
         /**
          * @brief Retrives and adds the vector of legal en-passant moves of the side to move to the pos_moves array.
@@ -318,7 +317,7 @@ class Position {
          * @param moves_index Current index of the first empty position in the pos_moves array.
          * @param pos_moves Array that holds pointers to vectors of moves.
          */
-        void getEnPassantMoves(int& moves_index, MoveSet pos_moves[MOVESET_SIZE]);
+        void getEnPassantMoves(uint& moves_index, MoveSet pos_moves[MOVESET_SIZE]);
 
         /**
          * @brief Retrives and adds the vector of legal pawn moves of the side to move to the pos_moves array.
@@ -326,7 +325,7 @@ class Position {
          * @param moves_index Current index of the first empty position in the pos_moves array.
          * @param pos_moves Array that holds pointers to vectors of moves.
          */
-        void getPawnMoves(int& moves_index, MoveSet pos_moves[MOVESET_SIZE]);
+        void getPawnMoves(uint& moves_index, MoveSet pos_moves[MOVESET_SIZE]);
 
         /**
          * @brief Get the reach bitboard of a rook on the indicated square.
@@ -353,7 +352,7 @@ class Position {
          * @param pos_moves Array that holds pointers to vectors of moves.
          * @param square The square of the piece of concern.
          */
-        void getBishopPinMoves(int& moves_index, MoveSet pos_moves[MOVESET_SIZE], Square square) const;
+        void getBishopPinMoves(uint& moves_index, MoveSet pos_moves[MOVESET_SIZE], Square square) const;
 
         /**
          * @brief Get the horizontal and vertical ranged moves for a horizontally or vertically  pinned piece on
@@ -363,7 +362,7 @@ class Position {
          * @param pos_moves Array that holds pointers to vectors of moves.
          * @param square The square of the piece of concern.
          */
-        void getRookPinMoves(int& moves_index, MoveSet pos_moves[MOVESET_SIZE], Square square) const;
+        void getRookPinMoves(uint& moves_index, MoveSet pos_moves[MOVESET_SIZE], Square square) const;
 
         /**
          * @brief Checks if the given square is occupied.
@@ -463,7 +462,7 @@ class MoveList {
         Iterator begin();
         Iterator end();
 
-        int moves_index = 0;
+        uint moves_index = 0;
         MoveSet moveSets[MOVESET_SIZE];
         const Move* endMove = nullptr; // Dummy move for end of iterator. Just need the address.
 };
