@@ -66,7 +66,7 @@ bool isPostiveInteger(std::string str) {
 }
 
 void displayBB(uint64_t position) {
-    std::string positionString = std::bitset<64>(position).to_string();
+    std::string positionString = std::bitset<SQUARE_COUNT>(position).to_string();
     std::cout << "\n";
     for (int i = 0; i < 8; i++) {
         // Reverse each line then print.

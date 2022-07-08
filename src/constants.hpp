@@ -31,6 +31,8 @@ const uint PROMOTION_SHIFT = 14;
 const uint KING_INDEX = 0;
 const uint MOVESET_SIZE = 32;
 const uint MAX_MOVES = 500;
+const uint DEFAULT_HASH_SIZE = 16;
+const uint MAX_PIECE_COUNT = 10;
 
 const uint16_t MOVE_MASK = 0b111111;
 const uint16_t MOVE_TYPE_MASK = 0b11;

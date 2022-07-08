@@ -7,11 +7,6 @@
 #include "constants.hpp"
 #include "movegen.hpp"
 
-#define KIWIPETE "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1"
-#define MAX_MOVES 500
-#define MOVESET_SIZE 32
-#define DEFAULT_HASH_SIZE 16
-
 /**
  * Forward declarations.
  */
@@ -80,12 +75,12 @@ class Position {
     private:
         // Non-position information
         Player turn;
-        int castling;
+        uint castling;
         Square en_passant;
-        int halfmove, fullmove;
+        uint halfmove, fullmove;
 
         // Bitboards
-        Bitboard sides[2];
+        Bitboard sides[PLAYER_COUNT];
         Bitboard kings, queens, rooks, bishops, knights, pawns;
         Bitboard rook_pins;
         Bitboard bishop_pins;
@@ -94,15 +89,15 @@ class Position {
         Bitboard rook_ep_pins;
 
         // Piece positions
-        int piece_index[12];
-        Square piece_list[12][10];
-        PieceType pieces[64];
+        uint piece_index[PIECE_TYPE_COUNT];
+        Square piece_list[PIECE_TYPE_COUNT][MAX_PIECE_COUNT];
+        PieceType pieces[SQUARE_COUNT];
 
         // Piece counts for insufficient material checks.
-        int piece_cnt = 0;
-        int knight_cnt = 0;
-        int wdsb_cnt = 0, wlsb_cnt = 0;
-        int bdsb_cnt = 0, blsb_cnt = 0;
+        uint piece_cnt = 0;
+        uint knight_cnt = 0;
+        uint wdsb_cnt = 0, wlsb_cnt = 0;
+        uint bdsb_cnt = 0, blsb_cnt = 0;
 
         // Position history
         Move last_move;
@@ -112,7 +107,7 @@ class Position {
         std::vector<History> history;
         std::unordered_map<Bitboard, int> hashes;
         Hash hash;
-        int ply;
+        uint ply;
 
         /**
          * @brief Get the king square.
@@ -120,6 +115,16 @@ class Position {
          * @return The king square.
          */
         inline Square getKingSquare() {
+            return piece_list[turn][KING_INDEX];
+        }
+
+        /**
+         * @brief Get the king square.
+         *
+         * @param turn The player who's king we want.
+         * @return The king square.
+         */
+        inline Square getKingSquare(Player player) {
             return piece_list[turn][KING_INDEX];
         }
 
@@ -467,9 +472,9 @@ std::string concatFEN(std::vector<std::string> strings);
 
 /**
  * Generate zobrist piece hashes using a predefined seed.
- * @return: Array of size 12 (each piece for each colour) containing arrays of size 64 Hashes.
+ * @return: Array of size 12 (each piece for each colour) containing arrays of size SQUARE_COUNT Hashes.
  */
-std::array<std::array<Hash, 64>, 12> generatePieceHashes();
+std::array<std::array<Hash, SQUARE_COUNT>, 12> generatePieceHashes();
 
 /**
  * Generate zobrist hashes for the turn using predefined seed.

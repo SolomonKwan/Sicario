@@ -55,8 +55,8 @@ int TOTAL_TEST_COUNT = 0;
 int TESTS_PASSED = 0;
 int TESTS_FAILED = 0;
 
-const std::array<std::vector<uint>, 64> ROOK_REACH_INDICES = computeRookReachIndices();
-const std::array<std::vector<uint>, 64> BISHOP_REACH_INDICES = computeBishopReachIndices();
+const std::array<std::vector<uint>, SQUARE_COUNT> ROOK_REACH_INDICES = computeRookReachIndices();
+const std::array<std::vector<uint>, SQUARE_COUNT> BISHOP_REACH_INDICES = computeBishopReachIndices();
 
 template <typename T>
 void assertEquals(TestType testType, T expected, T actual, int testNum) {
@@ -465,7 +465,7 @@ void run_getBishopMovesIndex_tests() {
 }
 
 void run_knightMagicNums_tests() {
-    for (int sq = 0; sq < 64; sq++) {
+    for (Square sq = A1; sq < SQUARE_COUNT; sq++) {
         TOTAL_TEST_COUNT++;
         TESTS_COUNTS[KNIGHT_MAGIC_NUMS]++;
         std::string testName = TESTS_NAMES[KNIGHT_MAGIC_NUMS] + std::to_string(TESTS_COUNTS[KNIGHT_MAGIC_NUMS]);
@@ -512,7 +512,7 @@ void run_knightMagicNums_tests() {
 }
 
 void run_kingMagicNums_tests() {
-    for (int sq = 0; sq < 64; sq++) {
+    for (Square sq = A1; sq < SQUARE_COUNT; sq++) {
         TOTAL_TEST_COUNT++;
         TESTS_COUNTS[KING_MAGIC_NUMS]++;
         std::string testName = TESTS_NAMES[KING_MAGIC_NUMS] + std::to_string(TESTS_COUNTS[KING_MAGIC_NUMS]) + "\t";
@@ -645,7 +645,7 @@ void run_whitePawnMagicNums_tests() {
 }
 
 void run_rookBlockMagicNums_tests() {
-    for (int sq = 0; sq < 64; sq++) {
+    for (Square sq = A1; sq < SQUARE_COUNT; sq++) {
         TOTAL_TEST_COUNT++;
         TESTS_COUNTS[ROOK_BLOCK_MAGIC_NUMS]++;
         std::string testName = TESTS_NAMES[ROOK_BLOCK_MAGIC_NUMS] + std::to_string(TESTS_COUNTS[ROOK_BLOCK_MAGIC_NUMS]);
@@ -687,7 +687,7 @@ void run_rookBlockMagicNums_tests() {
 }
 
 void run_bishopBlockMagicNums_tests() {
-    for (int sq = 0; sq < 64; sq++) {
+    for (Square sq = A1; sq < SQUARE_COUNT; sq++) {
         TOTAL_TEST_COUNT++;
         TESTS_COUNTS[BISHOP_BLOCK_MAGIC_NUMS]++;
         std::string testName = TESTS_NAMES[BISHOP_BLOCK_MAGIC_NUMS] + std::to_string(TESTS_COUNTS[BISHOP_BLOCK_MAGIC_NUMS]);

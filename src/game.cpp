@@ -7,9 +7,6 @@
 #include "utils.hpp"
 #include "bitboard.hpp"
 
-/**
- * Precomputed moves information.
- */
 namespace Moves {
     const std::array<std::vector<std::vector<Move>>, SQUARE_COUNT> KING = computeKingMoves();
     const std::array<std::vector<std::vector<Move>>, SQUARE_COUNT> ROOK = computeRookMoves();
@@ -25,9 +22,6 @@ namespace Moves::Blocks {
     const std::array<std::vector<std::vector<Move>>, SQUARE_COUNT> BISHOP = computeBishopBlockMoves();
 }
 
-/**
- * Vector of indices for rook and bishop indexing.
- */
 namespace Indices {
     const std::array<std::vector<uint>, SQUARE_COUNT> ROOK = computeRookReachIndices();
     const std::array<std::vector<uint>, SQUARE_COUNT> BISHOP = computeBishopReachIndices();
@@ -42,17 +36,11 @@ namespace KingReach {
     const std::array<std::vector<std::vector<Square>>, SQUARE_COUNT> SQUARES = computeKingReachSquares();
 }
 
-/**
- * Rays bitboards from start (exlusive) to end (inclusive).
- */
 namespace Rays {
     const std::array<std::vector<Bitboard>, SQUARE_COUNT> LEVEL = computeLevelRays();
     const std::array<std::vector<Bitboard>, SQUARE_COUNT> DIAGONAL = computeDiagonalRays();
 }
 
-/**
- * Hashes used for zobrist.
- */
 namespace Hashes {
     std::array<std::array<Hash, SQUARE_COUNT>, PIECE_TYPE_COUNT> PIECES = generatePieceHashes();
     Hash TURN = generateTurnHash();
@@ -61,7 +49,6 @@ namespace Hashes {
 }
 
 void Position::setCheckers() {
-    checkers = ZERO_BB;
     checkers = isAttacked(getKingSquare(), !turn);
 }
 
@@ -306,7 +293,7 @@ void Position::resetPosition() {
 
     // Piece positions
     std::fill(std::begin(piece_index), std::end(piece_index), 0);
-    std::fill(piece_list[0] + 0, piece_list[PIECE_TYPE_COUNT] + 10, NONE);
+    std::fill(piece_list[0] + 0, piece_list[PIECE_TYPE_COUNT] + MAX_PIECE_COUNT, NONE);
     std::fill(std::begin(pieces), std::end(pieces), NO_PIECE);
 
     // Piece counts
