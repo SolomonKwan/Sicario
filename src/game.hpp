@@ -110,6 +110,15 @@ class Position {
         uint ply;
 
         /**
+         * @brief Get bitboard of all pieces on the board.
+         *
+         * @return Bitboard of all pieces.
+         */
+        inline Bitboard getPieces() const {
+            return sides[WHITE] | sides[BLACK];
+        }
+
+        /**
          * @brief Get the king square.
          *
          * @return The king square.
@@ -401,7 +410,7 @@ class Position {
         bool isThreeFoldRep();
 
         // Position updates
-        void findAndRemovePiece(PieceType&, Square&);
+        void findAndRemovePiece(PieceType, Square);
         void addPiece(PieceType, Square);
         void removePiece();
 

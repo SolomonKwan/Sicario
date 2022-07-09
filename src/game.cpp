@@ -61,8 +61,6 @@ inline bool Position::isPawnPinnedByRookVertically(const Square square) {
 }
 
 void Position::setPinAndCheckRayBitboards() {
-    Square king_sq = getKingSquare();
-    Bitboard pieces = sides[WHITE] | sides[BLACK];
     rook_pins = ZERO_BB;
     bishop_pins = ZERO_BB;
     rook_ep_pins = ZERO_BB;
@@ -71,31 +69,31 @@ void Position::setPinAndCheckRayBitboards() {
     // Enemy queen rays
     PieceType eQueen = turn == WHITE ? B_QUEEN : W_QUEEN;
     for (uint i = 0; i < piece_index[eQueen]; i++) {
-        Bitboard ray = Rays::DIAGONAL[king_sq][piece_list[eQueen][i]];
+        Bitboard ray = Rays::DIAGONAL[getKingSquare()][piece_list[eQueen][i]];
         if (oneBitSet(ray & sides[turn]) && oneBitSet(ray & sides[!turn])) bishop_pins |= ray;
-        if (oneBitSet(ray & pieces)) check_rays |= ray;
+        if (oneBitSet(ray & getPieces())) check_rays |= ray;
 
-        ray = Rays::LEVEL[king_sq][piece_list[eQueen][i]];
+        ray = Rays::LEVEL[getKingSquare()][piece_list[eQueen][i]];
         if (oneBitSet(ray & sides[turn]) && oneBitSet(ray & sides[!turn])) rook_pins |= ray;
-        if (oneBitSet(ray & pieces)) check_rays |= ray;
-        if (rank(king_sq) == rank(piece_list[eQueen][i])) rook_ep_pins |= ray;
+        if (oneBitSet(ray & getPieces())) check_rays |= ray;
+        if (rank(getKingSquare()) == rank(piece_list[eQueen][i])) rook_ep_pins |= ray;
     }
 
     // Enemy rooks
     PieceType eRook = turn == WHITE ? B_ROOK : W_ROOK;
     for (uint i = 0; i < piece_index[eRook]; i++) {
-        Bitboard ray = Rays::LEVEL[king_sq][piece_list[eRook][i]];
+        Bitboard ray = Rays::LEVEL[getKingSquare()][piece_list[eRook][i]];
         if (oneBitSet(ray & sides[turn]) && oneBitSet(ray & sides[!turn])) rook_pins |= ray;
-        if (oneBitSet(ray & pieces)) check_rays |= ray;
-        if (rank(king_sq) == rank(piece_list[eRook][i])) rook_ep_pins |= ray;
+        if (oneBitSet(ray & getPieces())) check_rays |= ray;
+        if (rank(getKingSquare()) == rank(piece_list[eRook][i])) rook_ep_pins |= ray;
     }
 
     // Enemy bishops
     PieceType eBishop = turn == WHITE ? B_BISHOP : W_BISHOP;
     for (uint i = 0; i < piece_index[eBishop]; i++) {
-        Bitboard ray = Rays::DIAGONAL[king_sq][piece_list[eBishop][i]];
+        Bitboard ray = Rays::DIAGONAL[getKingSquare()][piece_list[eBishop][i]];
         if (oneBitSet(ray & sides[turn]) && oneBitSet(ray & sides[!turn])) bishop_pins |= ray;
-        if (oneBitSet(ray & pieces)) check_rays |= ray;
+        if (oneBitSet(ray & getPieces())) check_rays |= ray;
     }
 }
 
@@ -342,18 +340,17 @@ inline bool Position::inCheck() {
 }
 
 void Position::getKingMoves(uint& moves_index, MoveSet pos_moves[MOVESET_SIZE]) {
-    Square kingSquare = getKingSquare();
-    Bitboard reachBB = Masks::KING[kingSquare] & ~sides[turn];
+    Bitboard reachBB = Masks::KING[getKingSquare()] & ~sides[turn];
 
     if (reachBB == ZERO_BB) return;
-    for (Square square : KingReach::SQUARES[kingSquare][getKingMovesIndex(reachBB, kingSquare)]) {
+    for (Square square : KingReach::SQUARES[getKingSquare()][getKingMovesIndex(reachBB, getKingSquare())]) {
         if (isAttacked(square, (Player) !turn, true)) {
             reachBB &= ~(ONE_BB << square);
         }
     }
 
     if (reachBB == ZERO_BB) return;
-    pos_moves[moves_index++] = &Moves::KING[kingSquare][getKingMovesIndex(reachBB, kingSquare)];
+    pos_moves[moves_index++] = &Moves::KING[getKingSquare()][getKingMovesIndex(reachBB, getKingSquare())];
 }
 
 void Position::getCheckMoves(uint& moves_index, MoveSet pos_moves[MOVESET_SIZE]) {
@@ -368,17 +365,16 @@ void Position::getCheckMoves(uint& moves_index, MoveSet pos_moves[MOVESET_SIZE])
 
 void Position::getQueenCheckedMoves(uint& moves_index, MoveSet pos_moves[MOVESET_SIZE]) {
     PieceType queen = turn == WHITE ? W_QUEEN : B_QUEEN;
-    Bitboard pieces = sides[WHITE] | sides[BLACK];
 
     for (uint i = 0; i < piece_index[queen]; i++) {
         Square queenSquare = piece_list[queen][i];
         if (!isPinned(queenSquare)) {
-            Bitboard reach = getRookReachBB(Masks::ROOK[queenSquare] & pieces, queenSquare) & check_rays;
+            Bitboard reach = getRookReachBB(Masks::ROOK[queenSquare] & getPieces(), queenSquare) & check_rays;
             if (reach != ZERO_BB) {
                 pos_moves[moves_index++] = &Moves::Blocks::ROOK[queenSquare][getRookBlockIndex(reach, queenSquare)];
             }
 
-            reach = getBishopReachBB(Masks::BISHOP[queenSquare] & pieces, queenSquare) & check_rays;
+            reach = getBishopReachBB(Masks::BISHOP[queenSquare] & getPieces(), queenSquare) & check_rays;
             if (reach != ZERO_BB) {
                 pos_moves[moves_index++] = &Moves::Blocks::BISHOP[queenSquare][getBishopBlockIndex(reach, queenSquare)];
             }
@@ -388,12 +384,11 @@ void Position::getQueenCheckedMoves(uint& moves_index, MoveSet pos_moves[MOVESET
 
 void Position::getRookCheckedMoves(uint& moves_index, MoveSet pos_moves[MOVESET_SIZE]) {
     PieceType rook = turn == WHITE ? W_ROOK : B_ROOK;
-    Bitboard pieces = sides[WHITE] | sides[BLACK];
 
     for (uint i = 0; i < piece_index[rook]; i++) {
         Square rookSquare = piece_list[rook][i];
         if (!isPinned(rookSquare)) {
-            Bitboard reach = getRookReachBB(Masks::ROOK[rookSquare] & pieces, rookSquare) & check_rays;
+            Bitboard reach = getRookReachBB(Masks::ROOK[rookSquare] & getPieces(), rookSquare) & check_rays;
             if (reach != ZERO_BB) {
                 pos_moves[moves_index++] = &Moves::Blocks::ROOK[rookSquare][getRookBlockIndex(reach, rookSquare)];
             }
@@ -403,12 +398,11 @@ void Position::getRookCheckedMoves(uint& moves_index, MoveSet pos_moves[MOVESET_
 
 void Position::getBishopCheckedMoves(uint& moves_index, MoveSet pos_moves[MOVESET_SIZE]) {
     PieceType bishop = turn == WHITE ? W_BISHOP : B_BISHOP;
-    Bitboard pieces = sides[WHITE] | sides[BLACK];
 
     for (uint i = 0; i < piece_index[bishop]; i++) {
         Square bishopSquare = piece_list[bishop][i];
         if (!isPinned(bishopSquare)) {
-            Bitboard reach = getBishopReachBB(Masks::BISHOP[bishopSquare] & pieces, bishopSquare) & check_rays;
+            Bitboard reach = getBishopReachBB(Masks::BISHOP[bishopSquare] & getPieces(), bishopSquare) & check_rays;
             if (reach != ZERO_BB) {
                 pos_moves[moves_index++] = &Moves::Blocks::BISHOP[bishopSquare][getBishopBlockIndex(reach, bishopSquare)];
             }
@@ -431,19 +425,20 @@ void Position::getKnightCheckedMoves(uint& moves_index, MoveSet pos_moves[MOVESE
 
 void Position::getPawnCheckedMoves(uint& moves_index, MoveSet pos_moves[MOVESET_SIZE]) {
     PieceType pawn = turn == WHITE ? W_PAWN : B_PAWN;
-    int advance = turn == WHITE ? N : S;
-    int startRank = turn == WHITE ? 1 : 6;
-    Bitboard pieces = sides[WHITE] | sides[BLACK];
+    Direction advance = turn == WHITE ? N : S;
+    Rank startRank = turn == WHITE ? RANK_2 : RANK_7;
 
     for (uint i = 0; i < piece_index[pawn]; i++) {
         Square pawnSquare = piece_list[pawn][i];
         if (!isPinned(pawnSquare)) {
             Bitboard reach = ZERO_BB;
-            if (!(ONE_BB << (pawnSquare + advance) & pieces)) {
-                if ((ONE_BB << (pawnSquare + advance)) & (check_rays & ~sides[!turn])) {
-                    reach |= ONE_BB << (pawnSquare + advance);
-                } else if (rank(pawnSquare) == startRank && !(ONE_BB << (pawnSquare + advance + advance) & pieces) && (ONE_BB << (pawnSquare + advance + advance)) & (check_rays & ~sides[!turn])) {
-                    reach |= ONE_BB << (pawnSquare + advance + advance);
+            Square pawnPush = pawnSquare + advance;
+            Square pawnDoublePush = pawnSquare + advance + advance;
+            if (!((ONE_BB << pawnPush) & getPieces())) {
+                if ((ONE_BB << pawnPush) & (check_rays & ~sides[!turn])) {
+                    reach |= ONE_BB << pawnPush;
+                } else if (rank(pawnSquare) == startRank && !((ONE_BB << pawnDoublePush) & getPieces()) && (ONE_BB << pawnDoublePush) & (check_rays & ~sides[!turn])) {
+                    reach |= ONE_BB << pawnDoublePush;
                 }
             }
 
@@ -494,7 +489,6 @@ void Position::getNormalMoves(uint& moves_index, MoveSet pos_moves[MOVESET_SIZE]
 
 void Position::getQueenMoves(uint& moves_index, MoveSet pos_moves[MOVESET_SIZE]) {
     PieceType queen = turn == WHITE ? W_QUEEN : B_QUEEN;
-    Bitboard pieces = sides[WHITE] | sides[BLACK];
 
     for (uint i = 0; i < piece_index[queen]; i++) {
         Square queenSquare = piece_list[queen][i];
@@ -503,12 +497,12 @@ void Position::getQueenMoves(uint& moves_index, MoveSet pos_moves[MOVESET_SIZE])
         } else if (isPinnedByRook(queenSquare)) {
             getRookPinMoves(moves_index, pos_moves, queenSquare);
         } else {
-            Bitboard reach = getBishopReachBB(Masks::BISHOP[queenSquare] & pieces, queenSquare) & ~sides[turn];
+            Bitboard reach = getBishopReachBB(Masks::BISHOP[queenSquare] & getPieces(), queenSquare) & ~sides[turn];
             if (reach != ZERO_BB) {
                 pos_moves[moves_index++] = &Moves::BISHOP[queenSquare][getBishopMovesIndex(reach, queenSquare)];
             }
 
-            reach = getRookReachBB(Masks::ROOK[queenSquare] & pieces, queenSquare) & ~sides[turn];
+            reach = getRookReachBB(Masks::ROOK[queenSquare] & getPieces(), queenSquare) & ~sides[turn];
             if (reach != ZERO_BB) {
                 pos_moves[moves_index++] = &Moves::ROOK[queenSquare][getRookMovesIndex(reach, queenSquare)];
             }
@@ -518,7 +512,6 @@ void Position::getQueenMoves(uint& moves_index, MoveSet pos_moves[MOVESET_SIZE])
 
 void Position::getRookMoves(uint& moves_index, MoveSet pos_moves[MOVESET_SIZE]) {
     PieceType rook = turn == WHITE ? W_ROOK : B_ROOK;
-    Bitboard pieces = sides[WHITE] | sides[BLACK];
 
     for (uint i = 0; i < piece_index[rook]; i++) {
         Square rookSquare = piece_list[rook][i];
@@ -527,7 +520,7 @@ void Position::getRookMoves(uint& moves_index, MoveSet pos_moves[MOVESET_SIZE]) 
         } else if (isPinnedByRook(rookSquare)) {
             getRookPinMoves(moves_index, pos_moves, rookSquare);
         } else {
-            Bitboard reach = getRookReachBB(Masks::ROOK[rookSquare] & pieces, rookSquare) & ~sides[turn];
+            Bitboard reach = getRookReachBB(Masks::ROOK[rookSquare] & getPieces(), rookSquare) & ~sides[turn];
             if (reach != ZERO_BB) {
                 pos_moves[moves_index++] = &Moves::ROOK[rookSquare][getRookMovesIndex(reach, rookSquare)];
             }
@@ -537,7 +530,6 @@ void Position::getRookMoves(uint& moves_index, MoveSet pos_moves[MOVESET_SIZE]) 
 
 void Position::getBishopMoves(uint& moves_index, MoveSet pos_moves[MOVESET_SIZE]) {
     PieceType bishop = turn == WHITE ? W_BISHOP : B_BISHOP;
-    Bitboard pieces = sides[WHITE] | sides[BLACK];
 
     for (uint i = 0; i < piece_index[bishop]; i++) {
         Square bishopSquare = piece_list[bishop][i];
@@ -546,7 +538,7 @@ void Position::getBishopMoves(uint& moves_index, MoveSet pos_moves[MOVESET_SIZE]
         } else if (isPinnedByRook(bishopSquare)) {
             continue;
         } else {
-            Bitboard reach = getBishopReachBB(Masks::BISHOP[bishopSquare] & pieces, bishopSquare) & ~sides[turn];
+            Bitboard reach = getBishopReachBB(Masks::BISHOP[bishopSquare] & getPieces(), bishopSquare) & ~sides[turn];
             if (reach != ZERO_BB) {
                 pos_moves[moves_index++] = &Moves::BISHOP[bishopSquare][getBishopMovesIndex(reach, bishopSquare)];
             }
@@ -571,9 +563,8 @@ void Position::getKnightMoves(uint& moves_index, MoveSet pos_moves[MOVESET_SIZE]
 
 void Position::getPawnMoves(uint& moves_index, MoveSet pos_moves[MOVESET_SIZE]) {
     PieceType pawn = turn == WHITE ? W_PAWN : B_PAWN;
-    int advance = turn == WHITE ? N : S;
-    int startRank = turn == WHITE ? RANK_2 : RANK_7;
-    Bitboard pieces = sides[WHITE] | sides[BLACK];
+    Direction advance = turn == WHITE ? N : S;
+    Rank startRank = turn == WHITE ? RANK_2 : RANK_7;
 
     for (uint i = 0; i < piece_index[pawn]; i++) {
         Square pawnSquare = piece_list[pawn][i];
@@ -592,9 +583,9 @@ void Position::getPawnMoves(uint& moves_index, MoveSet pos_moves[MOVESET_SIZE]) 
                 reach |= Masks::PAWN[turn][pawnSquare] & ~Masks::FILE[file(pawnSquare)] & sides[!turn];
             }
 
-            if (!(ONE_BB << (pawnSquare + advance) & pieces)) {
+            if (!(ONE_BB << (pawnSquare + advance) & getPieces())) {
                 reach |= ONE_BB << (pawnSquare + advance);
-                if (rank(pawnSquare) == startRank && !(ONE_BB << (pawnSquare + advance + advance) & pieces)) {
+                if (rank(pawnSquare) == startRank && !(ONE_BB << (pawnSquare + advance + advance) & getPieces())) {
                     reach |= ONE_BB << (pawnSquare + advance + advance);
                 }
             }
@@ -615,21 +606,19 @@ inline Bitboard Position::getBishopReachBB(Bitboard occupancy, Square square) co
 }
 
 void Position::getBishopPinMoves(uint& moves_index, MoveSet pos_moves[MOVESET_SIZE], Square square) const {
-    Bitboard pieces = (sides[WHITE] | sides[BLACK]);
-    Bitboard reach = bishop_pins & ~(ONE_BB << square) & getBishopReachBB(Masks::BISHOP[square] & pieces, square);
+    Bitboard reach = bishop_pins & ~(ONE_BB << square) & getBishopReachBB(Masks::BISHOP[square] & getPieces(), square);
     if (reach == ZERO_BB) return;
     pos_moves[moves_index++] = &Moves::BISHOP[square][getBishopMovesIndex(reach, square)];
 }
 
 void Position::getRookPinMoves(uint& moves_index, MoveSet pos_moves[MOVESET_SIZE], Square square) const {
-    Bitboard pieces = (sides[WHITE] | sides[BLACK]);
-    Bitboard reach = rook_pins & ~(ONE_BB << square) & getRookReachBB(Masks::ROOK[square] & pieces, square);
+    Bitboard reach = rook_pins & ~(ONE_BB << square) & getRookReachBB(Masks::ROOK[square] & getPieces(), square);
     if (reach == ZERO_BB) return;
     pos_moves[moves_index++] = &Moves::ROOK[square][getRookMovesIndex(reach, square)];
 }
 
 Bitboard Position::isOccupied(const Square square) {
-    return ((this->sides[WHITE] | this->sides[BLACK]) & (ONE_BB << square));
+    return (getPieces() & (ONE_BB << square));
 }
 
 void Position::getCastlingMoves(uint& moves_index, MoveSet pos_moves[MOVESET_SIZE]) {
@@ -665,12 +654,12 @@ void Position::getCastlingMoves(uint& moves_index, MoveSet pos_moves[MOVESET_SIZ
 void Position::getEnPassantMoves(uint& moves_index, MoveSet pos_moves[MOVESET_SIZE]) {
     if (en_passant) {
         std::vector<Square> pawnSquares;
-        if (file(en_passant) != FILE_A) pawnSquares.push_back((Square)(en_passant + (turn == WHITE ? SW : NW)));
-        if (file(en_passant) != FILE_H) pawnSquares.push_back((Square)(en_passant + (turn == WHITE ? SE : NE)));
+        if (file(en_passant) != FILE_A) pawnSquares.push_back(en_passant + (turn == WHITE ? SW : NW));
+        if (file(en_passant) != FILE_H) pawnSquares.push_back(en_passant + (turn == WHITE ? SE : NE));
         for (Square square : pawnSquares) {
             bool pawnExists = pieces[square] == (turn == WHITE ? W_PAWN : B_PAWN);
             if (pawnExists && !isPinnedByBishop(square) && !isPinnedByRook(square)) {
-                bool pinned = oneBitSet((sides[WHITE] | sides[BLACK]) & rook_ep_pins & ~(ONE_BB << square | ONE_BB << (en_passant + (turn == WHITE ? S : N))));
+                bool pinned = oneBitSet(getPieces() & rook_ep_pins & ~(ONE_BB << square | ONE_BB << (en_passant + (turn == WHITE ? S : N))));
                 if (!pinned) pos_moves[moves_index++] = &Moves::EN_PASSANT[turn][file(en_passant)][file(square) < file(en_passant) ? 0 : 1];
             }
         }
@@ -704,7 +693,7 @@ ExitCode Position::isEOG(MoveList& move_list) {
 }
 
 Bitboard Position::isAttacked(const Square square, const Player player, const bool ignoreKing) {
-    Bitboard pieces = (sides[WHITE] | sides[BLACK]) ^ (ignoreKing ? ONE_BB << piece_list[!player][0] : ZERO_BB);
+    Bitboard pieces = getPieces() ^ (ignoreKing ? ONE_BB << piece_list[!player][0] : ZERO_BB);
     Bitboard kingBB = Masks::KING[square] & this->sides[player] & this->kings;
     Bitboard rooksBB = getRookReachBB(Masks::ROOK[square] & pieces, square) & sides[player] & (queens | rooks);
     Bitboard bishopsBB = getBishopReachBB(Masks::BISHOP[square] & pieces, square) & sides[player] & (queens | bishops);
@@ -717,7 +706,7 @@ inline Hash Position::getHash() {
     return this->hash;
 }
 
-void Position::findAndRemovePiece(PieceType& piece, Square& square) {
+void Position::findAndRemovePiece(PieceType piece, Square square) {
     int taken_index = -1;
     for (uint i = 0; i < this->piece_index[piece]; i++) {
         if (piece_list[piece][i] == square) {
@@ -768,84 +757,78 @@ void Position::addPiece(PieceType piece, Square square) {
 }
 
 void Position::removePiece() {
-    PieceType captured = this->piece_captured;
-    if (captured == NO_PIECE) return;
-    Square end = (Square) ((this->last_move >> 6) & 0b111111);
-    if (captured == W_QUEEN || captured == B_QUEEN) {
-        this->queens &= ~(ONE_BB << end);
-        this->findAndRemovePiece(captured, end);
-    } else if (captured == W_ROOK || captured == B_ROOK) {
-        this->rooks &= ~(ONE_BB << end);
-        this->findAndRemovePiece(captured, end);
-    } else if (captured == W_BISHOP || captured == B_BISHOP) {
-        this->bishops &= ~(ONE_BB << end);
-        this->findAndRemovePiece(captured, end);
-    } else if (captured == W_KNIGHT || captured == B_KNIGHT) {
-        this->knights &= ~(ONE_BB << end);
-        this->findAndRemovePiece(captured, end);
-    } else if (captured == W_PAWN || captured == B_PAWN) {
-        this->pawns &= ~(ONE_BB << end);
-        this->findAndRemovePiece(captured, end);
+    if (piece_captured == NO_PIECE) return;
+    if (piece_captured == W_QUEEN || piece_captured == B_QUEEN) {
+        queens &= ~(ONE_BB << end(last_move));
+        findAndRemovePiece(piece_captured, end(last_move));
+    } else if (piece_captured == W_ROOK || piece_captured == B_ROOK) {
+        rooks &= ~(ONE_BB << end(last_move));
+        findAndRemovePiece(piece_captured, end(last_move));
+    } else if (piece_captured == W_BISHOP || piece_captured == B_BISHOP) {
+        bishops &= ~(ONE_BB << end(last_move));
+        findAndRemovePiece(piece_captured, end(last_move));
+    } else if (piece_captured == W_KNIGHT || piece_captured == B_KNIGHT) {
+        knights &= ~(ONE_BB << end(last_move));
+        findAndRemovePiece(piece_captured, end(last_move));
+    } else if (piece_captured == W_PAWN || piece_captured == B_PAWN) {
+        pawns &= ~(ONE_BB << end(last_move));
+        findAndRemovePiece(piece_captured, end(last_move));
     }
 }
 
 void Position::handleCastle() {
-    Square start, end;
-    int last_end = (this->last_move >> 6) & 0b111111;
+    Square startSquare, endSquare;
     PieceType rook;
 
-    if (last_end  == G1) {
-        start = H1;
-        end = F1;
+    if (end(last_move) == G1) {
+        startSquare = H1;
+        endSquare = F1;
         rook = W_ROOK;
-    } else if (last_end == C1) {
-        start = A1;
-        end = D1;
+    } else if (end(last_move) == C1) {
+        startSquare = A1;
+        endSquare = D1;
         rook = W_ROOK;
-    } else if (last_end == G8) {
-        start = H8;
-        end = F8;
+    } else if (end(last_move) == G8) {
+        startSquare = H8;
+        endSquare = F8;
         rook = B_ROOK;
     } else {
-        start = A8;
-        end = D8;
+        startSquare = A8;
+        endSquare = D8;
         rook = B_ROOK;
     }
 
-    this->sides[this->turn] &= ~(ONE_BB << start);
-    this->sides[this->turn] |= ONE_BB << end;
-    this->pieces[start] = NO_PIECE;
-    this->hash ^= Hashes::PIECES[rook][start];
-    this->pieces[end] = rook;
-    this->hash ^= Hashes::PIECES[rook][end];
+    sides[turn] &= ~(ONE_BB << startSquare);
+    sides[turn] |= ONE_BB << endSquare;
+    pieces[startSquare] = NO_PIECE;
+    hash ^= Hashes::PIECES[rook][startSquare];
+    pieces[endSquare] = rook;
+    hash ^= Hashes::PIECES[rook][endSquare];
 
-    this->findAndRemovePiece(rook, start);
-    this->addPiece(rook, end);
-    this->rooks &= ~(ONE_BB << start);
-    this->rooks |= ONE_BB << end;
+    findAndRemovePiece(rook, startSquare);
+    addPiece(rook, endSquare);
+    rooks &= ~(ONE_BB << startSquare);
+    rooks |= ONE_BB << endSquare;
 }
 
 void Position::makeKingMoves(Move& move) {
-    this->removePiece();
-    int start = move & 0b111111;
-    int end = (move >> 6) & 0b111111;
-    int move_type = move & (0b11 << 12);
-    this->piece_list[this->turn][0] = (Square) end;
+    removePiece();
+    piece_list[turn][KING_INDEX] = end(move);
 
     // Remove castling rights
-    if (this->turn) {
-        this->castling &= ~(1 << WKSC | 1 << WQSC);
+    if (turn) {
+        castling &= ~(1U << WKSC | 1U << WQSC);
     } else {
-        this->castling &= ~(1 << BKSC | 1 << BQSC);
+        castling &= ~(1U << BKSC | 1U << BQSC);
     }
 
-    if (move_type == CASTLING) {
-        this->handleCastle();
+    if (type(move) == CASTLING) {
+        handleCastle();
     }
 
     // Update bitboards.
-    this->kings &= ~(ONE_BB << start);
-    this->kings |= ONE_BB << end;
+    kings &= ~(ONE_BB << start(move));
+    kings |= ONE_BB << end(move);
 }
 
 void Position::makeQueenMoves(Move& move) {
