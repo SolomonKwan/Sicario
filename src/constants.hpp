@@ -10,8 +10,8 @@ typedef uint64_t Bitboard;
 typedef std::vector<Move> const* MoveSet;
 
 const std::string NAME = "Sicario";
-const std::string CODENAME = "iteration-2";
-const std::string VERSION = "v0.2.0";
+const std::string CODENAME = "Iteration-3";
+const std::string VERSION = "v0.3.0";
 const std::string AUTHOR = "S. Kwan";
 const std::string CHESS_PROGRAMMING = "www.chessprogramming.org";
 const std::string STOCKFISH = "Stockfish";
