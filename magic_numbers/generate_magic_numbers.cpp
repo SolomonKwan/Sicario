@@ -769,7 +769,7 @@ void generateBishopBlockMNs() {
 }
 
 void generateKingMasks() {
-    std::vector<Bitboard> masks;
+    BitboardVector masks;
     for (int square = 0; square < 64; square++) {
         Bitboard mask = ZERO_BB;
         if (square / 8 != 7) mask |= (ONE_BB << (square + N));
@@ -790,7 +790,7 @@ void generateKingMasks() {
 }
 
 void generateKnightMasks() {
-    std::vector<Bitboard> masks;
+    BitboardVector masks;
     for (int square = 0; square < 64; square++) {
         Bitboard mask = ZERO_BB;
         if (square / 8 < 6 && square % 8 < 7) mask |= (ONE_BB << (square + NNE));
@@ -811,7 +811,7 @@ void generateKnightMasks() {
 }
 
 void generateBlackPawnMasks() {
-    std::vector<Bitboard> masks;
+    BitboardVector masks;
     for (int square = 0; square < 64; square++) {
         Bitboard mask = ZERO_BB;
         mask |= (ONE_BB << (square + S));
@@ -828,7 +828,7 @@ void generateBlackPawnMasks() {
 }
 
 void generateWhitePawnMasks() {
-    std::vector<Bitboard> masks;
+    BitboardVector masks;
     for (int square = 0; square < 64; square++) {
         Bitboard mask = ZERO_BB;
         mask |= (ONE_BB << (square + N));

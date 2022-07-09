@@ -13,35 +13,35 @@
  *
  * @return Array of vectors of move vectors.
  */
-std::array<std::vector<std::vector<Move>>, SQUARE_COUNT> computeKingMoves();
+MoveFamilies computeKingMoves();
 
 /**
  * @brief Computes move sets of the rook on each square based on legal destinations.
  *
  * @return Array of vectors of move vectors.
  */
-std::array<std::vector<std::vector<Move>>, SQUARE_COUNT> computeRookMoves();
+MoveFamilies computeRookMoves();
 
 /**
  * @brief Computes moves sets of the bishop on each square based on legal destinations.
  *
  * @return Array of vectors of move vectors.
  */
-std::array<std::vector<std::vector<Move>>, SQUARE_COUNT> computeBishopMoves();
+MoveFamilies computeBishopMoves();
 
 /**
  * @brief Computes move sets of the knight on each square based on legal destinations.
  *
  * @return Array of vectors of move vectors.
  */
-std::array<std::vector<std::vector<Move>>, SQUARE_COUNT> computeKnightMoves();
+MoveFamilies computeKnightMoves();
 
 /**
  * @brief Makes calls to computePawnMovesBySide to create the pawn moves arrays. Black array is 0, white array is 1.
  *
  * @return Array of array of vectors of move vectors.
  */
-std::array<std::array<std::vector<std::vector<Move>>, SQUARE_COUNT>,2> computePawnMoves();
+std::array<MoveFamilies,2> computePawnMoves();
 
 /**
  * @brief Computes move sets of the pawn on each square based of legal destinations for a particular side. Does not
@@ -50,7 +50,7 @@ std::array<std::array<std::vector<std::vector<Move>>, SQUARE_COUNT>,2> computePa
  * @param player The side to compute move sets for.
  * @return: Array of vectors of move vectors.
  */
-std::array<std::vector<std::vector<Move>>, SQUARE_COUNT> computePawnMovesBySide(Player player);
+MoveFamilies computePawnMovesBySide(Player player);
 
 /**
  * @brief Computed the castling moves for both sides. Black array is 0, white array is 1.
@@ -67,7 +67,7 @@ std::array<std::vector<std::vector<std::vector<Move>>>, 2> computeEnPassantMoves
  *
  * @return Array of vector of move vectors.
  */
-std::array<std::vector<std::vector<Move>>, SQUARE_COUNT> computeRookBlockMoves();
+MoveFamilies computeRookBlockMoves();
 
 /**
  * @brief Computes the move sets for bishop moves on each square based on legal destinations when the own side is in
@@ -75,35 +75,35 @@ std::array<std::vector<std::vector<Move>>, SQUARE_COUNT> computeRookBlockMoves()
  *
  * @return Array of vector of move vectors.
  */
-std::array<std::vector<std::vector<Move>>, SQUARE_COUNT> computeBishopBlockMoves();
+MoveFamilies computeBishopBlockMoves();
 
 /**
  * @brief Compute the rook indices into the reach index array.
  *
  * @return Array of vectors of uints of the rook index into the precomputed reach bitboards.
  */
-std::array<std::vector<uint>, SQUARE_COUNT> computeRookReachIndices();
+IndicesFamily computeRookReachIndices();
 
 /**
  * @brief Compute the bishop indices into the reach index array.
  *
  * @return Array of vectors of uints of the bishop index into the precomputed reach bitboards.
  */
-std::array<std::vector<uint>, SQUARE_COUNT> computeBishopReachIndices();
+IndicesFamily computeBishopReachIndices();
 
 /**
  * @brief Compute the reach bitboards for the different occupancies of the rook on each square.
  *
  * @return Array of vectors of reaches bitboards.
  */
-std::array<std::vector<Bitboard>, SQUARE_COUNT> computeRookReaches();
+BitboardFamily computeRookReaches();
 
 /**
  * @brief Computes the reach bitboards for the different occupancies of the bishop on each square.
  *
  * @return Array of vectors of reaches bitboards.
  */
-std::array<std::vector<Bitboard>, SQUARE_COUNT> computeBishopReaches();
+BitboardFamily computeBishopReaches();
 
 /**
  * @brief Computes the squares of the reach of the king for different occupancies on each square.
@@ -117,14 +117,14 @@ std::array<std::vector<std::vector<Square>>, SQUARE_COUNT> computeKingReachSquar
  *
  * @return Array of vector of reach bitboards.
  */
-std::array<std::vector<Bitboard>, SQUARE_COUNT> computeLevelRays();
+BitboardFamily computeLevelRays();
 
 /**
  * @brief Computes the diagonal rays from first square (exclusive) to second square (inclusive).
  *
  * @return Array of vector of reach bitboards.
  */
-std::array<std::vector<Bitboard>, SQUARE_COUNT> computeDiagonalRays();
+BitboardFamily computeDiagonalRays();
 
 /**
  * @brief Gets the rook index into the precomputed reach index array.

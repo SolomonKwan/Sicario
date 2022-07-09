@@ -3,11 +3,7 @@
 
 #include <string>
 #include <vector>
-
-typedef uint16_t Move;
-typedef uint64_t Hash;
-typedef uint64_t Bitboard;
-typedef std::vector<Move> const* MoveSet;
+#include <array>
 
 const std::string NAME = "Sicario";
 const std::string CODENAME = "Iteration-3";
@@ -38,10 +34,21 @@ const uint16_t MOVE_MASK = 0b111111;
 const uint16_t MOVE_TYPE_MASK = 0b11;
 const uint16_t PROMOTION_MASK = 0b11;
 
+typedef uint64_t Bitboard;
 const Bitboard DARK_BB = 0xAA55AA55AA55AA55ULL;
 const Bitboard ZERO_BB = 0ULL;
 const Bitboard ONE_BB = 1ULL;
 const Bitboard MAX_BB = 0xFFFFFFFFFFFFFFFF;
+
+typedef uint16_t Move;
+typedef std::vector<Move> MoveVector;
+typedef std::vector<MoveVector> MoveFamily;
+typedef std::array<MoveFamily, SQUARE_COUNT> MoveFamilies;
+typedef std::vector<Move> const* MoveSet;
+typedef uint64_t Hash;
+typedef std::vector<Bitboard> BitboardVector;
+typedef std::array<std::vector<Bitboard>, SQUARE_COUNT> BitboardFamily;
+typedef std::array<std::vector<uint>, SQUARE_COUNT> IndicesFamily;
 
 enum File { FILE_A, FILE_B, FILE_C, FILE_D, FILE_E, FILE_F, FILE_G, FILE_H };
 

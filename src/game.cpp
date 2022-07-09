@@ -8,28 +8,28 @@
 #include "bitboard.hpp"
 
 namespace Moves {
-    const std::array<std::vector<std::vector<Move>>, SQUARE_COUNT> KING = computeKingMoves();
-    const std::array<std::vector<std::vector<Move>>, SQUARE_COUNT> ROOK = computeRookMoves();
-    const std::array<std::vector<std::vector<Move>>, SQUARE_COUNT> BISHOP = computeBishopMoves();
-    const std::array<std::vector<std::vector<Move>>, SQUARE_COUNT> KNIGHT = computeKnightMoves();
-    const std::array<std::array<std::vector<std::vector<Move>>, SQUARE_COUNT>, PLAYER_COUNT> PAWN = computePawnMoves();
-    const std::array<std::vector<Move>, CASTLING_OPTIONS> CASTLING = computeCastlingMoves();
-    const std::array<std::vector<std::vector<std::vector<Move>>>, PLAYER_COUNT> EN_PASSANT = computeEnPassantMoves();
+    const MoveFamilies KING = computeKingMoves();
+    const MoveFamilies ROOK = computeRookMoves();
+    const MoveFamilies BISHOP = computeBishopMoves();
+    const MoveFamilies KNIGHT = computeKnightMoves();
+    const std::array<MoveFamilies, PLAYER_COUNT> PAWN = computePawnMoves();
+    const std::array<MoveVector, CASTLING_OPTIONS> CASTLING = computeCastlingMoves();
+    const std::array<std::vector<MoveFamily>, PLAYER_COUNT> EN_PASSANT = computeEnPassantMoves(); // TODO cleaner way of computing en-passant moves
 }
 
 namespace Moves::Blocks {
-    const std::array<std::vector<std::vector<Move>>, SQUARE_COUNT> ROOK = computeRookBlockMoves();
-    const std::array<std::vector<std::vector<Move>>, SQUARE_COUNT> BISHOP = computeBishopBlockMoves();
+    const MoveFamilies ROOK = computeRookBlockMoves();
+    const MoveFamilies BISHOP = computeBishopBlockMoves();
 }
 
 namespace Indices {
-    const std::array<std::vector<uint>, SQUARE_COUNT> ROOK = computeRookReachIndices();
-    const std::array<std::vector<uint>, SQUARE_COUNT> BISHOP = computeBishopReachIndices();
+    const IndicesFamily ROOK = computeRookReachIndices();
+    const IndicesFamily BISHOP = computeBishopReachIndices();
 }
 
 namespace Reach {
-    const std::array<std::vector<Bitboard>, SQUARE_COUNT> ROOK = computeRookReaches();
-    const std::array<std::vector<Bitboard>, SQUARE_COUNT> BISHOP = computeBishopReaches();
+    const BitboardFamily ROOK = computeRookReaches();
+    const BitboardFamily BISHOP = computeBishopReaches();
 }
 
 namespace KingReach {
@@ -37,8 +37,8 @@ namespace KingReach {
 }
 
 namespace Rays {
-    const std::array<std::vector<Bitboard>, SQUARE_COUNT> LEVEL = computeLevelRays();
-    const std::array<std::vector<Bitboard>, SQUARE_COUNT> DIAGONAL = computeDiagonalRays();
+    const BitboardFamily LEVEL = computeLevelRays();
+    const BitboardFamily DIAGONAL = computeDiagonalRays();
 }
 
 namespace Hashes {
@@ -48,15 +48,15 @@ namespace Hashes {
     std::array<Hash, FILE_COUNT> EN_PASSANT = generateEnPassantHash();
 }
 
-void Position::setCheckers() {
+inline void Position::setCheckers() {
     checkers = isAttacked(getKingSquare(), !turn);
 }
 
-bool Position::isPawnPinnedByRookHorizontally(const Square square) {
+inline bool Position::isPawnPinnedByRookHorizontally(const Square square) {
     return (rank(getKingSquare()) == rank(square)) && isPinnedByRook(square);
 }
 
-bool Position::isPawnPinnedByRookVertically(const Square square) {
+inline bool Position::isPawnPinnedByRookVertically(const Square square) {
     return (file(getKingSquare()) == file(square)) && isPinnedByRook(square);
 }
 
