@@ -47,8 +47,9 @@ class Position {
          * @brief Performs the given move on the board position.
          *
          * @param move The move to perform.
+         * @param hash Whether or not to hash the positions. Defaulted to true.
          */
-        void makeMove(Move move);
+        void makeMove(Move& move, bool hash = true);
 
         /**
          * @brief Undos the last move made.
@@ -132,7 +133,7 @@ class Position {
          *
          * @param square Square to check if attacked by "player".
          * @param player Attacking player to check.
-         * @param ignoreKing Ignore the !"player" king when calculating. Used for king check moves.
+         * @param ignoreKing Ignore the !"player" king when calculating. Used for king check moves. Defaulted to false.
          * @return Bitboard whose set bits indicate a piece belonging to "player" that attacks the given square.
          */
         Bitboard isAttacked(const Square square, const Player player, const bool ignoreKing = false);
@@ -387,7 +388,7 @@ class Position {
          *
          * @param move The move to save.
          */
-        void saveHistory(Move move);
+        void saveHistory(Move& move);
 
 
 
@@ -399,22 +400,18 @@ class Position {
         bool insufficientMaterial();
         bool isThreeFoldRep();
 
-        // Game logic
-        void checkCastlingEnPassantMoves(uint, uint, Move&);
-        bool validMove(Move, MoveList&);
-
         // Position updates
-        void findAndRemovePiece(PieceType, Square);
+        void findAndRemovePiece(PieceType&, Square&);
         void addPiece(PieceType, Square);
         void removePiece();
 
         // Make move
-        void makeKingMoves(Move);
-        void makeQueenMoves(Move);
-        void makeRookMoves(Move);
-        void makeBishopMoves(Move );
-        void makeKnightMoves(Move);
-        void makePawnMoves(Move);
+        void makeKingMoves(Move&);
+        void makeQueenMoves(Move&);
+        void makeRookMoves(Move&);
+        void makeBishopMoves(Move& );
+        void makeKnightMoves(Move&);
+        void makePawnMoves(Move&);
         void handleCastle();
 
         // Undo

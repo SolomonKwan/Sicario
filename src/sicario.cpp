@@ -24,7 +24,7 @@ uint64_t Sicario::perft(int depth, bool root) {
             current_node_count = 1;
             nodes++;
         } else {
-            position.makeMove(move);
+            position.makeMove(move, false);
             current_node_count = depth == 2 ? MoveList(position).size() : perft(depth - 1);
             position.undoMove();
             nodes += current_node_count;
