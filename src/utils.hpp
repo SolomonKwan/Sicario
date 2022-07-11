@@ -89,7 +89,7 @@ inline Square end(Move move) {
  * @return The move type encoded in the move.
  */
 inline MoveType type(Move move) {
-    return static_cast<MoveType>((move >> MOVE_TYPE_SHIFT) & MOVE_TYPE_MASK);
+    return static_cast<MoveType>(move & (MOVE_TYPE_MASK << MOVE_TYPE_SHIFT));
 }
 
 /**
@@ -99,7 +99,7 @@ inline MoveType type(Move move) {
  * @return The promotion encoded in the move.
  */
 inline Promotion promo(Move move) {
-    return static_cast<Promotion>((move >> PROMOTION_SHIFT) & PROMOTION_MASK);
+    return static_cast<Promotion>(move & (PROMOTION_MASK << PROMOTION_SHIFT));
 }
 
 /**
