@@ -28,6 +28,7 @@ inline bool isValidElo(std::string str) {
  */
 void Sicario::processInput(std::string& input) {
     std::vector<std::string> commands = split(input, " ");
+    if (commands.size() == 0) return;
     UciInput hashedInput = hashCommandInput(commands[0]);
 
     switch (hashedInput) {
