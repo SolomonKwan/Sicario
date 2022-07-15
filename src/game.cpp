@@ -245,7 +245,6 @@ void Position::parseFen(std::string fen) {
     parseFenMove(parts[1]);
     parseFenCastling(parts[2]);
     parseFenEnPassant(parts[3]);
-    parseFenEnPassant(parts[4]);
     parseFenMoves(parts[4], parts[5]);
 
     // Set ply and position hash to zero.
