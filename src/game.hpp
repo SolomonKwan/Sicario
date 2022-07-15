@@ -65,10 +65,6 @@ class Position {
 
         Move pseudoRandomMove(MoveList&, Player);
 
-        // Accessors
-        Hash getHash();
-        Player getTurn();
-
         // Checkers
         ExitCode isEOG(MoveList&);
 
@@ -123,7 +119,7 @@ class Position {
          *
          * @return The king square.
          */
-        inline Square getKingSquare() {
+        inline Square getKingSquare() const {
             return piece_list[turn][KING_INDEX];
         }
 
@@ -145,7 +141,7 @@ class Position {
          * @param ignoreKing Ignore the !"player" king when calculating. Used for king check moves. Defaulted to false.
          * @return Bitboard whose set bits indicate a piece belonging to "player" that attacks the given square.
          */
-        Bitboard isAttacked(const Square square, const Player player, const bool ignoreKing = false);
+        Bitboard isAttacked(const Square square, const Player player, const bool ignoreKing = false) const;
 
         /**
          * @brief Check if a piece located on "square" is pinned.
@@ -153,7 +149,7 @@ class Position {
          * @param square The square of the piece to check.
          * @return True if the piece on "square" is pinned, else false.
          */
-        inline bool isPinned(const Square square) {
+        inline bool isPinned(const Square square) const {
             return isPinnedByRook(square) || isPinnedByBishop(square);
         }
 
@@ -163,7 +159,7 @@ class Position {
          * @param square The square of the piece to check.
          * @return True if the piece on "square" is pinned, else false.
          */
-        inline bool isPinnedByRook(const Square square) {
+        inline bool isPinnedByRook(const Square square) const {
             return (ONE_BB << square) & rook_pins;
         }
 
@@ -173,25 +169,25 @@ class Position {
          * @param square The square of the piece to check.
          * @return True if the piece on "square" is pinned, else false.
          */
-        inline bool isPinnedByBishop(const Square square) {
+        inline bool isPinnedByBishop(const Square square) const {
             return (ONE_BB << square) & bishop_pins;
         }
 
         /**
          * @brief Checks if a pawn is pinned by a rook horizontally.
          *
-         * @param square The square that the pawn of concernis on.
+         * @param square The square that the pawn of concern is on.
          * @return True if pinned by a rook/queen horizontally, else false.
          */
-        bool isPawnPinnedByRookHorizontally(const Square square);
+        bool isPawnPinnedByRookHorizontally(const Square square) const;
 
         /**
          * @brief Checks if a pawn is pinned by a rook vertically.
          *
-         * @param square The square that the pawn of concernis on.
+         * @param square The square that the pawn of concern is on.
          * @return True if pinned by a rook/queen vertically, else false.
          */
-        bool isPawnPinnedByRookVertically(const Square square);
+        bool isPawnPinnedByRookVertically(const Square square) const;
 
         /**
          * @brief Sets the bitboard of checkers.
@@ -222,7 +218,7 @@ class Position {
          * @param moves_index Current index of the first empty position in the pos_moves array.
          * @param pos_moves Array that holds pointers to vectors of moves.
          */
-        void getKingMoves(uint& moves_index, MoveSet pos_moves[MOVESET_SIZE]);
+        void getKingMoves(uint& moves_index, MoveSet pos_moves[MOVESET_SIZE]) const;
 
         /**
          * @brief Calls other functions to add the legal moves for when the king is in check.
@@ -230,7 +226,7 @@ class Position {
          * @param moves_index Current index of the first empty position in the pos_moves array.
          * @param pos_moves Array that holds pointers to vectors of moves.
          */
-        void getCheckMoves(uint& moves_index, MoveSet pos_moves[MOVESET_SIZE]);
+        void getCheckMoves(uint& moves_index, MoveSet pos_moves[MOVESET_SIZE]) const;
 
         /**
          * @brief Retries and adds the vector of legal moves for the queens when king is in check.
@@ -238,7 +234,7 @@ class Position {
          * @param moves_index Current index of the first empty position in the pos_moves array.
          * @param pos_moves Array that holds pointers to vectors of moves.
          */
-        void getQueenCheckedMoves(uint& moves_index, MoveSet pos_moves[MOVESET_SIZE]);
+        void getQueenCheckedMoves(uint& moves_index, MoveSet pos_moves[MOVESET_SIZE]) const;
 
         /**
          * @brief Retries and adds the vector of legal moves for the rooks when king is in check.
@@ -246,7 +242,7 @@ class Position {
          * @param moves_index Current index of the first empty position in the pos_moves array.
          * @param pos_moves Array that holds pointers to vectors of moves.
          */
-        void getRookCheckedMoves(uint& moves_index, MoveSet pos_moves[MOVESET_SIZE]);
+        void getRookCheckedMoves(uint& moves_index, MoveSet pos_moves[MOVESET_SIZE]) const;
 
         /**
          * @brief Retries and adds the vector of legal moves for the bishop when king is in check.
@@ -254,7 +250,7 @@ class Position {
          * @param moves_index Current index of the first empty position in the pos_moves array.
          * @param pos_moves Array that holds pointers to vectors of moves.
          */
-        void getBishopCheckedMoves(uint& moves_index, MoveSet pos_moves[MOVESET_SIZE]);
+        void getBishopCheckedMoves(uint& moves_index, MoveSet pos_moves[MOVESET_SIZE]) const;
 
         /**
          * @brief Retries and adds the vector of legal moves for the knight when king is in check.
@@ -262,7 +258,7 @@ class Position {
          * @param moves_index Current index of the first empty position in the pos_moves array.
          * @param pos_moves Array that holds pointers to vectors of moves.
          */
-        void getKnightCheckedMoves(uint& moves_index, MoveSet pos_moves[MOVESET_SIZE]);
+        void getKnightCheckedMoves(uint& moves_index, MoveSet pos_moves[MOVESET_SIZE]) const;
 
         /**
          * @brief Retries and adds the vector of legal moves for the pawn when king is in check.
@@ -270,7 +266,7 @@ class Position {
          * @param moves_index Current index of the first empty position in the pos_moves array.
          * @param pos_moves Array that holds pointers to vectors of moves.
          */
-        void getPawnCheckedMoves(uint& moves_index, MoveSet pos_moves[MOVESET_SIZE]);
+        void getPawnCheckedMoves(uint& moves_index, MoveSet pos_moves[MOVESET_SIZE]) const;
 
         /**
          * @brief Calls other functions to add the legal moves for when there is no check.
@@ -278,7 +274,7 @@ class Position {
          * @param moves_index Current index of the first empty position in the pos_moves array.
          * @param pos_moves Array that holds pointers to vectors of moves.
          */
-        void getNormalMoves(uint& moves_index, MoveSet pos_moves[MOVESET_SIZE]);
+        void getNormalMoves(uint& moves_index, MoveSet pos_moves[MOVESET_SIZE]) const;
 
         /**
          * @brief Retrives and adds the vector of legal queen moves of the side to move to the pos_moves array.
@@ -286,7 +282,7 @@ class Position {
          * @param moves_index Current index of the first empty position in the pos_moves array.
          * @param pos_moves Array that holds pointers to vectors of moves.
          */
-        void getQueenMoves(uint& moves_index, MoveSet pos_moves[MOVESET_SIZE]);
+        void getQueenMoves(uint& moves_index, MoveSet pos_moves[MOVESET_SIZE]) const;
 
         /**
          * @brief Retrives and adds the vector of legal rook moves of the side to move to the pos_moves array.
@@ -294,7 +290,7 @@ class Position {
          * @param moves_index Current index of the first empty position in the pos_moves array.
          * @param pos_moves Array that holds pointers to vectors of moves.
          */
-        void getRookMoves(uint& moves_index, MoveSet pos_moves[MOVESET_SIZE]);
+        void getRookMoves(uint& moves_index, MoveSet pos_moves[MOVESET_SIZE]) const;
 
         /**
          * @brief Retrives and adds the vector of legal bishop moves of the side to move to the pos_moves array.
@@ -302,7 +298,7 @@ class Position {
          * @param moves_index Current index of the first empty position in the pos_moves array.
          * @param pos_moves Array that holds pointers to vectors of moves.
          */
-        void getBishopMoves(uint& moves_index, MoveSet pos_moves[MOVESET_SIZE]);
+        void getBishopMoves(uint& moves_index, MoveSet pos_moves[MOVESET_SIZE]) const;
 
         /**
          * @brief Retrives and adds the vector of legal knight moves of the side to move to the pos_moves array.
@@ -310,7 +306,7 @@ class Position {
          * @param moves_index Current index of the first empty position in the pos_moves array.
          * @param pos_moves Array that holds pointers to vectors of moves.
          */
-        void getKnightMoves(uint& moves_index, MoveSet pos_moves[MOVESET_SIZE]);
+        void getKnightMoves(uint& moves_index, MoveSet pos_moves[MOVESET_SIZE]) const;
 
         /**
          * @brief Retrives and adds the vector of legal castling moves of the side to move to the pos_moves array.
@@ -319,7 +315,7 @@ class Position {
          * @param moves_index Current index of the first empty position in the pos_moves array.
          * @param pos_moves Array that holds pointers to vectors of moves.
          */
-        void getCastlingMoves(uint& moves_index, MoveSet pos_moves[MOVESET_SIZE]);
+        void getCastlingMoves(uint& moves_index, MoveSet pos_moves[MOVESET_SIZE]) const;
 
         /**
          * @brief Retrives and adds the vector of legal en-passant moves of the side to move to the pos_moves array.
@@ -327,7 +323,7 @@ class Position {
          * @param moves_index Current index of the first empty position in the pos_moves array.
          * @param pos_moves Array that holds pointers to vectors of moves.
          */
-        void getEnPassantMoves(uint& moves_index, MoveSet pos_moves[MOVESET_SIZE]);
+        void getEnPassantMoves(uint& moves_index, MoveSet pos_moves[MOVESET_SIZE]) const;
 
         /**
          * @brief Retrives and adds the vector of legal pawn moves of the side to move to the pos_moves array.
@@ -335,7 +331,7 @@ class Position {
          * @param moves_index Current index of the first empty position in the pos_moves array.
          * @param pos_moves Array that holds pointers to vectors of moves.
          */
-        void getPawnMoves(uint& moves_index, MoveSet pos_moves[MOVESET_SIZE]);
+        void getPawnMoves(uint& moves_index, MoveSet pos_moves[MOVESET_SIZE]) const;
 
         /**
          * @brief Get the reach bitboard of a rook on the indicated square.
@@ -380,7 +376,7 @@ class Position {
          * @param square The square to check.
          * @return True if the square is occupied, else false.
          */
-        Bitboard isOccupied(const Square square);
+        Bitboard isOccupied(const Square square) const;
 
         /**
          * @brief Zeros out the class variables to make way for parsing a new FEN string.
@@ -398,6 +394,24 @@ class Position {
          * @param move The move to save.
          */
         void saveHistory(Move& move);
+
+        /**
+         * @brief Get the piece type based on the base piece type.
+         *
+         * @tparam Base piece type T.
+         * @param enemy Whether or not to get the enemy piece instead. Defaulted to false.
+         * @return The piece type.
+         */
+        template<BasePieceType T> inline PieceType getPieceType(bool enemy = false) const;
+
+        /**
+         * @brief Get the promotion piece type.
+         *
+         * @param move The move from which to retrieve the promotion move.
+         * @return Promotion piece type.
+         */
+        inline PieceType getPromotionPiece(Move& move);
+
 
 
 

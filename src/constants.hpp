@@ -95,6 +95,10 @@ enum PieceType {
     NO_PIECE
 };
 
+enum BasePieceType {
+    KING, QUEEN, ROOK, BISHOP, KNIGHT, PAWN
+};
+
 enum Castling {
     WKSC, WQSC, BKSC, BQSC
 };
@@ -125,6 +129,10 @@ enum ExitCode {
 
 inline Square operator+(const Square& square, const Direction& direction) { // CHECK Why do args have to be const?
     return static_cast<Square>(static_cast<uint>(square) + static_cast<uint>(direction));
+}
+
+inline Direction operator+(const Direction& direction1, const Direction& direction2) { // CHECK Why do args have to be const?
+    return static_cast<Direction>(static_cast<uint>(direction1) + static_cast<uint>(direction2));
 }
 
 inline Square operator++(Square& square) { // Pre-fix

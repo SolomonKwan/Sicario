@@ -10,17 +10,17 @@
 
 MoveFamilies computeKingMoves() {
     MoveFamilies kingMoves;
-    for (int square = A1; square <= H8; square++) {
+    for (Square square = A1; square <= H8; square++) {
         MoveFamily& moveSet = kingMoves[square];
         std::vector<Square> destinations;
-        if (square / 8 != 7) destinations.push_back((Square) (square + N));
-        if (square / 8 != 7 && square % 8 != 7) destinations.push_back((Square) (square + NE));
-        if (square % 8 != 7) destinations.push_back((Square) (square + E));
-        if (square / 8 != 0 && square % 8 != 7) destinations.push_back((Square) (square + SE));
-        if (square / 8 != 0) destinations.push_back((Square) (square + S));
-        if (square / 8 != 0 && square % 8 != 0) destinations.push_back((Square) (square + SW));
-        if (square % 8 != 0) destinations.push_back((Square) (square + W));
-        if (square / 8 != 7 && square % 8 != 0) destinations.push_back((Square) (square + NW));
+        if (rank(square) != RANK_8) destinations.push_back(square + N);
+        if (rank(square) != RANK_8 && file(square) != FILE_H) destinations.push_back(square + NE);
+        if (file(square) != FILE_H) destinations.push_back(square + E);
+        if (rank(square) != RANK_1 && file(square) != FILE_H) destinations.push_back(square + SE);
+        if (rank(square) != RANK_1) destinations.push_back(square + S);
+        if (rank(square) != RANK_1 && file(square) != FILE_A) destinations.push_back(square + SW);
+        if (file(square) != FILE_A) destinations.push_back(square + W);
+        if (rank(square) != RANK_8 && file(square) != FILE_A) destinations.push_back(square + NW);
 
         uint16_t maxOccupancy = (uint16_t)pow(2, destinations.size());
         moveSet.resize(maxOccupancy);
@@ -33,13 +33,13 @@ MoveFamilies computeKingMoves() {
             int shift = 0;
             for (Square dest : destinations) {
                 if ((j >> shift) & 1UL) {
-                    moves.push_back(square | (dest << 6));
+                    moves.push_back(square | (dest << DESTINATION_SHIFT));
                 }
                 occ |= ((j >> shift) & 1UL) << dest;
                 shift++;
             }
 
-            uint16_t magicIndex = getKingMovesIndex(occ, (Square) square);
+            uint16_t magicIndex = getKingMovesIndex(occ, square);
             moveSet[magicIndex] = moves;
         }
     }
@@ -48,17 +48,17 @@ MoveFamilies computeKingMoves() {
 
 MoveFamilies computeKnightMoves() {
     MoveFamilies knightMoves;
-    for (int square = A1; square <= H8; square++) {
+    for (Square square = A1; square <= H8; square++) {
         MoveFamily& moveSet = knightMoves[square];
         std::vector<Square> destinations;
-        if (square / 8 < 6 && square % 8 < 7) destinations.push_back((Square) (square + NNE));
-        if (square / 8 < 7 && square % 8 < 6) destinations.push_back((Square) (square + ENE));
-        if (square / 8 > 0 && square % 8 < 6) destinations.push_back((Square) (square + ESE));
-        if (square / 8 > 1 && square % 8 < 7) destinations.push_back((Square) (square + SES));
-        if (square / 8 > 1 && square % 8 > 0) destinations.push_back((Square) (square + SWS));
-        if (square / 8 > 0 && square % 8 > 1) destinations.push_back((Square) (square + WSW));
-        if (square / 8 < 7 && square % 8 > 1) destinations.push_back((Square) (square + WNW));
-        if (square / 8 < 6 && square % 8 > 0) destinations.push_back((Square) (square + NWN));
+        if (rank(square) < RANK_7 && file(square) < FILE_H) destinations.push_back(square + NNE);
+        if (rank(square) < RANK_8 && file(square) < FILE_G) destinations.push_back(square + ENE);
+        if (rank(square) > RANK_1 && file(square) < FILE_G) destinations.push_back(square + ESE);
+        if (rank(square) > RANK_2 && file(square) < FILE_H) destinations.push_back(square + SES);
+        if (rank(square) > RANK_2 && file(square) > FILE_A) destinations.push_back(square + SWS);
+        if (rank(square) > RANK_1 && file(square) > FILE_B) destinations.push_back(square + WSW);
+        if (rank(square) < RANK_8 && file(square) > FILE_B) destinations.push_back(square + WNW);
+        if (rank(square) < RANK_7 && file(square) > FILE_A) destinations.push_back(square + NWN);
 
         uint16_t maxOccupancy = (uint16_t)pow(2, destinations.size());
         moveSet.resize(maxOccupancy);
@@ -71,21 +71,21 @@ MoveFamilies computeKnightMoves() {
             int shift = 0;
             for (Square dest : destinations) {
                 if ((j >> shift) & 1UL) {
-                    moves.push_back(square | (dest << 6));
+                    moves.push_back(square | (dest << DESTINATION_SHIFT));
                 }
                 occ |= ((j >> shift) & 1UL) << dest;
                 shift++;
             }
 
-            uint16_t magicIndex = getKnightMovesIndex(occ, (Square) square);
+            uint16_t magicIndex = getKnightMovesIndex(occ, square);
             moveSet[magicIndex] = moves;
         }
     }
     return knightMoves;
 }
 
-std::array<MoveFamilies, 2> computePawnMoves() {
-    std::array<MoveFamilies, 2> pawnMoves = {
+std::array<MoveFamilies, PLAYER_COUNT> computePawnMoves() {
+    std::array<MoveFamilies, PLAYER_COUNT> pawnMoves = {
         computePawnMovesBySide(BLACK),
         computePawnMovesBySide(WHITE)
     };
@@ -94,19 +94,19 @@ std::array<MoveFamilies, 2> computePawnMoves() {
 
 MoveFamilies computePawnMovesBySide(Player player) {
     MoveFamilies pawnMoves;
-    for (int square = A2; square <= H7; square++) {
+    for (Square square = A2; square <= H7; square++) {
         MoveFamily& moveSet = pawnMoves[square];
-        std::vector<int> destinations;
+        std::vector<Square> destinations;
         if (player == BLACK) {
             destinations.push_back(square + S);
-            if (square / 8 == 6) destinations.push_back(square + S + S);
-            if (square % 8 != 0) destinations.push_back(square + SW);
-            if (square % 8 != 7) destinations.push_back(square + SE);
+            if (rank(square) == RANK_7) destinations.push_back(square + S + S);
+            if (file(square) != FILE_A) destinations.push_back(square + SW);
+            if (file(square) != FILE_H) destinations.push_back(square + SE);
         } else {
             destinations.push_back(square + N);
-            if (square / 8 == 1) destinations.push_back(square + N + N);
-            if (square % 8 != 0) destinations.push_back(square + NW);
-            if (square % 8 != 7) destinations.push_back(square + NE);
+            if (rank(square) == RANK_2) destinations.push_back(square + N + N);
+            if (file(square) != FILE_A) destinations.push_back(square + NW);
+            if (file(square) != FILE_H) destinations.push_back(square + NE);
         }
 
         int totalSize = destinations.size();
@@ -118,22 +118,22 @@ MoveFamilies computePawnMovesBySide(Player player) {
 
             uint64_t occ = ZERO_BB;
             int shift = 0;
-            for (int dest : destinations) {
+            for (Square dest : destinations) {
                 if ((j >> shift) & 1UL) {
-                    if (dest / 8 == 0 || dest / 8 == 7) {
-                        moves.push_back(square | (dest << 6) | PROMOTION | pQUEEN);
-                        moves.push_back(square | (dest << 6) | PROMOTION | pROOK);
-                        moves.push_back(square | (dest << 6) | PROMOTION | pBISHOP);
-                        moves.push_back(square | (dest << 6) | PROMOTION | pKNIGHT);
+                    if (rank(dest) == RANK_1 || rank(dest) == RANK_8) {
+                        moves.push_back(square | (dest << DESTINATION_SHIFT) | PROMOTION | pQUEEN);
+                        moves.push_back(square | (dest << DESTINATION_SHIFT) | PROMOTION | pROOK);
+                        moves.push_back(square | (dest << DESTINATION_SHIFT) | PROMOTION | pBISHOP);
+                        moves.push_back(square | (dest << DESTINATION_SHIFT) | PROMOTION | pKNIGHT);
                     } else {
-                        moves.push_back(square | (dest << 6));
+                        moves.push_back(square | (dest << DESTINATION_SHIFT));
                     }
                 }
                 occ |= ((j >> shift) & 1UL) << dest;
                 shift++;
             }
 
-            uint16_t magicIndex = getPawnMovesIndex(occ, (Square) square, player);
+            uint16_t magicIndex = getPawnMovesIndex(occ, square, player);
             moveSet[magicIndex] = moves;
         }
     }
@@ -142,11 +142,11 @@ MoveFamilies computePawnMovesBySide(Player player) {
 
 MoveFamilies computeRookMoves() {
     MoveFamilies rookMoves;
-    for (int square = A1; square <= H8; square++) {
-        int northSize = std::max(7 - (square / 8), 0);
-        int southSize = std::max(square / 8, 0);
-        int eastSize = std::max(7 - (square % 8), 0);
-        int westSize = std::max(square % 8, 0);
+    for (Square square = A1; square <= H8; square++) {
+        int northSize = std::max(static_cast<int>(RANK_8 - rank(square)), 0);
+        int southSize = std::max(static_cast<int>(rank(square)), 0);
+        int eastSize = std::max(static_cast<int>(RANK_8 - file(square)), 0);
+        int westSize = std::max(static_cast<int>(file(square)), 0);
         MoveFamily& movesSet = rookMoves[square];
         movesSet.resize((int)std::pow(2, SQUARE_COUNT - Shifts::Moves::ROOK[square]));
 
@@ -156,25 +156,25 @@ MoveFamilies computeRookMoves() {
 
             for (int i = 0; i < selection[0]; i++) {
                 reach |= ONE_BB << (square + N * (i + 1));
-                moves.push_back(square | ((square + N * (i + 1)) << 6));
+                moves.push_back(square | ((square + N * (i + 1)) << DESTINATION_SHIFT));
             }
 
             for (int i = 0; i < selection[1]; i++) {
                 reach |= ONE_BB << (square + E * (i + 1));
-                moves.push_back(square | ((square + E * (i + 1)) << 6));
+                moves.push_back(square | ((square + E * (i + 1)) << DESTINATION_SHIFT));
             }
 
             for (int i = 0; i < selection[2]; i++) {
                 reach |= ONE_BB << (square + S * (i + 1));
-                moves.push_back(square | ((square + S * (i + 1)) << 6));
+                moves.push_back(square | ((square + S * (i + 1)) << DESTINATION_SHIFT));
             }
 
             for (int i = 0; i < selection[3]; i++) {
                 reach |= ONE_BB << (square + W * (i + 1));
-                moves.push_back(square | ((square + W * (i + 1)) << 6));
+                moves.push_back(square | ((square + W * (i + 1)) << DESTINATION_SHIFT));
             }
 
-            int magicIndex = getRookMovesIndex(reach, (Square) square);
+            int magicIndex = getRookMovesIndex(reach, square);
             movesSet[magicIndex] = moves;
         }
     }
@@ -183,11 +183,11 @@ MoveFamilies computeRookMoves() {
 
 MoveFamilies computeBishopMoves() {
     MoveFamilies bishopMoves;
-    for (int square = A1; square <= H8; square++) {
-        int northEastSize = std::max(std::min(7 - square / 8, 7 - square % 8), 0);
-        int southEastSize = std::max(std::min(square / 8, 7 - square % 8), 0);
-        int southWestSize = std::max(std::min(square / 8, square % 8), 0);
-        int northWestSize = std::max(std::min(7 - square / 8, square % 8), 0);
+    for (Square square = A1; square <= H8; square++) {
+        int northEastSize = std::max(std::min(RANK_8 - rank(square), FILE_H - file(square)), 0);
+        int southEastSize = std::max(std::min(static_cast<int>(rank(square)), FILE_H - file(square)), 0);
+        int southWestSize = std::max(std::min(static_cast<int>(rank(square)), static_cast<int>(file(square))), 0);
+        int northWestSize = std::max(std::min(RANK_8 - static_cast<int>(rank(square)), static_cast<int>(file(square))), 0);
         MoveFamily& movesSet = bishopMoves[square];
         movesSet.resize((int)std::pow(2, SQUARE_COUNT - Shifts::Moves::BISHOP[square]));
 
@@ -198,74 +198,74 @@ MoveFamilies computeBishopMoves() {
 
             for (int i = 0; i < selection[0]; i++) {
                 reach |= ONE_BB << (square + NE * (i + 1));
-                moves.push_back(square | ((square + NE * (i + 1)) << 6));
+                moves.push_back(square | ((square + NE * (i + 1)) << DESTINATION_SHIFT));
             }
 
             for (int i = 0; i < selection[1]; i++) {
                 reach |= ONE_BB << (square + SE * (i + 1));
-                moves.push_back(square | ((square + SE * (i + 1)) << 6));
+                moves.push_back(square | ((square + SE * (i + 1)) << DESTINATION_SHIFT));
             }
 
             for (int i = 0; i < selection[2]; i++) {
                 reach |= ONE_BB << (square + SW * (i + 1));
-                moves.push_back(square | ((square + SW * (i + 1)) << 6));
+                moves.push_back(square | ((square + SW * (i + 1)) << DESTINATION_SHIFT));
             }
 
             for (int i = 0; i < selection[3]; i++) {
                 reach |= ONE_BB << (square + NW * (i + 1));
-                moves.push_back(square | ((square + NW * (i + 1)) << 6));
+                moves.push_back(square | ((square + NW * (i + 1)) << DESTINATION_SHIFT));
             }
 
-            int magicIndex = getBishopMovesIndex(reach, (Square) square);
+            int magicIndex = getBishopMovesIndex(reach, square);
             movesSet[magicIndex] = moves;
         }
     }
     return bishopMoves;
 }
 
-std::array<MoveVector, 4> computeCastlingMoves() {
-    std::array<MoveVector, 4> moves;
-    moves[WKSC] = {E1 | G1 << 6 | CASTLING};
-    moves[WQSC] = {E1 | C1 << 6 | CASTLING};
-    moves[BKSC] = {E8 | G8 << 6 | CASTLING};
-    moves[BQSC] = {E8 | C8 << 6 | CASTLING};
+std::array<MoveVector, CASTLING_OPTIONS> computeCastlingMoves() {
+    std::array<MoveVector, CASTLING_OPTIONS> moves;
+    moves[WKSC] = {E1 | G1 << DESTINATION_SHIFT | CASTLING};
+    moves[WQSC] = {E1 | C1 << DESTINATION_SHIFT | CASTLING};
+    moves[BKSC] = {E8 | G8 << DESTINATION_SHIFT | CASTLING};
+    moves[BQSC] = {E8 | C8 << DESTINATION_SHIFT | CASTLING};
     return moves;
 }
 
-std::array<std::vector<MoveFamily>, 2> computeEnPassantMoves() { // TODO this is ugly, clean it
-    std::array<std::vector<MoveFamily>, 2> moves;
+std::array<std::vector<MoveFamily>, PLAYER_COUNT> computeEnPassantMoves() { // TODO this is ugly, clean it
+    std::array<std::vector<MoveFamily>, PLAYER_COUNT> moves;
     std::vector<MoveFamily>& blackMove = moves[BLACK];
     std::vector<MoveFamily>& whiteMove = moves[WHITE];
     blackMove = {
-        {{B4 | A3 << 6 | EN_PASSANT}, {B4 | A3 << 6 | EN_PASSANT}},
-        {{A4 | B3 << 6 | EN_PASSANT}, {C4 | B3 << 6 | EN_PASSANT}},
-        {{B4 | C3 << 6 | EN_PASSANT}, {D4 | C3 << 6 | EN_PASSANT}},
-        {{C4 | D3 << 6 | EN_PASSANT}, {E4 | D3 << 6 | EN_PASSANT}},
-        {{D4 | E3 << 6 | EN_PASSANT}, {F4 | E3 << 6 | EN_PASSANT}},
-        {{E4 | F3 << 6 | EN_PASSANT}, {G4 | F3 << 6 | EN_PASSANT}},
-        {{F4 | G3 << 6 | EN_PASSANT}, {H4 | G3 << 6 | EN_PASSANT}},
-        {{G4 | H3 << 6 | EN_PASSANT}, {G4 | H3 << 6 | EN_PASSANT}}
+        {{B4 | A3 << DESTINATION_SHIFT | EN_PASSANT}, {B4 | A3 << DESTINATION_SHIFT | EN_PASSANT}},
+        {{A4 | B3 << DESTINATION_SHIFT | EN_PASSANT}, {C4 | B3 << DESTINATION_SHIFT | EN_PASSANT}},
+        {{B4 | C3 << DESTINATION_SHIFT | EN_PASSANT}, {D4 | C3 << DESTINATION_SHIFT | EN_PASSANT}},
+        {{C4 | D3 << DESTINATION_SHIFT | EN_PASSANT}, {E4 | D3 << DESTINATION_SHIFT | EN_PASSANT}},
+        {{D4 | E3 << DESTINATION_SHIFT | EN_PASSANT}, {F4 | E3 << DESTINATION_SHIFT | EN_PASSANT}},
+        {{E4 | F3 << DESTINATION_SHIFT | EN_PASSANT}, {G4 | F3 << DESTINATION_SHIFT | EN_PASSANT}},
+        {{F4 | G3 << DESTINATION_SHIFT | EN_PASSANT}, {H4 | G3 << DESTINATION_SHIFT | EN_PASSANT}},
+        {{G4 | H3 << DESTINATION_SHIFT | EN_PASSANT}, {G4 | H3 << DESTINATION_SHIFT | EN_PASSANT}}
     };
     whiteMove = {
-        {{B5 | A6 << 6 | EN_PASSANT}, {B5 | A6 << 6 | EN_PASSANT}},
-        {{A5 | B6 << 6 | EN_PASSANT}, {C5 | B6 << 6 | EN_PASSANT}},
-        {{B5 | C6 << 6 | EN_PASSANT}, {D5 | C6 << 6 | EN_PASSANT}},
-        {{C5 | D6 << 6 | EN_PASSANT}, {E5 | D6 << 6 | EN_PASSANT}},
-        {{D5 | E6 << 6 | EN_PASSANT}, {F5 | E6 << 6 | EN_PASSANT}},
-        {{E5 | F6 << 6 | EN_PASSANT}, {G5 | F6 << 6 | EN_PASSANT}},
-        {{F5 | G6 << 6 | EN_PASSANT}, {H5 | G6 << 6 | EN_PASSANT}},
-        {{G5 | H6 << 6 | EN_PASSANT}, {G5 | H6 << 6 | EN_PASSANT}}
+        {{B5 | A6 << DESTINATION_SHIFT | EN_PASSANT}, {B5 | A6 << DESTINATION_SHIFT | EN_PASSANT}},
+        {{A5 | B6 << DESTINATION_SHIFT | EN_PASSANT}, {C5 | B6 << DESTINATION_SHIFT | EN_PASSANT}},
+        {{B5 | C6 << DESTINATION_SHIFT | EN_PASSANT}, {D5 | C6 << DESTINATION_SHIFT | EN_PASSANT}},
+        {{C5 | D6 << DESTINATION_SHIFT | EN_PASSANT}, {E5 | D6 << DESTINATION_SHIFT | EN_PASSANT}},
+        {{D5 | E6 << DESTINATION_SHIFT | EN_PASSANT}, {F5 | E6 << DESTINATION_SHIFT | EN_PASSANT}},
+        {{E5 | F6 << DESTINATION_SHIFT | EN_PASSANT}, {G5 | F6 << DESTINATION_SHIFT | EN_PASSANT}},
+        {{F5 | G6 << DESTINATION_SHIFT | EN_PASSANT}, {H5 | G6 << DESTINATION_SHIFT | EN_PASSANT}},
+        {{G5 | H6 << DESTINATION_SHIFT | EN_PASSANT}, {G5 | H6 << DESTINATION_SHIFT | EN_PASSANT}}
     };
     return moves;
 }
 
 MoveFamilies computeRookBlockMoves() {
     MoveFamilies rookBlockMoves;
-    for (int square = A1; square <= H8; square++) {
-        int northSize = std::max(7 - (square / 8), 0);
-        int southSize = std::max(square / 8, 0);
-        int eastSize = std::max(7 - (square % 8), 0);
-        int westSize = std::max(square % 8, 0);
+    for (Square square = A1; square <= H8; square++) {
+        int northSize = std::max(RANK_8 - rank(square), 0);
+        int southSize = std::max(static_cast<int>(rank(square)), 0);
+        int eastSize = std::max(FILE_H - file(square), 0);
+        int westSize = std::max(static_cast<int>(file(square)), 0);
         MoveFamily& movesSet = rookBlockMoves[square];
         movesSet.resize((int)std::pow(2, SQUARE_COUNT - Shifts::Block::ROOK[square]));
 
@@ -273,26 +273,26 @@ MoveFamilies computeRookBlockMoves() {
             MoveVector moves;
             uint64_t occ = ZERO_BB;
             if (selection[0]) {
-                moves.push_back(square | (square + (N * selection[0])) << 6);
+                moves.push_back(square | (square + (N * selection[0])) << DESTINATION_SHIFT);
                 occ |= ONE_BB << (square + (N * selection[0]));
             }
 
             if (selection[1]) {
-                moves.push_back(square | (square + (E * selection[1])) << 6);
+                moves.push_back(square | (square + (E * selection[1])) << DESTINATION_SHIFT);
                 occ |= ONE_BB << (square + (E * selection[1]));
             }
 
             if (selection[2]) {
-                moves.push_back(square | (square + (S * selection[2])) << 6);
+                moves.push_back(square | (square + (S * selection[2])) << DESTINATION_SHIFT);
                 occ |= ONE_BB << (square + (S * selection[2]));
             }
 
             if (selection[3]) {
-                moves.push_back(square | (square + (W * selection[3])) << 6);
+                moves.push_back(square | (square + (W * selection[3])) << DESTINATION_SHIFT);
                 occ |= ONE_BB << (square + (W * selection[3]));
             }
 
-            movesSet[getRookBlockIndex(occ, (Square) square)] = moves;
+            movesSet[getRookBlockIndex(occ, square)] = moves;
         }
     }
     return rookBlockMoves;
@@ -300,11 +300,11 @@ MoveFamilies computeRookBlockMoves() {
 
 MoveFamilies computeBishopBlockMoves() {
     MoveFamilies bishopBlockMoves;
-    for (int square = A1; square <= H8; square++) {
-        int northEastSize = std::max(std::min(7 - square / 8, 7 - square % 8), 0);
-        int southEastSize = std::max(std::min(square / 8, 7 - square % 8), 0);
-        int southWestSize = std::max(std::min(square / 8, square % 8), 0);
-        int northWestSize = std::max(std::min(7 - square / 8, square % 8), 0);
+    for (Square square = A1; square <= H8; square++) {
+        int northEastSize = std::max(std::min(RANK_8 - rank(square), RANK_8 - file(square)), 0);
+        int southEastSize = std::max(std::min(static_cast<int>(rank(square)), FILE_H - file(square)), 0);
+        int southWestSize = std::max(std::min(static_cast<int>(rank(square)), static_cast<int>(file(square))), 0);
+        int northWestSize = std::max(std::min(RANK_8 - rank(square), static_cast<int>(file(square))), 0);
         MoveFamily& movesSet = bishopBlockMoves[square];
         movesSet.resize((int)std::pow(2, SQUARE_COUNT - Shifts::Block::BISHOP[square]));
 
@@ -313,26 +313,26 @@ MoveFamilies computeBishopBlockMoves() {
             MoveVector moves;
             uint64_t occ = ZERO_BB;
             if (selection[0]) {
-                moves.push_back(square | (square + (NE * selection[0])) << 6);
+                moves.push_back(square | (square + (NE * selection[0])) << DESTINATION_SHIFT);
                 occ |= ONE_BB << (square + (NE * selection[0]));
             }
 
             if (selection[1]) {
-                moves.push_back(square | (square + (SE * selection[1])) << 6);
+                moves.push_back(square | (square + (SE * selection[1])) << DESTINATION_SHIFT);
                 occ |= ONE_BB << (square + (SE * selection[1]));
             }
 
             if (selection[2]) {
-                moves.push_back(square | (square + (SW * selection[2])) << 6);
+                moves.push_back(square | (square + (SW * selection[2])) << DESTINATION_SHIFT);
                 occ |= ONE_BB << (square + (SW * selection[2]));
             }
 
             if (selection[3]) {
-                moves.push_back(square | (square + (NW * selection[3])) << 6);
+                moves.push_back(square | (square + (NW * selection[3])) << DESTINATION_SHIFT);
                 occ |= ONE_BB << (square + (NW * selection[3]));
             }
 
-            movesSet[getBishopBlockIndex(occ, (Square) square)] = moves;
+            movesSet[getBishopBlockIndex(occ, square)] = moves;
         }
     }
     return bishopBlockMoves;
@@ -340,12 +340,12 @@ MoveFamilies computeBishopBlockMoves() {
 
 IndicesFamily computeRookReachIndices() {
     IndicesFamily rookIndices;
-    for (int square = A1; square <= H8; square++) {
+    for (Square square = A1; square <= H8; square++) {
         std::vector<uint>& indices = rookIndices[square];
-        int northSize = std::max(6 - (square / 8), 0);
-        int southSize = std::max(square / 8 - 1, 0);
-        int eastSize = std::max(6 - (square % 8), 0);
-        int westSize = std::max(square % 8 - 1, 0);
+        int northSize = std::max(6 - rank(square), 0);
+        int southSize = std::max(rank(square) - 1, 0);
+        int eastSize = std::max(6 - file(square), 0);
+        int westSize = std::max(file(square) - 1, 0);
         int totalSize = northSize + southSize + eastSize + westSize;
         indices.resize(pow(2, totalSize));
 
@@ -385,12 +385,12 @@ IndicesFamily computeRookReachIndices() {
 
 IndicesFamily computeBishopReachIndices() {
     IndicesFamily bishopIndices;
-    for (int square = A1; square <= H8; square++) {
+    for (Square square = A1; square <= H8; square++) {
         std::vector<uint>& indices = bishopIndices[square];
-        int northeastSize = std::max(std::min(6 - square / 8, 6 - square % 8), 0);
-        int southeastSize = std::max(std::min(square / 8 - 1, 6 - square % 8), 0);
-        int southwestSize = std::max(std::min(square / 8 - 1, square % 8 - 1), 0);
-        int northwestSize = std::max(std::min(6 - square / 8, square % 8 - 1), 0);
+        int northeastSize = std::max(std::min(6 - rank(square), 6 - file(square)), 0);
+        int southeastSize = std::max(std::min(rank(square) - 1, 6 - file(square)), 0);
+        int southwestSize = std::max(std::min(rank(square) - 1, file(square) - 1), 0);
+        int northwestSize = std::max(std::min(6 - rank(square), file(square) - 1), 0);
         int totalSize = northeastSize + southeastSize + southwestSize + northwestSize;
         indices.resize(pow(2, totalSize));
 
