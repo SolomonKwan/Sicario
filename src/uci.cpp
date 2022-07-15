@@ -356,7 +356,7 @@ void Sicario::handleMoves() {
     MoveList moves = MoveList(position);
 
     std::cout << moves.moves_index << '\n';
-    for (int i = 0; i < moves.moves_index; i++) {
+    for (uint i = 0; i < moves.moves_index; i++) {
         std::cout << moves.moveSets[i]->size() << '\n';
     }
 

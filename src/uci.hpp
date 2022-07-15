@@ -75,7 +75,7 @@ struct OptionInfo {
 };
 
 struct GoParams {
-    std::vector<Move> moves;
+    MoveVector moves;
     int wtime = 0;
     int btime = 0;
     int winc = 0;

@@ -55,8 +55,8 @@ int TOTAL_TEST_COUNT = 0;
 int TESTS_PASSED = 0;
 int TESTS_FAILED = 0;
 
-const std::array<std::vector<uint>, 64> ROOK_REACH_INDICES = computeRookReachIndices();
-const std::array<std::vector<uint>, 64> BISHOP_REACH_INDICES = computeBishopReachIndices();
+const IndicesFamily ROOK_REACH_INDICES = computeRookReachIndices();
+const IndicesFamily BISHOP_REACH_INDICES = computeBishopReachIndices();
 
 template <typename T>
 void assertEquals(TestType testType, T expected, T actual, int testNum) {
@@ -97,9 +97,9 @@ int bishopMovesIndex(Bitboard occupancy, Square square) {
 }
 
 Bitboard generatePos(std::vector<Square> squares) {
-    Bitboard pos = 0ULL;
+    Bitboard pos = ZERO_BB;
     for (Square square : squares) {
-        pos |= 1ULL << square;
+        pos |= ONE_BB << square;
     }
     return pos;
 }
@@ -265,12 +265,12 @@ void run_getRookMovesIndex_tests() {
         std::unordered_set<int> indices;
         bool bad = false;
         for (std::array<int, 4> selection : getEndCombinations({northSize, eastSize, southSize, westSize})) {
-            uint64_t occ = 0ULL;
+            uint64_t occ = ZERO_BB;
 
-            for (int i = 0; i < selection[0]; i++) occ |= 1ULL << (sq + N * (i + 1));
-            for (int i = 0; i < selection[1]; i++) occ |= 1ULL << (sq + E * (i + 1));
-            for (int i = 0; i < selection[2]; i++) occ |= 1ULL << (sq + S * (i + 1));
-            for (int i = 0; i < selection[3]; i++) occ |= 1ULL << (sq + W * (i + 1));
+            for (int i = 0; i < selection[0]; i++) occ |= ONE_BB << (sq + N * (i + 1));
+            for (int i = 0; i < selection[1]; i++) occ |= ONE_BB << (sq + E * (i + 1));
+            for (int i = 0; i < selection[2]; i++) occ |= ONE_BB << (sq + S * (i + 1));
+            for (int i = 0; i < selection[3]; i++) occ |= ONE_BB << (sq + W * (i + 1));
 
             uint16_t magicIndex = rookMovesIndex(occ, (Square)sq);
             if (indices.find(magicIndex) != indices.end()) {
@@ -439,12 +439,12 @@ void run_getBishopMovesIndex_tests() {
         std::unordered_set<int> indices;
         bool bad = false;
         for (std::array<int, 4> selection : getEndCombinations({northEastSize, southEastSize, southWestSize, northWestSize})) {
-            uint64_t occ = 0ULL;
+            uint64_t occ = ZERO_BB;
 
-            for (int i = 0; i < selection[0]; i++) occ |= 1ULL << (sq + NE * (i + 1));
-            for (int i = 0; i < selection[1]; i++) occ |= 1ULL << (sq + SE * (i + 1));
-            for (int i = 0; i < selection[2]; i++) occ |= 1ULL << (sq + SW * (i + 1));
-            for (int i = 0; i < selection[3]; i++) occ |= 1ULL << (sq + NW * (i + 1));
+            for (int i = 0; i < selection[0]; i++) occ |= ONE_BB << (sq + NE * (i + 1));
+            for (int i = 0; i < selection[1]; i++) occ |= ONE_BB << (sq + SE * (i + 1));
+            for (int i = 0; i < selection[2]; i++) occ |= ONE_BB << (sq + SW * (i + 1));
+            for (int i = 0; i < selection[3]; i++) occ |= ONE_BB << (sq + NW * (i + 1));
 
             uint16_t magicIndex = bishopMovesIndex(occ, (Square)sq);
             if (indices.find(magicIndex) != indices.end()) {
@@ -465,7 +465,7 @@ void run_getBishopMovesIndex_tests() {
 }
 
 void run_knightMagicNums_tests() {
-    for (int sq = 0; sq < 64; sq++) {
+    for (Square sq = A1; sq < SQUARE_COUNT; sq++) {
         TOTAL_TEST_COUNT++;
         TESTS_COUNTS[KNIGHT_MAGIC_NUMS]++;
         std::string testName = TESTS_NAMES[KNIGHT_MAGIC_NUMS] + std::to_string(TESTS_COUNTS[KNIGHT_MAGIC_NUMS]);
@@ -486,7 +486,7 @@ void run_knightMagicNums_tests() {
 
         // Build occupancy bitboard
         for (uint16_t j = 0; j < maxOccupancy; j++) {
-            uint64_t occ = 0ULL;
+            uint64_t occ = ZERO_BB;
             int shift = 0;
             for (int dest : destinations) {
                 occ |= ((j >> shift) & 1UL) << dest;
@@ -512,7 +512,7 @@ void run_knightMagicNums_tests() {
 }
 
 void run_kingMagicNums_tests() {
-    for (int sq = 0; sq < 64; sq++) {
+    for (Square sq = A1; sq < SQUARE_COUNT; sq++) {
         TOTAL_TEST_COUNT++;
         TESTS_COUNTS[KING_MAGIC_NUMS]++;
         std::string testName = TESTS_NAMES[KING_MAGIC_NUMS] + std::to_string(TESTS_COUNTS[KING_MAGIC_NUMS]) + "\t";
@@ -533,7 +533,7 @@ void run_kingMagicNums_tests() {
 
         // Build occupancy bitboard
         for (uint16_t j = 0; j < maxOccupancy; j++) {
-            uint64_t occ = 0ULL;
+            uint64_t occ = ZERO_BB;
             int shift = 0;
             for (int dest : destinations) {
                 occ |= ((j >> shift) & 1UL) << dest;
@@ -576,7 +576,7 @@ void run_blackPawnMagicNums_tests() {
 
         // Build occupancy bitboard
         for (uint16_t j = 0; j < maxOccupancy; j++) {
-            uint64_t occ = 0ULL;
+            uint64_t occ = ZERO_BB;
             int shift = 0;
             for (int dest : destinations) {
                 occ |= ((j >> shift) & 1UL) << dest;
@@ -619,7 +619,7 @@ void run_whitePawnMagicNums_tests() {
 
         // Build occupancy bitboard
         for (uint16_t j = 0; j < maxOccupancy; j++) {
-            uint64_t occ = 0ULL;
+            uint64_t occ = ZERO_BB;
             int shift = 0;
             for (int dest : destinations) {
                 occ |= ((j >> shift) & 1UL) << dest;
@@ -645,7 +645,7 @@ void run_whitePawnMagicNums_tests() {
 }
 
 void run_rookBlockMagicNums_tests() {
-    for (int sq = 0; sq < 64; sq++) {
+    for (Square sq = A1; sq < SQUARE_COUNT; sq++) {
         TOTAL_TEST_COUNT++;
         TESTS_COUNTS[ROOK_BLOCK_MAGIC_NUMS]++;
         std::string testName = TESTS_NAMES[ROOK_BLOCK_MAGIC_NUMS] + std::to_string(TESTS_COUNTS[ROOK_BLOCK_MAGIC_NUMS]);
@@ -661,11 +661,11 @@ void run_rookBlockMagicNums_tests() {
 
         // Build occupancy bitboard
         for (std::array<int, 4> selection : combos) {
-            uint64_t occ = 0ULL;
-            if (selection[0]) occ |= 1ULL << (sq + (N * selection[0]));
-            if (selection[1]) occ |= 1ULL << (sq + (E * selection[1]));
-            if (selection[2]) occ |= 1ULL << (sq + (S * selection[2]));
-            if (selection[3]) occ |= 1ULL << (sq + (W * selection[3]));
+            uint64_t occ = ZERO_BB;
+            if (selection[0]) occ |= ONE_BB << (sq + (N * selection[0]));
+            if (selection[1]) occ |= ONE_BB << (sq + (E * selection[1]));
+            if (selection[2]) occ |= ONE_BB << (sq + (S * selection[2]));
+            if (selection[3]) occ |= ONE_BB << (sq + (W * selection[3]));
 
             uint16_t magicIndex = getRookBlockIndex(occ, (Square) sq);
             if (indices.find(magicIndex) != indices.end()) {
@@ -687,7 +687,7 @@ void run_rookBlockMagicNums_tests() {
 }
 
 void run_bishopBlockMagicNums_tests() {
-    for (int sq = 0; sq < 64; sq++) {
+    for (Square sq = A1; sq < SQUARE_COUNT; sq++) {
         TOTAL_TEST_COUNT++;
         TESTS_COUNTS[BISHOP_BLOCK_MAGIC_NUMS]++;
         std::string testName = TESTS_NAMES[BISHOP_BLOCK_MAGIC_NUMS] + std::to_string(TESTS_COUNTS[BISHOP_BLOCK_MAGIC_NUMS]);
@@ -703,11 +703,11 @@ void run_bishopBlockMagicNums_tests() {
 
         // Build occupancy bitboard
         for (std::array<int, 4> selection : combos) {
-            uint64_t occ = 0ULL;
-            if (selection[0]) occ |= 1ULL << (sq + (NE * selection[0]));
-            if (selection[1]) occ |= 1ULL << (sq + (SE * selection[1]));
-            if (selection[2]) occ |= 1ULL << (sq + (SW * selection[2]));
-            if (selection[3]) occ |= 1ULL << (sq + (NW * selection[3]));
+            uint64_t occ = ZERO_BB;
+            if (selection[0]) occ |= ONE_BB << (sq + (NE * selection[0]));
+            if (selection[1]) occ |= ONE_BB << (sq + (SE * selection[1]));
+            if (selection[2]) occ |= ONE_BB << (sq + (SW * selection[2]));
+            if (selection[3]) occ |= ONE_BB << (sq + (NW * selection[3]));
 
             uint16_t magicIndex = getBishopBlockIndex(occ, (Square) sq);
             if (indices.find(magicIndex) != indices.end()) {

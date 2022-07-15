@@ -19,7 +19,7 @@ using namespace std;
 // Useful things for later
 // cout << bitset<64>(_pext_u64(0b100101ULL, 0b101101ULL)) << '\n';
 // cout << _popcnt64(9ULL) << '\n';
-// cout << _popcnt64(0ULL) << '\n';
+// cout << _popcnt64(ZERO_BB) << '\n';
 
 void displayBB(uint64_t position) {
     string positionString = bitset<64>(position).to_string();
@@ -48,9 +48,9 @@ uint64_t randomMagicNumber(float dist) {
     mt19937 g(rd());
     shuffle(squares.begin(), squares.end(), g);
 
-    uint64_t res = 0ULL;
+    uint64_t res = ZERO_BB;
     for (int i = 0; i < (int)(dist * 64); i++) {
-        res |= 1ULL << squares[i];
+        res |= ONE_BB << squares[i];
     }
 
     return res;
@@ -87,7 +87,7 @@ void findRookReachMNs() {
 
             // Build occupancy bitboard
             for (uint64_t j = 0; j < maxOccupancy; j++) {
-                uint64_t occ = 0ULL;
+                uint64_t occ = ZERO_BB;
                 int shift = 0;
                 for (int k = 0; k < northSize; k++, shift++) occ |= ((j >> shift) & 1UL) << (sq + N * (k + 1));
                 for (int k = 0; k < southSize; k++, shift++) occ |= ((j >> shift) & 1UL) << (sq + S * (k + 1));
@@ -148,12 +148,12 @@ void findRookMovesMNs() {
 
             // Build occupancy bitboard
             for (std::array<int, 4> selection : combos) {
-                uint64_t occ = 0ULL;
+                uint64_t occ = ZERO_BB;
 
-                for (int i = 0; i < selection[0]; i++) occ |= 1ULL << (sq + N * (i + 1));
-                for (int i = 0; i < selection[1]; i++) occ |= 1ULL << (sq + E * (i + 1));
-                for (int i = 0; i < selection[2]; i++) occ |= 1ULL << (sq + S * (i + 1));
-                for (int i = 0; i < selection[3]; i++) occ |= 1ULL << (sq + W * (i + 1));
+                for (int i = 0; i < selection[0]; i++) occ |= ONE_BB << (sq + N * (i + 1));
+                for (int i = 0; i < selection[1]; i++) occ |= ONE_BB << (sq + E * (i + 1));
+                for (int i = 0; i < selection[2]; i++) occ |= ONE_BB << (sq + S * (i + 1));
+                for (int i = 0; i < selection[3]; i++) occ |= ONE_BB << (sq + W * (i + 1));
 
                 uint16_t magicIndex = ((occ * magicNum) >> (64 - totalSize));
                 if (indices.find(magicIndex) != indices.end()) {
@@ -204,7 +204,7 @@ void findBishopReachMNs() {
 
             // Build occupancy bitboard
             for (uint64_t j = 0; j < maxOccupancy; j++) {
-                uint64_t occ = 0ULL;
+                uint64_t occ = ZERO_BB;
                 int shift = 0;
                 for (int k = 0; k < northEastSize; k++, shift++) occ |= ((j >> shift) & 1UL) << (sq + NE * (k + 1));
                 for (int k = 0; k < southEastSize; k++, shift++) occ |= ((j >> shift) & 1UL) << (sq + SE * (k + 1));
@@ -267,12 +267,12 @@ void findBishopMovesMNs() {
 
             // Build occupancy bitboard
             for (std::array<int, 4> selection : combos) {
-                uint64_t occ = 0ULL;
+                uint64_t occ = ZERO_BB;
 
-                for (int i = 0; i < selection[0]; i++) occ |= 1ULL << (sq + NE * (i + 1));
-                for (int i = 0; i < selection[1]; i++) occ |= 1ULL << (sq + SE * (i + 1));
-                for (int i = 0; i < selection[2]; i++) occ |= 1ULL << (sq + SW * (i + 1));
-                for (int i = 0; i < selection[3]; i++) occ |= 1ULL << (sq + NW * (i + 1));
+                for (int i = 0; i < selection[0]; i++) occ |= ONE_BB << (sq + NE * (i + 1));
+                for (int i = 0; i < selection[1]; i++) occ |= ONE_BB << (sq + SE * (i + 1));
+                for (int i = 0; i < selection[2]; i++) occ |= ONE_BB << (sq + SW * (i + 1));
+                for (int i = 0; i < selection[3]; i++) occ |= ONE_BB << (sq + NW * (i + 1));
 
                 uint16_t magicIndex = ((occ * magicNum) >> (64 - totalSize));
                 if (indices.find(magicIndex) != indices.end()) {
@@ -320,7 +320,7 @@ void findKnightMovesMNs() {
             }
 
             if (prob >= 1) {
-                magicNums.push_back(0ULL);
+                magicNums.push_back(ZERO_BB);
                 shifts.push_back(0);
                 break;
             }
@@ -330,7 +330,7 @@ void findKnightMovesMNs() {
 
             // Build occupancy bitboard
             for (uint16_t j = 0; j < maxOccupancy; j++) {
-                uint64_t occ = 0ULL;
+                uint64_t occ = ZERO_BB;
                 int shift = 0;
                 for (int dest : destinations) {
                     occ |= ((j >> shift) & 1UL) << dest;
@@ -400,7 +400,7 @@ void findKingMovesMNs() {
             }
 
             if (prob >= 1) {
-                magicNums.push_back(0ULL);
+                magicNums.push_back(ZERO_BB);
                 shifts.push_back(0);
                 break;
             }
@@ -410,7 +410,7 @@ void findKingMovesMNs() {
 
             // Build occupancy bitboard
             for (uint16_t j = 0; j < maxOccupancy; j++) {
-                uint64_t occ = 0ULL;
+                uint64_t occ = ZERO_BB;
                 int shift = 0;
                 for (int dest : destinations) {
                     occ |= ((j >> shift) & 1UL) << dest;
@@ -477,7 +477,7 @@ void findBlackPawnMNs() {
             }
 
             if (prob >= 1) {
-                magicNums.push_back(0ULL);
+                magicNums.push_back(ZERO_BB);
                 shifts.push_back(0);
                 break;
             }
@@ -487,7 +487,7 @@ void findBlackPawnMNs() {
 
             // Build occupancy bitboard
             for (uint16_t j = 0; j < maxOccupancy; j++) {
-                uint64_t occ = 0ULL;
+                uint64_t occ = ZERO_BB;
                 int shift = 0;
                 for (int dest : destinations) {
                     occ |= ((j >> shift) & 1UL) << dest;
@@ -554,7 +554,7 @@ void findWhitePawnMNs() {
             }
 
             if (prob >= 1) {
-                magicNums.push_back(0ULL);
+                magicNums.push_back(ZERO_BB);
                 shifts.push_back(0);
                 break;
             }
@@ -564,7 +564,7 @@ void findWhitePawnMNs() {
 
             // Build occupancy bitboard
             for (uint16_t j = 0; j < maxOccupancy; j++) {
-                uint64_t occ = 0ULL;
+                uint64_t occ = ZERO_BB;
                 int shift = 0;
                 for (int dest : destinations) {
                     occ |= ((j >> shift) & 1UL) << dest;
@@ -640,7 +640,7 @@ void generateRookBlockMNs() {
             }
 
             if (prob > 1) {
-                // magicNums.push_back(0ULL);
+                // magicNums.push_back(ZERO_BB);
                 // shifts.push_back(0);
                 cout << squareName[sq] << " is fucked" << '\n';
                 break;
@@ -652,11 +652,11 @@ void generateRookBlockMNs() {
 
             // Build occupancy bitboard
             for (std::array<int, 4> selection : combos) {
-                uint64_t occ = 0ULL;
-                if (selection[0]) occ |= 1ULL << (sq + (N * selection[0]));
-                if (selection[1]) occ |= 1ULL << (sq + (E * selection[1]));
-                if (selection[2]) occ |= 1ULL << (sq + (S * selection[2]));
-                if (selection[3]) occ |= 1ULL << (sq + (W * selection[3]));
+                uint64_t occ = ZERO_BB;
+                if (selection[0]) occ |= ONE_BB << (sq + (N * selection[0]));
+                if (selection[1]) occ |= ONE_BB << (sq + (E * selection[1]));
+                if (selection[2]) occ |= ONE_BB << (sq + (S * selection[2]));
+                if (selection[3]) occ |= ONE_BB << (sq + (W * selection[3]));
 
                 uint16_t magicIndex = ((occ * magicNum) >> (64 - totalSize));
                 if (indices.find(magicIndex) != indices.end()) {
@@ -715,7 +715,7 @@ void generateBishopBlockMNs() {
             }
 
             if (prob > 1) {
-                magicNums.push_back(0ULL);
+                magicNums.push_back(ZERO_BB);
                 shifts.push_back(0);
                 cout << squareName[sq] << " is fucked" << '\n';
                 break;
@@ -727,11 +727,11 @@ void generateBishopBlockMNs() {
 
             // Build occupancy bitboard
             for (std::array<int, 4> selection : combos) {
-                uint64_t occ = 0ULL;
-                if (selection[0]) occ |= 1ULL << (sq + (NE * selection[0]));
-                if (selection[1]) occ |= 1ULL << (sq + (SE * selection[1]));
-                if (selection[2]) occ |= 1ULL << (sq + (SW * selection[2]));
-                if (selection[3]) occ |= 1ULL << (sq + (NW * selection[3]));
+                uint64_t occ = ZERO_BB;
+                if (selection[0]) occ |= ONE_BB << (sq + (NE * selection[0]));
+                if (selection[1]) occ |= ONE_BB << (sq + (SE * selection[1]));
+                if (selection[2]) occ |= ONE_BB << (sq + (SW * selection[2]));
+                if (selection[3]) occ |= ONE_BB << (sq + (NW * selection[3]));
 
                 uint16_t magicIndex = ((occ * magicNum) >> (64 - totalSize));
                 if (indices.find(magicIndex) != indices.end()) {
@@ -769,17 +769,17 @@ void generateBishopBlockMNs() {
 }
 
 void generateKingMasks() {
-    std::vector<Bitboard> masks;
+    BitboardVector masks;
     for (int square = 0; square < 64; square++) {
-        Bitboard mask = 0ULL;
-        if (square / 8 != 7) mask |= (1ULL << (square + N));
-        if (square / 8 != 7 && square % 8 != 7) mask |= (1ULL << (square + NE));
-        if (square % 8 != 7) mask |= (1ULL << (square + E));
-        if (square / 8 != 0 && square % 8 != 7) mask |= (1ULL << (square + SE));
-        if (square / 8 != 0) mask |= (1ULL << (square + S));
-        if (square / 8 != 0 && square % 8 != 0) mask |= (1ULL << (square + SW));
-        if (square % 8 != 0) mask |= (1ULL << (square + W));
-        if (square / 8 != 7 && square % 8 != 0) mask |= (1ULL << (square + NW));
+        Bitboard mask = ZERO_BB;
+        if (square / 8 != 7) mask |= (ONE_BB << (square + N));
+        if (square / 8 != 7 && square % 8 != 7) mask |= (ONE_BB << (square + NE));
+        if (square % 8 != 7) mask |= (ONE_BB << (square + E));
+        if (square / 8 != 0 && square % 8 != 7) mask |= (ONE_BB << (square + SE));
+        if (square / 8 != 0) mask |= (ONE_BB << (square + S));
+        if (square / 8 != 0 && square % 8 != 0) mask |= (ONE_BB << (square + SW));
+        if (square % 8 != 0) mask |= (ONE_BB << (square + W));
+        if (square / 8 != 7 && square % 8 != 0) mask |= (ONE_BB << (square + NW));
         masks.push_back(mask);
     }
 
@@ -790,17 +790,17 @@ void generateKingMasks() {
 }
 
 void generateKnightMasks() {
-    std::vector<Bitboard> masks;
+    BitboardVector masks;
     for (int square = 0; square < 64; square++) {
-        Bitboard mask = 0ULL;
-        if (square / 8 < 6 && square % 8 < 7) mask |= (1ULL << (square + NNE));
-        if (square / 8 < 7 && square % 8 < 6) mask |= (1ULL << (square + ENE));
-        if (square / 8 > 0 && square % 8 < 6) mask |= (1ULL << (square + ESE));
-        if (square / 8 > 1 && square % 8 < 7) mask |= (1ULL << (square + SES));
-        if (square / 8 > 1 && square % 8 > 0) mask |= (1ULL << (square + SWS));
-        if (square / 8 > 0 && square % 8 > 1) mask |= (1ULL << (square + WSW));
-        if (square / 8 < 7 && square % 8 > 1) mask |= (1ULL << (square + WNW));
-        if (square / 8 < 6 && square % 8 > 0) mask |= (1ULL << (square + NWN));
+        Bitboard mask = ZERO_BB;
+        if (square / 8 < 6 && square % 8 < 7) mask |= (ONE_BB << (square + NNE));
+        if (square / 8 < 7 && square % 8 < 6) mask |= (ONE_BB << (square + ENE));
+        if (square / 8 > 0 && square % 8 < 6) mask |= (ONE_BB << (square + ESE));
+        if (square / 8 > 1 && square % 8 < 7) mask |= (ONE_BB << (square + SES));
+        if (square / 8 > 1 && square % 8 > 0) mask |= (ONE_BB << (square + SWS));
+        if (square / 8 > 0 && square % 8 > 1) mask |= (ONE_BB << (square + WSW));
+        if (square / 8 < 7 && square % 8 > 1) mask |= (ONE_BB << (square + WNW));
+        if (square / 8 < 6 && square % 8 > 0) mask |= (ONE_BB << (square + NWN));
         masks.push_back(mask);
     }
 
@@ -811,13 +811,13 @@ void generateKnightMasks() {
 }
 
 void generateBlackPawnMasks() {
-    std::vector<Bitboard> masks;
+    BitboardVector masks;
     for (int square = 0; square < 64; square++) {
-        Bitboard mask = 0ULL;
-        mask |= (1ULL << (square + S));
-        if (square / 8 == 6) mask |= (1ULL << (square + S + S));
-        if (square % 8 != 0) mask |= (1ULL << (square + SW));
-        if (square % 8 != 7) mask |= (1ULL << (square + SE));
+        Bitboard mask = ZERO_BB;
+        mask |= (ONE_BB << (square + S));
+        if (square / 8 == 6) mask |= (ONE_BB << (square + S + S));
+        if (square % 8 != 0) mask |= (ONE_BB << (square + SW));
+        if (square % 8 != 7) mask |= (ONE_BB << (square + SE));
         masks.push_back(mask);
     }
 
@@ -828,13 +828,13 @@ void generateBlackPawnMasks() {
 }
 
 void generateWhitePawnMasks() {
-    std::vector<Bitboard> masks;
+    BitboardVector masks;
     for (int square = 0; square < 64; square++) {
-        Bitboard mask = 0ULL;
-        mask |= (1ULL << (square + N));
-        if (square / 8 == 1) mask |= (1ULL << (square + N + N));
-        if (square % 8 != 0) mask |= (1ULL << (square + NW));
-        if (square % 8 != 7) mask |= (1ULL << (square + NE));
+        Bitboard mask = ZERO_BB;
+        mask |= (ONE_BB << (square + N));
+        if (square / 8 == 1) mask |= (ONE_BB << (square + N + N));
+        if (square % 8 != 0) mask |= (ONE_BB << (square + NW));
+        if (square % 8 != 7) mask |= (ONE_BB << (square + NE));
         masks.push_back(mask);
     }
 
