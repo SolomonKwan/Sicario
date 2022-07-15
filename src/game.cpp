@@ -176,78 +176,55 @@ void Position::parseFen(std::string fen) {
                     file++;
                 }
             } else {
-                if (c == 'K') {
-                    this->kings |= ONE_BB << (8 * rank + file);
-                    this->piece_list[WHITE][0] = (Square) (8 * rank + file);
-                    this->piece_index[W_KING]++;
-                    this->pieces[8 * rank + file] = W_KING;
-                } else if (c == 'Q') {
-                    this->queens |= ONE_BB << (8 * rank + file);
-                    this->piece_list[W_QUEEN][this->piece_index[W_QUEEN]] = (Square)(8 * rank + file);
-                    this->piece_index[W_QUEEN]++;
-                    this->pieces[8 * rank + file] = W_QUEEN;
-                } else if (c == 'R') {
-                    this->rooks |= ONE_BB << (8 * rank + file);
-                    this->piece_list[W_ROOK][this->piece_index[W_ROOK]] = (Square)(8 * rank + file);
-                    this->piece_index[W_ROOK]++;
-                    this->pieces[8 * rank + file] = W_ROOK;
-                } else if (c == 'B') {
-                    this->bishops |= ONE_BB << (8 * rank + file);
-                    this->piece_list[W_BISHOP][this->piece_index[W_BISHOP]] = (Square)(8 * rank + file);
-                    this->piece_index[W_BISHOP]++;
-                    this->pieces[8 * rank + file] = W_BISHOP;
-                    if (isDark(8 * rank + file)) {
-                        this->wdsb_cnt++;
-                    } else {
-                        this->wlsb_cnt++;
-                    }
-                } else if (c == 'N') {
-                    this->knights |= ONE_BB << (8 * rank + file);
-                    this->piece_list[W_KNIGHT][this->piece_index[W_KNIGHT]] = (Square)(8 * rank + file);
-                    this->piece_index[W_KNIGHT]++;
-                    this->pieces[8 * rank + file] = W_KNIGHT;
-                    this->knight_cnt++;
-                } else if (c == 'P') {
-                    this->pawns |= ONE_BB << (8 * rank + file);
-                    this->piece_list[W_PAWN][this->piece_index[W_PAWN]] = (Square)(8 * rank + file);
-                    this->piece_index[W_PAWN]++;
-                    this->pieces[8 * rank + file] = W_PAWN;
-                } else if (c == 'k') {
-                    this->kings |= ONE_BB << (8 * rank + file);
-                    this->piece_list[BLACK][0] = (Square) (8 * rank + file);
-                    this->piece_index[B_KING]++;
-                    this->pieces[8 * rank + file] = B_KING;
-                } else if (c == 'q') {
-                    this->queens |= ONE_BB << (8 * rank + file);
-                    this->piece_list[B_QUEEN][this->piece_index[B_QUEEN]] = (Square)(8 * rank + file);
-                    this->piece_index[B_QUEEN]++;
-                    this->pieces[8 * rank + file] = B_QUEEN;
-                } else if (c == 'r') {
-                    this->rooks |= ONE_BB << (8 * rank + file);
-                    this->piece_list[B_ROOK][this->piece_index[B_ROOK]] = (Square)(8 * rank + file);
-                    this->piece_index[B_ROOK]++;
-                    this->pieces[8 * rank + file] = B_ROOK;
-                } else if (c == 'b') {
-                    this->bishops |= ONE_BB << (8 * rank + file);
-                    this->piece_list[B_BISHOP][this->piece_index[B_BISHOP]] = (Square)(8 * rank + file);
-                    this->piece_index[B_BISHOP]++;
-                    this->pieces[8 * rank + file] = B_BISHOP;
-                    if (isDark(8 * rank + file)) {
-                        this->bdsb_cnt++;
-                    } else {
-                        this->blsb_cnt++;
-                    }
-                } else if (c == 'n') {
-                    this->knights |= ONE_BB << (8 * rank + file);
-                    this->piece_list[B_KNIGHT][this->piece_index[B_KNIGHT]] = (Square)(8 * rank + file);
-                    this->piece_index[B_KNIGHT]++;
-                    this->pieces[8 * rank + file] = B_KNIGHT;
-                    this->knight_cnt++;
-                } else {
-                    this->pawns |= ONE_BB << (8 * rank + file);
-                    this->piece_list[B_PAWN][this->piece_index[B_PAWN]] = (Square)(8 * rank + file);
-                    this->piece_index[B_PAWN]++;
-                    this->pieces[8 * rank + file] = B_PAWN;
+                switch (c) {
+                    case 'K':
+                        updatePieceInfo(kings, W_KING, static_cast<Square>(8 * rank + file));
+                        break;
+                    case 'Q':
+                        updatePieceInfo(queens, W_QUEEN, static_cast<Square>(8 * rank + file));
+                        break;
+                    case 'R':
+                        updatePieceInfo(rooks, W_ROOK, static_cast<Square>(8 * rank + file));
+                        break;
+                    case 'B':
+                        updatePieceInfo(bishops, W_BISHOP, static_cast<Square>(8 * rank + file));
+                        if (isDark(static_cast<Square>(8 * rank + file))) {
+                            this->wdsb_cnt++;
+                        } else {
+                            this->wlsb_cnt++;
+                        }
+                        break;
+                    case 'N':
+                        updatePieceInfo(knights, W_KNIGHT, static_cast<Square>(8 * rank + file));
+                        this->knight_cnt++;
+                        break;
+                    case 'P':
+                        updatePieceInfo(pawns, W_PAWN, static_cast<Square>(8 * rank + file));
+                        break;
+                    case 'k':
+                        updatePieceInfo(kings, B_KING, static_cast<Square>(8 * rank + file));
+                        break;
+                    case 'q':
+                        updatePieceInfo(queens, B_QUEEN, static_cast<Square>(8 * rank + file));
+                        break;
+                    case 'r':
+                        updatePieceInfo(rooks, B_ROOK, static_cast<Square>(8 * rank + file));
+                        break;
+                    case 'b':
+                        updatePieceInfo(bishops, B_BISHOP, static_cast<Square>(8 * rank + file));
+                        if (isDark(static_cast<Square>(8 * rank + file))) {
+                            this->bdsb_cnt++;
+                        } else {
+                            this->blsb_cnt++;
+                        }
+                        break;
+                    case 'n':
+                        updatePieceInfo(knights, B_KNIGHT, static_cast<Square>(8 * rank + file));
+                        this->knight_cnt++;
+                        break;
+                    case 'p':
+                        updatePieceInfo(pawns, B_PAWN, static_cast<Square>(8 * rank + file));
+                        break;
                 }
 
                 // Set sides and piece count
@@ -265,51 +242,68 @@ void Position::parseFen(std::string fen) {
         rank--;
     }
 
-    // Set turn
-    if (parts[1] == "w") {
-        this->turn = WHITE;
-    } else {
-        this->turn = BLACK;
-    }
+    parseFenMove(parts[1]);
+    parseFenCastling(parts[2]);
+    parseFenEnPassant(parts[3]);
+    parseFenEnPassant(parts[4]);
+    parseFenMoves(parts[4], parts[5]);
 
-    // Set castling
-    this->castling = 0;
-    if (parts[2] != "-") {
-        for (char c : parts[2]) {
+    // Set ply and position hash to zero.
+    this->ply = 0;
+    this->hash = ZERO_BB;
+}
+
+void Position::parseFenMove(std::string& fenMove) {
+    if (fenMove == "w") {
+        turn = WHITE;
+    } else {
+        turn = BLACK;
+    }
+}
+
+void Position::parseFenCastling(std::string& fenCastling) {
+    castling = 0;
+    if (fenCastling != "-") {
+        for (char c : fenCastling) {
             if (c == 'K') {
-                this->castling |= 1 << WKSC;
+                castling |= 1 << WKSC;
             } else if (c == 'Q') {
-                this->castling |= 1 << WQSC;
+                castling |= 1 << WQSC;
             } else if (c == 'k') {
-                this->castling |= 1 << BKSC;
+                castling |= 1 << BKSC;
             } else {
-                this->castling |= 1 << BQSC;
+                castling |= 1 << BQSC;
             }
         }
     }
+}
 
-    // Set en-passant
-    if (parts[3] != "-") {
+void Position::parseFenEnPassant(std::string& fenEnPassant) {
+    if (fenEnPassant != "-") {
         int value = -1;
-        for (char c : parts[3]) {
+        for (char c : fenEnPassant) {
             if (value == -1) {
                 value = (c - 'a');
             } else {
                 value += 8 * (c - '1');
             }
         }
-        this->en_passant = (Square) value;
+        en_passant = (Square) value;
     } else {
-        this->en_passant = NONE;
+        en_passant = NONE;
     }
+}
 
-    // Set fullmoves and halfmoves.
-    this->halfmove = std::stoi(parts[4]);
-    this->fullmove = std::stoi(parts[5]);
+void Position::parseFenMoves(std::string& halfmove, std::string& fullmove) {
+    halfmove = std::stoi(halfmove);
+    fullmove = std::stoi(fullmove);
+}
 
-    // Set ply and position hash to zero.
-    this->ply = 0;
-    this->hash = ZERO_BB;
+void Position::updatePieceInfo(Bitboard& pieceBB, PieceType piece, Square square) {
+    pieceBB |= ONE_BB << square;
+    piece_list[piece][piece_index[piece]] = square;
+    piece_index[piece]++;
+    pieces[square] = piece;
 }
 
 void Position::resetPosition() {
@@ -1322,8 +1316,8 @@ void Position::incrementHash(Move move) {
 }
 
 Position::Position(std::string fen) : history(MAX_MOVES) {
-    this->parseFen(fen);
-    this->initialiseHash();
+    parseFen(fen);
+    initialiseHash();
 }
 
 inline std::string darkSquare(std::string str) {

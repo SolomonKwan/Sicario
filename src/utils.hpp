@@ -130,13 +130,4 @@ inline File file(Square square) {
  */
 void printMove(Move move, bool extraInfo);
 
-/**
- * @brief Return true if a square is a dark square, else false.
- *
- * @param square: The square to check.
- */
-inline bool isDark(int square) {
-    return (DARK_BB >> square) & ONE_BB;
-}
-
 #endif

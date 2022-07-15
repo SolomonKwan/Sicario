@@ -105,6 +105,16 @@ class Position {
         Hash hash;
         uint ply;
 
+        void parseFenMove(std::string& fenMove);
+
+        void parseFenCastling(std::string& fenCastling);
+
+        void parseFenEnPassant(std::string& fenEnPassant);
+
+        void parseFenMoves(std::string& halfmove, std::string& fullmove);
+
+        void updatePieceInfo(Bitboard& pieceBB, PieceType piece, Square square);
+
         /**
          * @brief Get bitboard of all pieces on the board.
          *
