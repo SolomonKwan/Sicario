@@ -5,10 +5,6 @@
 #include <vector>
 #include <string>
 
-#ifdef USE_PEXT
-#include <x86intrin.h>
-#endif
-
 /**
  * @brief Splits a string by a delimeter string and returns vector of results without empty strings.
  *
@@ -132,11 +128,5 @@ inline File file(Square square) {
  * @param extraInfo Whether or not to print the extra information relating to the move type and promotion.
  */
 void printMove(Move move, bool extraInfo);
-
-#ifdef USE_PEXT
-inline Bitboard pext(Bitboard occ, Bitboard mask) {
-    return _pext_u64(occ, mask);
-}
-#endif
 
 #endif

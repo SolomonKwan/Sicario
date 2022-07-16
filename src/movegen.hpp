@@ -2,8 +2,13 @@
 #ifndef MOVEGEN_HPP
 #define MOVEGEN_HPP
 
+#ifdef USE_PEXT
+#include <x86intrin.h>
+#endif
+
 #include <unordered_map>
 #include <vector>
+
 #include "constants.hpp"
 #include "bitboard.hpp"
 #include "utils.hpp"
@@ -136,7 +141,7 @@ BitboardFamily computeDiagonalRays();
  */
 inline uint getRookReachIndex(Bitboard occupancy, Square square) {
     #ifdef USE_PEXT
-    return pext(occupancy, Masks::ROOK[square]);
+    return _pext_u64(occupancy, Masks::ROOK[square]);
     #else
     return (occupancy * MagicNums::Reach::ROOK[square]) >> Shifts::Reach::ROOK[square];
     #endif
@@ -162,7 +167,7 @@ inline uint getRookMovesIndex(Bitboard reach, Square square) {
  */
 inline uint getBishopReachIndex(Bitboard occupancy, Square square) {
     #ifdef USE_PEXT
-    return pext(occupancy, Masks::BISHOP[square]);
+    return _pext_u64(occupancy, Masks::BISHOP[square]);
     #else
     return (occupancy * MagicNums::Reach::BISHOP[square]) >> Shifts::Reach::BISHOP[square];
     #endif
@@ -188,7 +193,7 @@ inline uint getBishopMovesIndex(Bitboard reach, Square square) {
  */
 inline uint getKnightMovesIndex(Bitboard reach, Square square) {
     #ifdef USE_PEXT
-    return pext(reach, Masks::KNIGHT[square]);
+    return _pext_u64(reach, Masks::KNIGHT[square]);
     #else
     return (reach * MagicNums::KNIGHT[square]) >> Shifts::KNIGHT[square];
     #endif
@@ -203,7 +208,7 @@ inline uint getKnightMovesIndex(Bitboard reach, Square square) {
  */
 inline uint getKingMovesIndex(Bitboard reach, Square square) {
     #ifdef USE_PEXT
-    return pext(reach, Masks::KING[square]);
+    return _pext_u64(reach, Masks::KING[square]);
     #else
     return (reach * MagicNums::KING[square]) >> Shifts::KING[square];
     #endif
@@ -219,7 +224,7 @@ inline uint getKingMovesIndex(Bitboard reach, Square square) {
  */
 inline uint getPawnMovesIndex(Bitboard reach, Square square, Player player) {
     #ifdef USE_PEXT
-    return pext(reach, Masks::PAWN[player][square]);
+    return _pext_u64(reach, Masks::PAWN[player][square]);
     #else
     return (reach * MagicNums::PAWN[player][square]) >> Shifts::PAWN[player][square];
     #endif
