@@ -6,6 +6,7 @@
 #include <vector>
 #include "constants.hpp"
 #include "bitboard.hpp"
+#include "utils.hpp"
 
 /**
  * @brief Computes move sets of the king on each square based on legal destinations. This does not compute castling
@@ -134,7 +135,11 @@ BitboardFamily computeDiagonalRays();
  * @return Index into the precomputed rook reach array.
  */
 inline uint getRookReachIndex(Bitboard occupancy, Square square) {
+    #ifdef USE_PEXT
+    return pext(occupancy, Masks::ROOK[square]);
+    #else
     return (occupancy * MagicNums::Reach::ROOK[square]) >> Shifts::Reach::ROOK[square];
+    #endif
 }
 
 /**
@@ -156,7 +161,11 @@ inline uint getRookMovesIndex(Bitboard reach, Square square) {
  * @return Index into the precomputed bishop reach array.
  */
 inline uint getBishopReachIndex(Bitboard occupancy, Square square) {
+    #ifdef USE_PEXT
+    return pext(occupancy, Masks::BISHOP[square]);
+    #else
     return (occupancy * MagicNums::Reach::BISHOP[square]) >> Shifts::Reach::BISHOP[square];
+    #endif
 }
 
 /**
@@ -178,7 +187,11 @@ inline uint getBishopMovesIndex(Bitboard reach, Square square) {
  * @return Index into the precomputed knight moves array.
  */
 inline uint getKnightMovesIndex(Bitboard reach, Square square) {
+    #ifdef USE_PEXT
+    return pext(reach, Masks::KNIGHT[square]);
+    #else
     return (reach * MagicNums::KNIGHT[square]) >> Shifts::KNIGHT[square];
+    #endif
 }
 
 /**
@@ -189,7 +202,11 @@ inline uint getKnightMovesIndex(Bitboard reach, Square square) {
  * @return Index into the precomputed king moves array.
  */
 inline uint getKingMovesIndex(Bitboard reach, Square square) {
+    #ifdef USE_PEXT
+    return pext(reach, Masks::KING[square]);
+    #else
     return (reach * MagicNums::KING[square]) >> Shifts::KING[square];
+    #endif
 }
 
 /**
@@ -201,7 +218,11 @@ inline uint getKingMovesIndex(Bitboard reach, Square square) {
  * @return Index into the precomputed pawn moves array.
  */
 inline uint getPawnMovesIndex(Bitboard reach, Square square, Player player) {
+    #ifdef USE_PEXT
+    return pext(reach, Masks::PAWN[player][square]);
+    #else
     return (reach * MagicNums::PAWN[player][square]) >> Shifts::PAWN[player][square];
+    #endif
 }
 
 /**
