@@ -1320,11 +1320,11 @@ Position::Position(std::string fen) : history(MAX_MOVES) {
 }
 
 inline std::string darkSquare(std::string str) {
-    return "\033[1;30;44m" + str + " \033[0m"; // TODO bold outline?
+    return "\033[1;30;44m" + str + " \033[0m";
 }
 
 inline std::string lightSquare(std::string str) {
-    return "\033[1;30;47m" + str + " \033[0m"; // TODO bold outline?
+    return "\033[1;30;47m" + str + " \033[0m";
 }
 
 void Position::display() {

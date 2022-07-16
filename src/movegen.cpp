@@ -485,7 +485,7 @@ BitboardFamily computeBishopReaches() {
 
         for (std::array<int, 4> combo : combos) {
             Bitboard occ = ZERO_BB;
-            if (combo[0]) occ |= (ONE_BB << (square + NE * combo[0])); // TODO R.E. the todo below, the problem is that this will set a bit on the edge on occasion. Why doesnt this seem to haoppenf or the rook???
+            if (combo[0]) occ |= (ONE_BB << (square + NE * combo[0]));
             if (combo[1]) occ |= (ONE_BB << (square + SE * combo[1]));
             if (combo[2]) occ |= (ONE_BB << (square + SW * combo[2]));
             if (combo[3]) occ |= (ONE_BB << (square + NW * combo[3]));
@@ -507,7 +507,7 @@ BitboardFamily computeBishopReaches() {
                 reach |= (ONE_BB << (square + i * NW));
             }
 
-            reachSet[BISHOP[square][getBishopReachIndex(occ & Masks::BISHOP[square], (Square) square)]] = reach; // TODO the border thing is stupid. this whole function need looking at.
+            reachSet[BISHOP[square][getBishopReachIndex(occ & Masks::BISHOP[square], (Square) square)]] = reach;
         }
     }
     return reaches;
