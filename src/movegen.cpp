@@ -371,7 +371,7 @@ IndicesFamily computeRookReachIndices() {
                 if (!westBlock && ((j >> shift) & 1UL)) westBlock = k + 1;
             }
 
-            uint16_t magicIndex = ((occ * MagicNums::Reach::ROOK[square]) >> Shifts::Reach::ROOK[square]);
+            uint16_t magicIndex = getRookReachIndex(occ, square);
             int mappedIndex = getIndex(
                 {northBlock, eastBlock, southBlock, westBlock},
                 {northSize ? northSize + 1 : 0, eastSize ? eastSize + 1 : 0, southSize ? southSize + 1 : 0,
@@ -416,7 +416,7 @@ IndicesFamily computeBishopReachIndices() {
                 if (!northwestBlock && ((j >> shift) & 1UL)) northwestBlock = k + 1;
             }
 
-            uint16_t magicIndex = ((occ * MagicNums::Reach::BISHOP[square]) >> Shifts::Reach::BISHOP[square]);
+            uint16_t magicIndex = getBishopReachIndex(occ, square);
             int mappedIndex = getIndex(
                 {northeastBlock, southeastBlock, southwestBlock, northwestBlock},
                 {northeastSize ? northeastSize + 1 : 0, southeastSize ? southeastSize + 1 : 0,

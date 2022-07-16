@@ -6,6 +6,7 @@
 #include <vector>
 #include "constants.hpp"
 #include "bitboard.hpp"
+#include "utils.hpp"
 
 /**
  * @brief Computes move sets of the king on each square based on legal destinations. This does not compute castling
@@ -134,7 +135,11 @@ BitboardFamily computeDiagonalRays();
  * @return Index into the precomputed rook reach array.
  */
 inline uint getRookReachIndex(Bitboard occupancy, Square square) {
+    #ifdef USE_PEXT
+    return pext(occupancy, Masks::ROOK[square]);
+    #else
     return (occupancy * MagicNums::Reach::ROOK[square]) >> Shifts::Reach::ROOK[square];
+    #endif
 }
 
 /**
@@ -156,7 +161,11 @@ inline uint getRookMovesIndex(Bitboard reach, Square square) {
  * @return Index into the precomputed bishop reach array.
  */
 inline uint getBishopReachIndex(Bitboard occupancy, Square square) {
+    #ifdef USE_PEXT
+    return pext(occupancy, Masks::BISHOP[square]);
+    #else
     return (occupancy * MagicNums::Reach::BISHOP[square]) >> Shifts::Reach::BISHOP[square];
+    #endif
 }
 
 /**
@@ -178,7 +187,11 @@ inline uint getBishopMovesIndex(Bitboard reach, Square square) {
  * @return Index into the precomputed knight moves array.
  */
 inline uint getKnightMovesIndex(Bitboard reach, Square square) {
+    #ifdef USE_PEXT
+    return pext(reach, Masks::KNIGHT[square]);
+    #else
     return (reach * MagicNums::KNIGHT[square]) >> Shifts::KNIGHT[square];
+    #endif
 }
 
 /**
@@ -189,7 +202,11 @@ inline uint getKnightMovesIndex(Bitboard reach, Square square) {
  * @return Index into the precomputed king moves array.
  */
 inline uint getKingMovesIndex(Bitboard reach, Square square) {
+    #ifdef USE_PEXT
+    return pext(reach, Masks::KING[square]);
+    #else
     return (reach * MagicNums::KING[square]) >> Shifts::KING[square];
+    #endif
 }
 
 /**
@@ -201,7 +218,11 @@ inline uint getKingMovesIndex(Bitboard reach, Square square) {
  * @return Index into the precomputed pawn moves array.
  */
 inline uint getPawnMovesIndex(Bitboard reach, Square square, Player player) {
+    #ifdef USE_PEXT
+    return pext(reach, Masks::PAWN[player][square]);
+    #else
     return (reach * MagicNums::PAWN[player][square]) >> Shifts::PAWN[player][square];
+    #endif
 }
 
 /**
@@ -293,31 +314,6 @@ void generatePairSquares(std::array<int, 4> sizes, std::array<int, 4>& curr, std
  * @return std::vector<std::array<int, 4>>
  */
 std::vector<std::array<int, 4>> getEndBlockSquares(std::array<int, 4> sizes); // TODO change to uint
-
-/**
- * A struct holding the move families.
- *
- * Contains:
- *  reach:      A bit board of the squares a piece can reach. Enemy and friendly
- *              pieces included. Goes all the way to the edge of the board.
- *  block_bits: A vector of the end squares on each ray of the reach bitboard.
- *  move_set:   A vector of vectors of 16 bit unsigned integers. Each integer
- *              encodes a move as Promotion (4), MoveType (4), Destination (6)
- *             , Origin (6).
- *  en_passant: Vector of vectors of en-passant moves. Used only for pawns.
- *  checked_moves: Unnorderd map whose keys are uint64_t ints with the possible
- *      destination squares (captures and blocks) set. The value is a vector of
- *      moves to those squares.
- */
-struct MovesStruct {
-    uint64_t reach;
-    std::vector<int> block_bits;
-    std::vector<std::vector<Move>> move_set;
-    std::vector<std::vector<Move>> en_passant;
-    std::vector<std::vector<Move>> double_push;
-
-    std::unordered_map<uint64_t, std::vector<Move>> checked_moves;
-};
 
 /**
  * Information before current move is made.
