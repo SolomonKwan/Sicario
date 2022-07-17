@@ -1,3 +1,7 @@
+#ifdef USE_PEXT
+#include <x86intrin.h>
+#endif
+
 #include <iostream>
 #include <bitset>
 #include <random>
@@ -145,15 +149,17 @@ void Position::setPinAndCheckRayBitboards() {
 
 void Position::getMoves(uint& moves_index, MoveSet pos_moves[MOVESET_SIZE]) {
     setCheckers();
-    if (inDoubleCheck()) {
-        getKingMoves(moves_index, pos_moves);
-    } else if (inCheck()) {
+    if (inCheck()) {
+        if (inDoubleCheck()) {
+            getKingMoves(moves_index, pos_moves);
+            return;
+        }
         setPinAndCheckRayBitboards();
         getCheckMoves(moves_index, pos_moves);
-    } else {
-        setPinAndCheckRayBitboards();
-        getNormalMoves(moves_index, pos_moves);
+        return;
     }
+    setPinAndCheckRayBitboards();
+    getNormalMoves(moves_index, pos_moves);
 }
 
 void Position::parseFen(std::string fen) {
@@ -685,7 +691,11 @@ void Position::getEnPassantMoves(uint& moves_index, MoveSet pos_moves[MOVESET_SI
 }
 
 inline bool Position::inDoubleCheck() {
+    #ifdef USE_PEXT
+    return _blsr_u64(checkers) != ZERO_BB;
+    #else
     return (checkers & (checkers - ONE_BB)) != ZERO_BB;
+    #endif
 }
 
 bool Position::isThreeFoldRep() {
