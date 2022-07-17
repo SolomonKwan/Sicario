@@ -13,9 +13,9 @@ main() {
 		# record_file)
 		# 	record_file "$2"
 		# 	;;
-		# check)
-		# 	check
-		# 	;;
+		check)
+			check
+			;;
 		# clean)
 		# 	clean
 		# 	;;
@@ -54,16 +54,16 @@ perft() {
 	vimdiff sf_result.txt sc_result.txt
 }
 
-# sicario_value() {
-# 	make -C ~/Sicario/src/ -s
-# 	~/Sicario/src/sicario > ~/Sicario/tests/sc_result <<-EOF
-# 		nouci
-# 		set fen $1
-# 		perft $2
-# 		exit
-# 	EOF
-# 	echo $(cut -d ":" -f2- <<< $(tail -n 2 ~/Sicario/tests/sc_result))
-# }
+sicario_value() {
+	../src/sicario > ./sc_result.txt <<-EOF
+		position fen $1
+		perft $2
+		quit
+	EOF
+	tail -n 1 sc_result.txt > sc_result.tmp
+	cat sc_result.tmp > sc_result.txt
+	rm sc_result.tmp
+}
 
 # perft_suite() {
 # 	echo "Running perft suite"
@@ -93,37 +93,43 @@ perft() {
 # 	rm ~/Sicario/tests/sc_result_vd ~/Sicario/tests/sf_result_vd ~/Sicario/tests/sf_result ~/Sicario/tests/sc_result
 # }
 
-# stockfish_value() {
-# 	~/Stockfish/src/stockfish > ~/Sicario/tests/sf_result <<-EOF
-# 		position fen "$1"
-# 		go perft $2
-# 	EOF
-# 	echo $(cut -d ":" -f2- <<< $(tail -n 2 ~/Sicario/tests/sf_result))
-# }
+stockfish_value() {
+	../../stockfish_15_linux_x64_bmi2/stockfish_15_x64_bmi2 > ./sf_result.txt <<-EOF
+		position fen "$1"
+		go perft $2
+		quit
+	EOF
+	tail -n 2 sf_result.txt | head -n 1 > sf_result.tmp
+	cat sf_result.tmp > sf_result.txt
+	rm sf_result.tmp
+}
 
-# # Quick check of perft 5 on the original and kiwipete position.
-# check() {
-# 	echo "Performing quick check..."
-# 	local original="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
-# 	val=$(sicario_value "$original" 5)
-# 	actualVal=$(stockfish_value "$original" 5)
-# 	if [[ $val -eq $actualVal ]]
-# 	then
-# 		echo "[ PASSED ] Original position"
-# 	else
-# 		echo "[ FAILED ] Original position"
-# 	fi
+# Quick check of perft 6 on the original and kiwipete position.
+check() {
+	echo "Performing quick check..."
 
-# 	local kiwipete="r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1"
-# 	val=$(sicario_value "$kiwipete" 5)
-# 	actualVal=$(stockfish_value "$kiwipete" 5)
-# 	if [[ $val -eq $actualVal ]]
-# 	then
-# 		echo "[ PASSED ] Kiwipete position"
-# 	else
-# 		echo "[ FAILED ] Kiwipete position"
-# 	fi
-# }
+	local original="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+	sicario_value "$original" 6
+	stockfish_value "$original" 6
+	if cmp --silent -- sc_result.txt sf_result.txt;
+	then
+		echo "[ \033[0;32mPASSED\033[0m ] Original position"
+	else
+		echo "[ \033[0;31mFAILED\033[0m ] Original position"
+	fi
+
+	local kiwipete="r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1"
+	sicario_value "$kiwipete" 5
+	stockfish_value "$kiwipete" 5
+	if cmp --silent -- sc_result.txt sf_result.txt;
+	then
+		echo "[ \033[0;32mPASSED\033[0m ] Kiwipete position"
+	else
+		echo "[ \033[0;31mFAILED\033[0m ] Kiwipete position"
+	fi
+
+	rm sf_result.txt sc_result.txt
+}
 
 # record_result() {
 # 	echo "Recording result" "$1"
