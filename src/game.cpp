@@ -680,7 +680,7 @@ void Position::getEnPassantMoves(uint& moves_index, MoveSet pos_moves[MOVESET_SI
         if (file(en_passant) != FILE_A) pawnSquares.push_back(en_passant + (turn == WHITE ? SW : NW));
         if (file(en_passant) != FILE_H) pawnSquares.push_back(en_passant + (turn == WHITE ? SE : NE));
         for (Square square : pawnSquares) {
-            if ((pieces[square] == getPieceType<PAWN>()) && !isPinnedByBishop(square) && !isPinnedByRook(square)) {
+            if ((pieces[square] == getPieceType<PAWN>()) && (!isPinnedByBishop(square) || (isPinnedByBishop(square) && isPinnedByBishop(en_passant))) && !isPinnedByRook(square)) {
                 bool pinned = oneBitSet(getPieces() & rook_ep_pins & ~(ONE_BB << square | ONE_BB << (en_passant +
                         (turn == WHITE ? S : N))));
                 if (!pinned) pos_moves[moves_index++] = &Moves::EN_PASSANT[turn][file(en_passant)]
