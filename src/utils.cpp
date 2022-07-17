@@ -80,10 +80,38 @@ void displayBB(uint64_t position) {
 void printMove(Move move, bool extraInfo) {
     if (extraInfo) {
         std::cout << squareName[start(move)] << squareName[end(move)];
-        std::cout << " " << moveName[type(move)] << " " << promoName[promo(move)];
+        std::cout << " ";
+        std::cout << getTypeString(type(move)) << " " << promoName[promo(move)];
     } else if (type(move) == PROMOTION) {
-        std::cout << squareName[start(move)] << squareName[end(move)] << promoName[promo(move)];
+        std::cout << squareName[start(move)] << squareName[end(move)] << getPromoString(promo(move));
+
     } else {
         std::cout << squareName[start(move)] << squareName[end(move)];
+    }
+}
+
+std::string getPromoString(Promotion promo) {
+    switch (promo) {
+        case pKNIGHT:
+            return promoName[0];
+        case pBISHOP:
+            return promoName[1];
+        case pROOK:
+            return promoName[2];
+        default:
+            return promoName[3];
+    }
+}
+
+std::string getTypeString(MoveType type) {
+    switch (type) {
+        case NORMAL:
+            return moveName[0];
+        case PROMOTION:
+            return moveName[1];
+        case EN_PASSANT:
+            return moveName[2];
+        default:
+            return moveName[3];
     }
 }

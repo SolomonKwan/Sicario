@@ -129,4 +129,8 @@ inline File file(Square square) {
  */
 void printMove(Move move, bool extraInfo);
 
+std::string getPromoString(Promotion promo);
+
+std::string getTypeString(MoveType type);
+
 #endif
