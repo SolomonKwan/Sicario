@@ -1,12 +1,17 @@
+#!/bin/bash
+
+GREEN="\033[0;32m"
+RED='\033[0;31m'
+NC='\033[0m'
 
 main() {
 	case $1 in
 		perft)
 			perft "$2" "$3"
 			;;
-		# perft_suite)
-		# 	perft_suite
-		# 	;;
+		perft_suite)
+			perft_suite
+			;;
 		# record_result)
 		# 	record_result "$2"
 		# 	;;
@@ -62,27 +67,25 @@ sicario_value() {
 	EOF
 	tail -n 1 sc_result.txt > sc_result.tmp
 	cat sc_result.tmp > sc_result.txt
+	cat sc_result.txt
 	rm sc_result.tmp
 }
 
-# perft_suite() {
-# 	echo "Running perft suite"
-# 	while IFS= read -r line; do
-# 		local FEN="${line%%;*}"
-# 		val=$(sicario_value "$FEN" 6)
-# 		actualVal=$(echo "$line", grep -o "D6 .*", cut -c 4-)
-#         GREEN='\033[0;32m'
-#         RED='\033[0;31m'
-#         NC='\033[0m'
-# 		if [[ $val -eq $actualVal ]]
-# 		then
-# 			echo -e "${GREEN}[ PASSED ]${NC} " "$FEN"
-# 		else
-# 			echo -e "${RED}[ FAILED ]${NC} " "$FEN"
-# 		fi
-# 	done < ~/Sicario/tests/perftsuite.epd
-# 	rm sc_result
-# }
+perft_suite() {
+	printf "Running perft suite\n"
+	while IFS= read -r line; do
+		local FEN="${line%%;*}"
+		local actualVal=$(echo $line | grep -o "D6 .*" | cut -c 4-)
+		local val=$(sicario_value "$FEN" 6 | cut -c 17-)
+		if [[ $val -eq $actualVal ]]
+		then
+			printf "[ ${GREEN}PASSED${NC} ] ${FEN}\n"
+		else
+			printf "[ ${RED}FAILED${NC} ] ${FEN}\n"
+		fi
+	done < ./perftsuite.epd
+	rm sc_result.txt sf_result.txt
+}
 
 # clean() {
 # 	echo "Removing files:"
@@ -101,34 +104,32 @@ stockfish_value() {
 	EOF
 	tail -n 2 sf_result.txt | head -n 1 > sf_result.tmp
 	cat sf_result.tmp > sf_result.txt
+	cat sf_result.txt
 	rm sf_result.tmp
 }
 
-# Quick check of perft 6 on the original and kiwipete position.
 check() {
-	echo "Performing quick check..."
+	printf "Performing quick check...\n"
 
 	local original="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
-	sicario_value "$original" 6
-	stockfish_value "$original" 6
-	if cmp --silent -- sc_result.txt sf_result.txt;
+	local sc_value=$(sicario_value "$original" 6)
+	local sf_value=$(stockfish_value "$original" 6)
+	if [[ $sc_value == $sf_value ]]
 	then
-		echo "[ \033[0;32mPASSED\033[0m ] Original position"
+		printf "[ ${GREEN}PASSED${NC} ] Original position\n"
 	else
-		echo "[ \033[0;31mFAILED\033[0m ] Original position"
+		printf "[ ${RED}FAILED${NC} ] Original position\n"
 	fi
 
 	local kiwipete="r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1"
-	sicario_value "$kiwipete" 5
-	stockfish_value "$kiwipete" 5
-	if cmp --silent -- sc_result.txt sf_result.txt;
+	local sc_value=$(sicario_value "$kiwipete" 5)
+	local sf_value=$(stockfish_value "$kiwipete" 5)
+	if [[ $sc_value == $sf_value ]]
 	then
-		echo "[ \033[0;32mPASSED\033[0m ] Kiwipete position"
+		printf "[ ${GREEN}PASSED${NC} ] Kiwipete position\n"
 	else
-		echo "[ \033[0;31mFAILED\033[0m ] Kiwipete position"
+		printf "[ ${RED}FAILED${NC} ] Kiwipete position\n"
 	fi
-
-	rm sf_result.txt sc_result.txt
 }
 
 # record_result() {
