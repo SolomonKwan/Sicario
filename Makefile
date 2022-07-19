@@ -2,6 +2,10 @@ ifeq ($(OPTIMISE), TRUE)
 	OPT = -O3 -DNDEBUG
 endif
 
+ifeq ($(PEXT), TRUE)
+	OPT := $(OPT) -DUSE_PEXT -march=native
+endif
+
 SRC = ./src
 TEST = ./tests
 GENERATE = ./magic_numbers

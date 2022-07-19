@@ -371,7 +371,7 @@ IndicesFamily computeRookReachIndices() {
                 if (!westBlock && ((j >> shift) & 1UL)) westBlock = k + 1;
             }
 
-            uint16_t magicIndex = ((occ * MagicNums::Reach::ROOK[square]) >> Shifts::Reach::ROOK[square]);
+            uint16_t magicIndex = getRookReachIndex(occ, square);
             int mappedIndex = getIndex(
                 {northBlock, eastBlock, southBlock, westBlock},
                 {northSize ? northSize + 1 : 0, eastSize ? eastSize + 1 : 0, southSize ? southSize + 1 : 0,
@@ -416,7 +416,7 @@ IndicesFamily computeBishopReachIndices() {
                 if (!northwestBlock && ((j >> shift) & 1UL)) northwestBlock = k + 1;
             }
 
-            uint16_t magicIndex = ((occ * MagicNums::Reach::BISHOP[square]) >> Shifts::Reach::BISHOP[square]);
+            uint16_t magicIndex = getBishopReachIndex(occ, square);
             int mappedIndex = getIndex(
                 {northeastBlock, southeastBlock, southwestBlock, northwestBlock},
                 {northeastSize ? northeastSize + 1 : 0, southeastSize ? southeastSize + 1 : 0,
@@ -485,7 +485,7 @@ BitboardFamily computeBishopReaches() {
 
         for (std::array<int, 4> combo : combos) {
             Bitboard occ = ZERO_BB;
-            if (combo[0]) occ |= (ONE_BB << (square + NE * combo[0])); // TODO R.E. the todo below, the problem is that this will set a bit on the edge on occasion. Why doesnt this seem to haoppenf or the rook???
+            if (combo[0]) occ |= (ONE_BB << (square + NE * combo[0]));
             if (combo[1]) occ |= (ONE_BB << (square + SE * combo[1]));
             if (combo[2]) occ |= (ONE_BB << (square + SW * combo[2]));
             if (combo[3]) occ |= (ONE_BB << (square + NW * combo[3]));
@@ -507,7 +507,7 @@ BitboardFamily computeBishopReaches() {
                 reach |= (ONE_BB << (square + i * NW));
             }
 
-            reachSet[BISHOP[square][getBishopReachIndex(occ & Masks::BISHOP[square], (Square) square)]] = reach; // TODO the border thing is stupid. this whole function need looking at.
+            reachSet[BISHOP[square][getBishopReachIndex(occ & Masks::BISHOP[square], (Square) square)]] = reach;
         }
     }
     return reaches;

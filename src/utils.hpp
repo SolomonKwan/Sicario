@@ -2,7 +2,6 @@
 #define UTILS_HPP
 
 #include "constants.hpp"
-#include "movegen.hpp"
 #include <vector>
 #include <string>
 
@@ -129,5 +128,9 @@ inline File file(Square square) {
  * @param extraInfo Whether or not to print the extra information relating to the move type and promotion.
  */
 void printMove(Move move, bool extraInfo);
+
+std::string getPromoString(Promotion promo);
+
+std::string getTypeString(MoveType type);
 
 #endif

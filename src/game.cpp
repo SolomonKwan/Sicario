@@ -1,3 +1,7 @@
+#ifdef USE_PEXT
+#include <x86intrin.h>
+#endif
+
 #include <iostream>
 #include <bitset>
 #include <random>
@@ -145,15 +149,17 @@ void Position::setPinAndCheckRayBitboards() {
 
 void Position::getMoves(uint& moves_index, MoveSet pos_moves[MOVESET_SIZE]) {
     setCheckers();
-    if (inDoubleCheck()) {
-        getKingMoves(moves_index, pos_moves);
-    } else if (inCheck()) {
+    if (inCheck()) {
+        if (inDoubleCheck()) {
+            getKingMoves(moves_index, pos_moves);
+            return;
+        }
         setPinAndCheckRayBitboards();
         getCheckMoves(moves_index, pos_moves);
-    } else {
-        setPinAndCheckRayBitboards();
-        getNormalMoves(moves_index, pos_moves);
+        return;
     }
+    setPinAndCheckRayBitboards();
+    getNormalMoves(moves_index, pos_moves);
 }
 
 void Position::parseFen(std::string fen) {
@@ -162,76 +168,76 @@ void Position::parseFen(std::string fen) {
 
     // Split the string into parts and ranks
     std::vector<std::string> parts = split(fen, " ");
-    std::vector<std::string> ranks = split(parts[0], "/");
+    std::vector<std::string> ranks = split(parts[FEN_BOARD_INDEX], "/");
 
     // Set the pieces
-    int rank = 7;
+    Rank rank = RANK_8;
     for (std::string rank_string : ranks) {
-        int file = 0;
+        File file = FILE_A;
 
         for (char c : rank_string) {
             if (std::isdigit(static_cast<unsigned char>(c))) {
                 for (int i = 0; i < (c - '0'); i++) {
-                    this->pieces[8 * rank + file] = NO_PIECE;
+                    pieces[RANK_COUNT * rank + file] = NO_PIECE;
                     file++;
                 }
             } else {
                 switch (c) {
                     case 'K':
-                        updatePieceInfo(kings, W_KING, static_cast<Square>(8 * rank + file));
+                        updatePieceInfo(kings, W_KING, static_cast<Square>(RANK_COUNT * rank + file));
                         break;
                     case 'Q':
-                        updatePieceInfo(queens, W_QUEEN, static_cast<Square>(8 * rank + file));
+                        updatePieceInfo(queens, W_QUEEN, static_cast<Square>(RANK_COUNT * rank + file));
                         break;
                     case 'R':
-                        updatePieceInfo(rooks, W_ROOK, static_cast<Square>(8 * rank + file));
+                        updatePieceInfo(rooks, W_ROOK, static_cast<Square>(RANK_COUNT * rank + file));
                         break;
                     case 'B':
-                        updatePieceInfo(bishops, W_BISHOP, static_cast<Square>(8 * rank + file));
-                        if (isDark(static_cast<Square>(8 * rank + file))) {
+                        updatePieceInfo(bishops, W_BISHOP, static_cast<Square>(RANK_COUNT * rank + file));
+                        if (isDark(static_cast<Square>(RANK_COUNT * rank + file))) {
                             this->wdsb_cnt++;
                         } else {
                             this->wlsb_cnt++;
                         }
                         break;
                     case 'N':
-                        updatePieceInfo(knights, W_KNIGHT, static_cast<Square>(8 * rank + file));
+                        updatePieceInfo(knights, W_KNIGHT, static_cast<Square>(RANK_COUNT * rank + file));
                         this->knight_cnt++;
                         break;
                     case 'P':
-                        updatePieceInfo(pawns, W_PAWN, static_cast<Square>(8 * rank + file));
+                        updatePieceInfo(pawns, W_PAWN, static_cast<Square>(RANK_COUNT * rank + file));
                         break;
                     case 'k':
-                        updatePieceInfo(kings, B_KING, static_cast<Square>(8 * rank + file));
+                        updatePieceInfo(kings, B_KING, static_cast<Square>(RANK_COUNT * rank + file));
                         break;
                     case 'q':
-                        updatePieceInfo(queens, B_QUEEN, static_cast<Square>(8 * rank + file));
+                        updatePieceInfo(queens, B_QUEEN, static_cast<Square>(RANK_COUNT * rank + file));
                         break;
                     case 'r':
-                        updatePieceInfo(rooks, B_ROOK, static_cast<Square>(8 * rank + file));
+                        updatePieceInfo(rooks, B_ROOK, static_cast<Square>(RANK_COUNT * rank + file));
                         break;
                     case 'b':
-                        updatePieceInfo(bishops, B_BISHOP, static_cast<Square>(8 * rank + file));
-                        if (isDark(static_cast<Square>(8 * rank + file))) {
+                        updatePieceInfo(bishops, B_BISHOP, static_cast<Square>(RANK_COUNT * rank + file));
+                        if (isDark(static_cast<Square>(RANK_COUNT * rank + file))) {
                             this->bdsb_cnt++;
                         } else {
                             this->blsb_cnt++;
                         }
                         break;
                     case 'n':
-                        updatePieceInfo(knights, B_KNIGHT, static_cast<Square>(8 * rank + file));
+                        updatePieceInfo(knights, B_KNIGHT, static_cast<Square>(RANK_COUNT * rank + file));
                         this->knight_cnt++;
                         break;
                     case 'p':
-                        updatePieceInfo(pawns, B_PAWN, static_cast<Square>(8 * rank + file));
+                        updatePieceInfo(pawns, B_PAWN, static_cast<Square>(RANK_COUNT * rank + file));
                         break;
                 }
 
                 // Set sides and piece count
                 if (std::isupper(static_cast<unsigned char>(c))) {
-                    this->sides[WHITE] |= ONE_BB << (8 * rank + file);
+                    this->sides[WHITE] |= ONE_BB << (RANK_COUNT * rank + file);
                 } else {
-                    this->sides[BLACK] |= ONE_BB << (8 * rank + file);
+                    this->sides[BLACK] |= ONE_BB << (RANK_COUNT * rank + file);
                 }
                 this->piece_cnt++;
 
@@ -242,11 +248,10 @@ void Position::parseFen(std::string fen) {
         rank--;
     }
 
-    parseFenMove(parts[1]);
-    parseFenCastling(parts[2]);
-    parseFenEnPassant(parts[3]);
-    parseFenEnPassant(parts[4]);
-    parseFenMoves(parts[4], parts[5]);
+    parseFenMove(parts[FEN_MOVE_INDEX]);
+    parseFenCastling(parts[FEN_CASTLING_INDEX]);
+    parseFenEnPassant(parts[FEN_EN_PASSANT_INDEX]);
+    parseFenMoves(parts[FEN_HALFMOVE_INDEX], parts[FEN_FULLMOVE_INDEX]);
 
     // Set ply and position hash to zero.
     this->ply = 0;
@@ -675,7 +680,7 @@ void Position::getEnPassantMoves(uint& moves_index, MoveSet pos_moves[MOVESET_SI
         if (file(en_passant) != FILE_A) pawnSquares.push_back(en_passant + (turn == WHITE ? SW : NW));
         if (file(en_passant) != FILE_H) pawnSquares.push_back(en_passant + (turn == WHITE ? SE : NE));
         for (Square square : pawnSquares) {
-            if ((pieces[square] == getPieceType<PAWN>()) && !isPinnedByBishop(square) && !isPinnedByRook(square)) {
+            if ((pieces[square] == getPieceType<PAWN>()) && (!isPinnedByBishop(square) || (isPinnedByBishop(square) && isPinnedByBishop(en_passant))) && !isPinnedByRook(square)) {
                 bool pinned = oneBitSet(getPieces() & rook_ep_pins & ~(ONE_BB << square | ONE_BB << (en_passant +
                         (turn == WHITE ? S : N))));
                 if (!pinned) pos_moves[moves_index++] = &Moves::EN_PASSANT[turn][file(en_passant)]
@@ -686,7 +691,11 @@ void Position::getEnPassantMoves(uint& moves_index, MoveSet pos_moves[MOVESET_SI
 }
 
 inline bool Position::inDoubleCheck() {
+    #ifdef USE_PEXT
+    return _blsr_u64(checkers) != ZERO_BB;
+    #else
     return (checkers & (checkers - ONE_BB)) != ZERO_BB;
+    #endif
 }
 
 bool Position::isThreeFoldRep() {
@@ -1321,11 +1330,11 @@ Position::Position(std::string fen) : history(MAX_MOVES) {
 }
 
 inline std::string darkSquare(std::string str) {
-    return "\033[1;30;44m" + str + " \033[0m"; // TODO bold outline?
+    return "\033[1;30;44m" + str + " \033[0m";
 }
 
 inline std::string lightSquare(std::string str) {
-    return "\033[1;30;47m" + str + " \033[0m"; // TODO bold outline?
+    return "\033[1;30;47m" + str + " \033[0m";
 }
 
 void Position::display() {

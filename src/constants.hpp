@@ -29,6 +29,12 @@ const uint MOVESET_SIZE = 32;
 const uint MAX_MOVES = 500;
 const uint DEFAULT_HASH_SIZE = 16;
 const uint MAX_PIECE_COUNT = 10;
+const uint FEN_BOARD_INDEX = 0;
+const uint FEN_MOVE_INDEX = 1;
+const uint FEN_CASTLING_INDEX = 2;
+const uint FEN_EN_PASSANT_INDEX = 3;
+const uint FEN_HALFMOVE_INDEX = 4;
+const uint FEN_FULLMOVE_INDEX = 5;
 
 const uint16_t MOVE_MASK = 0b111111;
 const uint16_t MOVE_TYPE_MASK = 0b11;
@@ -154,6 +160,12 @@ inline File operator++(File& file) { // Pre-fix
 inline File operator++(File& file, int) { // Post-fix
     File prev = file;
     file = static_cast<File>(static_cast<uint>(file) + 1U);
+    return prev;
+}
+
+inline Rank operator--(Rank& rank, int) {
+    Rank prev = rank;
+    rank = static_cast<Rank>(static_cast<uint>(rank) - 1U);
     return prev;
 }
 
