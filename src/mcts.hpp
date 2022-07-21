@@ -3,47 +3,68 @@
 #define MCTS_HPP
 
 #include <atomic>
-#include <chrono>
+
 #include "game.hpp"
 #include "constants.hpp"
 
-typedef Move Edge;
+const float C = std::sqrt(2); // TODO make this a uci paramter for user to set.
 
-struct Info {
-    int depth = 0;
-    int seldepth = 0;
-    int multipv = 0;
-    int cp = 0;
-    int nodes = 0;
-    int nps = 0;
-    int tbhits = 0;
-    std::chrono::_V2::system_clock::time_point time = std::chrono::high_resolution_clock::now();
-    Move bestMove = 0U;
-};
+typedef Move Edge;
 
 class Node {
     public:
-        Node(Move, bool, Hash, bool, int);
+        Node(Move move, Node* parent);
 
-        bool is_root;
-        Hash hash;
-        Move incoming_move;
-        Node* parent;
+        inline void addChild(Move move);
+
+        inline float UCB1() const {
+            return visits == 0 ? std::numeric_limits<float>::min() : (value / visits) + C *
+                    std::sqrt(std::log(parent->visits) / visits);
+        }
+
+        void freeChildren();
+
+        Node* select(Position& position);
+
+        Node* expand(Position& position);
+
+        float simulate(Position& position, std::atomic_bool& searchTree);
+
+        void rollback(Position& position, float val, std::atomic_bool& searchTree);
+
+        inline Move getInEdge() const {
+            return inEdge;
+        }
+
+        struct UCB1Comparator {
+            bool operator ()(const Node* a, const Node* b) const {
+                return a->UCB1() < b->UCB1();
+            }
+        };
+
+    // private:
+        Edge inEdge;
+        Node* parent = nullptr; // TODO make a node have multiple parents
         std::vector<Node*> children;
-        static Player rootPlayer;
-        bool turn;
-        int depth;
-
         float value = 0;
         float visits = 0;
 
-        Node* select();
-        Node* expand();
-        float simulate();
-        void rollback();
+        // bool is_root;
+        // Hash hash;
+        // Move incoming_move;
+        // std::vector<Node*> children;
+        // static Player rootPlayer;
+        // bool turn;
+        // int depth;
 
-        float UCB1() const;
-        Node* bestChild();
+
+        // Node* select();
+        // Node* expand();
+        // float simulate();
+        // void rollback();
+
+        // float UCB1() const;
+        // Node* bestChild();
 };
 
 #endif

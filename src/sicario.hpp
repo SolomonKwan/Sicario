@@ -7,10 +7,16 @@
 #include "game.hpp"
 #include "uci.hpp"
 
+void showInfo(int argc, char* argv[]);
+
+void showLogo();
+
+void showStartUp();
 
 class Sicario {
     public:
         ExitCode run();
+        Position getPosition() const;
 
     private:
         Position position;
@@ -41,6 +47,7 @@ class Sicario {
         void handleDisplay();
         void handleMoves();
         void handleBitboards();
+        void handleRandom();
 
         // GUI messaging
         void communicate(std::string);

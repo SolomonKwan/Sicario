@@ -704,7 +704,7 @@ bool Position::isThreeFoldRep() {
 }
 
 ExitCode Position::isEOG(MoveList& move_list) {
-    if (this->isThreeFoldRep()) return THREE_FOLD_REPETITION;
+    // if (this->isThreeFoldRep()) return THREE_FOLD_REPETITION; // NOTE
 
     if (this->halfmove == 100) return FIFTY_MOVES_RULE;
 
@@ -944,23 +944,22 @@ void Position::makePawnMoves(Move& move) {
 }
 
 void Position::saveHistory(Move& move) {
-    history[ply].castling = castling;
-    history[ply].en_passant = en_passant;
-    history[ply].halfmove = halfmove;
-    history[ply].move = move;
-    history[ply].captured = pieces[end(move)];
-    history[ply].hash = hash;
+    history.push_back({
+        castling,
+        en_passant,
+        halfmove,
+        move,
+        pieces[end(move)],
+        hash,
+    });
     ply++;
-
-    if (ply >= MAX_MOVES) {
-        history.resize(2 * MAX_MOVES);
-    }
 }
 
 void Position::undoNormal() {
     // Change game history
     this->ply--;
-    History previous_pos = this->history[this->ply];
+    History previous_pos = this->history.back();
+    this->history.pop_back();
 
     // Retrieve last move information
     Move move = previous_pos.move;
@@ -1043,7 +1042,8 @@ void Position::undoNormal() {
 void Position::undoPromotion() {
     // Change game history
     this->ply--;
-    History previous_pos = this->history[this->ply];
+    History previous_pos = this->history.back();
+    this->history.pop_back();
 
     // Change turn
     this->turn = !turn;
@@ -1101,7 +1101,8 @@ void Position::undoPromotion() {
 void Position::undoEnPassant() {
     // Change game history
     this->ply--;
-    History previous_pos = this->history[this->ply];
+    History previous_pos = this->history.back();
+    this->history.pop_back();
 
     // Change turn
     this->turn = (Player)(1 - this->turn);
@@ -1143,7 +1144,8 @@ void Position::undoEnPassant() {
 void Position::undoCastling() {
     // Change game history
     this->ply--;
-    History previous_pos = this->history[this->ply];
+    History previous_pos = this->history.back();
+    this->history.pop_back();
 
     // Change turn
     this->turn = (Player)(1 - this->turn);
@@ -1210,7 +1212,7 @@ void Position::decrementHash(const Bitboard hash) {
 
 void Position::undoMove() {
     decrementHash(hash);
-    MoveType moveType = type(history[ply - 1].move);
+    MoveType moveType = type(history.back().move);
     if (moveType == NORMAL) {
         undoNormal();
     } else if (moveType == PROMOTION) {
@@ -1222,7 +1224,7 @@ void Position::undoMove() {
     }
 }
 
-void Position::makeMove(Move& move, bool hash) {
+void Position::makeMove(Move move, bool hash) {
     // Save current position and move to make to history.
     saveHistory(move);
 
@@ -1324,7 +1326,7 @@ void Position::incrementHash(Move move) {
     }
 }
 
-Position::Position(std::string fen) : history(MAX_MOVES) {
+Position::Position(std::string fen) {
     parseFen(fen);
     initialiseHash();
 }
@@ -1451,6 +1453,12 @@ std::string concatFEN(std::vector<std::string> strings) {
 
 MoveList::MoveList(Position& position) {
     position.getMoves(moves_index, moveSets);
+}
+
+Move MoveList::randomMove() {
+    uint vecIndex = std::rand() % (moves_index);
+    uint movesIndex = std::rand() % (moveSets[vecIndex]->size());
+    return (*moveSets[vecIndex])[movesIndex];
 }
 
 uint64_t MoveList::size() {

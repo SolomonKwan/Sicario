@@ -324,9 +324,9 @@ std::vector<std::array<int, 4>> getEndBlockSquares(std::array<int, 4> sizes); //
  * Information before current move is made.
  */
 struct History {
-    int castling;
+    uint castling;
     Square en_passant;
-    int halfmove;
+    uint halfmove;
     Move move;
     PieceType captured;
     uint64_t hash;

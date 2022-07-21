@@ -49,7 +49,7 @@ class Position {
          * @param move The move to perform.
          * @param hash Whether or not to hash the positions. Defaulted to true.
          */
-        void makeMove(Move& move, bool hash = true);
+        void makeMove(Move move, bool hash = true);
 
         /**
          * @brief Undos the last move made.
@@ -464,6 +464,7 @@ class MoveList {
         MoveList(Position&);
         uint64_t size();
         bool contains(Move move);
+        Move randomMove();
 
         struct Iterator {
             Iterator(int vecCnt, int i, int j, MoveSet* pos_moves, const Move* endMove);
