@@ -318,14 +318,14 @@ void Sicario::handleMove(std::vector<std::string>& commands) {
     }
 
     if (moves.contains(move)) {
-        position.makeMove(move);
+        position.processMakeMove(move);
     } else {
-        position.makeMove(move | EN_PASSANT);
+        position.processMakeMove(move | EN_PASSANT);
     }
 }
 
 void Sicario::handleUndo() {
-    position.undoMove();
+    position.processUndoMove();
 }
 
 void Sicario::handleDisplay() {
@@ -364,7 +364,7 @@ void Sicario::handleRandom() {
         while (!position.isEOG(moves)) {
             Move move = moves.randomMove();
             playedMoves.push_back(move);
-            position.makeMove(move);
+            position.processMakeMove(move);
             // position.display();
             moves = MoveList(position);
             moveCount++;
@@ -373,7 +373,7 @@ void Sicario::handleRandom() {
         showEog(position.isEOG(moves));
         std::cout << "here4" << '\n';
         while (moveCount > 0) {
-            position.undoMove();
+            position.processUndoMove();
             moveCount--;
         }
         std::cout << "here5" << '\n';

@@ -133,4 +133,27 @@ std::string getPromoString(Promotion promo);
 
 std::string getTypeString(MoveType type);
 
+/**
+ * @brief Check if the bit at 'index' of 'number' is set.
+ *
+ * @tparam T Type
+ * @param number The number to check for the set bit.
+ * @param index Index of the bit to check.
+ * @return True if the bit is set, else false.
+ */
+template<typename T>
+inline bool isSet(T number, uint index) {
+    return number & (static_cast<T>(1) << index);
+}
+
+template<typename N, typename I>
+inline void clearBit(N& number, I index) {
+    number &= ~(static_cast<N>(1) << index);
+}
+
+template<typename N, typename I>
+inline void setBit(N& number, I index) {
+    number |= static_cast<N>(1) << index;
+}
+
 #endif

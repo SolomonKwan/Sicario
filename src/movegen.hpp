@@ -321,15 +321,16 @@ void generatePairSquares(std::array<int, 4> sizes, std::array<int, 4>& curr, std
 std::vector<std::array<int, 4>> getEndBlockSquares(std::array<int, 4> sizes); // TODO change to uint
 
 /**
- * Information before current move is made.
+ * Information before current move is made. In the Position class, the 'history' contains structs of type History. The
+ * last entry is described by this struct.
  */
 struct History {
-    uint castling;
-    Square en_passant;
-    uint halfmove;
-    Move move;
-    PieceType captured;
-    uint64_t hash;
+    uint castling;      // Castling permissions immediately before the current position.
+    Square en_passant;  // En passant permission immediately before the current position.
+    uint halfmove;      // Halfmove count immediately before the current position.
+    Move move;          // The move that resulted in the current position.
+    PieceType captured; // The piece captured just before the current position (if any).
+    uint64_t hash;      // The hash of immediately before the current position.
 };
 
 #endif

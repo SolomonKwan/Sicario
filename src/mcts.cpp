@@ -37,7 +37,7 @@ Node* Node::select(Position& position) {
     if (children.size() == 0) return this;
     // NOTE this currently just chooses the last one it comes across if there are multiple of equal value
     Node* bestChild = *std::max_element(children.begin(), children.end(), Node::UCB1Comparator());
-    position.makeMove(bestChild->getInEdge());
+    position.processMakeMove(bestChild->getInEdge());
     return bestChild->select(position);
 }
 

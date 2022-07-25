@@ -99,12 +99,12 @@ MoveFamilies computePawnMovesBySide(Player player) {
         std::vector<Square> destinations;
         if (player == BLACK) {
             destinations.push_back(square + S);
-            if (rank(square) == RANK_7) destinations.push_back(square + S + S);
+            if (rank(square) == RANK_7) destinations.push_back(square + SS);
             if (file(square) != FILE_A) destinations.push_back(square + SW);
             if (file(square) != FILE_H) destinations.push_back(square + SE);
         } else {
             destinations.push_back(square + N);
-            if (rank(square) == RANK_2) destinations.push_back(square + N + N);
+            if (rank(square) == RANK_2) destinations.push_back(square + NN);
             if (file(square) != FILE_A) destinations.push_back(square + NW);
             if (file(square) != FILE_H) destinations.push_back(square + NE);
         }
@@ -232,7 +232,7 @@ std::array<MoveVector, CASTLING_OPTIONS> computeCastlingMoves() {
     return moves;
 }
 
-std::array<std::vector<MoveFamily>, PLAYER_COUNT> computeEnPassantMoves() { // TODO this is ugly, clean it
+std::array<std::vector<MoveFamily>, PLAYER_COUNT> computeEnPassantMoves() {
     std::array<std::vector<MoveFamily>, PLAYER_COUNT> moves;
     std::vector<MoveFamily>& blackMove = moves[BLACK];
     std::vector<MoveFamily>& whiteMove = moves[WHITE];

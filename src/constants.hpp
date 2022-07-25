@@ -35,6 +35,8 @@ const uint FEN_CASTLING_INDEX = 2;
 const uint FEN_EN_PASSANT_INDEX = 3;
 const uint FEN_HALFMOVE_INDEX = 4;
 const uint FEN_FULLMOVE_INDEX = 5;
+const uint WHITE_CASTLING = 0b11;
+const uint BLACK_CASTLING = 0b1100;
 
 const uint16_t MOVE_MASK = 0b111111;
 const uint16_t MOVE_TYPE_MASK = 0b11;
@@ -71,6 +73,9 @@ enum Direction {
     SW = -9,
     W = -1,
     NW = 7,
+
+    NN = 16,
+    SS = -16,
 
     NNE = +17,
     ENE = +10,
@@ -135,11 +140,11 @@ enum ExitCode {
     INSUFFICIENT_MATERIAL,
 };
 
-inline Square operator+(const Square& square, const Direction& direction) { // CHECK Why do args have to be const?
+inline Square operator+(const Square& square, const Direction& direction) {
     return static_cast<Square>(static_cast<uint>(square) + static_cast<uint>(direction));
 }
 
-inline Direction operator+(const Direction& direction1, const Direction& direction2) { // CHECK Why do args have to be const?
+inline Direction operator+(const Direction& direction1, const Direction& direction2) {
     return static_cast<Direction>(static_cast<uint>(direction1) + static_cast<uint>(direction2));
 }
 
