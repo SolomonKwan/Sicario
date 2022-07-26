@@ -65,3 +65,6 @@ for the move precomputation (at the price of clarity, maintenance, my time and m
 <strong>Bluefeversoft</strong> - For your YouTube tutorials and explanations for concepts I found difficult to grasp.</br>
 There are likely others that I have missed.</br>
 </br>
+
+TODO three fold repitition bug
+TODO CHeck fullmove increment is occurring at right time

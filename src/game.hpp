@@ -49,12 +49,12 @@ class Position {
          * @param move The move to perform.
          * @param hash Whether or not to hash the positions. Defaulted to true.
          */
-        void makeMove(Move& move, bool hash = true);
+        void processMakeMove(const Move move, const bool hash = true);
 
         /**
-         * @brief Undos the last move made.
+         * @brief Undoes the last move made.
          */
-        void undoMove();
+        void processUndoMove();
 
         /**
          * @brief Display the board position and information.
@@ -96,14 +96,9 @@ class Position {
         uint bdsb_cnt = 0, blsb_cnt = 0;
 
         // Position history
-        Move last_move;
-        PieceType piece_moved;
-        PieceType piece_captured;
-        MoveType last_move_type;
         std::vector<History> history;
-        std::unordered_map<Bitboard, int> hashes;
+        std::unordered_map<Bitboard, int> positionCounts;
         Hash hash;
-        uint ply;
 
         void parseFenMove(std::string& fenMove);
 
@@ -403,7 +398,7 @@ class Position {
          *
          * @param move The move to save.
          */
-        void saveHistory(Move& move);
+        void saveHistory(const Move move);
 
         /**
          * @brief Get the piece type based on the base piece type.
@@ -412,15 +407,37 @@ class Position {
          * @param enemy Whether or not to get the enemy piece instead. Defaulted to false.
          * @return The piece type.
          */
-        template<BasePieceType T> inline PieceType getPieceType(bool enemy = false) const;
+        template<BasePieceType T>
+        inline PieceType getPieceType(bool enemy = false) const;
 
         /**
          * @brief Get the promotion piece type.
          *
          * @param move The move from which to retrieve the promotion move.
+         * @param incHash Whether or not to increment the hash.
          * @return Promotion piece type.
          */
         inline PieceType getPromotionPiece(Move& move);
+
+        template<MoveType T>
+        void makeMove(const Move move);
+
+        template<PieceType T>
+        void makePieceMove(const Move move);
+
+        template<PieceType T, Player P>
+        void removePiece2();
+
+        template<MoveType T>
+        void undoMove();
+
+        template <Square kingStart, Square kingEnd, Square rookStart, Square rookEnd, PieceType king, PieceType rook>
+        void makeCastlingMove();
+
+        void updateCastlingPermissionsAndHash(Move move);
+
+        template <BasePieceType P>
+        void makeNormalMove(const Move move);
 
 
 
@@ -436,22 +453,16 @@ class Position {
         // Position updates
         void findAndRemovePiece(PieceType, Square);
         void addPiece(PieceType, Square);
-        void removePiece();
+        void removePiece(const Move move, const PieceType piece_captured);
 
         // Make move
-        void makeKingMoves(Move&);
-        void makeQueenMoves(Move&);
-        void makeRookMoves(Move&);
-        void makeBishopMoves(Move& );
-        void makeKnightMoves(Move&);
-        void makePawnMoves(Move&);
-        void handleCastle();
-
-        // Undo
-        void undoNormal();
-        void undoCastling();
-        void undoPromotion();
-        void undoEnPassant();
+        void makeKingMoves(const Move, const PieceType piece_captured);
+        void makeQueenMoves(const Move, const PieceType piece_captured);
+        void makeRookMoves(const Move, const PieceType piece_captured);
+        void makeBishopMoves(const Move, const PieceType piece_captured );
+        void makeKnightMoves(const Move, const PieceType piece_captured);
+        void makePawnMoves(const Move, const PieceType piece_captured);
+        void handleCastle(const Move move);
 
         // Miscellaneous
         void showEOG(ExitCode);
@@ -464,6 +475,7 @@ class MoveList {
         MoveList(Position&);
         uint64_t size();
         bool contains(Move move);
+        Move randomMove();
 
         struct Iterator {
             Iterator(int vecCnt, int i, int j, MoveSet* pos_moves, const Move* endMove);

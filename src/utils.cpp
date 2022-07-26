@@ -81,10 +81,9 @@ void printMove(Move move, bool extraInfo) {
     if (extraInfo) {
         std::cout << squareName[start(move)] << squareName[end(move)];
         std::cout << " ";
-        std::cout << getTypeString(type(move)) << " " << promoName[promo(move)];
+        std::cout << getTypeString(type(move)) << " " << getPromoString(promo(move));
     } else if (type(move) == PROMOTION) {
         std::cout << squareName[start(move)] << squareName[end(move)] << getPromoString(promo(move));
-
     } else {
         std::cout << squareName[start(move)] << squareName[end(move)];
     }

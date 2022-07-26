@@ -460,7 +460,7 @@ void findBlackPawnMNs() {
         std::vector<int> destinations;
 
         destinations.push_back(sq + S);
-        if (sq / 8 == 6) destinations.push_back(sq + S + S);
+        if (sq / 8 == 6) destinations.push_back(sq + SS);
         if (sq % 8 != 0) destinations.push_back(sq + SW);
         if (sq % 8 != 7) destinations.push_back(sq + SE);
 
@@ -537,7 +537,7 @@ void findWhitePawnMNs() {
         std::vector<int> destinations;
 
         destinations.push_back(sq + N);
-        if (sq / 8 == 1) destinations.push_back(sq + N + N);
+        if (sq / 8 == 1) destinations.push_back(sq + NN);
         if (sq % 8 != 0) destinations.push_back(sq + NW);
         if (sq % 8 != 7) destinations.push_back(sq + NE);
 
@@ -815,7 +815,7 @@ void generateBlackPawnMasks() {
     for (int square = 0; square < 64; square++) {
         Bitboard mask = ZERO_BB;
         mask |= (ONE_BB << (square + S));
-        if (square / 8 == 6) mask |= (ONE_BB << (square + S + S));
+        if (square / 8 == 6) mask |= (ONE_BB << (square + SS));
         if (square % 8 != 0) mask |= (ONE_BB << (square + SW));
         if (square % 8 != 7) mask |= (ONE_BB << (square + SE));
         masks.push_back(mask);
@@ -832,7 +832,7 @@ void generateWhitePawnMasks() {
     for (int square = 0; square < 64; square++) {
         Bitboard mask = ZERO_BB;
         mask |= (ONE_BB << (square + N));
-        if (square / 8 == 1) mask |= (ONE_BB << (square + N + N));
+        if (square / 8 == 1) mask |= (ONE_BB << (square + NN));
         if (square % 8 != 0) mask |= (ONE_BB << (square + NW));
         if (square % 8 != 7) mask |= (ONE_BB << (square + NE));
         masks.push_back(mask);
