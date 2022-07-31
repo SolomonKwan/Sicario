@@ -5,6 +5,7 @@
 #include <iostream>
 #include <bitset>
 #include <random>
+#include <cassert>
 
 #include "game.hpp"
 #include "utils.hpp"
@@ -53,49 +54,92 @@ namespace Hashes {
 
 template<>
 inline PieceType Position::getPieceType<KING>(bool enemy) const {
-    return ((turn == WHITE) != enemy)  ? W_KING : B_KING;
+    return ((turn == WHITE) != enemy) ? W_KING : B_KING;
 }
 
 template<>
 inline PieceType Position::getPieceType<QUEEN>(bool enemy) const {
-    return ((turn == WHITE) != enemy)  ? W_QUEEN : B_QUEEN;
+    return ((turn == WHITE) != enemy) ? W_QUEEN : B_QUEEN;
 }
 
 template<>
 inline PieceType Position::getPieceType<ROOK>(bool enemy) const {
-    return ((turn == WHITE) != enemy)  ? W_ROOK : B_ROOK;
+    return ((turn == WHITE) != enemy) ? W_ROOK : B_ROOK;
 }
 
 template<>
 inline PieceType Position::getPieceType<BISHOP>(bool enemy) const {
-    return ((turn == WHITE) != enemy)  ? W_BISHOP : B_BISHOP;
+    return ((turn == WHITE) != enemy) ? W_BISHOP : B_BISHOP;
 }
 
 template<>
 inline PieceType Position::getPieceType<KNIGHT>(bool enemy) const {
-    return ((turn == WHITE) != enemy)  ? W_KNIGHT : B_KNIGHT;
+    return ((turn == WHITE) != enemy) ? W_KNIGHT : B_KNIGHT;
 }
 
 template<>
 inline PieceType Position::getPieceType<PAWN>(bool enemy) const {
-    return ((turn == WHITE) != enemy)  ? W_PAWN : B_PAWN;
+    return ((turn == WHITE) != enemy) ? W_PAWN : B_PAWN;
+}
+
+template <PieceType T>
+void Position::movePiece(const Square start, const Square end) {
+    for (uint i = 0; i < piece_index[T]; i++) { // TODO check if in-built function to change and see if faster
+        if (piece_list[T][i] == start) {
+            piece_list[T][i] = end;
+            break;
+        }
+    }
+    pieces[start] = NO_PIECE;
+    pieces[end] = T;
+}
+
+template <PieceType T>
+void Position::removePiece(const Square square) {
+    for (uint i = 0; i < piece_index[T]; i++) { // TODO check if in-built function to change and see if faster
+        if (piece_list[T][i] == square) {
+            piece_list[T][i] = piece_list[T][--piece_index[T]];
+            break;
+        }
+    }
+    pieces[square] = NO_PIECE;
+}
+
+template <PieceType T>
+void Position::addPiece(const Square square) {
+    piece_list[T][piece_index[T]++] = square;
+    pieces[square] = T;
+}
+
+template <>
+void Position::makePromotionMove<PromoMoveType::CAPTURE>(const Move move) {
+    // Update bitboards
+    sides[turn] ^= ONE_BB << start(move) | ONE_BB << end(move);
+    sides[!turn] ^= ONE_BB << end(move);
+    pawns ^= ONE_BB << start(move);
+    removeFromBitboardPromotion(move);
+    addToPromotionBitboard(move);
+
+    // Update piece_list and pieces
+    turn == WHITE ? removePiece<W_PAWN>(start(move)) : removePiece<B_PAWN>(start(move));
+    removePiecePromotion(move);
+    addPiecePromotion(move);
+}
+
+template <>
+void Position::makePromotionMove<PromoMoveType::NON_CAPTURE>(const Move move) {
+    // Update bitboards
+    sides[turn] ^= ONE_BB << start(move) | ONE_BB << end(move);
+    pawns ^= ONE_BB << start(move);
+    addToPromotionBitboard(move);
+
+    // Update piece_list and pieces
+    turn == WHITE ? removePiece<W_PAWN>(start(move)) : removePiece<B_PAWN>(start(move));
+    addPiecePromotion(move);
 }
 
 template<>
 void Position::makeMove<NORMAL>(const Move move) {
-    // Update bitboards
-    // Update piece positions
-    // Update turn and hash
-    // Update castling and hash
-    // Update en-passant and hash
-    // Update fullmove and halfmove
-
-
-
-
-
-
-
     PieceType piece_captured = pieces[end(move)];
     PieceType piece_moved = pieces[start(move)];
 
@@ -159,85 +203,32 @@ void Position::makeMove<NORMAL>(const Move move) {
 
 template<>
 void Position::makeMove<PROMOTION>(const Move move) {
-    // Update bitboards
-    clearBit(sides[turn], start(move));
-    clearBit(sides[!turn], end(move));
-    setBit(sides[turn], end(move));
-
-    // TODO Weird stuff that needs cleaning
-    PieceType piece_captured = pieces[end(move)];
-    PieceType piece_moved = pieces[start(move)];
-    removePiece(move, piece_captured);
-    findAndRemovePiece(turn == WHITE ? W_PAWN : B_PAWN, start(move));
-
-    pieces[start(move)] = NO_PIECE;
-    hash ^= Hashes::PIECES[piece_moved][start(move)];
-    pieces[end(move)] = piece_moved;
-    if (piece_captured != NO_PIECE) {
-        hash ^= Hashes::PIECES[piece_captured][end(move)];
-    }
-    hash ^= Hashes::PIECES[piece_moved][end(move)];
-
-    PieceType piece;
-    if (this->turn) {
-        piece = promo(move) == pQUEEN ? W_QUEEN : promo(move) == pROOK ? W_ROOK : promo(move) == pBISHOP ? W_BISHOP : W_KNIGHT;
+    if (pieces[end(move)] != NO_PIECE) {
+        makePromotionMove<PromoMoveType::CAPTURE>(move);
     } else {
-        piece = promo(move) == pQUEEN ? B_QUEEN : promo(move) == pROOK ? B_ROOK : promo(move) == pBISHOP ? B_BISHOP : B_KNIGHT;
+        makePromotionMove<PromoMoveType::NON_CAPTURE>(move);
     }
 
-    if (promo(move) == pQUEEN) {
-        this->queens |= ONE_BB << end(move);
-        PieceType queen = this->turn ? W_QUEEN : B_QUEEN;
-        this->addPiece(queen, end(move));
-    } else if (promo(move) == pROOK) {
-        this->rooks |= ONE_BB << end(move);
-        PieceType ROOK = this->turn ? W_ROOK : B_ROOK;
-        this->addPiece(ROOK, end(move));
-    } else if (promo(move) == pBISHOP) {
-        this->bishops |= ONE_BB << end(move);
-        PieceType bishop = this->turn ? W_BISHOP : B_BISHOP;
-        this->addPiece(bishop, end(move));
-    } else {
-        this->knights |= ONE_BB << end(move);
-        PieceType knight = this->turn ? W_KNIGHT : B_KNIGHT;
-        this->addPiece(knight, end(move));
-    }
-    this->pieces[end(move)] = piece;
-    this->hash ^= Hashes::PIECES[piece][end(move)];
-    this->pawns &= ~(ONE_BB << start(move));
-
-    // Update turn and hash
+    // Update turn
     turn = !turn;
-    if (turn == BLACK) hash ^= Hashes::TURN;
 
     // Update castling and hash
-    switch (end(move)) {
-        case H1:
-            if (!isSet(castling, WKSC)) break;
-            hash ^= Hashes::CASTLING[castling];
-            clearBit(castling, WKSC);
-            hash ^= Hashes::CASTLING[castling];
-            break;
-        case A1:
-            if (!isSet(castling, WQSC)) break;
-            hash ^= Hashes::CASTLING[castling];
-            clearBit(castling, WQSC);
-            hash ^= Hashes::CASTLING[castling];
-            break;
-        case H8:
-            if (!isSet(castling, BKSC)) break;
-            hash ^= Hashes::CASTLING[castling];
-            clearBit(castling, BKSC);
-            hash ^= Hashes::CASTLING[castling];
-            break;
-        case A8:
-            if (!isSet(castling, BQSC)) break;
-            hash ^= Hashes::CASTLING[castling];
-            clearBit(castling, BQSC);
-            hash ^= Hashes::CASTLING[castling];
-            break;
-        default:
-            break;
+    if (isSet(castling, WKSC) && end(move) == H1) {
+        hash ^= Hashes::CASTLING[castling];
+        castling &= ~(1 << WKSC);
+        hash ^= Hashes::CASTLING[castling];
+    } else if (isSet(castling, WQSC) && end(move) == A1) {
+        hash ^= Hashes::CASTLING[castling];
+        castling &= ~(1 << WQSC);
+        hash ^= Hashes::CASTLING[castling];
+    } else if (isSet(castling, BKSC) && end(move) == H8) {
+        hash ^= Hashes::CASTLING[castling];
+        castling &= ~(1 << BKSC);
+        hash ^= Hashes::CASTLING[castling];
+    } else if (isSet(castling, BQSC) && end(move) == A8) {
+        hash ^= Hashes::CASTLING[castling];
+        castling &= ~(1 << BQSC);
+        hash ^= Hashes::CASTLING[castling];
     }
 
     // Update en-passant and hash
@@ -249,38 +240,32 @@ void Position::makeMove<PROMOTION>(const Move move) {
     // Update fullmove and halfmove
     if (turn == BLACK) fullmove++;
     halfmove = 0;
+
+    // Update remaining hash
+    hash ^= Hashes::PIECES[turn == WHITE ? W_PAWN : B_PAWN][start(move)]; // TODO do hashes on the fly instead
 }
 
 template<>
 void Position::makeMove<EN_PASSANT>(const Move move) {
-    Square takenPawn = en_passant + ((turn == WHITE) ? S : N);
+    Square takenPawnSquare = en_passant + (turn == WHITE ? S : N);
 
     // Update bitboards
-    clearBit<Bitboard, uint>(sides[turn], start(move));
-    clearBit<Bitboard, uint>(pawns, start(move));
-    setBit<Bitboard, uint>(sides[turn], end(move));
-    setBit<Bitboard, uint>(pawns, end(move));
-    clearBit<Bitboard, uint>(sides[!turn], takenPawn);
-    clearBit<Bitboard, uint>(pawns, takenPawn);
+    sides[turn] ^= (ONE_BB << start(move) | ONE_BB << end(move));
+    sides[!turn] ^= ONE_BB << takenPawnSquare;
+    pawns ^= (ONE_BB << start(move) | ONE_BB << end(move) | ONE_BB << takenPawnSquare);
+
+    // Update piece positions
+    turn == WHITE ? movePiece<W_PAWN>(start(move), end(move)) : movePiece<B_PAWN>(start(move), end(move));
+    turn == WHITE ? removePiece<B_PAWN>(takenPawnSquare) : removePiece<W_PAWN>(takenPawnSquare);
+    hash ^= Hashes::PIECES[getPieceType<PAWN>()][start(move)] ^ Hashes::PIECES[getPieceType<PAWN>()][end(move)] ^
+            Hashes::PIECES[takenPawnSquare][takenPawnSquare];
+
+    // Update turn
+    turn = !turn;
 
     // Update en-passant and hash
     hash ^= Hashes::EN_PASSANT[file(en_passant)];
     en_passant = NONE;
-
-    // Update piece positions
-    pieces[start(move)] = NO_PIECE;
-    pieces[end(move)] = turn == WHITE ? W_PAWN : B_PAWN;
-    pieces[takenPawn] = NO_PIECE;
-    findAndRemovePiece(turn == WHITE ? W_PAWN : B_PAWN, start(move));
-    addPiece(turn == WHITE ? W_PAWN : B_PAWN, end(move));
-    findAndRemovePiece(turn == WHITE ? B_PAWN : W_PAWN, takenPawn);
-    hash ^= Hashes::PIECES[turn == WHITE ? W_PAWN : B_PAWN][start(move)];
-    hash ^= Hashes::PIECES[turn == WHITE ? W_PAWN : B_PAWN][end(move)];
-    hash ^= Hashes::PIECES[turn == WHITE ? B_PAWN : W_PAWN][takenPawn];
-
-    // Update turn and hash
-    turn = !turn;
-    if (turn == BLACK) hash ^= Hashes::TURN;
 
     // Update fullmove and halfmove
     if (turn == BLACK) fullmove++;
@@ -291,56 +276,54 @@ template<>
 void Position::makeMove<CASTLING>(const Move move) {
     switch (end(move)) {
         case G1:
+            assert(start(move) == E1);
+            assert(end(move) == G1);
             makeCastlingMove<E1, G1, H1, F1, W_KING, W_ROOK>();
             break;
         case G8:
+            assert(start(move) == E8);
+            assert(end(move) == G8);
             makeCastlingMove<E8, G8, H8, F8, B_KING, B_ROOK>();
             break;
         case C1:
+            assert(start(move) == E1);
+            assert(end(move) == C1);
             makeCastlingMove<E1, C1, A1, D1, W_KING, W_ROOK>();
             break;
         default: // C8
+            assert(start(move) == E8);
+            assert(end(move) == C8);
             makeCastlingMove<E8, C8, A8, D8, B_KING, B_ROOK>();
             break;
     }
 }
 
-template <Square kingStart, Square kingEnd, Square rookStart, Square rookEnd, PieceType king, PieceType rook>
-void Position::makeCastlingMove() {
+template <Square KS, Square KE, Square RS, Square RE, PieceType K, PieceType R>
+void Position::makeCastlingMove() { // TODO Is it faster to combine makeCastlingMove and makeMove<CASTLING> as one?
     // Update bitboards
-    clearBit<Bitboard, Square>(kings, kingStart);
-    clearBit<Bitboard, Square>(sides[turn], kingStart);
-    setBit<Bitboard, Square>(kings, kingEnd);
-    setBit<Bitboard, Square>(sides[turn], kingEnd);
-    clearBit<Bitboard, Square>(rooks, rookStart);
-    clearBit<Bitboard, Square>(sides[turn], rookStart);
-    setBit<Bitboard, Square>(rooks, rookEnd);
-    setBit<Bitboard, Square>(sides[turn], rookEnd);
+    sides[turn] ^= (ONE_BB << KS | ONE_BB << KE | ONE_BB << RS | ONE_BB << RE);
+    kings ^= (ONE_BB << KS | ONE_BB << KE);
+    rooks ^= (ONE_BB << RS | ONE_BB << RE);
 
-    // Update piece positions
-    piece_list[turn][KING_INDEX] = kingEnd;
-    findAndRemovePiece(rook, rookStart);
-    addPiece(rook, rookEnd);
-    pieces[kingStart] = NO_PIECE;
-    pieces[kingEnd] = king;
-    pieces[rookStart] = NO_PIECE;
-    pieces[rookEnd] = rook;
-    hash ^= Hashes::PIECES[king][kingStart];
-    hash ^= Hashes::PIECES[king][kingEnd];
-    hash ^= Hashes::PIECES[rook][rookStart];
-    hash ^= Hashes::PIECES[rook][rookEnd];
+    // Update piece_list and pieces
+    piece_list[turn][KING_INDEX] = KE;
+    for (uint i = 0; i < piece_index[R]; i++) { // TODO check if in-built function to change and see if faster
+        if (piece_list[R][i] == RS) {
+            piece_list[R][i] = RE;
+            break;
+        }
+    }
+    pieces[KS] = NO_PIECE;
+    pieces[KE] = K;
+    pieces[RS] = NO_PIECE;
+    pieces[RE] = R;
 
-    // Update turn and hash
+    // Update turn
     turn = !turn;
-    if (rank(kingStart) == RANK_8) hash ^= Hashes::TURN;
 
     // Update castling and hash
     hash ^= Hashes::CASTLING[castling];
-    if (kingStart == E1) {
-        castling &= BLACK_CASTLING;
-    } else { // kingStart == E8
-        castling &= WHITE_CASTLING;
-    }
+    castling &= (KS == E1 ? BLACK_CASTLING : WHITE_CASTLING);
     hash ^= Hashes::CASTLING[castling];
 
     // Update en-passant and hash
@@ -350,8 +333,117 @@ void Position::makeCastlingMove() {
     }
 
     // Update fullmove and halfmove
-    if (rank(kingStart) == RANK_8) fullmove++;
+    if (turn == BLACK) fullmove++;
     halfmove++;
+
+    // Update remaining hash
+    hash ^= (Hashes::PIECES[K][KS] ^ Hashes::PIECES[K][KE] ^ Hashes::PIECES[R][RS] ^ Hashes::PIECES[R][RE]);
+    if (turn == BLACK) hash ^= Hashes::TURN;
+
+    assert(pieces[KS] == NO_PIECE);
+    assert(pieces[KE] == K);
+    assert(pieces[RS] == NO_PIECE);
+    assert(pieces[RE] == R);
+}
+
+PieceType Position::promoPiece(const Move move) {
+    switch (promo(move)) {
+        case pQUEEN:
+            return turn == WHITE ? W_QUEEN : B_QUEEN;
+        case pROOK:
+            return turn == WHITE ? W_ROOK : B_ROOK;
+        case pBISHOP:
+            return turn == WHITE ? W_BISHOP : B_BISHOP;
+        default: // pKNIGHT
+            return turn == WHITE ? W_KNIGHT : B_KNIGHT;
+    }
+}
+
+void Position::addToPromotionBitboard(const Move move) {
+    switch (promo(move)) {
+        case pQUEEN:
+            queens ^= ONE_BB << end(move);
+            break;
+        case pROOK:
+            rooks ^= ONE_BB << end(move);
+            break;
+        case pBISHOP:
+            bishops ^= ONE_BB << end(move);
+            break;
+        default: // pKNIGHT
+            knights ^= ONE_BB << end(move);
+            break;
+    }
+}
+
+void Position::removeFromBitboardPromotion(const Move move) {
+    switch (pieces[end(move)]) {
+        case W_QUEEN:
+        case B_QUEEN:
+            queens ^= ONE_BB << end(move);
+            break;
+        case W_ROOK:
+        case B_ROOK:
+            rooks ^= ONE_BB << end(move);
+            break;
+        case W_BISHOP:
+        case B_BISHOP:
+            bishops ^= ONE_BB << end(move);
+            break;
+        default: // W_KNIGHT or B_KNIGHT
+            knights ^= ONE_BB << end(move);
+            break;
+    }
+}
+
+void Position::addPiecePromotion(const Move move) {
+    switch (promo(move)) {
+        case pQUEEN:
+            turn == WHITE ? addPiece<W_QUEEN>(end(move)) : addPiece<B_QUEEN>(end(move));
+            break;
+        case pROOK:
+            turn == WHITE ? addPiece<W_ROOK>(end(move)) : addPiece<B_ROOK>(end(move));
+            break;
+        case pBISHOP:
+            turn == WHITE ? addPiece<W_BISHOP>(end(move)) : addPiece<B_BISHOP>(end(move));
+            break;
+        case pKNIGHT: // pKNIGHT
+            turn == WHITE ? addPiece<W_KNIGHT>(end(move)) : addPiece<B_KNIGHT>(end(move));
+            break;
+        default:
+            assert(false);
+    }
+}
+
+void Position::removePiecePromotion(const Move move) {
+    switch (pieces[end(move)]) {
+        case W_QUEEN:
+            removePiece<W_QUEEN>(end(move));
+            break;
+        case B_QUEEN:
+            removePiece<B_QUEEN>(end(move));
+            break;
+        case W_ROOK:
+            removePiece<W_ROOK>(end(move));
+            break;
+        case B_ROOK:
+            removePiece<B_ROOK>(end(move));
+            break;
+        case W_BISHOP:
+            removePiece<W_BISHOP>(end(move));
+            break;
+        case B_BISHOP:
+            removePiece<B_BISHOP>(end(move));
+            break;
+        case W_KNIGHT:
+            removePiece<W_KNIGHT>(end(move));
+            break;
+        case B_KNIGHT:
+            removePiece<B_KNIGHT>(end(move));
+            break;
+        default:
+            assert(false);
+    }
 }
 
 void Position::updateCastlingPermissionsAndHash(Move move) {
@@ -390,47 +482,6 @@ void Position::updateCastlingPermissionsAndHash(Move move) {
         castling &= ~(1 << BQSC);
         hash ^= Hashes::CASTLING[castling];
     }
-}
-
-template <>
-void Position::makeNormalMove<KING>(const Move move) {
-    // Update bitboards
-    clearBit(sides[turn], start(move));
-    setBit(sides[turn], end(move));
-    clearBit(sides[!turn], end(move));
-    clearBit(kings, start(move));
-    setBit(kings, end(move));
-
-    // Update piece positions
-    // Update turn and hash
-    // Update castling and hash
-    // Update en-passant and hash
-    // Update fullmove and halfmove
-}
-
-template <>
-void Position::makeNormalMove<QUEEN>(const Move move) {
-
-}
-
-template <>
-void Position::makeNormalMove<ROOK>(const Move move) {
-
-}
-
-template <>
-void Position::makeNormalMove<BISHOP>(const Move move) {
-
-}
-
-template <>
-void Position::makeNormalMove<KNIGHT>(const Move move) {
-
-}
-
-template <>
-void Position::makeNormalMove<PAWN>(const Move move) {
-
 }
 
 template<> void Position::undoMove<NORMAL>() {
@@ -1430,14 +1481,6 @@ void Position::handleCastle(const Move move) {
     addPiece(rook, endSquare);
     rooks &= ~(ONE_BB << startSquare);
     rooks |= ONE_BB << endSquare;
-}
-
-template<> void Position::makePieceMove<W_KING>(const Move move) {
-
-}
-
-template<> void Position::removePiece2<W_KING, WHITE>() {
-
 }
 
 void Position::makeKingMoves(const Move move, const PieceType piece_captured) {
