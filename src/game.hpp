@@ -444,6 +444,9 @@ class Position {
         template <PromoMoveType::MoveType T>
         void makePromotionMove(const Move move);
 
+        template <NormalMoveType::MoveType T>
+        void makeNormalMove(const Move move);
+
         /**
          * @brief Assumes that end square is empty.
          *
@@ -474,12 +477,12 @@ class Position {
         void removePiece(const Move move, const PieceType piece_captured);
 
         // Make move
-        void makeKingMoves(const Move, const PieceType piece_captured);
-        void makeQueenMoves(const Move, const PieceType piece_captured);
-        void makeRookMoves(const Move, const PieceType piece_captured);
-        void makeBishopMoves(const Move, const PieceType piece_captured );
-        void makeKnightMoves(const Move, const PieceType piece_captured);
-        void makePawnMoves(const Move, const PieceType piece_captured);
+        void makeKingMoves(const Move);
+        void makeQueenMoves(const Move);
+        void makeRookMoves(const Move);
+        void makeBishopMoves(const Move );
+        void makeKnightMoves(const Move);
+        void makePawnMoves(const Move);
         void handleCastle(const Move move);
 
         // Miscellaneous

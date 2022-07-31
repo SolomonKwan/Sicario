@@ -156,4 +156,26 @@ inline void setBit(N& number, I index) {
     number |= static_cast<N>(1) << index;
 }
 
+constexpr BasePieceType baseTypeFromPiece(PieceType piece) {
+    switch (piece) {
+        case W_KING:
+        case B_KING:
+            return KING;
+        case W_QUEEN:
+        case B_QUEEN:
+            return QUEEN;
+        case W_ROOK:
+        case B_ROOK:
+            return ROOK;
+        case W_BISHOP:
+        case B_BISHOP:
+            return BISHOP;
+        case W_KNIGHT:
+        case B_KNIGHT:
+            return KNIGHT;
+        default: // W_PAWN or B_PAWN
+            return PAWN;
+    }
+}
+
 #endif
