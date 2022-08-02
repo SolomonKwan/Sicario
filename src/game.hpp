@@ -460,6 +460,14 @@ class Position {
 
         void removePiecePromotion(const Move move);
 
+        template<BasePieceType T>
+        void movePieceBitboard(const Square start, const Square end);
+
+        template<BasePieceType T>
+        void addToBitboard(const Square square);
+
+        void movePieceAndUpdateBitboard(PieceType piece, const Square start, const Square end);
+
 
 
 
@@ -477,12 +485,6 @@ class Position {
         void removePiece(const Move move, const PieceType piece_captured);
 
         // Make move
-        void makeKingMoves(const Move);
-        void makeQueenMoves(const Move);
-        void makeRookMoves(const Move);
-        void makeBishopMoves(const Move );
-        void makeKnightMoves(const Move);
-        void makePawnMoves(const Move);
         void handleCastle(const Move move);
 
         // Miscellaneous

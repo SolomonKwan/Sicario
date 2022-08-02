@@ -328,9 +328,9 @@ struct History {
     uint castling;      // Castling permissions immediately before the current position.
     Square en_passant;  // En passant permission immediately before the current position.
     uint halfmove;      // Halfmove count immediately before the current position.
+    uint64_t hash;      // The hash of immediately before the current position.
     Move move;          // The move that resulted in the current position.
     PieceType captured; // The piece captured just before the current position (if any).
-    uint64_t hash;      // The hash of immediately before the current position.
 };
 
 #endif
