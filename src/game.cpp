@@ -412,60 +412,21 @@ void Position::undoMove<NORMAL>() {
     decrementHash(hash);
 
     // Change game history
-    History prev = this->history.back();
-    this->history.pop_back();
+    History prev = history.back();
+    history.pop_back();
 
-    if (turn) this->fullmove--;
-    this->castling = prev.castling;
-    this->en_passant = prev.en_passant;
-    this->halfmove = prev.halfmove;
-    this->hash = prev.hash;
+    if (turn) fullmove--;
+    castling = prev.castling;
+    en_passant = prev.en_passant;
+    halfmove = prev.halfmove;
+    hash = prev.hash;
     turn = !turn;
-
-    // Retrieve last move information
-    PieceType moved = pieces[end(prev.move)];
 
     // Change pieces bitboards, piece list and indices and piece counts
     this->sides[turn] ^= ONE_BB << end(prev.move) | ONE_BB << start(prev.move);
-    movePieceAndUpdateBitboard(moved, end(prev.move), start(prev.move));
+    movePieceAndUpdateBitboard(pieces[end(prev.move)], end(prev.move), start(prev.move));
 
-    if (prev.captured != NO_PIECE) {
-        sides[!turn] ^= ONE_BB << end(prev.move);
-        switch (prev.captured) {
-            case W_KING:
-            case B_KING:
-                turn == WHITE ? addPiece<B_KING>(end(prev.move)) : addPiece<W_KING>(end(prev.move));
-                addToBitboard<KING>(end(prev.move));
-                break;
-            case W_QUEEN:
-            case B_QUEEN:
-                turn == WHITE ? addPiece<B_QUEEN>(end(prev.move)) : addPiece<W_QUEEN>(end(prev.move));
-                addToBitboard<QUEEN>(end(prev.move));
-                break;
-            case W_ROOK:
-            case B_ROOK:
-                turn == WHITE ? addPiece<B_ROOK>(end(prev.move)) : addPiece<W_ROOK>(end(prev.move));
-                addToBitboard<ROOK>(end(prev.move));
-                break;
-            case W_BISHOP:
-            case B_BISHOP:
-                turn == WHITE ? addPiece<B_BISHOP>(end(prev.move)) : addPiece<W_BISHOP>(end(prev.move));
-                addToBitboard<BISHOP>(end(prev.move));
-                break;
-            case W_KNIGHT:
-            case B_KNIGHT:
-                turn == WHITE ? addPiece<B_KNIGHT>(end(prev.move)) : addPiece<W_KNIGHT>(end(prev.move));
-                addToBitboard<KNIGHT>(end(prev.move));
-                break;
-            case W_PAWN:
-            case B_PAWN:
-                turn == WHITE ? addPiece<B_PAWN>(end(prev.move)) : addPiece<W_PAWN>(end(prev.move));
-                addToBitboard<PAWN>(end(prev.move));
-                break;
-            default:
-                assert(false);
-        }
-    }
+    if (prev.captured != NO_PIECE) placeCapturedPiece(prev.captured, end(prev.move));
 }
 
 template<>
@@ -473,17 +434,21 @@ void Position::undoMove<PROMOTION>() {
     decrementHash(hash);
 
     // Change game history
-    History previous_pos = this->history.back();
-    this->history.pop_back();
+    History prev = history.back();
+    history.pop_back();
 
     // Change turn
-    this->turn = !turn;
-    bool turn = this->turn;
+    if (turn) fullmove--;
+    castling = prev.castling;
+    en_passant = prev.en_passant;
+    halfmove = prev.halfmove;
+    hash = prev.hash;
+    turn = !turn;
 
     // Retrieve last move information
-    Move move = previous_pos.move;
+    Move move = prev.move;
     PieceType promoted = this->pieces[end(move)];
-    PieceType captured = previous_pos.captured;
+    PieceType captured = prev.captured;
 
     // Remove promoted piece
     this->findAndRemovePiece(promoted, end(move));
@@ -499,34 +464,13 @@ void Position::undoMove<PROMOTION>() {
         this->knights &= ~(ONE_BB << end(move));
     }
 
-    // Replace captured piece (if any)
-    if (captured != NO_PIECE) {
-        this->addPiece(captured, end(move));
-        this->sides[!turn] |= ONE_BB << end(move);
-        this->pieces[end(move)] = captured;
-        if (captured == W_QUEEN || captured == B_QUEEN) {
-            this->queens |= ONE_BB << end(move);
-        } else if (captured == W_ROOK || captured == B_ROOK) {
-            this->rooks |= ONE_BB << end(move);
-        } else if (captured == W_BISHOP || captured == B_BISHOP) {
-            this->bishops |= ONE_BB << end(move);
-        } else { // Knight
-            this->knights |= ONE_BB << end(move);
-        }
-    }
+    // Replace captured piece
+    if (prev.captured != NO_PIECE) placeCapturedPiece(prev.captured, end(prev.move));
 
     // Replace pawn
-    this->addPiece(getPieceType<PAWN>(), start(move));
-    this->sides[turn] |= ONE_BB << start(move);
-    this->pawns |= ONE_BB << start(move);
-    this->pieces[start(move)] = getPieceType<PAWN>();
-
-    // Undo fullmove and History struct information
-    if (turn) this->fullmove--;
-    this->castling = previous_pos.castling;
-    this->en_passant = previous_pos.en_passant;
-    this->halfmove = previous_pos.halfmove;
-    this->hash = previous_pos.hash;
+    turn == WHITE ? addPiece<W_PAWN>(start(move)) : addPiece<B_PAWN>(start(move));
+    sides[turn] ^= ONE_BB << start(move);
+    addToBitboard<PAWN>(start(move));
 }
 
 template<>
@@ -534,44 +478,35 @@ void Position::undoMove<EN_PASSANT>() {
     decrementHash(hash);
 
     // Change game history
-    History previous_pos = this->history.back();
-    this->history.pop_back();
-
-    // Change turn
-    this->turn = (Player)(1 - this->turn);
-    bool turn = this->turn;
+    History prev = history.back();
+    history.pop_back();
 
     // Retrieve last move information
-    Move move = previous_pos.move;
-    PieceType moved = this->pieces[end(move)];
-    Square captured_sq = end(move) + (turn ? S : N);
+    turn = !turn;
+    PieceType moved = pieces[end(prev.move)];
+    Square captured_sq = end(prev.move) + (turn == WHITE ? S : N);
 
-    // Change sides bitboards
-    this->sides[turn] &= ~(ONE_BB << end(move));
-    this->sides[turn] |= ONE_BB << start(move);
-    this->sides[!turn] |= ONE_BB << captured_sq;
-
-    // Change pawn bitboards
-    this->pawns &= ~(ONE_BB << end(move));
-    this->pawns |= ONE_BB << start(move);
-    this->pawns |= ONE_BB << captured_sq;
+    // Change bitboards
+    sides[turn] ^= ONE_BB << end(prev.move) | ONE_BB << start(prev.move);
+    sides[!turn] ^= ONE_BB << captured_sq;
+    pawns ^= ONE_BB << end(prev.move) | ONE_BB << start(prev.move) | ONE_BB << captured_sq;
 
     // Undo fullmove and History struct information
-    if (turn) this->fullmove--;
-    this->castling = previous_pos.castling;
-    this->en_passant = previous_pos.en_passant;
-    this->halfmove = previous_pos.halfmove;
-    this->hash = previous_pos.hash;
+    if (turn) fullmove--;
+    castling = prev.castling;
+    en_passant = prev.en_passant;
+    halfmove = prev.halfmove;
+    hash = prev.hash;
 
     // Update piece list, indices and counts
-    this->findAndRemovePiece(moved, end(move));
-    this->addPiece(moved, start(move));
-    this->addPiece(getPieceType<PAWN>(true), captured_sq);
+    findAndRemovePiece(moved, end(prev.move));
+    addPiece(moved, start(prev.move));
+    addPiece(getPieceType<PAWN>(true), captured_sq);
 
     // Update pieces array
-    this->pieces[start(move)] = moved;
-    this->pieces[end(move)] = NO_PIECE;
-    this->pieces[captured_sq] = getPieceType<PAWN>(true);
+    pieces[start(prev.move)] = moved;
+    pieces[end(prev.move)] = NO_PIECE;
+    pieces[captured_sq] = getPieceType<PAWN>(true);
 }
 
 template<>
@@ -579,26 +514,21 @@ void Position::undoMove<CASTLING>() {
     decrementHash(hash);
 
     // Change game history
-    History previous_pos = this->history.back();
-    this->history.pop_back();
+    History prev = history.back();
+    history.pop_back();
 
-    // Change turn
-    this->turn = (Player)(1 - this->turn);
-    bool turn = this->turn;
-
-    // Retrieve last move information
-    Move move = previous_pos.move;
-    PieceType moved = this->pieces[end(move)];
+    turn = !turn;
+    PieceType moved = pieces[end(prev.move)];
 
     // Rook changes
     Square rook_start, rook_end;
-    if (end(move) == G1) {
+    if (end(prev.move) == G1) {
         rook_start = H1;
         rook_end = F1;
-    } else if (end(move) == C1) {
+    } else if (end(prev.move) == C1) {
         rook_start = A1;
         rook_end = D1;
-    } else if (end(move) == G8) {
+    } else if (end(prev.move) == G8) {
         rook_start = H8;
         rook_end = F8;
     } else {
@@ -607,37 +537,68 @@ void Position::undoMove<CASTLING>() {
     }
 
     // Change sides bitboards
-    this->sides[turn] &= ~(ONE_BB << end(move));
-    this->sides[turn] |= ONE_BB << start(move);
-    this->sides[turn] &= ~(ONE_BB << rook_end);
-    this->sides[turn] |= ONE_BB << rook_start;
+    sides[turn] ^= ONE_BB << end(prev.move) | ONE_BB << start(prev.move) | ONE_BB << rook_end | ONE_BB << rook_start;
 
     // Change king bitboards
-    this->kings &= ~(ONE_BB << end(move));
-    this->kings |= ONE_BB << start(move);
-
-    // Change rook bitboards
-    this->rooks &= ~(ONE_BB << rook_end);
-    this->rooks |= ONE_BB << rook_start;
+    kings ^= ONE_BB << end(prev.move) | ONE_BB << start(prev.move);
+    rooks ^= ONE_BB << rook_end | ONE_BB << rook_start;
 
     // Undo fullmove and History struct information (some is not necessary i think? Done out of principle)
-    if (turn) this->fullmove--;
-    this->castling = previous_pos.castling;
-    this->en_passant = previous_pos.en_passant;
-    this->halfmove = previous_pos.halfmove;
-    this->hash = previous_pos.hash;
+    if (turn) fullmove--;
+    castling = prev.castling;
+    en_passant = prev.en_passant;
+    halfmove = prev.halfmove;
+    hash = prev.hash;
 
     // Update piece list, indices and counts
-    this->findAndRemovePiece(moved, end(move));
-    this->addPiece(moved, start(move));
-    this->findAndRemovePiece(getPieceType<ROOK>(), rook_end);
-    this->addPiece(getPieceType<ROOK>(), rook_start);
+    findAndRemovePiece(moved, end(prev.move));
+    addPiece(moved, start(prev.move));
+    findAndRemovePiece(getPieceType<ROOK>(), rook_end);
+    addPiece(getPieceType<ROOK>(), rook_start);
 
     // Update pieces array
-    this->pieces[start(move)] = moved;
-    this->pieces[end(move)] = NO_PIECE;
-    this->pieces[rook_start] = getPieceType<ROOK>();
-    this->pieces[rook_end] = NO_PIECE;
+    pieces[start(prev.move)] = moved;
+    pieces[end(prev.move)] = NO_PIECE;
+    pieces[rook_start] = getPieceType<ROOK>();
+    pieces[rook_end] = NO_PIECE;
+}
+
+void Position::placeCapturedPiece(PieceType piece, const Square square) {
+    sides[!turn] ^= ONE_BB << square;
+    switch (piece) {
+        case W_KING:
+        case B_KING:
+            turn == WHITE ? addPiece<B_KING>(square) : addPiece<W_KING>(square);
+            addToBitboard<KING>(square);
+            break;
+        case W_QUEEN:
+        case B_QUEEN:
+            turn == WHITE ? addPiece<B_QUEEN>(square) : addPiece<W_QUEEN>(square);
+            addToBitboard<QUEEN>(square);
+            break;
+        case W_ROOK:
+        case B_ROOK:
+            turn == WHITE ? addPiece<B_ROOK>(square) : addPiece<W_ROOK>(square);
+            addToBitboard<ROOK>(square);
+            break;
+        case W_BISHOP:
+        case B_BISHOP:
+            turn == WHITE ? addPiece<B_BISHOP>(square) : addPiece<W_BISHOP>(square);
+            addToBitboard<BISHOP>(square);
+            break;
+        case W_KNIGHT:
+        case B_KNIGHT:
+            turn == WHITE ? addPiece<B_KNIGHT>(square) : addPiece<W_KNIGHT>(square);
+            addToBitboard<KNIGHT>(square);
+            break;
+        case W_PAWN:
+        case B_PAWN:
+            turn == WHITE ? addPiece<B_PAWN>(square) : addPiece<W_PAWN>(square);
+            addToBitboard<PAWN>(square);
+            break;
+        default:
+            assert(false);
+    }
 }
 
 void Position::movePieceAndUpdateBitboard(PieceType piece, const Square start, const Square end) {

@@ -468,6 +468,8 @@ class Position {
 
         void movePieceAndUpdateBitboard(PieceType piece, const Square start, const Square end);
 
+        void placeCapturedPiece(PieceType piece, const Square square);
+
 
 
 

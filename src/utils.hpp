@@ -4,6 +4,7 @@
 #include "constants.hpp"
 #include <vector>
 #include <string>
+#include <cassert>
 
 /**
  * @brief Splits a string by a delimeter string and returns vector of results without empty strings.
@@ -173,8 +174,32 @@ constexpr BasePieceType baseTypeFromPiece(PieceType piece) {
         case W_KNIGHT:
         case B_KNIGHT:
             return KNIGHT;
-        default: // W_PAWN or B_PAWN
+        case W_PAWN:
+        case B_PAWN:
             return PAWN;
+        default: // W_PAWN or B_PAWN
+            assert(false);
+    }
+}
+
+constexpr Player colourFromPieceType(PieceType piece) {
+    switch (piece) {
+        case W_KING:
+        case W_QUEEN:
+        case W_ROOK:
+        case W_BISHOP:
+        case W_KNIGHT:
+        case W_PAWN:
+            return WHITE;
+        case B_KING:
+        case B_QUEEN:
+        case B_ROOK:
+        case B_BISHOP:
+        case B_KNIGHT:
+        case B_PAWN:
+            return BLACK;
+        default: // W_PAWN or B_PAWN
+            assert(false);
     }
 }
 
