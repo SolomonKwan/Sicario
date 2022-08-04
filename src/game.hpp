@@ -482,12 +482,7 @@ class Position {
         bool isThreeFoldRep();
 
         // Position updates
-        void findAndRemovePiece(PieceType, Square);
-        void addPiece(PieceType, Square);
-        void removePiece(const Move move, const PieceType piece_captured);
-
-        // Make move
-        void handleCastle(const Move move);
+        void removePiece(const Square square, const PieceType piece_captured);
 
         // Miscellaneous
         void showEOG(ExitCode);
