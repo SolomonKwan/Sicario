@@ -422,22 +422,53 @@ class Position {
         template<MoveType T>
         void makeMove(const Move move);
 
-        template<PieceType T>
-        void makePieceMove(const Move move);
-
-        template<PieceType T, Player P>
-        void removePiece2();
-
         template<MoveType T>
         void undoMove();
 
-        template <Square kingStart, Square kingEnd, Square rookStart, Square rookEnd, PieceType king, PieceType rook>
+        template <Square KS, Square KE, Square RS, Square RE, PieceType K, PieceType R>
         void makeCastlingMove();
 
         void updateCastlingPermissionsAndHash(Move move);
 
-        template <BasePieceType P>
+        template <PieceType T>
+        void movePiece(const Square start, const Square end);
+
+        template <PieceType T>
+        void removePiece(const Square square);
+
+        template <PieceType T>
+        void addPiece(const Square square);
+
+        PieceType promoPiece(const Move move);
+
+        template <PromoMoveType::MoveType T>
+        void makePromotionMove(const Move move);
+
+        template <NormalMoveType::MoveType T>
         void makeNormalMove(const Move move);
+
+        /**
+         * @brief Assumes that end square is empty.
+         *
+         * @param move
+         */
+        void addToPromotionBitboard(const Move move);
+
+        void removeFromBitboardPromotion(const Move move);
+
+        void addPiecePromotion(const Move move);
+
+        void removePiecePromotion(const Move move);
+
+        template<BasePieceType T>
+        void movePieceBitboard(const Square start, const Square end);
+
+        template<BasePieceType T>
+        void addToBitboard(const Square square);
+
+        void movePieceAndUpdateBitboard(PieceType piece, const Square start, const Square end);
+
+        void placeCapturedPiece(PieceType piece, const Square square);
 
 
 
@@ -451,18 +482,7 @@ class Position {
         bool isThreeFoldRep();
 
         // Position updates
-        void findAndRemovePiece(PieceType, Square);
-        void addPiece(PieceType, Square);
-        void removePiece(const Move move, const PieceType piece_captured);
-
-        // Make move
-        void makeKingMoves(const Move, const PieceType piece_captured);
-        void makeQueenMoves(const Move, const PieceType piece_captured);
-        void makeRookMoves(const Move, const PieceType piece_captured);
-        void makeBishopMoves(const Move, const PieceType piece_captured );
-        void makeKnightMoves(const Move, const PieceType piece_captured);
-        void makePawnMoves(const Move, const PieceType piece_captured);
-        void handleCastle(const Move move);
+        void removePiece(const Square square, const PieceType piece_captured);
 
         // Miscellaneous
         void showEOG(ExitCode);

@@ -4,6 +4,7 @@
 #include "constants.hpp"
 #include <vector>
 #include <string>
+#include <cassert>
 
 /**
  * @brief Splits a string by a delimeter string and returns vector of results without empty strings.
@@ -154,6 +155,52 @@ inline void clearBit(N& number, I index) {
 template<typename N, typename I>
 inline void setBit(N& number, I index) {
     number |= static_cast<N>(1) << index;
+}
+
+constexpr BasePieceType baseTypeFromPiece(PieceType piece) {
+    switch (piece) {
+        case W_KING:
+        case B_KING:
+            return KING;
+        case W_QUEEN:
+        case B_QUEEN:
+            return QUEEN;
+        case W_ROOK:
+        case B_ROOK:
+            return ROOK;
+        case W_BISHOP:
+        case B_BISHOP:
+            return BISHOP;
+        case W_KNIGHT:
+        case B_KNIGHT:
+            return KNIGHT;
+        case W_PAWN:
+        case B_PAWN:
+            return PAWN;
+        default: // W_PAWN or B_PAWN
+            assert(false);
+    }
+}
+
+constexpr Player colourFromPieceType(PieceType piece) {
+    switch (piece) {
+        case W_KING:
+        case W_QUEEN:
+        case W_ROOK:
+        case W_BISHOP:
+        case W_KNIGHT:
+        case W_PAWN:
+            return WHITE;
+        case B_KING:
+        case B_QUEEN:
+        case B_ROOK:
+        case B_BISHOP:
+        case B_KNIGHT:
+        case B_PAWN:
+            return BLACK;
+        default: // W_PAWN or B_PAWN
+            assert(false);
+    }
 }
 
 #endif

@@ -140,6 +140,18 @@ enum ExitCode {
     INSUFFICIENT_MATERIAL,
 };
 
+namespace PromoMoveType {
+    enum MoveType {
+        NON_CAPTURE, CAPTURE
+    };
+}
+
+namespace NormalMoveType {
+    enum MoveType {
+        NON_CAPTURE, CAPTURE
+    };
+}
+
 inline Square operator+(const Square& square, const Direction& direction) {
     return static_cast<Square>(static_cast<uint>(square) + static_cast<uint>(direction));
 }
