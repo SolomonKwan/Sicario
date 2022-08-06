@@ -332,6 +332,8 @@ class Position {
          */
         void getEnPassantMoves(uint& moves_index, MoveSet pos_moves[MOVESET_SIZE]) const;
 
+        void getEnPassantCheckMoves(uint& moves_index, MoveSet pos_moves[MOVESET_SIZE]) const;
+
         /**
          * @brief Retrives and adds the vector of legal pawn moves of the side to move to the pos_moves array.
          *

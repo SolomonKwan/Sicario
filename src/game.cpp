@@ -1147,6 +1147,7 @@ void Position::getCheckMoves(uint& moves_index, MoveSet pos_moves[MOVESET_SIZE])
     getBishopCheckedMoves(moves_index, pos_moves);
     getKnightCheckedMoves(moves_index, pos_moves);
     getPawnCheckedMoves(moves_index, pos_moves);
+    getEnPassantCheckMoves(moves_index, pos_moves);
 }
 
 void Position::getQueenCheckedMoves(uint& moves_index, MoveSet pos_moves[MOVESET_SIZE]) const {
@@ -1417,6 +1418,23 @@ void Position::getCastlingMoves(uint& moves_index, MoveSet pos_moves[MOVESET_SIZ
 
 void Position::getEnPassantMoves(uint& moves_index, MoveSet pos_moves[MOVESET_SIZE]) const {
     if (en_passant) {
+        std::vector<Square> pawnSquares;
+        if (file(en_passant) != FILE_A) pawnSquares.push_back(en_passant + (turn == WHITE ? SW : NW));
+        if (file(en_passant) != FILE_H) pawnSquares.push_back(en_passant + (turn == WHITE ? SE : NE));
+        for (Square square : pawnSquares) {
+            if ((pieces[square] == getPieceType<PAWN>()) && (!isPinnedByBishop(square) || (isPinnedByBishop(square) &&
+                    isPinnedByBishop(en_passant))) && !isPinnedByRook(square)) {
+                bool pinned = oneBitSet(getPieces() & rook_ep_pins & ~(ONE_BB << square | ONE_BB << (en_passant +
+                        (turn == WHITE ? S : N))));
+                if (!pinned) pos_moves[moves_index++] = &Moves::EN_PASSANT[turn][file(en_passant)]
+                        [file(square) < file(en_passant) ? 0 : 1];
+            }
+        }
+    }
+}
+
+void Position::getEnPassantCheckMoves(uint& moves_index, MoveSet pos_moves[MOVESET_SIZE]) const {
+    if (en_passant && (checkers & pawns)) {
         std::vector<Square> pawnSquares;
         if (file(en_passant) != FILE_A) pawnSquares.push_back(en_passant + (turn == WHITE ? SW : NW));
         if (file(en_passant) != FILE_H) pawnSquares.push_back(en_passant + (turn == WHITE ? SE : NE));
