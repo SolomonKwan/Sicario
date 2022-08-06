@@ -67,6 +67,7 @@ class Position {
 
         // Checkers
         ExitCode isEOG(MoveList&);
+        std::vector<Move> moves;
 
     private:
         // Non-position information
@@ -90,10 +91,11 @@ class Position {
         PieceType pieces[SQUARE_COUNT];
 
         // Piece counts for insufficient material checks.
-        uint piece_cnt = 0;
-        uint knight_cnt = 0;
-        uint wdsb_cnt = 0, wlsb_cnt = 0;
-        uint bdsb_cnt = 0, blsb_cnt = 0;
+        uint piece_cnt;
+        uint knight_cnt;
+        uint bishop_cnt;
+        uint light_bishop_cnt;
+        uint dark_bishop_cnt;
 
         // Position history
         std::vector<History> history;

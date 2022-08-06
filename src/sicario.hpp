@@ -48,6 +48,7 @@ class Sicario {
         void handleMoves();
         void handleBitboards();
         void handleRandom();
+        void handleState();
 
         // GUI messaging
         void communicate(std::string);

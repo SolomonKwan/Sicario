@@ -26,7 +26,6 @@ const uint MOVE_TYPE_SHIFT = 12;
 const uint PROMOTION_SHIFT = 14;
 const uint KING_INDEX = 0;
 const uint MOVESET_SIZE = 32;
-const uint MAX_MOVES = 500;
 const uint DEFAULT_HASH_SIZE = 16;
 const uint MAX_PIECE_COUNT = 10;
 const uint FEN_BOARD_INDEX = 0;
@@ -158,6 +157,10 @@ inline Square operator+(const Square& square, const Direction& direction) {
 
 inline Direction operator+(const Direction& direction1, const Direction& direction2) {
     return static_cast<Direction>(static_cast<uint>(direction1) + static_cast<uint>(direction2));
+}
+
+inline int operator-(const Rank& rank, const File& file) {
+    return static_cast<int>(rank) - static_cast<int>(file);
 }
 
 inline Square operator++(Square& square) { // Pre-fix

@@ -28,6 +28,7 @@ enum UciInput {
     MOVES,
     BITBOARDS,
     RANDOMGAME,
+    STATE,
 
     // Sentinel for invalid command
     INVALID_COMMAND
