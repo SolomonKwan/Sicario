@@ -38,8 +38,8 @@ function main() {
 
     # Changing constants.hpp
     echo -e "\nUpdating constants.hpp..."
-    sed -i 's/#define VERSION .*/#define VERSION "'"$versionNum"'"/' src/constants.hpp
-    sed -i 's/#define CODENAME .*/#define CODENAME "'"$codeName"'"/' src/constants.hpp
+    sed -i 's/const std::string VERSION .*/const std::string VERSION = "'"$versionNum"'";/' src/constants.hpp
+    sed -i 's/const std::string CODENAME .*/const std::string CODENAME = "'"$codeName"'";/' src/constants.hpp
 
     # Creating tag, commit and pushing
     git add src/constants.hpp
