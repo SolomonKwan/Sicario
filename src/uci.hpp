@@ -90,6 +90,6 @@ struct GoParams {
     bool infinite = true;
 };
 
-void showEog(ExitCode code);
+void showEogMessage(ExitCode code);
 
 #endif

@@ -167,40 +167,23 @@ void Position::addPiece(const Square square) {
 template <Square KS, Square KE, Square RS, Square RE, PieceType K, PieceType R>
 void Position::makeCastlingMove() { // TODO Is it faster to combine makeCastlingMove and makeMove<CASTLING> as one?
     // Update bitboards
-    sides[turn] ^= (ONE_BB << KS | ONE_BB << KE | ONE_BB << RS | ONE_BB << RE);
-    kings ^= (ONE_BB << KS | ONE_BB << KE);
-    rooks ^= (ONE_BB << RS | ONE_BB << RE);
+    sides[turn] ^= ONE_BB << KS | ONE_BB << KE | ONE_BB << RS | ONE_BB << RE;
+    kings ^= ONE_BB << KS | ONE_BB << KE;
+    rooks ^= ONE_BB << RS | ONE_BB << RE;
 
     // Update piece_list and pieces
     movePiece<K>(KS, KE);
     movePiece<R>(RS, RE);
 
-    // Update full move and turn
-    if (turn == BLACK) fullmove++;
-    turn = !turn;
+    // Update piece hash
+    hash ^= Hashes::PIECES[K][KS] ^ Hashes::PIECES[K][KE] ^ Hashes::PIECES[R][RS] ^ Hashes::PIECES[R][RE];
 
-    // Update castling and hash
-    hash ^= Hashes::CASTLING[castling];
-    castling &= (KS == E1 ? BLACK_CASTLING : WHITE_CASTLING);
-    hash ^= Hashes::CASTLING[castling];
-
-    // Update en-passant and hash
-    if (en_passant != NONE) {
-        hash ^= Hashes::EN_PASSANT[file(en_passant)];
-        en_passant = NONE;
-    }
-
-    // Update halfmove
-    halfmove++;
-
-    // Update remaining hash
-    hash ^= (Hashes::PIECES[K][KS] ^ Hashes::PIECES[K][KE] ^ Hashes::PIECES[R][RS] ^ Hashes::PIECES[R][RE]);
-    if (turn == BLACK) hash ^= Hashes::TURN;
-
-    assert(pieces[KS] == NO_PIECE);
-    assert(pieces[KE] == K);
-    assert(pieces[RS] == NO_PIECE);
-    assert(pieces[RE] == R);
+    // Update non-position information
+    updateCastling(KS, KE);
+    updateEnPassant(true);
+    updateFullmove();
+    updateHalfmove(false);
+    updateTurn();
 }
 
 template<>
@@ -270,8 +253,8 @@ void Position::addToBitboard<PAWN>(const Square square) {
 
 template<>
 void Position::makeMove<NORMAL>(const Move move) {
-    // Remove en-passant and its hash
-    if (en_passant != NONE) en_passant = NONE;
+    updateEnPassant(true);
+
     PieceType piece_captured = pieces[end(move)];
     PieceType piece_moved = pieces[start(move)];
 
@@ -290,18 +273,12 @@ void Position::makeMove<NORMAL>(const Move move) {
     }
     movePieceAndUpdateBitboard(piece_moved, start(move), end(move));
 
-    updateCastlingPermissionsAndHash(move);
-    if (turn == BLACK) {
-        fullmove++;
-        hash ^= Hashes::TURN;
-    }
-    if (piece_moved == W_PAWN || piece_moved == B_PAWN || piece_captured != NO_PIECE) {
-        halfmove = 0;
-    } else {
-        halfmove++;
-    }
-
-    turn = !turn;
+    // Update non-position information
+    updateCastling(start(move), end(move));
+    updateEnPassant(false);
+    updateFullmove();
+    updateHalfmove(piece_captured != NO_PIECE || piece_moved == W_PAWN || piece_moved == B_PAWN);
+    updateTurn();
 }
 
 template<>
@@ -331,40 +308,12 @@ void Position::makeMove<PROMOTION>(const Move move) {
             break;
     }
 
-    // Update fullmove and turn
-    if (turn == BLACK) fullmove++;
-    turn = !turn;
-
-    // Update castling and hash
-    if (isSet(castling, WKSC) && end(move) == H1) {
-        hash ^= Hashes::CASTLING[castling];
-        castling &= ~(1 << WKSC);
-        hash ^= Hashes::CASTLING[castling];
-    } else if (isSet(castling, WQSC) && end(move) == A1) {
-        hash ^= Hashes::CASTLING[castling];
-        castling &= ~(1 << WQSC);
-        hash ^= Hashes::CASTLING[castling];
-    } else if (isSet(castling, BKSC) && end(move) == H8) {
-        hash ^= Hashes::CASTLING[castling];
-        castling &= ~(1 << BKSC);
-        hash ^= Hashes::CASTLING[castling];
-    } else if (isSet(castling, BQSC) && end(move) == A8) {
-        hash ^= Hashes::CASTLING[castling];
-        castling &= ~(1 << BQSC);
-        hash ^= Hashes::CASTLING[castling];
-    }
-
-    // Update en-passant and hash
-    if (en_passant != NONE) {
-        hash ^= Hashes::EN_PASSANT[file(en_passant)];
-        en_passant = NONE;
-    }
-
-    // Update halfmove
-    halfmove = 0;
-
-    // Update remaining hash
-    hash ^= Hashes::PIECES[turn == WHITE ? W_PAWN : B_PAWN][start(move)]; // TODO do hashes on the fly instead
+    // Update non-position information
+    updateCastling(start(move), end(move));
+    updateEnPassant(true);
+    updateFullmove();
+    updateHalfmove(true);
+    updateTurn();
 }
 
 template<>
@@ -382,19 +331,14 @@ void Position::makeMove<EN_PASSANT>(const Move move) {
     hash ^= Hashes::PIECES[getPieceType<PAWN>()][start(move)] ^ Hashes::PIECES[getPieceType<PAWN>()][end(move)] ^
             Hashes::PIECES[takenPawnSquare][takenPawnSquare];
 
-    // Update fullmove and turn
-    if (turn == BLACK) fullmove++;
-    turn = !turn;
-
-    // Update en-passant and hash
-    hash ^= Hashes::EN_PASSANT[file(en_passant)];
-    en_passant = NONE;
-
-    // Update halfmove
-    halfmove = 0;
-
     // Update piece count
     piece_cnt--;
+
+    // Update non-position information
+    updateEnPassant(true);
+    updateFullmove();
+    updateHalfmove(true);
+    updateTurn();
 }
 
 template<>
@@ -425,21 +369,20 @@ void Position::makeMove<CASTLING>(const Move move) {
 
 template<>
 void Position::undoMove<NORMAL>() {
-    decrementHash(hash);
-
     // Change game history
     History prev = history.back();
     history.pop_back();
 
+    // Revert non-position information
+    turn = !turn;
+    hash = prev.hash;
     castling = prev.castling;
     en_passant = prev.en_passant;
     halfmove = prev.halfmove;
-    hash = prev.hash;
-    turn = !turn;
     if (turn == BLACK) fullmove--;
 
     // Change pieces bitboards, piece list and indices and piece counts
-    this->sides[turn] ^= ONE_BB << end(prev.move) | ONE_BB << start(prev.move);
+    sides[turn] ^= ONE_BB << end(prev.move) | ONE_BB << start(prev.move);
     movePieceAndUpdateBitboard(pieces[end(prev.move)], end(prev.move), start(prev.move));
 
     if (prev.captured != NO_PIECE) {
@@ -463,27 +406,22 @@ void Position::undoMove<NORMAL>() {
 
 template<>
 void Position::undoMove<PROMOTION>() {
-    decrementHash(hash);
-
     // Change game history
     History prev = history.back();
     history.pop_back();
 
-    // Change turn
+    // Revert non-position information
+    turn = !turn;
+    hash = prev.hash;
     castling = prev.castling;
     en_passant = prev.en_passant;
     halfmove = prev.halfmove;
-    hash = prev.hash;
-    turn = !turn;
     if (turn == BLACK) fullmove--;
 
-    // Retrieve last move information
-    Move move = prev.move;
-    PieceType promoted = pieces[end(move)];
-
     // Remove promoted piece
-    removePiece(end(move), promoted);
-    sides[turn] &= ~(ONE_BB << end(move));
+    PieceType promoted = pieces[end(prev.move)];
+    removePiece(end(prev.move), promoted);
+    sides[turn] &= ~(ONE_BB << end(prev.move));
     switch (promoted) {
         case W_KNIGHT:
         case B_KNIGHT:
@@ -492,7 +430,7 @@ void Position::undoMove<PROMOTION>() {
         case W_BISHOP:
         case B_BISHOP:
             bishop_cnt--;
-            isDark(end(move)) ? dark_bishop_cnt-- : light_bishop_cnt--;
+            isDark(end(prev.move)) ? dark_bishop_cnt-- : light_bishop_cnt--;
             break;
         default:
             break;
@@ -518,34 +456,30 @@ void Position::undoMove<PROMOTION>() {
     }
 
     // Replace pawn
-    turn == WHITE ? addPiece<W_PAWN>(start(move)) : addPiece<B_PAWN>(start(move));
-    sides[turn] ^= ONE_BB << start(move);
-    addToBitboard<PAWN>(start(move));
+    turn == WHITE ? addPiece<W_PAWN>(start(prev.move)) : addPiece<B_PAWN>(start(prev.move));
+    sides[turn] ^= ONE_BB << start(prev.move);
+    addToBitboard<PAWN>(start(prev.move));
 }
 
 template<>
 void Position::undoMove<EN_PASSANT>() {
-    decrementHash(hash);
-
     // Change game history
     History prev = history.back();
     history.pop_back();
 
-    // Retrieve last move information
+    // Revert non-position information
     turn = !turn;
-    Square captured_sq = end(prev.move) + (turn == WHITE ? S : N);
-
-    // Change bitboards
-    sides[turn] ^= ONE_BB << end(prev.move) | ONE_BB << start(prev.move);
-    sides[!turn] ^= ONE_BB << captured_sq;
-    pawns ^= ONE_BB << end(prev.move) | ONE_BB << start(prev.move) | ONE_BB << captured_sq;
-
-    // Undo fullmove and History struct information
+    hash = prev.hash;
     castling = prev.castling;
     en_passant = prev.en_passant;
     halfmove = prev.halfmove;
-    hash = prev.hash;
     if (turn == BLACK) fullmove--;
+
+    // Change bitboards
+    Square captured_sq = end(prev.move) + (turn == WHITE ? S : N);
+    sides[turn] ^= ONE_BB << end(prev.move) | ONE_BB << start(prev.move);
+    sides[!turn] ^= ONE_BB << captured_sq;
+    pawns ^= ONE_BB << end(prev.move) | ONE_BB << start(prev.move) | ONE_BB << captured_sq;
 
     // Update piece list, indices and counts
     turn == WHITE ? movePiece<W_PAWN>(end(prev.move), start(prev.move)) :
@@ -558,12 +492,17 @@ void Position::undoMove<EN_PASSANT>() {
 
 template<>
 void Position::undoMove<CASTLING>() {
-    decrementHash(hash);
-
     // Change game history
     History prev = history.back();
     history.pop_back();
+
+    // Revert non-position information
     turn = !turn;
+    hash = prev.hash;
+    castling = prev.castling;
+    en_passant = prev.en_passant;
+    halfmove = prev.halfmove;
+    if (turn == BLACK) fullmove--;
 
     // Rook changes
     Square rook_start, rook_end;
@@ -588,17 +527,70 @@ void Position::undoMove<CASTLING>() {
     kings ^= ONE_BB << end(prev.move) | ONE_BB << start(prev.move);
     rooks ^= ONE_BB << rook_end | ONE_BB << rook_start;
 
-    // Undo fullmove and History struct information (some is not necessary i think? Done out of principle)
-    castling = prev.castling;
-    en_passant = prev.en_passant;
-    halfmove = prev.halfmove;
-    hash = prev.hash;
-    if (turn == BLACK) fullmove--;
-
     // Update piece list, indices and counts
     turn == WHITE ? movePiece<W_KING>(end(prev.move), start(prev.move)) :
             movePiece<B_KING>(end(prev.move), start(prev.move));
     turn == WHITE ? movePiece<W_ROOK>(rook_end, rook_start) : movePiece<B_ROOK>(rook_end, rook_start);
+}
+
+void Position::updateTurn() {
+    turn = !turn;
+}
+
+void Position::updateCastling(const Square start, const Square end) {
+    if (start == E1 && WHITE_CASTLING & castling) {
+        hash ^= Hashes::CASTLING[castling];
+        castling &= BLACK_CASTLING;
+        hash ^= Hashes::CASTLING[castling];
+    } else if (start == E8 && BLACK_CASTLING & castling) {
+        hash ^= Hashes::CASTLING[castling];
+        castling &= WHITE_CASTLING;
+        hash ^= Hashes::CASTLING[castling];
+    } else {
+        if ((start == H1 || end == H1) && isSet(castling, WKSC)) {
+            hash ^= Hashes::CASTLING[castling];
+            castling &= ~(1 << WKSC);
+            hash ^= Hashes::CASTLING[castling];
+        }
+
+        if ((start == A1 || end == A1) && isSet(castling, WQSC)) {
+            hash ^= Hashes::CASTLING[castling];
+            castling &= ~(1 << WQSC);
+            hash ^= Hashes::CASTLING[castling];
+        }
+
+        if ((start == H8 || end == H8) && isSet(castling, BKSC)) {
+            hash ^= Hashes::CASTLING[castling];
+            castling &= ~(1 << BKSC);
+            hash ^= Hashes::CASTLING[castling];
+        }
+
+        if ((start == A8 || end == A8) && isSet(castling, BQSC)) {
+            hash ^= Hashes::CASTLING[castling];
+            castling &= ~(1 << BQSC);
+            hash ^= Hashes::CASTLING[castling];
+        }
+    }
+}
+
+void Position::updateEnPassant(const bool clear) {
+    if (en_passant != NONE) hash ^= Hashes::EN_PASSANT[file(en_passant)];
+    if (clear) en_passant = NONE;
+}
+
+void Position::updateHalfmove(const bool zero) {
+    if (zero) {
+        halfmove = 0;
+    } else {
+        halfmove++;
+    }
+}
+
+void Position::updateFullmove() {
+    if (turn == BLACK) {
+        fullmove++;
+        hash ^= Hashes::TURN;
+    }
 }
 
 void Position::placeCapturedPiece(PieceType piece, const Square square) {
@@ -811,44 +803,6 @@ void Position::removePiecePromotion(const Move move) {
     }
 }
 
-void Position::updateCastlingPermissionsAndHash(Move move) {
-    if (start(move) == E1 && WHITE_CASTLING & castling) {
-        hash ^= Hashes::CASTLING[castling];
-        castling &= BLACK_CASTLING;
-        hash ^= Hashes::CASTLING[castling];
-    }
-
-    if (start(move) == E8 && BLACK_CASTLING & castling) {
-        hash ^= Hashes::CASTLING[castling];
-        castling &= WHITE_CASTLING;
-        hash ^= Hashes::CASTLING[castling];
-    }
-
-    if ((start(move) == H1 || end(move) == H1) && isSet(castling, WKSC)) {
-        hash ^= Hashes::CASTLING[castling];
-        castling &= ~(1 << WKSC);
-        hash ^= Hashes::CASTLING[castling];
-    }
-
-    if ((start(move) == A1 || end(move) == A1) && isSet(castling, WQSC)) {
-        hash ^= Hashes::CASTLING[castling];
-        castling &= ~(1 << WQSC);
-        hash ^= Hashes::CASTLING[castling];
-    }
-
-    if ((start(move) == H8 || end(move) == H8) && isSet(castling, BKSC)) {
-        hash ^= Hashes::CASTLING[castling];
-        castling &= ~(1 << BKSC);
-        hash ^= Hashes::CASTLING[castling];
-    }
-
-    if ((start(move) == A8 || end(move) == A8) && isSet(castling, BQSC)) {
-        hash ^= Hashes::CASTLING[castling];
-        castling &= ~(1 << BQSC);
-        hash ^= Hashes::CASTLING[castling];
-    }
-}
-
 inline PieceType Position::getPromotionPiece(Move& move) {
     switch (promo(move)) {
         case pQUEEN:
@@ -924,6 +878,7 @@ void Position::getMoves(uint& moves_index, MoveSet pos_moves[MOVESET_SIZE]) {
 }
 
 void Position::parseFen(std::string fen) {
+    // TODO add hashing to parsing
     // Zero out variables.
     resetPosition();
 
@@ -1463,16 +1418,16 @@ bool Position::isThreeFoldRep() {
 }
 
 ExitCode Position::isEOG(MoveList& move_list) {
-    // if (this->isThreeFoldRep()) return THREE_FOLD_REPETITION; //TODO
+    // if (isThreeFoldRep()) return THREE_FOLD_REPETITION; //TODO
 
-    if (this->halfmove == 100) return FIFTY_MOVES_RULE;
+    if (halfmove == 100) return FIFTY_MOVES_RULE;
 
-    if (this->insufficientMaterial()) return INSUFFICIENT_MATERIAL;
+    if (insufficientMaterial()) return INSUFFICIENT_MATERIAL;
 
-    if (move_list.moves_index == 0 && !(this->inCheck())) return STALEMATE;
+    if (move_list.moves_index == 0 && !(inCheck())) return STALEMATE;
 
-    if (move_list.moves_index == 0 && this->inCheck()) {
-        if (this->turn) return BLACK_WINS;
+    if (move_list.moves_index == 0 && inCheck()) {
+        if (turn) return BLACK_WINS;
         return WHITE_WINS;
     }
 
@@ -1527,10 +1482,6 @@ void Position::removePiece(const Square square, const PieceType piece_captured) 
             removePiece<B_PAWN>(square);
             break;
         default:
-            for (Move move : moves) {
-                printMove(move, true);
-                std::cout << '\n';
-            }
             std::cerr << "This shouldn't be happening... " << piece_captured << '\n';
             assert(false);
     }
@@ -1542,6 +1493,7 @@ void Position::decrementHash(const Bitboard hash) {
 }
 
 void Position::processUndoMove() {
+    decrementHash(hash);
     switch (type(history.back().move)) {
         case NORMAL:
             undoMove<NORMAL>();

@@ -67,7 +67,6 @@ class Position {
 
         // Checkers
         ExitCode isEOG(MoveList&);
-        std::vector<Move> moves;
 
     private:
         // Non-position information
@@ -101,6 +100,30 @@ class Position {
         std::vector<History> history;
         std::unordered_map<Bitboard, int> positionCounts;
         Hash hash;
+
+        /**
+         * @brief Get the piece type based on the base piece type.
+         *
+         * @tparam T Base piece type.
+         * @param enemy Whether or not to get the enemy piece instead. Default is false.
+         * @return The piece type.
+         */
+        template<BasePieceType T>
+        inline PieceType getPieceType(bool enemy = false) const;
+
+        /**
+         * @brief
+         *
+         * @tparam T
+         * @param start
+         * @param end
+         */
+        template <PieceType T>
+        void movePiece(const Square start, const Square end);
+
+        void makeMovePieces(const Square start, const Square end);
+
+        void makeMovePieces(const Square square);
 
         void parseFenMove(std::string& fenMove);
 
@@ -405,16 +428,6 @@ class Position {
         void saveHistory(const Move move);
 
         /**
-         * @brief Get the piece type based on the base piece type.
-         *
-         * @tparam Base piece type T.
-         * @param enemy Whether or not to get the enemy piece instead. Defaulted to false.
-         * @return The piece type.
-         */
-        template<BasePieceType T>
-        inline PieceType getPieceType(bool enemy = false) const;
-
-        /**
          * @brief Get the promotion piece type.
          *
          * @param move The move from which to retrieve the promotion move.
@@ -431,11 +444,6 @@ class Position {
 
         template <Square KS, Square KE, Square RS, Square RE, PieceType K, PieceType R>
         void makeCastlingMove();
-
-        void updateCastlingPermissionsAndHash(Move move);
-
-        template <PieceType T>
-        void movePiece(const Square start, const Square end);
 
         template <PieceType T>
         void removePiece(const Square square);
@@ -474,22 +482,28 @@ class Position {
 
         void placeCapturedPiece(PieceType piece, const Square square);
 
+        /**
+         * @brief Checks if the game has ended by insufficient material.
+         *
+         * @return True, if draw by insufficient material, else false.
+         */
+        bool insufficientMaterial();
 
+        void removePiece(const Square square, const PieceType piece_captured); // NOTE might update
 
-
+        void updateCastling(const Square start, const Square end);
+        void updateEnPassant(const bool clear);
+        void updateHalfmove(const bool zero);
+        void updateFullmove();
+        void updateTurn();
 
 
 
 
         // EOG checks
-        bool insufficientMaterial();
         bool isThreeFoldRep();
 
-        // Position updates
-        void removePiece(const Square square, const PieceType piece_captured);
-
         // Miscellaneous
-        void showEOG(ExitCode);
         void incrementHash(Move);
         void decrementHash(Hash);
 };
