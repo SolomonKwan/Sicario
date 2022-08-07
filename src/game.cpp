@@ -165,7 +165,7 @@ void Position::addPiece(const Square square) {
 }
 
 template <Square KS, Square KE, Square RS, Square RE, PieceType K, PieceType R>
-void Position::makeCastlingMove() { // TODO Is it faster to combine makeCastlingMove and makeMove<CASTLING> as one?
+void Position::makeCastlingMove() {
     // Update bitboards
     sides[turn] ^= ONE_BB << KS | ONE_BB << KE | ONE_BB << RS | ONE_BB << RE;
     kings ^= ONE_BB << KS | ONE_BB << KE;
@@ -258,7 +258,8 @@ void Position::makeMove<NORMAL>(const Move move) {
     PieceType piece_captured = pieces[end(move)];
     PieceType piece_moved = pieces[start(move)];
 
-    if (pieces[end(move)] != NO_PIECE) {
+    // Update pieces, piece_list and bitboard.
+    if (piece_captured != NO_PIECE) {
         removePiece(end(move), piece_captured);
         makeNormalMove<NormalMoveType::CAPTURE>(move);
 
@@ -273,6 +274,10 @@ void Position::makeMove<NORMAL>(const Move move) {
     }
     movePieceAndUpdateBitboard(piece_moved, start(move), end(move));
 
+    // Update hash
+    hash ^= Hashes::PIECES[piece_moved][start(move)] ^ Hashes::PIECES[piece_moved][end(move)];
+    if (piece_captured != NO_PIECE) hash ^= Hashes::PIECES[piece_captured][end(move)];
+
     // Update non-position information
     updateCastling(start(move), end(move));
     updateEnPassant(false);
@@ -283,6 +288,9 @@ void Position::makeMove<NORMAL>(const Move move) {
 
 template<>
 void Position::makeMove<PROMOTION>(const Move move) {
+    PieceType piece_captured = pieces[end(move)];
+    PieceType piece_moved = pieces[start(move)];
+
     if (pieces[end(move)] != NO_PIECE) {
         piece_cnt--;
         if (pieces[end(move)] == W_KNIGHT || pieces[end(move)] == B_KNIGHT) knight_cnt--;
@@ -295,18 +303,28 @@ void Position::makeMove<PROMOTION>(const Move move) {
         makePromotionMove<PromoMoveType::NON_CAPTURE>(move);
     }
 
-    // Update piece count
+    // Update promotion piece hash and/or piece count
     switch (promo(move)) {
+        case pQUEEN:
+            hash ^= Hashes::PIECES[getPieceType<QUEEN>()][end(move)];
+            break;
+        case pROOK:
+            hash ^= Hashes::PIECES[getPieceType<ROOK>()][end(move)];
+            break;
         case pKNIGHT:
             knight_cnt++;
+            hash ^= Hashes::PIECES[getPieceType<KNIGHT>()][end(move)];
             break;
         case pBISHOP:
             bishop_cnt++;
             isDark(end(move)) ? dark_bishop_cnt++ : light_bishop_cnt++;
-            break;
-        default:
+            hash ^= Hashes::PIECES[getPieceType<BISHOP>()][end(move)];
             break;
     }
+
+    // Update hash
+    hash ^= Hashes::PIECES[piece_moved][start(move)];
+    if (piece_captured != NO_PIECE) hash ^= Hashes::PIECES[piece_captured][end(move)];
 
     // Update non-position information
     updateCastling(start(move), end(move));
@@ -328,11 +346,13 @@ void Position::makeMove<EN_PASSANT>(const Move move) {
     // Update piece positions
     turn == WHITE ? movePiece<W_PAWN>(start(move), end(move)) : movePiece<B_PAWN>(start(move), end(move));
     turn == WHITE ? removePiece<B_PAWN>(takenPawnSquare) : removePiece<W_PAWN>(takenPawnSquare);
-    hash ^= Hashes::PIECES[getPieceType<PAWN>()][start(move)] ^ Hashes::PIECES[getPieceType<PAWN>()][end(move)] ^
-            Hashes::PIECES[takenPawnSquare][takenPawnSquare];
 
     // Update piece count
     piece_cnt--;
+
+    // Update hash
+    hash ^= Hashes::PIECES[getPieceType<PAWN>()][start(move)] ^ Hashes::PIECES[getPieceType<PAWN>()][end(move)] ^
+            Hashes::PIECES[takenPawnSquare][takenPawnSquare];
 
     // Update non-position information
     updateEnPassant(true);
@@ -695,7 +715,7 @@ void Position::processMakeMove(const Move move, const bool hash) {
             makeMove<PROMOTION>(move);
             break;
     }
-    if (hash) incrementHash(move);
+    if (hash) incrementHash();
 }
 
 PieceType Position::promoPiece(const Move move) {
@@ -878,7 +898,6 @@ void Position::getMoves(uint& moves_index, MoveSet pos_moves[MOVESET_SIZE]) {
 }
 
 void Position::parseFen(std::string fen) {
-    // TODO add hashing to parsing
     // Zero out variables.
     resetPosition();
 
@@ -963,7 +982,8 @@ void Position::parseFen(std::string fen) {
     parseFenEnPassant(parts[FEN_EN_PASSANT_INDEX]);
     parseFenMoves(parts[FEN_HALFMOVE_INDEX], parts[FEN_FULLMOVE_INDEX]);
 
-    hash = ZERO_BB;
+    initialiseHash();
+    incrementHash();
 }
 
 void Position::parseFenMove(std::string& fenMove) {
@@ -1413,21 +1433,24 @@ inline bool Position::inDoubleCheck() {
 }
 
 bool Position::isThreeFoldRep() {
-    auto val = this->positionCounts.find(this->hash);
-    return val != this->positionCounts.end() && val->second >= 3;
+    auto val = positionCounts.find(hash);
+    if (val != positionCounts.end() && val->second >= 3) {
+        return true;
+    }
+    return false;
 }
 
 ExitCode Position::isEOG(MoveList& move_list) {
-    // if (isThreeFoldRep()) return THREE_FOLD_REPETITION; //TODO
+    if (isThreeFoldRep()) return THREE_FOLD_REPETITION;
 
     if (halfmove == 100) return FIFTY_MOVES_RULE;
 
     if (insufficientMaterial()) return INSUFFICIENT_MATERIAL;
 
-    if (move_list.moves_index == 0 && !(inCheck())) return STALEMATE;
+    if (move_list.moves_index == 0 && !inCheck()) return STALEMATE;
 
     if (move_list.moves_index == 0 && inCheck()) {
-        if (turn) return BLACK_WINS;
+        if (turn == WHITE) return BLACK_WINS;
         return WHITE_WINS;
     }
 
@@ -1510,7 +1533,7 @@ void Position::processUndoMove() {
     }
 }
 
-void Position::incrementHash(Move move) {
+void Position::incrementHash() {
     auto record = this->positionCounts.find(this->hash);
     if (record != this->positionCounts.end()) {
         this->positionCounts[this->hash]++;
@@ -1521,7 +1544,6 @@ void Position::incrementHash(Move move) {
 
 Position::Position(std::string fen) {
     parseFen(fen);
-    initialiseHash();
 }
 
 inline std::string darkSquare(std::string str) {
