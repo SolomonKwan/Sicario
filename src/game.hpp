@@ -504,7 +504,7 @@ class Position {
         bool isThreeFoldRep();
 
         // Miscellaneous
-        void incrementHash(Move);
+        void incrementHash();
         void decrementHash(Hash);
 };
 
