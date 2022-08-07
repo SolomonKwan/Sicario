@@ -1,9 +1,13 @@
 ifeq ($(OPTIMISE), TRUE)
-	OPT = -O3 -DNDEBUG
+	OPTIONS = -O3
+endif
+
+ifeq ($(NDEBUG), TRUE)
+	OPTIONS := $(OPTIONS) -DNDEBUG
 endif
 
 ifeq ($(PEXT), TRUE)
-	OPT := $(OPT) -DUSE_PEXT -march=native
+	OPTIONS := $(OPTIONS) -DUSE_PEXT -march=native
 endif
 
 SRC = ./src
@@ -11,7 +15,7 @@ TEST = ./tests
 GENERATE = ./magic_numbers
 
 CC = g++
-CFLAGS = -std=c++20 -g -pedantic -Wall $(OPT)
+CFLAGS = -std=c++20 -g -pedantic -Wall $(OPTIONS)
 THREAD = -pthread
 
 all: test sicario generate

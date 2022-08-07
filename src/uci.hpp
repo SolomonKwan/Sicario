@@ -28,6 +28,7 @@ enum UciInput {
     MOVES,
     BITBOARDS,
     RANDOMGAME,
+    STATE,
 
     // Sentinel for invalid command
     INVALID_COMMAND
@@ -89,6 +90,6 @@ struct GoParams {
     bool infinite = true;
 };
 
-void showEog(ExitCode code);
+void showEogMessage(ExitCode code);
 
 #endif

@@ -68,3 +68,4 @@ There are likely others that I have missed.</br>
 
 TODO three fold repitition bug
 TODO CHeck fullmove increment is occurring at right time
+TODO draw by insufficient material

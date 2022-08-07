@@ -10,7 +10,7 @@
 #include "sicario.hpp"
 #include "mcts.hpp"
 
-void showEog(ExitCode code) {
+void showEogMessage(ExitCode code) {
     switch (code) {
         case NORMAL_PLY:
             std::cout << "Normal ply" << '\n';
@@ -111,6 +111,9 @@ void Sicario::processInput(std::string& input) {
         case RANDOMGAME:
             handleRandom();
             break;
+        case STATE:
+            handleState();
+            break;
     }
 }
 
@@ -135,6 +138,7 @@ UciInput Sicario::hashCommandInput(std::string& input) {
     if (input == "moves") return MOVES;
     if (input == "bitboards") return BITBOARDS;
     if (input == "random") return RANDOMGAME;
+    if (input == "state") return STATE;
 
     return INVALID_COMMAND;
 }
@@ -352,38 +356,28 @@ void Sicario::handleBitboards() {
 }
 
 void Sicario::handleRandom() {
-    position.display();
-
-    for (int i = 0; i < 1000000; i++) {
-        int moveCount = 0;
-
-        std::cout << "here1" << '\n';
+    for (int i = 0; i < 1000000000; i++) {
         MoveList moves = MoveList(position);
-        std::cout << "here2" << '\n';
         std::vector<Move> playedMoves;
+        int moveCount = 0;
         while (!position.isEOG(moves)) {
             Move move = moves.randomMove();
             playedMoves.push_back(move);
             position.processMakeMove(move);
-            // position.display();
             moves = MoveList(position);
             moveCount++;
         }
-        std::cout << "here3" << '\n';
-        showEog(position.isEOG(moves));
-        std::cout << "here4" << '\n';
+        showEogMessage(position.isEOG(moves));
         while (moveCount > 0) {
             position.processUndoMove();
             moveCount--;
         }
-        std::cout << "here5" << '\n';
-
-        for (Move move : playedMoves) {
-            printMove(move, false);
-            std::cout << ' ';
-        }
-        std::cout << " " << i << "\n\n";
     }
+}
+
+void Sicario::handleState() {
+    MoveList moves = MoveList(position);
+    showEogMessage(position.isEOG(moves));
 }
 
 /**

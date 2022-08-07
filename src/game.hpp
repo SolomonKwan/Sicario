@@ -90,15 +90,40 @@ class Position {
         PieceType pieces[SQUARE_COUNT];
 
         // Piece counts for insufficient material checks.
-        uint piece_cnt = 0;
-        uint knight_cnt = 0;
-        uint wdsb_cnt = 0, wlsb_cnt = 0;
-        uint bdsb_cnt = 0, blsb_cnt = 0;
+        uint piece_cnt;
+        uint knight_cnt;
+        uint bishop_cnt;
+        uint light_bishop_cnt;
+        uint dark_bishop_cnt;
 
         // Position history
         std::vector<History> history;
         std::unordered_map<Bitboard, int> positionCounts;
         Hash hash;
+
+        /**
+         * @brief Get the piece type based on the base piece type.
+         *
+         * @tparam T Base piece type.
+         * @param enemy Whether or not to get the enemy piece instead. Default is false.
+         * @return The piece type.
+         */
+        template<BasePieceType T>
+        inline PieceType getPieceType(bool enemy = false) const;
+
+        /**
+         * @brief
+         *
+         * @tparam T
+         * @param start
+         * @param end
+         */
+        template <PieceType T>
+        void movePiece(const Square start, const Square end);
+
+        void makeMovePieces(const Square start, const Square end);
+
+        void makeMovePieces(const Square square);
 
         void parseFenMove(std::string& fenMove);
 
@@ -330,6 +355,8 @@ class Position {
          */
         void getEnPassantMoves(uint& moves_index, MoveSet pos_moves[MOVESET_SIZE]) const;
 
+        void getEnPassantCheckMoves(uint& moves_index, MoveSet pos_moves[MOVESET_SIZE]) const;
+
         /**
          * @brief Retrives and adds the vector of legal pawn moves of the side to move to the pos_moves array.
          *
@@ -401,16 +428,6 @@ class Position {
         void saveHistory(const Move move);
 
         /**
-         * @brief Get the piece type based on the base piece type.
-         *
-         * @tparam Base piece type T.
-         * @param enemy Whether or not to get the enemy piece instead. Defaulted to false.
-         * @return The piece type.
-         */
-        template<BasePieceType T>
-        inline PieceType getPieceType(bool enemy = false) const;
-
-        /**
          * @brief Get the promotion piece type.
          *
          * @param move The move from which to retrieve the promotion move.
@@ -427,11 +444,6 @@ class Position {
 
         template <Square KS, Square KE, Square RS, Square RE, PieceType K, PieceType R>
         void makeCastlingMove();
-
-        void updateCastlingPermissionsAndHash(Move move);
-
-        template <PieceType T>
-        void movePiece(const Square start, const Square end);
 
         template <PieceType T>
         void removePiece(const Square square);
@@ -470,22 +482,28 @@ class Position {
 
         void placeCapturedPiece(PieceType piece, const Square square);
 
+        /**
+         * @brief Checks if the game has ended by insufficient material.
+         *
+         * @return True, if draw by insufficient material, else false.
+         */
+        bool insufficientMaterial();
 
+        void removePiece(const Square square, const PieceType piece_captured); // NOTE might update
 
-
+        void updateCastling(const Square start, const Square end);
+        void updateEnPassant(const bool clear);
+        void updateHalfmove(const bool zero);
+        void updateFullmove();
+        void updateTurn();
 
 
 
 
         // EOG checks
-        bool insufficientMaterial();
         bool isThreeFoldRep();
 
-        // Position updates
-        void removePiece(const Square square, const PieceType piece_captured);
-
         // Miscellaneous
-        void showEOG(ExitCode);
         void incrementHash(Move);
         void decrementHash(Hash);
 };
