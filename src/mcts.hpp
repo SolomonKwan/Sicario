@@ -18,7 +18,7 @@ class Node {
         inline void addChild(Move move);
 
         inline float UCB1() const {
-            return visits == 0 ? std::numeric_limits<float>::min() : (value / visits) + C *
+            return visits == 0 ? std::numeric_limits<float>::max() : (value / visits) + C *
                     std::sqrt(std::log(parent->visits) / visits);
         }
 
