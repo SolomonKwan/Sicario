@@ -65,6 +65,10 @@ class Position {
 
         Move pseudoRandomMove(MoveList&, Player);
 
+        inline const Player getTurn() const {
+            return turn;
+        }
+
         // Checkers
         ExitCode isEOG(MoveList&);
 

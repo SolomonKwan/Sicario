@@ -18,7 +18,7 @@ class Node {
         inline void addChild(Move move);
 
         inline float UCB1() const {
-            return visits == 0 ? std::numeric_limits<float>::min() : (value / visits) + C *
+            return visits == 0 ? std::numeric_limits<float>::max() : (value / visits) + C *
                     std::sqrt(std::log(parent->visits) / visits);
         }
 
@@ -28,9 +28,9 @@ class Node {
 
         Node* expand(Position& position);
 
-        float simulate(Position& position, std::atomic_bool& searchTree);
+        float simulate(Position& position, std::atomic_bool& searchTree, Player rootPlayer);
 
-        void rollback(Position& position, float val, std::atomic_bool& searchTree);
+        void rollback(Position& position, float val, std::atomic_bool& searchTree, Player rootPlayer);
 
         inline Move getInEdge() const {
             return inEdge;
@@ -65,6 +65,15 @@ class Node {
 
         // float UCB1() const;
         // Node* bestChild();
+};
+
+class Searcher {
+    public:
+        Searcher(Position position);
+        void search(std::atomic_bool& searchTree);
+
+        Position position;
+        const Player rootPlayer;
 };
 
 #endif

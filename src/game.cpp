@@ -684,6 +684,7 @@ void Position::movePieceAndUpdateBitboard(PieceType piece, const Square start, c
             movePieceBitboard<PAWN>(start, end);
             break;
         default:
+            std::cout << "This shouldn't be happening... " << piece << '\n';
             assert(false);
     }
 }
