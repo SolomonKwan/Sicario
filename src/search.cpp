@@ -6,7 +6,7 @@
 #include <atomic>
 #include <chrono>
 
-#include "mcts.hpp"
+#include "search.hpp"
 #include "uci.hpp"
 #include "utils.hpp"
 #include "sicario.hpp"

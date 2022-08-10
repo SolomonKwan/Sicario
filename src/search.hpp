@@ -1,6 +1,6 @@
 
-#ifndef MCTS_HPP
-#define MCTS_HPP
+#ifndef SEARCH_HPP
+#define SEARCH_HPP
 
 #include <atomic>
 

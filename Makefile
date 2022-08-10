@@ -26,8 +26,8 @@ movegen.o: $(SRC)/movegen.cpp $(SRC)/movegen.hpp $(SRC)/constants.hpp $(SRC)/gam
 game.o: $(SRC)/game.cpp $(SRC)/game.hpp $(SRC)/constants.hpp $(SRC)/movegen.hpp $(SRC)/utils.hpp $(SRC)/bitboard.hpp
 	$(CC) $(CFLAGS) -c $(SRC)/game.cpp -o $(SRC)/game.o
 
-mcts.o: $(SRC)/mcts.cpp $(SRC)/mcts.hpp $(SRC)/constants.hpp $(SRC)/movegen.hpp
-	$(CC) $(CFLAGS) -c $(SRC)/mcts.cpp -o $(SRC)/mcts.o
+search.o: $(SRC)/search.cpp $(SRC)/search.hpp $(SRC)/constants.hpp $(SRC)/movegen.hpp
+	$(CC) $(CFLAGS) -c $(SRC)/search.cpp -o $(SRC)/search.o
 
 uci.o: $(SRC)/uci.cpp $(SRC)/uci.hpp $(SRC)/utils.hpp
 	$(CC) $(CFLAGS) $(THREAD) -c $(SRC)/uci.cpp -o $(SRC)/uci.o
@@ -50,8 +50,8 @@ test: test.o utils.o movegen.o $(SRC)/movegen.hpp
 generate: $(GENERATE)/generate_magic_numbers.cpp
 	$(CC) $(CFLAGS) $(GENERATE)/generate_magic_numbers.cpp $(SRC)/movegen.o -o $(GENERATE)/generate
 
-sicario: main.o game.o movegen.o uci.o sicario.o utils.o mcts.o
-	$(CC) $(CFLAGS) $(SRC)/main.o $(SRC)/game.o $(SRC)/movegen.o $(SRC)/uci.o $(SRC)/sicario.o $(SRC)/utils.o $(SRC)/mcts.o -o $(SRC)/sicario
+sicario: main.o game.o movegen.o uci.o sicario.o utils.o search.o
+	$(CC) $(CFLAGS) $(SRC)/main.o $(SRC)/game.o $(SRC)/movegen.o $(SRC)/uci.o $(SRC)/sicario.o $(SRC)/utils.o $(SRC)/search.o -o $(SRC)/sicario
 
 clean-test:
 	rm $(TEST)/*.o $(TEST)/test
