@@ -128,7 +128,7 @@ inline File file(Square square) {
  * @param move The move to print.
  * @param extraInfo Whether or not to print the extra information relating to the move type and promotion.
  */
-void printMove(Move move, bool extraInfo);
+void printMove(Move move, bool extraInfo, bool flush = false);
 
 std::string getPromoString(Promotion promo);
 
