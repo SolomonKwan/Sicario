@@ -77,7 +77,7 @@ void displayBB(uint64_t position) {
     std::cout << '\n' << std::flush;
 }
 
-void printMove(Move move, bool extraInfo) {
+void printMove(Move move, bool extraInfo, bool flush) {
     if (extraInfo) {
         std::cout << squareName[start(move)] << squareName[end(move)];
         std::cout << " ";
@@ -87,6 +87,8 @@ void printMove(Move move, bool extraInfo) {
     } else {
         std::cout << squareName[start(move)] << squareName[end(move)];
     }
+
+    if (flush) std::cout << '\n';
 }
 
 std::string getPromoString(Promotion promo) {
