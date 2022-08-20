@@ -114,6 +114,9 @@ void Sicario::processInput(std::string& input) {
         case STATE:
             handleState();
             break;
+        case OPTIONS:
+            handleOptions();
+            break;
     }
 }
 
@@ -139,6 +142,7 @@ UciInput Sicario::hashCommandInput(std::string& input) {
     if (input == "bitboards") return BITBOARDS;
     if (input == "random") return RANDOMGAME;
     if (input == "state") return STATE;
+    if (input == "options") return OPTIONS;
 
     return INVALID_COMMAND;
 }
@@ -377,6 +381,21 @@ void Sicario::handleRandom() {
 void Sicario::handleState() {
     MoveList moves = MoveList(position);
     showEogMessage(position.isEOG(moves));
+}
+
+void Sicario::handleOptions() {
+    std::cout << "debugMode " << sicarioConfigs.debugMode << '\n';
+    std::cout << "threads " << sicarioConfigs.threads << '\n';
+    std::cout << "hash " << sicarioConfigs.hash << '\n';
+    std::cout << "ponder " << sicarioConfigs.ponder << '\n';
+    std::cout << "ownBook " << sicarioConfigs.ownBook << '\n';
+    std::cout << "multiPv " << sicarioConfigs.multiPv << '\n';
+    std::cout << "uciShowCurrLine " << sicarioConfigs.uciShowCurrLine << '\n';
+    std::cout << "uciShowRefutations " << sicarioConfigs.uciShowRefutations << '\n';
+    std::cout << "uciLimitStrength " << sicarioConfigs.uciLimitStrength << '\n';
+    std::cout << "uciElo " << sicarioConfigs.uciElo << '\n';
+    std::cout << "uciAnalyseMode " << sicarioConfigs.uciAnalyseMode << '\n';
+    std::cout << "uciOpponent " << sicarioConfigs.uciOpponent << '\n';
 }
 
 /**
