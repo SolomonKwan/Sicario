@@ -61,6 +61,7 @@ Node* Node::expand(Searcher* searcher) {
     return children[0]; // NOTE currently just getting the first child.
 }
 
+// TODO see if faster to make and undo move or if faster to create a copy of the object instead
 float Node::simulate(Searcher* searcher) {
     MoveList moves = MoveList(searcher->position);
     int moveCount = 0;

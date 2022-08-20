@@ -1,6 +1,12 @@
 #ifndef CONSTANTS_HPP
 #define CONSTANTS_HPP
 
+#ifndef NDEBUG
+    #define DEBUG_LOG(x) std::cout << "\u001b[35m[ DEBUG ] " << x << "\033[0m\n";
+#else
+    #define DEBUG_LOG(x)
+#endif
+
 #include <string>
 #include <vector>
 #include <array>

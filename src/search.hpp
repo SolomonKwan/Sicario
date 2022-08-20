@@ -28,8 +28,8 @@ class Node {
         inline void addChild(Move move, Searcher* searcher);
 
         inline float UCB1() const {
-            return visits == 0 ? std::numeric_limits<float>::max() : (value / visits) + C *
-                    std::sqrt(std::log(parent->visits) / visits);
+            return visits == 0 ? std::numeric_limits<float>::max() : (value / static_cast<float>(visits)) + C *
+                    std::sqrt(std::log(static_cast<float>(parent->visits)) / static_cast<float>(visits));
         }
 
         void freeChildren();
@@ -56,7 +56,7 @@ class Node {
         Node* parent = nullptr; // TODO make a node have multiple parents
         std::vector<Node*> children;
         float value = 0;
-        float visits = 0;
+        uint visits = 0;
 };
 
 class Searcher {

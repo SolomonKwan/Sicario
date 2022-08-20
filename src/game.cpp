@@ -1513,7 +1513,10 @@ void Position::removePiece(const Square square, const PieceType piece_captured) 
 
 void Position::decrementHash(const Bitboard hash) {
     auto it = positionCounts.find(hash);
-    if (it != positionCounts.end()) positionCounts[hash]--;
+    if (it != positionCounts.end()) {
+        positionCounts[hash]--;
+        if (positionCounts[hash] == 0) positionCounts.erase(it);
+    }
 }
 
 void Position::processUndoMove() {
