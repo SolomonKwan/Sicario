@@ -34,8 +34,8 @@ Node::Node(Node* parent, Searcher* searcher) {
     this->searcher = searcher;
     // this->turn = searcher->position.getTurn();
 
-    if (searcher->nodeInfo.find(this->hash) == searcher->nodeInfo.end())
-        searcher->nodeInfo.insert(std::make_pair(this->hash, NodeInfo(searcher)));
+    if (searcher->nodes.find(this->hash) == searcher->nodes.end())
+        searcher->nodes.insert(std::make_pair(this->hash, NodeInfo(searcher)));
 
     assert(parent == nullptr ? true : this->parent->hash != searcher->position.getHash());
 }
@@ -146,8 +146,8 @@ void Searcher::search() {
 }
 
 NodeInfo& Searcher::getNodeInfo(Hash hash) {
-    assert(this->nodeInfo.find(hash) != this->nodeInfo.end());
-    return this->nodeInfo.find(hash)->second;
+    assert(this->nodes.find(hash) != this->nodes.end());
+    return this->nodes.find(hash)->second;
 }
 
 void Sicario::mcts() {

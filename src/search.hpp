@@ -54,7 +54,7 @@ class Node {
 
         Hash hash;
         Searcher* searcher;
-        Node* parent = nullptr; // TODO make a node have multiple parents
+        Node* parent = nullptr;
         std::vector<std::tuple<Node*, Move>> children;
 };
 
@@ -68,7 +68,7 @@ class Searcher {
         Position position;
         const Player rootPlayer;
         const std::atomic_bool& searchTree;
-        std::unordered_map<Hash, NodeInfo> nodeInfo;
+        std::unordered_map<Hash, NodeInfo> nodes;
         std::chrono::_V2::system_clock::time_point lastMessage;
 
         friend Node* Node::select();
