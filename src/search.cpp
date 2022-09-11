@@ -1,6 +1,5 @@
 
 #include <iostream>
-#include <memory>
 #include <limits>
 #include <algorithm>
 #include <atomic>
@@ -11,71 +10,89 @@
 #include "utils.hpp"
 #include "sicario.hpp"
 
-void printMovesInformation(std::unique_ptr<Node>& root) {
-    for (Node* node : root->children) {
-        printMove(node->inEdge, true);
-        std::cout << " " << node->visits << " " << node->value << " " << node->UCB1() << '\n';
+void Searcher::printMovesInformation() {
+    for (auto pair : this->root->children) {
+        printMove(std::get<1>(pair), true);
+        std::cout << " " << std::get<0>(pair)->visits << " " << std::get<0>(pair)->value << " " <<
+                std::get<0>(pair)->UCB1() << '\n';
     }
 
-    Node* bestChild = *std::max_element(root->children.begin(), root->children.end(), Node::UCB1Comparator());
+    std::tuple<Node*, Move> bestChild = this->root->bestChild();
     std::cout << "Best move: " << '\n';
-    printMove(bestChild->inEdge, true);
+    printMove(std::get<1>(bestChild), true);
     std::cout << '\n';
 }
 
-Node::Node(Move move, Node* parent) {
-    this->inEdge = move;
-    this->parent = parent;
+NodeInfo::NodeInfo(Searcher* searcher) {
+    this->turn = searcher->position.getTurn();
 }
 
-inline void Node::addChild(Move move, Searcher* searcher) {
+Node::Node(Node* parent, Searcher* searcher) {
+    this->parent = parent;
+    this->hash = searcher->position.getHash();
+    this->searcher = searcher;
+    this->turn = searcher->position.getTurn();
+
+    if (searcher->nodeInfo.find(this->hash) == searcher->nodeInfo.end())
+        searcher->nodeInfo.insert(std::make_pair(this->hash, NodeInfo(searcher)));
+
+    assert(parent == nullptr ? true : this->parent->hash != searcher->position.getHash());
+}
+
+Node::~Node() {
+    for (auto pair : children)
+        delete std::get<0>(pair);
+}
+
+void Node::addChild(Move move) {
     searcher->info.nodes++;
     searcher->info.nps_nodeCount++;
-    children.push_back(new Node(move, this));
+    this->searcher->position.processMakeMove(move);
+    children.push_back(std::make_pair(new Node(this, searcher), move));
+    this->searcher->position.processUndoMove();
 }
 
-void Node::freeChildren() {
-    if (children.size() == 0) return;
-    for (Node* child : children) {
-        child->freeChildren();
-        delete child;
-    }
+float Node::UCB1() const {
+    return visits == 0 ? std::numeric_limits<float>::max() : (value / static_cast<float>(visits)) + C *
+            std::sqrt(std::log(static_cast<float>(parent->visits)) / static_cast<float>(visits));
 }
 
-Node* Node::select(Searcher* searcher) {
+std::tuple<Node*, Move> Node::bestChild() {
+    auto bestChild = *std::max_element(this->children.begin(), this->children.end(), Node::UCB1Comparator()); // NOTE this currently just chooses the last one it comes across if there are multiple of equal value
+    return bestChild;
+}
+
+Node* Node::select() {
     if (children.size() == 0) return this;
-    Node* bestChild = *std::max_element(children.begin(), children.end(), Node::UCB1Comparator()); // NOTE this currently just chooses the last one it comes across if there are multiple of equal value
-    searcher->position.processMakeMove(bestChild->getInEdge());
-    return bestChild->select(searcher);
+    std::tuple<Node*, Move> bestChild = this->bestChild();
+    searcher->position.processMakeMove(std::get<1>(bestChild));
+    return std::get<0>(bestChild)->select();
 }
 
-Node* Node::expand(Searcher* searcher) {
+Node* Node::expand() {
     MoveList moves = MoveList(searcher->position);
     if (visits == 0 || searcher->position.isEOG(moves)) return this;
 
-    for (Move move : moves) {
-        addChild(move, searcher);
-    }
+    for (Move move : moves)
+        addChild(move);
 
-    searcher->position.processMakeMove(children[0]->inEdge);
-    return children[0]; // NOTE currently just getting the first child.
+    this->searcher->position.processMakeMove(std::get<1>(children[0]));
+    return std::get<0>(children[0]); // NOTE currently just getting the first child.
 }
 
 // TODO see if faster to make and undo move or if faster to create a copy of the object instead
-float Node::simulate(Searcher* searcher) {
-    MoveList moves = MoveList(searcher->position);
-    int moveCount = 0;
+float Node::simulate() {
+    Position posCopy = this->searcher->position;
+    MoveList moves = MoveList(posCopy);
     ExitCode code;
-    while (!(code = searcher->position.isEOG(moves))) {
-        searcher->position.processMakeMove(moves.randomMove());
-        moves = MoveList(searcher->position);
-        moveCount++;
+    while (!(code = posCopy.isEOG(moves))) {
+        posCopy.processMakeMove(moves.randomMove());
+        moves = MoveList(posCopy);
     }
 
-    while (moveCount > 0) {
+    // Roll back original position object to root position
+    while (searcher->position.getHistory().size() != 0)
         searcher->position.processUndoMove();
-        moveCount--;
-    }
 
     if (code == WHITE_WINS) {
         return searcher->rootPlayer == WHITE ? 1 : -1;
@@ -85,21 +102,19 @@ float Node::simulate(Searcher* searcher) {
     return 0;
 }
 
-void Node::rollback(Searcher* searcher, float val) {
+void Node::rollback(float val) {
     Node* curr = this;
-    while (curr->parent != nullptr) {
+    do {
         curr->visits++;
-        curr->value += searcher->position.getTurn() == searcher->rootPlayer ? -1 * val : val;
+        curr->value += curr->turn == this->searcher->rootPlayer ? -1 * val : val;
         curr = curr->parent;
-        searcher->position.processUndoMove();
-    }
-
-    curr->value += searcher->position.getTurn() == searcher->rootPlayer ? -1 * val : val;
-    curr->visits++;
+    } while (curr != nullptr);
 }
 
-std::unique_ptr<Node> initialise(Position& position) {
-    return std::make_unique<Node>(NULL_MOVE, nullptr);
+Node* Searcher::initialise(Position& position) {
+    Node* root = new Node(nullptr, this);
+    this->root = root;
+    return root;
 }
 
 Searcher::Searcher(Position position, const std::atomic_bool& searchTree) :
@@ -110,18 +125,23 @@ Searcher::Searcher(Position position, const std::atomic_bool& searchTree) :
 }
 
 void Searcher::search() {
-    std::unique_ptr<Node> root = initialise(position);
+    Node* root = initialise(position);
     while (searchTree) {
-        Node* leaf = root->select(this);
-        leaf = leaf->expand(this);
-        float val = leaf->simulate(this);
-        leaf->rollback(this, val);
-        printInfo(root);
+        Node* leaf = root->select();
+        leaf = leaf->expand();
+        float val = leaf->simulate();
+        leaf->rollback(val);
+        printInfo();
     }
-    printBestMove(root);
+    printBestMove();
     // printMovesInformation(root);
 
-    root->freeChildren();
+    delete root;
+}
+
+NodeInfo& Searcher::getNodeInfo(Hash hash) {
+    assert(this->nodeInfo.find(hash) != this->nodeInfo.end());
+    return this->nodeInfo.find(hash)->second;
 }
 
 void Sicario::mcts() {
@@ -129,7 +149,7 @@ void Sicario::mcts() {
     searcher.search();
 }
 
-void Searcher::printInfo(std::unique_ptr<Node, std::default_delete<Node>>& root) { // TODO make this in line with the uci commands in the Sicario class
+void Searcher::printInfo() { // TODO make this in line with the uci commands in the Sicario class
     std::chrono::time_point now = std::chrono::high_resolution_clock::now();
     uint64_t duration = std::chrono::duration_cast<std::chrono::milliseconds>(now - lastMessage).count();
     if (duration >= 500) {
@@ -141,9 +161,9 @@ void Searcher::printInfo(std::unique_ptr<Node, std::default_delete<Node>>& root)
     }
 }
 
-void Searcher::printBestMove(std::unique_ptr<Node, std::default_delete<Node>>& root) {
-    Node* bestChild = *std::max_element(root->children.begin(), root->children.end(), Node::UCB1Comparator());
+void Searcher::printBestMove() {
+    std::tuple<Node*, Move> bestChild = this->root->bestChild();
     std::cout << "bestmove ";
-    printMove(bestChild->inEdge, false, true);
+    printMove(std::get<1>(bestChild), false, true);
     std::cout << '\n';
 }

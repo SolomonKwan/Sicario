@@ -10,8 +10,6 @@
 
 const float C = std::sqrt(2); // TODO make this a uci paramter for user to set.
 
-typedef Move Edge;
-
 // GUI info command data
 struct GuiInfo {
     uint64_t nodes = 0;
@@ -21,42 +19,47 @@ struct GuiInfo {
 
 class Searcher;
 
+struct NodeInfo {
+    NodeInfo(Searcher* searcher);
+    uint value = 0;
+    uint visits = 0;
+    Player turn;
+};
+
 class Node {
     public:
-        Node(Move move, Node* parent);
+        Node(Node* parent, Searcher* searcher);
 
-        inline void addChild(Move move, Searcher* searcher);
+        ~Node();
 
-        inline float UCB1() const {
-            return visits == 0 ? std::numeric_limits<float>::max() : (value / static_cast<float>(visits)) + C *
-                    std::sqrt(std::log(static_cast<float>(parent->visits)) / static_cast<float>(visits));
-        }
+        void addChild(Move move);
 
-        void freeChildren();
+        float UCB1() const;
 
-        Node* select(Searcher* searcher);
+        std::tuple<Node*, Move> bestChild();
 
-        Node* expand(Searcher* searcher);
+        Node* select();
 
-        float simulate(Searcher* searcher);
+        Node* expand();
 
-        void rollback(Searcher* searcher, float val);
+        float simulate();
 
-        inline Move getInEdge() const {
-            return inEdge;
-        }
+        void rollback(float val);
 
         struct UCB1Comparator {
-            bool operator ()(const Node* a, const Node* b) const {
-                return a->UCB1() < b->UCB1();
+            bool operator ()(const std::tuple<Node*, Move> a, const std::tuple<Node*, Move> b) const {
+                return std::get<0>(a)->UCB1() < std::get<0>(b)->UCB1();
             }
         };
 
-        Edge inEdge;
         Node* parent = nullptr; // TODO make a node have multiple parents
-        std::vector<Node*> children;
+        std::vector<std::tuple<Node*, Move>> children;
+        Hash hash;
+        Searcher* searcher;
+
         float value = 0;
         uint visits = 0;
+        Player turn;
 };
 
 class Searcher {
@@ -64,19 +67,26 @@ class Searcher {
         Searcher(Position position, const std::atomic_bool& searchTree);
         void search();
 
+        Node* root;
         GuiInfo info;
         Position position;
         const Player rootPlayer;
         const std::atomic_bool& searchTree;
+        std::unordered_map<Hash, NodeInfo> nodeInfo;
         std::chrono::_V2::system_clock::time_point lastMessage;
 
-        friend Node* Node::select(Searcher* searcher);
-        friend Node* Node::expand(Searcher* searcher);
-        friend float Node::simulate(Searcher* searcher);
-        friend void Node::rollback(Searcher* searcher, float val);
+        friend Node* Node::select();
+        friend Node* Node::expand();
+        friend float Node::simulate();
+        friend void Node::rollback(float val);
 
-        void printInfo(std::unique_ptr<Node, std::default_delete<Node>>& root);
-        void printBestMove(std::unique_ptr<Node, std::default_delete<Node>>& root);
+        void printInfo();
+        void printBestMove();
+        Node* initialise(Position& position);
+        NodeInfo& getNodeInfo(Hash hash);
+
+        // NOTE Used for debugging
+        void printMovesInformation();
 };
 
 #endif

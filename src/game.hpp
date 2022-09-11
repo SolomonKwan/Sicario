@@ -69,6 +69,14 @@ class Position {
             return turn;
         }
 
+        inline const Hash getHash() const {
+            return this->hash;
+        }
+
+        inline const std::vector<History>& getHistory() const {
+            return this->history;
+        }
+
         // Checkers
         ExitCode isEOG(MoveList&);
 
