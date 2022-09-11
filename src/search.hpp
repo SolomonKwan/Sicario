@@ -21,7 +21,7 @@ class Searcher;
 
 struct NodeInfo {
     NodeInfo(Searcher* searcher);
-    uint value = 0;
+    int value = 0;
     uint visits = 0;
     Player turn;
 };
@@ -52,14 +52,10 @@ class Node {
             }
         };
 
-        Node* parent = nullptr; // TODO make a node have multiple parents
-        std::vector<std::tuple<Node*, Move>> children;
         Hash hash;
         Searcher* searcher;
-
-        float value = 0;
-        uint visits = 0;
-        Player turn;
+        Node* parent = nullptr; // TODO make a node have multiple parents
+        std::vector<std::tuple<Node*, Move>> children;
 };
 
 class Searcher {

@@ -13,7 +13,8 @@
 void Searcher::printMovesInformation() {
     for (auto pair : this->root->children) {
         printMove(std::get<1>(pair), true);
-        std::cout << " " << std::get<0>(pair)->visits << " " << std::get<0>(pair)->value << " " <<
+        NodeInfo& nodeInfo = this->getNodeInfo(std::get<0>(pair)->hash);
+        std::cout << " " << nodeInfo.visits << " " << nodeInfo.value << " " <<
                 std::get<0>(pair)->UCB1() << '\n';
     }
 
@@ -31,7 +32,7 @@ Node::Node(Node* parent, Searcher* searcher) {
     this->parent = parent;
     this->hash = searcher->position.getHash();
     this->searcher = searcher;
-    this->turn = searcher->position.getTurn();
+    // this->turn = searcher->position.getTurn();
 
     if (searcher->nodeInfo.find(this->hash) == searcher->nodeInfo.end())
         searcher->nodeInfo.insert(std::make_pair(this->hash, NodeInfo(searcher)));
@@ -53,8 +54,11 @@ void Node::addChild(Move move) {
 }
 
 float Node::UCB1() const {
-    return visits == 0 ? std::numeric_limits<float>::max() : (value / static_cast<float>(visits)) + C *
-            std::sqrt(std::log(static_cast<float>(parent->visits)) / static_cast<float>(visits));
+    NodeInfo& nodeInfo = this->searcher->getNodeInfo(this->hash);
+    NodeInfo& parentNodeInfo = this->searcher->getNodeInfo(this->parent->hash);
+    if (nodeInfo.visits == 0) return std::numeric_limits<float>::max();
+    return (static_cast<float>(nodeInfo.value) / static_cast<float>(nodeInfo.visits)) + C *
+            std::sqrt(std::log(static_cast<float>(parentNodeInfo.visits)) / static_cast<float>(nodeInfo.visits));
 }
 
 std::tuple<Node*, Move> Node::bestChild() {
@@ -70,8 +74,9 @@ Node* Node::select() {
 }
 
 Node* Node::expand() {
+    NodeInfo& nodeInfo = this->searcher->getNodeInfo(this->hash);
     MoveList moves = MoveList(searcher->position);
-    if (visits == 0 || searcher->position.isEOG(moves)) return this;
+    if (nodeInfo.visits == 0 || searcher->position.isEOG(moves)) return this;
 
     for (Move move : moves)
         addChild(move);
@@ -105,8 +110,9 @@ float Node::simulate() {
 void Node::rollback(float val) {
     Node* curr = this;
     do {
-        curr->visits++;
-        curr->value += curr->turn == this->searcher->rootPlayer ? -1 * val : val;
+        NodeInfo& nodeInfo = this->searcher->getNodeInfo(curr->hash);
+        nodeInfo.visits++;
+        nodeInfo.value += nodeInfo.turn == this->searcher->rootPlayer ? -1 * val : val;
         curr = curr->parent;
     } while (curr != nullptr);
 }
