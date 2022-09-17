@@ -11,9 +11,9 @@
 #include "sicario.hpp"
 
 void Searcher::printMovesInformation() {
-    for (auto pair : this->root->children) {
+    for (auto pair : this->root->getChildren()) {
         printMove(std::get<1>(pair), true);
-        NodeInfo& nodeInfo = this->getNodeInfo(std::get<0>(pair)->hash);
+        NodeInfo& nodeInfo = this->getNodeInfo(std::get<0>(pair)->getHash());
         std::cout << " " << nodeInfo.visits << " " << nodeInfo.value << " " <<
                 std::get<0>(pair)->UCB1() << '\n';
     }
@@ -28,14 +28,14 @@ NodeInfo::NodeInfo(Searcher* searcher) {
     this->turn = searcher->position.getTurn();
 }
 
-Node::Node(Node* parent, Searcher* searcher) {
+Node::Node(Node* parent, Searcher* searcher, bool isRoot = false) {
     this->parent = parent;
     this->hash = searcher->position.getHash();
     this->searcher = searcher;
-    // this->turn = searcher->position.getTurn();
+    this->isRoot = isRoot;
 
-    if (searcher->nodes.find(this->hash) == searcher->nodes.end())
-        searcher->nodes.insert(std::make_pair(this->hash, NodeInfo(searcher)));
+    if (searcher->nodeInfos.find(this->hash) == searcher->nodeInfos.end())
+        searcher->nodeInfos.insert(std::make_pair(this->hash, NodeInfo(searcher)));
 
     assert(parent == nullptr ? true : this->parent->hash != searcher->position.getHash());
 }
@@ -46,8 +46,8 @@ Node::~Node() {
 }
 
 void Node::addChild(Move move) {
-    searcher->info.nodes++;
-    searcher->info.nps_nodeCount++;
+    searcher->guiInfo.nodes++;
+    searcher->guiInfo.nps_nodeCount++;
     this->searcher->position.processMakeMove(move);
     children.push_back(std::make_pair(new Node(this, searcher), move));
     this->searcher->position.processUndoMove();
@@ -64,6 +64,18 @@ float Node::UCB1() const {
 std::tuple<Node*, Move> Node::bestChild() {
     auto bestChild = *std::max_element(this->children.begin(), this->children.end(), Node::UCB1Comparator()); // NOTE this currently just chooses the last one it comes across if there are multiple of equal value
     return bestChild;
+}
+
+const std::vector<std::tuple<Node*, Move>>& Node::getChildren() const {
+    return this->children;
+}
+
+const Hash Node::getHash() const {
+    return this->hash;
+}
+
+const Hash Node::getSearcherHash() const {
+    return this->searcher->position.getHash();
 }
 
 Node* Node::select() {
@@ -146,8 +158,8 @@ void Searcher::search() {
 }
 
 NodeInfo& Searcher::getNodeInfo(Hash hash) {
-    assert(this->nodes.find(hash) != this->nodes.end());
-    return this->nodes.find(hash)->second;
+    assert(this->nodeInfos.find(hash) != this->nodeInfos.end());
+    return this->nodeInfos.find(hash)->second;
 }
 
 void Sicario::mcts() {
@@ -159,11 +171,11 @@ void Searcher::printInfo() { // TODO make this in line with the uci commands in 
     std::chrono::time_point now = std::chrono::high_resolution_clock::now();
     uint64_t duration = std::chrono::duration_cast<std::chrono::milliseconds>(now - lastMessage).count();
     if (duration >= 500) {
-        std::cout << "nodes " << info.nodes;
-        std::cout << " hashfull " << info.hashfull;
-        std::cout << " nps " << static_cast<uint>(static_cast<float>(info.nps_nodeCount) / (static_cast<float>(duration) / 1000)) << '\n';
+        std::cout << "nodes " << guiInfo.nodes;
+        std::cout << " hashfull " << guiInfo.hashfull;
+        std::cout << " nps " << static_cast<uint>(static_cast<float>(guiInfo.nps_nodeCount) / (static_cast<float>(duration) / 1000)) << '\n';
         this->lastMessage = now;
-        info.nps_nodeCount = 0;
+        guiInfo.nps_nodeCount = 0;
     }
 }
 

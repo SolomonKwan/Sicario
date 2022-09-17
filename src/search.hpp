@@ -28,7 +28,7 @@ struct NodeInfo {
 
 class Node {
     public:
-        Node(Node* parent, Searcher* searcher);
+        Node(Node* parent, Searcher* searcher, bool isRoot);
 
         ~Node();
 
@@ -37,6 +37,14 @@ class Node {
         float UCB1() const;
 
         std::tuple<Node*, Move> bestChild();
+
+        const std::vector<std::tuple<Node*, Move>>& getChildren() const;
+
+        const Hash getHash() const;
+
+        const Hash getSearcherHash() const;
+
+        const uint getParentVisits() const;
 
         Node* select();
 
@@ -52,7 +60,9 @@ class Node {
             }
         };
 
+    private:
         Hash hash;
+        bool isRoot;
         Searcher* searcher;
         Node* parent = nullptr;
         std::vector<std::tuple<Node*, Move>> children;
@@ -64,17 +74,12 @@ class Searcher {
         void search();
 
         Node* root;
-        GuiInfo info;
+        GuiInfo guiInfo;
         Position position;
         const Player rootPlayer;
         const std::atomic_bool& searchTree;
-        std::unordered_map<Hash, NodeInfo> nodes;
+        std::unordered_map<Hash, NodeInfo> nodeInfos;
         std::chrono::_V2::system_clock::time_point lastMessage;
-
-        friend Node* Node::select();
-        friend Node* Node::expand();
-        friend float Node::simulate();
-        friend void Node::rollback(float val);
 
         void printInfo();
         void printBestMove();
