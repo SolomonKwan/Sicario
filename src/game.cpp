@@ -1551,7 +1551,7 @@ Position::Position(std::string fen) {
 }
 
 inline std::string darkSquare(std::string str) {
-    return "\033[1;30;44m" + str + " \033[0m";
+    return "\033[1;30;45m" + str + " \033[0m";
 }
 
 inline std::string lightSquare(std::string str) {
