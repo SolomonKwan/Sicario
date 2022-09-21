@@ -203,4 +203,8 @@ constexpr Player colourFromPieceType(PieceType piece) {
     }
 }
 
+inline Square reflectVertical(const Square square) {
+    return static_cast<Square>(square ^ 56);
+}
+
 #endif
