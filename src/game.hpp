@@ -77,6 +77,28 @@ class Position {
             return this->history;
         }
 
+        inline const uint getCastling() const {
+            return this->castling;
+        }
+
+        inline const uint getPieceCnt() const {
+            return this->piece_cnt;
+        }
+
+        inline const uint getQueenCount() const {
+            return this->piece_index[W_QUEEN] + this->piece_index[B_QUEEN];
+        }
+
+        template <PieceType T>
+        inline const uint getPieceIndex() const {
+            return this->piece_index[T];
+        }
+
+        template <PieceType T>
+        inline const Square getPieceSquare(uint index) const {
+            return this->piece_list[T][index];
+        }
+
         // Checkers
         ExitCode isEOG(MoveList&);
 
