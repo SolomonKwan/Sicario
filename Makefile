@@ -26,7 +26,7 @@ movegen.o: $(SRC)/movegen.cpp $(SRC)/movegen.hpp $(SRC)/constants.hpp $(SRC)/gam
 game.o: $(SRC)/game.cpp $(SRC)/game.hpp $(SRC)/constants.hpp $(SRC)/movegen.hpp $(SRC)/utils.hpp $(SRC)/bitboard.hpp
 	$(CC) $(CFLAGS) -c $(SRC)/game.cpp -o $(SRC)/game.o
 
-search.o: $(SRC)/search.cpp $(SRC)/search.hpp $(SRC)/constants.hpp $(SRC)/movegen.hpp
+search.o: $(SRC)/search.cpp $(SRC)/search.hpp $(SRC)/constants.hpp $(SRC)/movegen.hpp $(SRC)/evaluate.hpp
 	$(CC) $(CFLAGS) -c $(SRC)/search.cpp -o $(SRC)/search.o
 
 evaluate.o: $(SRC)/evaluate.cpp $(SRC)/evaluate.hpp $(SRC)/constants.hpp

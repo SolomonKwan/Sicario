@@ -9,6 +9,7 @@
 #include "uci.hpp"
 #include "utils.hpp"
 #include "sicario.hpp"
+#include "evaluate.hpp"
 
 void Searcher::printMovesInformation() {
     for (auto pair : this->root->getChildren()) {
@@ -164,7 +165,9 @@ NodeInfo& Searcher::getNodeInfo(Hash hash) {
 
 void Sicario::mcts() {
     Searcher searcher(getPosition(), searchTree);
-    searcher.search();
+    std::cout << "getPieceEvaluation " << Evaluator::getPieceEvaluation(searcher.position) << '\n';
+    std::cout << "psqtEvaluation " << Evaluator::psqtEvaluation(searcher.position) << '\n';
+    // searcher.search();
 }
 
 void Searcher::printInfo() { // TODO make this in line with the uci commands in the Sicario class
