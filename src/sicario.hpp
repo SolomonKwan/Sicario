@@ -1,6 +1,6 @@
 
-#ifndef EVALUATE_HPP
-#define EVALUATE_HPP
+#ifndef SICARIO_HPP
+#define SICARIO_HPP
 
 #include <atomic>
 #include "constants.hpp"

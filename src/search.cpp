@@ -9,6 +9,7 @@
 #include "uci.hpp"
 #include "utils.hpp"
 #include "sicario.hpp"
+#include "evaluate.hpp"
 
 void Searcher::printMovesInformation() {
     for (auto pair : this->root->getChildren()) {
@@ -26,6 +27,10 @@ void Searcher::printMovesInformation() {
 
 NodeInfo::NodeInfo(Searcher* searcher) {
     this->turn = searcher->position.getTurn();
+
+    // Piece and psqt evaluation
+    this->value = (this->turn == WHITE ? 1 : -1) *
+            (Evaluator::psqtEvaluation(searcher->position) + Evaluator::getPieceEvaluation(searcher->position)) / 100;
 }
 
 Node::Node(Node* parent, Searcher* searcher, bool isRoot = false) {

@@ -1,3 +1,7 @@
+
+#ifndef EVALUATE_HPP
+#define EVALUATE_HPP
+
 #include "constants.hpp"
 #include "game.hpp"
 
@@ -14,7 +18,7 @@ enum GameStage {
 };
 
 namespace PSQT::Opening {
-    float KING[SQUARE_COUNT] = {
+    const float KING[SQUARE_COUNT] = {
          20,  30,  10,   0,   0,  10,  30,  20,
          20,  20,   0,   0,   0,   0,  20,  20,
         -10, -20, -20, -20, -20, -20, -20, -10,
@@ -25,7 +29,7 @@ namespace PSQT::Opening {
         -30, -40, -40, -50, -50, -40, -40, -30
     };
 
-    float QUEEN[SQUARE_COUNT] = {
+    const float QUEEN[SQUARE_COUNT] = {
         -20, -10, -10, -5, -5, -10, -10, -20,
         -10,   0,   5,  0,  0,   0,   0, -10,
         -10,   5,   5,  5,  5,   5,   0, -10,
@@ -36,7 +40,7 @@ namespace PSQT::Opening {
         -20, -10, -10, -5, -5, -10, -10, -20
     };
 
-    float ROOK[SQUARE_COUNT] = {
+    const float ROOK[SQUARE_COUNT] = {
          0,  0,  0,  5,  5,  0,  0,  0
         -5,  0,  0,  0,  0,  0,  0, -5,
         -5,  0,  0,  0,  0,  0,  0, -5,
@@ -47,7 +51,7 @@ namespace PSQT::Opening {
          0,  0,  0,  0,  0,  0,  0,  0
     };
 
-    float BISHOP[SQUARE_COUNT] = {
+    const float BISHOP[SQUARE_COUNT] = {
         -20, -10, -10, -10, -10, -10, -10, -20,
         -10,   5,   0,   0,   0,   0,   5, -10,
         -10,  10,  10,  10,  10,  10,  10, -10,
@@ -58,7 +62,7 @@ namespace PSQT::Opening {
         -20, -10, -10, -10, -10, -10, -10, -20
     };
 
-    float KNIGHT[SQUARE_COUNT] = {
+    const float KNIGHT[SQUARE_COUNT] = {
         -50, -40, -30, -30, -30, -30, -40, -50,
         -40, -20,   0,   5,   5,   0, -20, -40,
         -30,   5,  10,  15,  15,  10,   5, -30,
@@ -69,7 +73,7 @@ namespace PSQT::Opening {
         -50, -40, -30, -30, -30, -30, -40, -50
     };
 
-    float PAWN[SQUARE_COUNT] = {
+    const float PAWN[SQUARE_COUNT] = {
          0,  0,   0,   0,   0,   0,  0,  0,
          5, 10,  10, -20, -20,  10, 10,  5,
          5, -5, -10,   0,   0, -10, -5,  5,
@@ -82,7 +86,7 @@ namespace PSQT::Opening {
 }
 
 namespace PSQT::MiddleGame {
-    float KING[SQUARE_COUNT] = {
+    const float KING[SQUARE_COUNT] = {
          20,  30,  10,   0,   0,  10,  30,  20,
          20,  20,   0,   0,   0,   0,  20,  20,
         -10, -20, -20, -20, -20, -20, -20, -10,
@@ -93,7 +97,7 @@ namespace PSQT::MiddleGame {
         -30, -40, -40, -50, -50, -40, -40, -30
     };
 
-    float QUEEN[SQUARE_COUNT] = {
+    const float QUEEN[SQUARE_COUNT] = {
         -20, -10, -10, -5, -5, -10, -10, -20,
         -10,   0,   5,  0,  0,   0,   0, -10,
         -10,   5,   5,  5,  5,   5,   0, -10,
@@ -104,7 +108,7 @@ namespace PSQT::MiddleGame {
         -20, -10, -10, -5, -5, -10, -10, -20
     };
 
-    float ROOK[SQUARE_COUNT] = {
+    const float ROOK[SQUARE_COUNT] = {
          0,  0,  0,  5,  5,  0,  0,  0
         -5,  0,  0,  0,  0,  0,  0, -5,
         -5,  0,  0,  0,  0,  0,  0, -5,
@@ -115,7 +119,7 @@ namespace PSQT::MiddleGame {
          0,  0,  0,  0,  0,  0,  0,  0
     };
 
-    float BISHOP[SQUARE_COUNT] = {
+    const float BISHOP[SQUARE_COUNT] = {
         -20, -10, -10, -10, -10, -10, -10, -20,
         -10,   5,   0,   0,   0,   0,   5, -10,
         -10,  10,  10,  10,  10,  10,  10, -10,
@@ -126,7 +130,7 @@ namespace PSQT::MiddleGame {
         -20, -10, -10, -10, -10, -10, -10, -20
     };
 
-    float KNIGHT[SQUARE_COUNT] = {
+    const float KNIGHT[SQUARE_COUNT] = {
         -50, -40, -30, -30, -30, -30, -40, -50,
         -40, -20,   0,   5,   5,   0, -20, -40,
         -30,   5,  10,  15,  15,  10,   5, -30,
@@ -137,7 +141,7 @@ namespace PSQT::MiddleGame {
         -50, -40, -30, -30, -30, -30, -40, -50
     };
 
-    float PAWN[SQUARE_COUNT] = {
+    const float PAWN[SQUARE_COUNT] = {
          0,  0,   0,   0,   0,   0,  0,  0,
          5, 10,  10, -20, -20,  10, 10,  5,
          5, -5, -10,   0,   0, -10, -5,  5,
@@ -150,7 +154,7 @@ namespace PSQT::MiddleGame {
 }
 
 namespace PSQT::EndGame {
-    float KING[SQUARE_COUNT] = {
+    const float KING[SQUARE_COUNT] = {
         -10, -20, -20, -20, -20, -20, -20, -10,
           0,   0,   0,   0,   0,   0,   0,   0,
          10,  10,  10,  10,  10,  10,  10,  10,
@@ -161,7 +165,7 @@ namespace PSQT::EndGame {
          20,  30,  30,  30,  30,  30,  30,  20
     };
 
-    float QUEEN[SQUARE_COUNT] = {
+    const float QUEEN[SQUARE_COUNT] = {
         -20, -10, -10, -5, -5, -10, -10, -20,
         -10,   0,   5,  0,  0,   0,   0, -10,
         -10,   5,   5,  5,  5,   5,   0, -10,
@@ -172,7 +176,7 @@ namespace PSQT::EndGame {
         -20, -10, -10, -5, -5, -10, -10, -20
     };
 
-    float ROOK[SQUARE_COUNT] = {
+    const float ROOK[SQUARE_COUNT] = {
          0,  0,  0,  5,  5,  0,  0,  0
         -5,  0,  0,  0,  0,  0,  0, -5,
         -5,  0,  0,  0,  0,  0,  0, -5,
@@ -183,7 +187,7 @@ namespace PSQT::EndGame {
          0,  0,  0,  0,  0,  0,  0,  0
     };
 
-    float BISHOP[SQUARE_COUNT] = {
+    const float BISHOP[SQUARE_COUNT] = {
         -20, -10, -10, -10, -10, -10, -10, -20,
         -10,   5,   0,   0,   0,   0,   5, -10,
         -10,  10,  10,  10,  10,  10,  10, -10,
@@ -194,7 +198,7 @@ namespace PSQT::EndGame {
         -20, -10, -10, -10, -10, -10, -10, -20
     };
 
-    float KNIGHT[SQUARE_COUNT] = {
+    const float KNIGHT[SQUARE_COUNT] = {
         -50, -40, -30, -30, -30, -30, -40, -50,
         -40, -20,   0,   5,   5,   0, -20, -40,
         -30,   5,  10,  15,  15,  10,   5, -30,
@@ -205,7 +209,7 @@ namespace PSQT::EndGame {
         -50, -40, -30, -30, -30, -30, -40, -50
     };
 
-    float PAWN[SQUARE_COUNT] = {
+    const float PAWN[SQUARE_COUNT] = {
          0,   0,   0,   0,   0,   0,   0,  0,
         -5, -10, -10, -20, -20,  10, -10, -5,
         -5,  -5, -10, -10, -10, -10,  -5, -5,
@@ -226,4 +230,6 @@ namespace Evaluator {
     float getPieceEvaluation(Position& position);
 
     GameStage getStage(Position& position);
-}
+};
+
+#endif
