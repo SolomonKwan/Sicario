@@ -27,6 +27,10 @@ void Searcher::printMovesInformation() {
 
 NodeInfo::NodeInfo(Searcher* searcher) {
     this->turn = searcher->position.getTurn();
+
+    // Piece and psqt evaluation
+    this->value = (this->turn == WHITE ? 1 : -1) *
+            (Evaluator::psqtEvaluation(searcher->position) + Evaluator::getPieceEvaluation(searcher->position)) / 100;
 }
 
 Node::Node(Node* parent, Searcher* searcher, bool isRoot = false) {
@@ -165,9 +169,7 @@ NodeInfo& Searcher::getNodeInfo(Hash hash) {
 
 void Sicario::mcts() {
     Searcher searcher(getPosition(), searchTree);
-    std::cout << "getPieceEvaluation " << Evaluator::getPieceEvaluation(searcher.position) << '\n';
-    std::cout << "psqtEvaluation " << Evaluator::psqtEvaluation(searcher.position) << '\n';
-    // searcher.search();
+    searcher.search();
 }
 
 void Searcher::printInfo() { // TODO make this in line with the uci commands in the Sicario class
