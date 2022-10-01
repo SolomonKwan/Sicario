@@ -140,11 +140,11 @@ BitboardFamily computeDiagonalRays();
  * @return Index into the precomputed rook reach array.
  */
 inline uint getRookReachIndex(Bitboard occupancy, Square square) {
-    #ifdef USE_PEXT
-    return _pext_u64(occupancy, Masks::ROOK[square]);
-    #else
-    return (occupancy * MagicNums::Reach::ROOK[square]) >> Shifts::Reach::ROOK[square];
-    #endif
+	#ifdef USE_PEXT
+	return _pext_u64(occupancy, Masks::ROOK[square]);
+	#else
+	return (occupancy * MagicNums::Reach::ROOK[square]) >> Shifts::Reach::ROOK[square];
+	#endif
 }
 
 /**
@@ -155,7 +155,7 @@ inline uint getRookReachIndex(Bitboard occupancy, Square square) {
  * @return Index into the precomputed rook moves array.
  */
 inline uint getRookMovesIndex(Bitboard reach, Square square) {
-    return (reach * MagicNums::Moves::ROOK[square]) >> Shifts::Moves::ROOK[square];
+	return (reach * MagicNums::Moves::ROOK[square]) >> Shifts::Moves::ROOK[square];
 }
 
 /**
@@ -166,11 +166,11 @@ inline uint getRookMovesIndex(Bitboard reach, Square square) {
  * @return Index into the precomputed bishop reach array.
  */
 inline uint getBishopReachIndex(Bitboard occupancy, Square square) {
-    #ifdef USE_PEXT
-    return _pext_u64(occupancy, Masks::BISHOP[square]);
-    #else
-    return (occupancy * MagicNums::Reach::BISHOP[square]) >> Shifts::Reach::BISHOP[square];
-    #endif
+	#ifdef USE_PEXT
+	return _pext_u64(occupancy, Masks::BISHOP[square]);
+	#else
+	return (occupancy * MagicNums::Reach::BISHOP[square]) >> Shifts::Reach::BISHOP[square];
+	#endif
 }
 
 /**
@@ -181,7 +181,7 @@ inline uint getBishopReachIndex(Bitboard occupancy, Square square) {
  * @return Index into the precomputed bishop moves array.
  */
 inline uint getBishopMovesIndex(Bitboard reach, Square square) {
-    return (reach * MagicNums::Moves::BISHOP[square]) >> Shifts::Moves::BISHOP[square];
+	return (reach * MagicNums::Moves::BISHOP[square]) >> Shifts::Moves::BISHOP[square];
 }
 
 /**
@@ -192,11 +192,11 @@ inline uint getBishopMovesIndex(Bitboard reach, Square square) {
  * @return Index into the precomputed knight moves array.
  */
 inline uint getKnightMovesIndex(Bitboard reach, Square square) {
-    #ifdef USE_PEXT
-    return _pext_u64(reach, Masks::KNIGHT[square]);
-    #else
-    return (reach * MagicNums::KNIGHT[square]) >> Shifts::KNIGHT[square];
-    #endif
+	#ifdef USE_PEXT
+	return _pext_u64(reach, Masks::KNIGHT[square]);
+	#else
+	return (reach * MagicNums::KNIGHT[square]) >> Shifts::KNIGHT[square];
+	#endif
 }
 
 /**
@@ -207,11 +207,11 @@ inline uint getKnightMovesIndex(Bitboard reach, Square square) {
  * @return Index into the precomputed king moves array.
  */
 inline uint getKingMovesIndex(Bitboard reach, Square square) {
-    #ifdef USE_PEXT
-    return _pext_u64(reach, Masks::KING[square]);
-    #else
-    return (reach * MagicNums::KING[square]) >> Shifts::KING[square];
-    #endif
+	#ifdef USE_PEXT
+	return _pext_u64(reach, Masks::KING[square]);
+	#else
+	return (reach * MagicNums::KING[square]) >> Shifts::KING[square];
+	#endif
 }
 
 /**
@@ -223,11 +223,11 @@ inline uint getKingMovesIndex(Bitboard reach, Square square) {
  * @return Index into the precomputed pawn moves array.
  */
 inline uint getPawnMovesIndex(Bitboard reach, Square square, Player player) {
-    #ifdef USE_PEXT
-    return _pext_u64(reach, Masks::PAWN[player][square]);
-    #else
-    return (reach * MagicNums::PAWN[player][square]) >> Shifts::PAWN[player][square];
-    #endif
+	#ifdef USE_PEXT
+	return _pext_u64(reach, Masks::PAWN[player][square]);
+	#else
+	return (reach * MagicNums::PAWN[player][square]) >> Shifts::PAWN[player][square];
+	#endif
 }
 
 /**
@@ -238,7 +238,7 @@ inline uint getPawnMovesIndex(Bitboard reach, Square square, Player player) {
  * @return Index into the precomputed rook block moves array.
  */
 inline uint getRookBlockIndex(Bitboard reach, Square square) {
-    return (reach * MagicNums::Block::ROOK[square]) >> Shifts::Block::ROOK[square];
+	return (reach * MagicNums::Block::ROOK[square]) >> Shifts::Block::ROOK[square];
 }
 
 /**
@@ -249,7 +249,7 @@ inline uint getRookBlockIndex(Bitboard reach, Square square) {
  * @return Index into the precomputed bishop block moves array.
  */
 inline uint getBishopBlockIndex(Bitboard reach, Square square) {
-    return (reach * MagicNums::Block::BISHOP[square]) >> Shifts::Block::BISHOP[square];
+	return (reach * MagicNums::Block::BISHOP[square]) >> Shifts::Block::BISHOP[square];
 }
 
 /**
@@ -325,12 +325,12 @@ std::vector<std::array<int, 4>> getEndBlockSquares(std::array<int, 4> sizes); //
  * last entry is described by this struct.
  */
 struct History {
-    uint castling;      // Castling permissions immediately before the current position.
-    Square en_passant;  // En passant permission immediately before the current position.
-    uint halfmove;      // Halfmove count immediately before the current position.
-    uint64_t hash;      // The hash of immediately before the current position.
-    Move move;          // The move that resulted in the current position.
-    PieceType captured; // The piece captured just before the current position (if any).
+	uint castling;      // Castling permissions immediately before the current position.
+	Square en_passant;  // En passant permission immediately before the current position.
+	uint halfmove;      // Halfmove count immediately before the current position.
+	uint64_t hash;      // The hash of immediately before the current position.
+	Move move;          // The move that resulted in the current position.
+	PieceType captured; // The piece captured just before the current position (if any).
 };
 
 #endif

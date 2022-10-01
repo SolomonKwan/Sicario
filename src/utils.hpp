@@ -49,7 +49,7 @@ void displayBB(uint64_t position);
  * @return True if only 1 bit set, else false.
  */
 inline bool oneBitSet(Bitboard bitboard) {
-    return bitboard && !(bitboard & (bitboard - ONE_BB));
+	return bitboard && !(bitboard & (bitboard - ONE_BB));
 }
 
 /**
@@ -59,7 +59,7 @@ inline bool oneBitSet(Bitboard bitboard) {
  * @return True if the square is dark, else false.
  */
 inline bool isDark(Square square) {
-    return (DARK_BB >> square) & ONE_BB;
+	return (DARK_BB >> square) & ONE_BB;
 }
 
 /**
@@ -69,7 +69,7 @@ inline bool isDark(Square square) {
  * @return The start square encoded in the move.
  */
 inline Square start(Move move) {
-    return static_cast<Square>(move & MOVE_MASK);
+	return static_cast<Square>(move & MOVE_MASK);
 }
 
 /**
@@ -79,7 +79,7 @@ inline Square start(Move move) {
  * @return The end square encoded in the move.
  */
 inline Square end(Move move) {
-    return static_cast<Square>((move >> DESTINATION_SHIFT) & MOVE_MASK);
+	return static_cast<Square>((move >> DESTINATION_SHIFT) & MOVE_MASK);
 }
 
 /**
@@ -89,7 +89,7 @@ inline Square end(Move move) {
  * @return The move type encoded in the move.
  */
 inline MoveType type(Move move) {
-    return static_cast<MoveType>(move & (MOVE_TYPE_MASK << MOVE_TYPE_SHIFT));
+	return static_cast<MoveType>(move & (MOVE_TYPE_MASK << MOVE_TYPE_SHIFT));
 }
 
 /**
@@ -99,7 +99,7 @@ inline MoveType type(Move move) {
  * @return The promotion encoded in the move.
  */
 inline Promotion promo(Move move) {
-    return static_cast<Promotion>(move & (PROMOTION_MASK << PROMOTION_SHIFT));
+	return static_cast<Promotion>(move & (PROMOTION_MASK << PROMOTION_SHIFT));
 }
 
 /**
@@ -109,7 +109,7 @@ inline Promotion promo(Move move) {
  * @return The rank of the square.
  */
 inline Rank rank(Square square) {
-    return static_cast<Rank>(square / RANK_COUNT);
+	return static_cast<Rank>(square / RANK_COUNT);
 }
 
 /**
@@ -119,7 +119,7 @@ inline Rank rank(Square square) {
  * @return The file of the square.
  */
 inline File file(Square square) {
-    return static_cast<File>(square % FILE_COUNT);
+	return static_cast<File>(square % FILE_COUNT);
 }
 
 /**
@@ -144,67 +144,67 @@ std::string getTypeString(MoveType type);
  */
 template<typename T>
 inline bool isSet(T number, uint index) {
-    return number & (static_cast<T>(1) << index);
+	return number & (static_cast<T>(1) << index);
 }
 
 template<typename N, typename I>
 inline void clearBit(N& number, I index) {
-    number &= ~(static_cast<N>(1) << index);
+	number &= ~(static_cast<N>(1) << index);
 }
 
 template<typename N, typename I>
 inline void setBit(N& number, I index) {
-    number |= static_cast<N>(1) << index;
+	number |= static_cast<N>(1) << index;
 }
 
 constexpr BasePieceType baseTypeFromPiece(PieceType piece) {
-    switch (piece) {
-        case W_KING:
-        case B_KING:
-            return KING;
-        case W_QUEEN:
-        case B_QUEEN:
-            return QUEEN;
-        case W_ROOK:
-        case B_ROOK:
-            return ROOK;
-        case W_BISHOP:
-        case B_BISHOP:
-            return BISHOP;
-        case W_KNIGHT:
-        case B_KNIGHT:
-            return KNIGHT;
-        case W_PAWN:
-        case B_PAWN:
-            return PAWN;
-        default: // W_PAWN or B_PAWN
-            assert(false);
-    }
+	switch (piece) {
+		case W_KING:
+		case B_KING:
+			return KING;
+		case W_QUEEN:
+		case B_QUEEN:
+			return QUEEN;
+		case W_ROOK:
+		case B_ROOK:
+			return ROOK;
+		case W_BISHOP:
+		case B_BISHOP:
+			return BISHOP;
+		case W_KNIGHT:
+		case B_KNIGHT:
+			return KNIGHT;
+		case W_PAWN:
+		case B_PAWN:
+			return PAWN;
+		default: // W_PAWN or B_PAWN
+			assert(false);
+	}
 }
 
 constexpr Player colourFromPieceType(PieceType piece) {
-    switch (piece) {
-        case W_KING:
-        case W_QUEEN:
-        case W_ROOK:
-        case W_BISHOP:
-        case W_KNIGHT:
-        case W_PAWN:
-            return WHITE;
-        case B_KING:
-        case B_QUEEN:
-        case B_ROOK:
-        case B_BISHOP:
-        case B_KNIGHT:
-        case B_PAWN:
-            return BLACK;
-        default: // W_PAWN or B_PAWN
-            assert(false);
-    }
+	switch (piece) {
+		case W_KING:
+		case W_QUEEN:
+		case W_ROOK:
+		case W_BISHOP:
+		case W_KNIGHT:
+		case W_PAWN:
+			return WHITE;
+		case B_KING:
+		case B_QUEEN:
+		case B_ROOK:
+		case B_BISHOP:
+		case B_KNIGHT:
+		case B_PAWN:
+			return BLACK;
+		default: // W_PAWN or B_PAWN
+			assert(false);
+	}
 }
 
 inline Square reflectVertical(const Square square) {
-    return static_cast<Square>(square ^ 56);
+	return static_cast<Square>(square ^ 56);
 }
 
 #endif

@@ -2,9 +2,9 @@
 #define CONSTANTS_HPP
 
 #ifndef NDEBUG
-    #define DEBUG_LOG(x) std::cout << "\u001b[35m[ DEBUG ] " << x << "\033[0m\n";
+	#define DEBUG_LOG(x) std::cout << "\u001b[35m[ DEBUG ] " << x << "\033[0m\n";
 #else
-    #define DEBUG_LOG(x)
+	#define DEBUG_LOG(x)
 #endif
 
 #include <string>
@@ -70,162 +70,162 @@ enum File { FILE_A, FILE_B, FILE_C, FILE_D, FILE_E, FILE_F, FILE_G, FILE_H };
 enum Rank { RANK_1, RANK_2, RANK_3, RANK_4, RANK_5, RANK_6, RANK_7, RANK_8 };
 
 enum Direction {
-    N = 8,
-    NE = 9,
-    E = 1,
-    SE = -7,
-    S = -8,
-    SW = -9,
-    W = -1,
-    NW = 7,
+	N = 8,
+	NE = 9,
+	E = 1,
+	SE = -7,
+	S = -8,
+	SW = -9,
+	W = -1,
+	NW = 7,
 
-    NN = 16,
-    SS = -16,
+	NN = 16,
+	SS = -16,
 
-    NNE = +17,
-    ENE = +10,
-    ESE = -6,
-    SES = -15,
-    SWS = -17,
-    WSW = -10,
-    WNW = +6,
-    NWN = +15,
+	NNE = +17,
+	ENE = +10,
+	ESE = -6,
+	SES = -15,
+	SWS = -17,
+	WSW = -10,
+	WNW = +6,
+	NWN = +15,
 };
 
 enum Player { BLACK, WHITE };
 
 enum Square {
-    A1, B1, C1, D1, E1, F1, G1, H1,
-    A2, B2, C2, D2, E2, F2, G2, H2,
-    A3, B3, C3, D3, E3, F3, G3, H3,
-    A4, B4, C4, D4, E4, F4, G4, H4,
-    A5, B5, C5, D5, E5, F5, G5, H5,
-    A6, B6, C6, D6, E6, F6, G6, H6,
-    A7, B7, C7, D7, E7, F7, G7, H7,
-    A8, B8, C8, D8, E8, F8, G8, H8,
-    NONE
+	A1, B1, C1, D1, E1, F1, G1, H1,
+	A2, B2, C2, D2, E2, F2, G2, H2,
+	A3, B3, C3, D3, E3, F3, G3, H3,
+	A4, B4, C4, D4, E4, F4, G4, H4,
+	A5, B5, C5, D5, E5, F5, G5, H5,
+	A6, B6, C6, D6, E6, F6, G6, H6,
+	A7, B7, C7, D7, E7, F7, G7, H7,
+	A8, B8, C8, D8, E8, F8, G8, H8,
+	NONE
 };
 
 enum PieceType {
-    B_KING, W_KING,
-    W_QUEEN, W_ROOK, W_BISHOP, W_KNIGHT, W_PAWN,
-    B_QUEEN, B_ROOK, B_BISHOP, B_KNIGHT, B_PAWN,
-    NO_PIECE
+	B_KING, W_KING,
+	W_QUEEN, W_ROOK, W_BISHOP, W_KNIGHT, W_PAWN,
+	B_QUEEN, B_ROOK, B_BISHOP, B_KNIGHT, B_PAWN,
+	NO_PIECE
 };
 
 enum BasePieceType {
-    KING, QUEEN, ROOK, BISHOP, KNIGHT, PAWN
+	KING, QUEEN, ROOK, BISHOP, KNIGHT, PAWN
 };
 
 enum Castling {
-    WKSC, WQSC, BKSC, BQSC
+	WKSC, WQSC, BKSC, BQSC
 };
 
 enum MoveType {
-    NORMAL = 0,
-    PROMOTION = 1 << MOVE_TYPE_SHIFT,
-    EN_PASSANT = 2 << MOVE_TYPE_SHIFT,
-    CASTLING = 3 << MOVE_TYPE_SHIFT
+	NORMAL = 0,
+	PROMOTION = 1 << MOVE_TYPE_SHIFT,
+	EN_PASSANT = 2 << MOVE_TYPE_SHIFT,
+	CASTLING = 3 << MOVE_TYPE_SHIFT
 };
 
 enum Promotion {
-    pKNIGHT = 0,
-    pBISHOP = 1 << PROMOTION_SHIFT,
-    pROOK = 2 << PROMOTION_SHIFT,
-    pQUEEN = 3 << PROMOTION_SHIFT
+	pKNIGHT = 0,
+	pBISHOP = 1 << PROMOTION_SHIFT,
+	pROOK = 2 << PROMOTION_SHIFT,
+	pQUEEN = 3 << PROMOTION_SHIFT
 };
 
 enum ExitCode {
-    NORMAL_PLY,
-    WHITE_WINS,
-    BLACK_WINS,
-    STALEMATE,
-    THREE_FOLD_REPETITION,
-    FIFTY_MOVES_RULE,
-    INSUFFICIENT_MATERIAL,
+	NORMAL_PLY,
+	WHITE_WINS,
+	BLACK_WINS,
+	STALEMATE,
+	THREE_FOLD_REPETITION,
+	FIFTY_MOVES_RULE,
+	INSUFFICIENT_MATERIAL,
 };
 
 namespace PromoMoveType {
-    enum MoveType {
-        NON_CAPTURE, CAPTURE
-    };
+	enum MoveType {
+		NON_CAPTURE, CAPTURE
+	};
 }
 
 namespace NormalMoveType {
-    enum MoveType {
-        NON_CAPTURE, CAPTURE
-    };
+	enum MoveType {
+		NON_CAPTURE, CAPTURE
+	};
 }
 
 inline Square operator+(const Square& square, const Direction& direction) {
-    return static_cast<Square>(static_cast<uint>(square) + static_cast<uint>(direction));
+	return static_cast<Square>(static_cast<uint>(square) + static_cast<uint>(direction));
 }
 
 inline Direction operator+(const Direction& direction1, const Direction& direction2) {
-    return static_cast<Direction>(static_cast<uint>(direction1) + static_cast<uint>(direction2));
+	return static_cast<Direction>(static_cast<uint>(direction1) + static_cast<uint>(direction2));
 }
 
 inline int operator-(const Rank& rank, const File& file) {
-    return static_cast<int>(rank) - static_cast<int>(file);
+	return static_cast<int>(rank) - static_cast<int>(file);
 }
 
 inline Square operator++(Square& square) { // Pre-fix
-    square = static_cast<Square>(static_cast<uint>(square) + 1U);
-    return square;
+	square = static_cast<Square>(static_cast<uint>(square) + 1U);
+	return square;
 }
 
 inline Square operator++(Square& square, int) { // Post-fix
-    Square prev = square;
-    square = static_cast<Square>(static_cast<uint>(square) + 1U);
-    return prev;
+	Square prev = square;
+	square = static_cast<Square>(static_cast<uint>(square) + 1U);
+	return prev;
 }
 
 inline File operator++(File& file) { // Pre-fix
-    file = static_cast<File>(static_cast<uint>(file) + 1U);
-    return file;
+	file = static_cast<File>(static_cast<uint>(file) + 1U);
+	return file;
 }
 
 inline File operator++(File& file, int) { // Post-fix
-    File prev = file;
-    file = static_cast<File>(static_cast<uint>(file) + 1U);
-    return prev;
+	File prev = file;
+	file = static_cast<File>(static_cast<uint>(file) + 1U);
+	return prev;
 }
 
 inline Rank operator--(Rank& rank, int) {
-    Rank prev = rank;
-    rank = static_cast<Rank>(static_cast<uint>(rank) - 1U);
-    return prev;
+	Rank prev = rank;
+	rank = static_cast<Rank>(static_cast<uint>(rank) - 1U);
+	return prev;
 }
 
 inline Player operator!(const Player& player) {
-    return static_cast<Player>(1U - player);
+	return static_cast<Player>(1U - player);
 }
 
 const std::string promoName[4] = {
-    "n", "b", "r", "q"
+	"n", "b", "r", "q"
 };
 
 const std::string moveName[4] = {
-    "Normal", "Promotion", "En-passant", "Castling"
+	"Normal", "Promotion", "En-passant", "Castling"
 };
 
 const std::string piece_type_string[PIECE_TYPE_COUNT + 1] = {
-    "B_KING", "W_KING",
-    "W_QUEEN", "W_ROOK", "W_BISHOP", "W_KNIGHT", "W_PAWN",
-    "B_QUEEN", "B_ROOK", "B_BISHOP", "B_KNIGHT", "B_PAWN",
-    "NO_PIECE"
+	"B_KING", "W_KING",
+	"W_QUEEN", "W_ROOK", "W_BISHOP", "W_KNIGHT", "W_PAWN",
+	"B_QUEEN", "B_ROOK", "B_BISHOP", "B_KNIGHT", "B_PAWN",
+	"NO_PIECE"
 };
 
 const std::string squareName[SQUARE_COUNT + 1] = {
-    "a1", "b1", "c1", "d1", "e1", "f1", "g1", "h1",
-    "a2", "b2", "c2", "d2", "e2", "f2", "g2", "h2",
-    "a3", "b3", "c3", "d3", "e3", "f3", "g3", "h3",
-    "a4", "b4", "c4", "d4", "e4", "f4", "g4", "h4",
-    "a5", "b5", "c5", "d5", "e5", "f5", "g5", "h5",
-    "a6", "b6", "c6", "d6", "e6", "f6", "g6", "h6",
-    "a7", "b7", "c7", "d7", "e7", "f7", "g7", "h7",
-    "a8", "b8", "c8", "d8", "e8", "f8", "g8", "h8",
-    "None"
+	"a1", "b1", "c1", "d1", "e1", "f1", "g1", "h1",
+	"a2", "b2", "c2", "d2", "e2", "f2", "g2", "h2",
+	"a3", "b3", "c3", "d3", "e3", "f3", "g3", "h3",
+	"a4", "b4", "c4", "d4", "e4", "f4", "g4", "h4",
+	"a5", "b5", "c5", "d5", "e5", "f5", "g5", "h5",
+	"a6", "b6", "c6", "d6", "e6", "f6", "g6", "h6",
+	"a7", "b7", "c7", "d7", "e7", "f7", "g7", "h7",
+	"a8", "b8", "c8", "d8", "e8", "f8", "g8", "h8",
+	"None"
 };
 
 #endif
