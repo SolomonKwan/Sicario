@@ -99,7 +99,7 @@ class Sicario {
 		OptionInfo uciOpponent { "UCI_Opponent", "string", "" };
 
 		// Tree search
-		void mcts();
+		void search();
 
 		// Perft
 		uint64_t perft(int depth, bool root = false);
