@@ -8,7 +8,7 @@ int main(int argc, char* argv[]) {
 	showStartUp();
 
 	Sicario sicario;
-	ExitCode code = sicario.run();
+	sicario.run();
 
-	return code;
+	return EXIT_SUCCESS;
 }

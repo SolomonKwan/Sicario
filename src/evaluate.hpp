@@ -222,13 +222,39 @@ namespace PSQT::EndGame {
 }
 
 namespace Evaluator {
+	/**
+	 * @brief Calculates and returns the piece square evaluation of the current position. Positive return value means
+	 * the player to move is ahead. Negative return value means player to move is behind. Return value of 0 means equal.
+	 *
+	 * @tparam S Current stage the game. Can be OPENING, MIDDLEGAME or ENDGAME.
+	 * @param position Position object to evaluate.
+	 * @return Piece square evaluation of the current position with respec to the game stage.
+	 */
 	template<GameStage S>
 	float psqtEvaluation(Position& position);
 
+	/**
+	 * @brief Returns the piece square evaluation of the current position.
+	 *
+	 * @param position Position object to evaluate.
+	 * @return Piece square evaluation of the current position.
+	 */
 	float psqtEvaluation(Position& position);
 
+	/**
+	 * @brief Returns the raw piece evaluation of the current position.
+	 *
+	 * @param position Position object to evaluate.
+	 * @return Raw piece evaluation of the current position.
+	 */
 	float getPieceEvaluation(Position& position);
 
+	/**
+	 * @brief Returns the stage of the position.
+	 *
+	 * @param position Position object to evaluate.
+	 * @return GameStage of the current position.
+	 */
 	GameStage getStage(Position& position);
 };
 

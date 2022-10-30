@@ -92,7 +92,7 @@ std::array<MoveFamilies, PLAYER_COUNT> computePawnMoves() {
 	return pawnMoves;
 }
 
-MoveFamilies computePawnMovesBySide(Player player) {
+MoveFamilies computePawnMovesBySide(const Player player) {
 	MoveFamilies pawnMoves;
 	for (Square square = A2; square <= H7; square++) {
 		MoveFamily& moveSet = pawnMoves[square];
@@ -592,7 +592,7 @@ BitboardFamily computeDiagonalRays() {
 	return rays;
 }
 
-int getIndex(std::vector<int> values, std::vector<int> ranges) {
+int getIndex(const std::vector<int> values, const std::vector<int> ranges) {
 	if (values.size() == 0) return values[0];
 
 	// Iteratively build the index (basically just a composition of functions i.e. f(f(f(...)))).
@@ -610,7 +610,7 @@ int getIndex(std::vector<int> values, std::vector<int> ranges) {
 	return currValue;
 }
 
-int pairingFunction(int n, int m, int N, int M) {
+int pairingFunction(const int n, const int m, const int N, const int M) {
 	if (N == M) {
 		return n + m * N;
 	} else if (N < M) {

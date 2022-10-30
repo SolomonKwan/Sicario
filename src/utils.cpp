@@ -5,7 +5,7 @@
 #include "utils.hpp"
 #include "constants.hpp"
 
-std::vector<std::string> split(std::string input, std::string delim) {
+std::vector<std::string> split(std::string input, const std::string delim) {
 	std::vector<std::string> result;
 	std::size_t pos;
 
@@ -18,38 +18,7 @@ std::vector<std::string> split(std::string input, std::string delim) {
 	return result;
 }
 
-Move parseMove(std::string move_str) {
-	Move move = 0;
-	if (move_str[0] < 'a' || move_str[0] > 'h' || move_str[2] < 'a' || move_str[2] > 'h') {
-		return 0;
-	}
-
-	if (move_str[1] < '1' || move_str[1] > '8' || move_str[3] < '1' || move_str[3] > '8') {
-		return 0;
-	}
-
-	int start_file = move_str[0] - 'a';
-	int start_rank = move_str[1] - '1';
-	int end_file = move_str[2] - 'a';
-	int end_rank = move_str[3] - '1';
-
-	if (move_str.length() == 5) {
-		move |= PROMOTION;
-		if (move_str[4] == 'q') {
-			move |= pQUEEN;
-		} else if (move_str[4] == 'r') {
-			move |= pROOK;
-		} else if (move_str[4] == 'b') {
-			move |= pBISHOP;
-		}
-	}
-
-	move |= 8 * start_rank + start_file;
-	move |= ((8 * end_rank + end_file) << 6);
-	return move;
-}
-
-std::string concat(std::vector<std::string> strings, std::string delimeter) {
+std::string concat(const std::vector<std::string> strings, const std::string delimeter) {
 	std::string combinedStr = "";
 	for (std::string str : strings) {
 		combinedStr += str + delimeter;
@@ -58,14 +27,14 @@ std::string concat(std::vector<std::string> strings, std::string delimeter) {
 	return combinedStr;
 }
 
-bool isPostiveInteger(std::string str) {
+bool isPostiveInteger(const std::string str) {
 	for (char c : str) {
 		if (!std::isdigit(c)) return false;
 	}
 	return true;
 }
 
-void displayBB(uint64_t position) {
+void displayBB(const uint64_t position) {
 	std::string positionString = std::bitset<SQUARE_COUNT>(position).to_string();
 	std::cout << "\n";
 	for (int i = 0; i < 8; i++) {
@@ -77,7 +46,7 @@ void displayBB(uint64_t position) {
 	std::cout << '\n' << std::flush;
 }
 
-void printMove(Move move, bool extraInfo, bool flush) {
+void printMove(const Move move, const bool extraInfo, const bool flush) {
 	if (extraInfo) {
 		std::cout << squareName[start(move)] << squareName[end(move)];
 		std::cout << " ";
@@ -91,7 +60,7 @@ void printMove(Move move, bool extraInfo, bool flush) {
 	if (flush) std::cout << '\n';
 }
 
-std::string getPromoString(Promotion promo) {
+std::string getPromoString(const Promotion promo) {
 	switch (promo) {
 		case pKNIGHT:
 			return promoName[0];
@@ -104,7 +73,7 @@ std::string getPromoString(Promotion promo) {
 	}
 }
 
-std::string getTypeString(MoveType type) {
+std::string getTypeString(const MoveClass type) {
 	switch (type) {
 		case NORMAL:
 			return moveName[0];

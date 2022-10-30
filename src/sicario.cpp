@@ -35,33 +35,28 @@ void showStartUp() {
 	std::cout << "By " << AUTHOR << "\n\n";
 }
 
-Position Sicario::getPosition() const {
-	return position;
-}
-
-ExitCode Sicario::run() {
+void Sicario::run() {
 	std::string input("");
 	do {
 		std::getline(std::cin, input);
 		processInput(input);
 	} while (input != "quit");
 
-	searchTree = false;
-	return ExitCode::NORMAL_PLY;
+	this->searchTree = false;
 }
 
-uint64_t Sicario::perft(int depth, bool root) {
+uint64_t Sicario::perft(const int depth, const bool root) {
 	uint64_t nodes = 0;
 	uint64_t current_node_count = 0;
 
-	for (Move move: MoveList(position)) {
+	for (Move move: MoveList(this->position)) {
 		if (depth <= 1) {
 			current_node_count = 1;
 			nodes++;
 		} else {
-			position.processMakeMove(move, false);
-			current_node_count = depth == 2 ? MoveList(position).size() : perft(depth - 1);
-			position.processUndoMove();
+			this->position.processMakeMove(move, false);
+			current_node_count = depth == 2 ? MoveList(this->position).size() : perft(depth - 1);
+			this->position.processUndoMove();
 			nodes += current_node_count;
 		}
 

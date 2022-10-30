@@ -14,7 +14,7 @@
 #include "utils.hpp"
 
 /**
- * @brief Computes move sets of the king on each square based on legal destinations. This does not compute castling
+ * @brief Compute move sets of the king on each square based on legal destinations. This does not compute castling
  * moves.
  *
  * @return Array of vectors of move vectors.
@@ -22,21 +22,21 @@
 MoveFamilies computeKingMoves();
 
 /**
- * @brief Computes move sets of the rook on each square based on legal destinations.
+ * @brief Compute move sets of the rook on each square based on legal destinations.
  *
  * @return Array of vectors of move vectors.
  */
 MoveFamilies computeRookMoves();
 
 /**
- * @brief Computes moves sets of the bishop on each square based on legal destinations.
+ * @brief Compute moves sets of the bishop on each square based on legal destinations.
  *
  * @return Array of vectors of move vectors.
  */
 MoveFamilies computeBishopMoves();
 
 /**
- * @brief Computes move sets of the knight on each square based on legal destinations.
+ * @brief Compute move sets of the knight on each square based on legal destinations.
  *
  * @return Array of vectors of move vectors.
  */
@@ -47,28 +47,33 @@ MoveFamilies computeKnightMoves();
  *
  * @return Array of array of vectors of move vectors.
  */
-std::array<MoveFamilies,2> computePawnMoves();
+std::array<MoveFamilies, PLAYER_COUNT> computePawnMoves();
 
 /**
- * @brief Computes move sets of the pawn on each square based of legal destinations for a particular side. Does not
+ * @brief Compute move sets of the pawn on each square based of legal destinations for a particular side. Does not
  * compute en-passant moves.
  *
  * @param player The side to compute move sets for.
- * @return: Array of vectors of move vectors.
+ * @return Array of vectors of move vectors.
  */
-MoveFamilies computePawnMovesBySide(Player player);
+MoveFamilies computePawnMovesBySide(const Player player);
 
 /**
- * @brief Computed the castling moves for both sides. Black array is 0, white array is 1.
+ * @brief Compute the castling moves for both sides. Black array is 0, white array is 1.
  *
  * @return Array of move vectors.
  */
-std::array<std::vector<Move>, 4> computeCastlingMoves();
-
-std::array<std::vector<std::vector<std::vector<Move>>>, 2> computeEnPassantMoves();
+std::array<std::vector<Move>, CASTLING_OPTIONS> computeCastlingMoves();
 
 /**
- * @brief Computes the move sets for rook moves on each square based on legal destinations when the own side is in
+ * @brief Compute the en-passant moves.
+ *
+ * @return Some overly confusing data structure containing the en-passant moves. // TODO Clean up the en-passant stuffs
+ */
+std::array<std::vector<std::vector<std::vector<Move>>>, PLAYER_COUNT> computeEnPassantMoves();
+
+/**
+ * @brief Compute the move sets for rook moves on each square based on legal destinations when the own side is in
  * check.
  *
  * @return Array of vector of move vectors.
@@ -76,7 +81,7 @@ std::array<std::vector<std::vector<std::vector<Move>>>, 2> computeEnPassantMoves
 MoveFamilies computeRookBlockMoves();
 
 /**
- * @brief Computes the move sets for bishop moves on each square based on legal destinations when the own side is in
+ * @brief Compute the move sets for bishop moves on each square based on legal destinations when the own side is in
  * check.
  *
  * @return Array of vector of move vectors.
@@ -105,41 +110,41 @@ IndicesFamily computeBishopReachIndices();
 BitboardFamily computeRookReaches();
 
 /**
- * @brief Computes the reach bitboards for the different occupancies of the bishop on each square.
+ * @brief Compute the reach bitboards for the different occupancies of the bishop on each square.
  *
  * @return Array of vectors of reaches bitboards.
  */
 BitboardFamily computeBishopReaches();
 
 /**
- * @brief Computes the squares of the reach of the king for different occupancies on each square.
+ * @brief Compute the squares of the reach of the king for different occupancies on each square.
  *
  * @return Squares of the reach of the king for different occupancies on each square.
  */
 std::array<std::vector<std::vector<Square>>, SQUARE_COUNT> computeKingReachSquares();
 
 /**
- * @brief Computes the level rays from first square (exclusive) to second square (inclusive).
+ * @brief Compute the level rays from first square (exclusive) to second square (inclusive).
  *
  * @return Array of vector of reach bitboards.
  */
 BitboardFamily computeLevelRays();
 
 /**
- * @brief Computes the diagonal rays from first square (exclusive) to second square (inclusive).
+ * @brief Compute the diagonal rays from first square (exclusive) to second square (inclusive).
  *
  * @return Array of vector of reach bitboards.
  */
 BitboardFamily computeDiagonalRays();
 
 /**
- * @brief Gets the rook index into the precomputed reach index array.
+ * @brief Get the rook index into the precomputed reach index array.
  *
- * @param occupancy The occupancy bits of concern.
- * @param square The square the rook of concern is on.
+ * @param occupancy Occupancy bitboard.
+ * @param square Square the rook is on.
  * @return Index into the precomputed rook reach array.
  */
-inline uint getRookReachIndex(Bitboard occupancy, Square square) {
+inline uint getRookReachIndex(const Bitboard occupancy, const Square square) {
 	#ifdef USE_PEXT
 	return _pext_u64(occupancy, Masks::ROOK[square]);
 	#else
@@ -148,24 +153,24 @@ inline uint getRookReachIndex(Bitboard occupancy, Square square) {
 }
 
 /**
- * @brief Gets the rook index into the precomputed moves index array.
+ * @brief Get the rook index into the precomputed moves index array.
  *
- * @param reach The reach of the piece. Each set bit is a legal destination square.
- * @param square The square the rook of concern is on.
+ * @param reach Reach of the piece. Each set bit is a legal destination square.
+ * @param square Square the rook is on.
  * @return Index into the precomputed rook moves array.
  */
-inline uint getRookMovesIndex(Bitboard reach, Square square) {
+inline uint getRookMovesIndex(const Bitboard reach, const Square square) {
 	return (reach * MagicNums::Moves::ROOK[square]) >> Shifts::Moves::ROOK[square];
 }
 
 /**
- * @brief Gets the bishop index into the precomputed reach index arrays.
+ * @brief Get the bishop index into the precomputed reach index arrays.
  *
- * @param occupancy The occupancy bits of concern.
- * @param square The square the bishop of concern is on.
+ * @param occupancy Occupancy bits of concern.
+ * @param square Square the bishop of concern is on.
  * @return Index into the precomputed bishop reach array.
  */
-inline uint getBishopReachIndex(Bitboard occupancy, Square square) {
+inline uint getBishopReachIndex(const Bitboard occupancy, const Square square) {
 	#ifdef USE_PEXT
 	return _pext_u64(occupancy, Masks::BISHOP[square]);
 	#else
@@ -174,24 +179,24 @@ inline uint getBishopReachIndex(Bitboard occupancy, Square square) {
 }
 
 /**
- * @brief Gets the bishop index into the precomputed moves index arrays.
+ * @brief Get the bishop index into the precomputed moves index arrays.
  *
- * @param reach The reach of the piece. Each set bit is a legal destination square.
- * @param square The square the bishop of concern is on.
+ * @param reach Reach of the piece. Each set bit is a legal destination square.
+ * @param square Square the bishop of concern is on.
  * @return Index into the precomputed bishop moves array.
  */
-inline uint getBishopMovesIndex(Bitboard reach, Square square) {
+inline uint getBishopMovesIndex(const Bitboard reach, const Square square) {
 	return (reach * MagicNums::Moves::BISHOP[square]) >> Shifts::Moves::BISHOP[square];
 }
 
 /**
- * @brief Gets the knight index into the precomputed moves arrays.
+ * @brief Get the knight index into the precomputed moves arrays.
  *
- * @param reach The reach of the piece. Each set bit is a legal destination square.
- * @param square The square the knight of concern is on.
+ * @param reach Reach of the piece. Each set bit is a legal destination square.
+ * @param square Square the knight of concern is on.
  * @return Index into the precomputed knight moves array.
  */
-inline uint getKnightMovesIndex(Bitboard reach, Square square) {
+inline uint getKnightMovesIndex(const Bitboard reach, const Square square) {
 	#ifdef USE_PEXT
 	return _pext_u64(reach, Masks::KNIGHT[square]);
 	#else
@@ -200,13 +205,13 @@ inline uint getKnightMovesIndex(Bitboard reach, Square square) {
 }
 
 /**
- * @brief Gets the king index into the precomputed moves arrays.
+ * @brief Get the king index into the precomputed moves arrays.
  *
- * @param reach The reach of the piece. Each set bit is a legal destination square.
- * @param square The square the king of concern is on.
+ * @param reach Reach of the piece. Each set bit is a legal destination square.
+ * @param square Square the king of concern is on.
  * @return Index into the precomputed king moves array.
  */
-inline uint getKingMovesIndex(Bitboard reach, Square square) {
+inline uint getKingMovesIndex(const Bitboard reach, const Square square) {
 	#ifdef USE_PEXT
 	return _pext_u64(reach, Masks::KING[square]);
 	#else
@@ -215,14 +220,14 @@ inline uint getKingMovesIndex(Bitboard reach, Square square) {
 }
 
 /**
- * @brief Gets the pawn index into the precomputed moves arrays.
+ * @brief Get the pawn index into the precomputed moves arrays.
  *
- * @param reach The reach of the piece. Each set bit is a legal destination square.
- * @param square The square the pawn of concern is on.
+ * @param reach Reach of the piece. Each set bit is a legal destination square.
+ * @param square Square the pawn of concern is on.
  * @param player Which sides pawn.
  * @return Index into the precomputed pawn moves array.
  */
-inline uint getPawnMovesIndex(Bitboard reach, Square square, Player player) {
+inline uint getPawnMovesIndex(const Bitboard reach, const Square square, const Player player) {
 	#ifdef USE_PEXT
 	return _pext_u64(reach, Masks::PAWN[player][square]);
 	#else
@@ -231,24 +236,24 @@ inline uint getPawnMovesIndex(Bitboard reach, Square square, Player player) {
 }
 
 /**
- * @brief Gets the rook index into the precomputed block moves arrays.
+ * @brief Get the rook index into the precomputed block moves arrays.
  *
- * @param reach The reach of the piece. Each set bit is a legal destination square.
- * @param square The square the rook of concern is on.
+ * @param reach Reach of the piece. Each set bit is a legal destination square.
+ * @param square Square the rook of concern is on.
  * @return Index into the precomputed rook block moves array.
  */
-inline uint getRookBlockIndex(Bitboard reach, Square square) {
+inline uint getRookBlockIndex(const Bitboard reach, const Square square) {
 	return (reach * MagicNums::Block::ROOK[square]) >> Shifts::Block::ROOK[square];
 }
 
 /**
- * @brief Gets the bishop index into the precomputed block moves arrays.
+ * @brief Get the bishop index into the precomputed block moves arrays.
  *
- * @param reach The reach of the piece. Each set bit is a legal destination square.
- * @param square The square the bishop of concern is on.
+ * @param reach Reach of the piece. Each set bit is a legal destination square.
+ * @param square Square the bishop of concern is on.
  * @return Index into the precomputed bishop block moves array.
  */
-inline uint getBishopBlockIndex(Bitboard reach, Square square) {
+inline uint getBishopBlockIndex(const Bitboard reach, const Square square) {
 	return (reach * MagicNums::Block::BISHOP[square]) >> Shifts::Block::BISHOP[square];
 }
 
@@ -259,7 +264,7 @@ inline uint getBishopBlockIndex(Bitboard reach, Square square) {
  * @param ranges The number ranges[i] is the cardinality of the set from which values[i] comes from.
  * @return A unique index mapping based on a composition of the function pairingFunction.
  */
-int getIndex(std::vector<int> values, std::vector<int> ranges); // TODO Change to uint
+int getIndex(const std::vector<int> values, const std::vector<int> ranges); // TODO Change to uint
 
 /**
  * @brief Maps ordered pairs of integers (n, m) to a unique int in the set {0, 1, ..., N * M - 1}.
@@ -270,7 +275,7 @@ int getIndex(std::vector<int> values, std::vector<int> ranges); // TODO Change t
  * @param M Cardinality of the set of possible values for m.
  * @return A unique integer from the set {0, 1, ..., N * M - 1} for each ordered pair (n, m).
  */
-int pairingFunction(int n, int m, int N, int M); // TODO change to uint
+int pairingFunction(const int n, const int m, const int N, const int M); // TODO change to uint
 
 /**
  * @brief Adds the curr combination to the res vector and increments curr[0]. If an overflow occurs, it resolves the

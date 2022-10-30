@@ -91,6 +91,11 @@ struct GoParams {
 	bool infinite = true;
 };
 
+/**
+ * @brief Show the end of game message.
+ *
+ * @param code ExitCode of the current position.
+ */
 void showEogMessage(ExitCode code);
 
 #endif
