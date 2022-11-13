@@ -32,6 +32,13 @@ class Sicario {
 		 */
 		void run();
 
+		/**
+		 * @brief Get a copy of the Position object.
+		 *
+		 * @return Copy of the Position object.
+		 */
+		Position getPosition() const;
+
 	private:
 		Position position;
 		SicarioConfigs sicarioConfigs;
@@ -351,7 +358,7 @@ class Sicario {
 		/**
 		 * @brief Begins search.
 		 */
-		void search();
+		void mcts();
 
 		/**
 		 * @brief Begin the perft calculation.

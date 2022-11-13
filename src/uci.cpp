@@ -260,7 +260,7 @@ void Sicario::handleGo(const std::vector<std::string>& commands) {
 	// TODO Parse search parameters
 	if (this->searchTree == false) {
 		this->searchTree = true;
-		std::thread searchThread(&Sicario::search, this);
+		std::thread searchThread(&Sicario::mcts, this);
 		searchThread.detach();
 	}
 }

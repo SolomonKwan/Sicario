@@ -35,6 +35,10 @@ void showStartUp() {
 	std::cout << "By " << AUTHOR << "\n\n";
 }
 
+Position Sicario::getPosition() const {
+	return position;
+}
+
 void Sicario::run() {
 	std::string input("");
 	do {
