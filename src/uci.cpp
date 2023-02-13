@@ -251,9 +251,21 @@ void Sicario::handleUciNewGame() {
 }
 
 void Sicario::handlePosition(const std::vector<std::string>& inputs) {
-	// TODO play out moves as well and handle startpos command and unknown commands
+	this->position.resetPosition();
+
 	if (inputs[1] == "fen") {
 		this->position.parseFen(concatFEN(inputs));
+	} else if (inputs[1] == "startpos") {
+		this->position.parseFen(STANDARD_GAME);
+	} else {
+		sendInvalidArgument(inputs);
+		return;
+	}
+
+	auto ptr = ++std::find(inputs.begin(), inputs.end(), "moves");
+	while (ptr != inputs.end()) {
+		this->position.processMakeMove(getMovefromAlgebraic(*ptr));
+		ptr++;
 	}
 }
 
@@ -286,37 +298,11 @@ void Sicario::handlePerft(const std::vector<std::string>& commands) {
 }
 
 void Sicario::handleMove(const std::vector<std::string>& commands) {
-	// TODO chuck this in a parse move
-	std::string move_str = commands[1];
-	Move move = 0;
-	if (move_str[0] < 'a' || move_str[0] > 'h' || move_str[2] < 'a' || move_str[2] > 'h') {
-		communicate("Invalid move");
+	Move move = getMovefromAlgebraic(commands[1]);
+	if (move == NULL_MOVE) {
+		communicate("Invalid move: " + move);
 		return;
 	}
-
-	if (move_str[1] < '1' || move_str[1] > '8' || move_str[3] < '1' || move_str[3] > '8') {
-		communicate("Invalid move");
-		return;
-	}
-
-	int start_file = move_str[0] - 'a';
-	int start_rank = move_str[1] - '1';
-	int end_file = move_str[2] - 'a';
-	int end_rank = move_str[3] - '1';
-
-	if (move_str.length() == 5) {
-		move |= PROMOTION;
-		if (move_str[4] == 'q') {
-			move |= pQUEEN;
-		} else if (move_str[4] == 'r') {
-			move |= pROOK;
-		} else if (move_str[4] == 'b') {
-			move |= pBISHOP;
-		}
-	}
-
-	move |= 8 * start_rank + start_file;
-	move |= ((8 * end_rank + end_file) << 6);
 
 	MoveList moves = MoveList(this->position);
 	if (!moves.contains(move) && !moves.contains(move | EN_PASSANT)) { // NOTE en-passant checks are hacky...

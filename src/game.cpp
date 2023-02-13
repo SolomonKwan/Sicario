@@ -707,6 +707,7 @@ void Position::saveHistory(const Move move) {
 }
 
 void Position::processMakeMove(const Move move, const bool hash) {
+	if (move == NULL_MOVE) return;
 	saveHistory(move);
 	switch (type(move)) {
 		case NORMAL:
@@ -990,6 +991,47 @@ void Position::parseFen(const std::string fen) {
 	incrementPositionCounter();
 }
 
+void Position::resetPosition() {
+	// Non-positional variables
+	this->turn = WHITE;
+	this->castling = 0;
+	this->en_passant = NONE;
+	this->halfmove = 0;
+	this->fullmove = 1;
+
+	// Bitboards
+	this->sides[WHITE] = ZERO_BB;
+	this->sides[BLACK] = ZERO_BB;
+	this->kings = ZERO_BB;
+	this->queens = ZERO_BB;
+	this->rooks = ZERO_BB;
+	this->bishops = ZERO_BB;
+	this->knights = ZERO_BB;
+	this->pawns = ZERO_BB;
+	this->rook_pins = ZERO_BB;
+	this->bishop_pins = ZERO_BB;
+	this->check_rays = ZERO_BB;
+	this->checkers = ZERO_BB;
+	this->rook_ep_pins = ZERO_BB;
+
+	// Piece positions
+	std::fill(std::begin(this->piece_index), std::end(this->piece_index), 0);
+	std::fill(this->piece_list[0] + 0, this->piece_list[PIECE_TYPE_COUNT] + MAX_PIECE_COUNT, NONE);
+	std::fill(std::begin(this->pieces), std::end(this->pieces), NO_PIECE);
+
+	// Piece counts
+	this->piece_cnt = 0;
+	this->knight_cnt = 0;
+	this->bishop_cnt = 0;
+	this->light_bishop_cnt = 0;
+	this->dark_bishop_cnt = 0;
+
+	// History
+	this->history.clear();
+	this->positionCounts.clear();
+	this->hash = ZERO_BB;
+}
+
 void Position::parseFenMove(const std::string& fenMove) {
 	if (fenMove == "w") {
 		this->turn = WHITE;
@@ -1041,47 +1083,6 @@ void Position::addPieceFromFen(Bitboard& pieceBB, const PieceType piece, const S
 	this->piece_list[piece][this->piece_index[piece]] = square;
 	this->piece_index[piece]++;
 	this->pieces[square] = piece;
-}
-
-void Position::resetPosition() {
-	// Non-positional variables
-	this->turn = WHITE;
-	this->castling = 0;
-	this->en_passant = NONE;
-	this->halfmove = 0;
-	this->fullmove = 1;
-
-	// Bitboards
-	this->sides[WHITE] = ZERO_BB;
-	this->sides[BLACK] = ZERO_BB;
-	this->kings = ZERO_BB;
-	this->queens = ZERO_BB;
-	this->rooks = ZERO_BB;
-	this->bishops = ZERO_BB;
-	this->knights = ZERO_BB;
-	this->pawns = ZERO_BB;
-	this->rook_pins = ZERO_BB;
-	this->bishop_pins = ZERO_BB;
-	this->check_rays = ZERO_BB;
-	this->checkers = ZERO_BB;
-	this->rook_ep_pins = ZERO_BB;
-
-	// Piece positions
-	std::fill(std::begin(this->piece_index), std::end(this->piece_index), 0);
-	std::fill(this->piece_list[0] + 0, this->piece_list[PIECE_TYPE_COUNT] + MAX_PIECE_COUNT, NONE);
-	std::fill(std::begin(this->pieces), std::end(this->pieces), NO_PIECE);
-
-	// Piece counts
-	this->piece_cnt = 0;
-	this->knight_cnt = 0;
-	this->bishop_cnt = 0;
-	this->light_bishop_cnt = 0;
-	this->dark_bishop_cnt = 0;
-
-	// History
-	this->history.clear();
-	this->positionCounts.clear();
-	this->hash = ZERO_BB;
 }
 
 bool Position::insufficientMaterial() const {

@@ -31,6 +31,11 @@ class Position {
 		void parseFen(const std::string fen);
 
 		/**
+		 * @brief Zeros out the class variables to make way for parsing a new FEN string.
+		 */
+		void resetPosition();
+
+		/**
 		 * @brief Check if the game is finished.
 		 *
 		 * @return Current game state.
@@ -507,11 +512,6 @@ class Position {
 		 * @return True if the square is occupied, else false.
 		 */
 		Bitboard isOccupied(const Square square) const;
-
-		/**
-		 * @brief Zeros out the class variables to make way for parsing a new FEN string.
-		 */
-		void resetPosition();
 
 		/**
 		 * @brief Initialises the hash for the position. Assumes that the FEN string has been parsed.
