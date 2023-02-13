@@ -57,6 +57,7 @@ for the move precomputation (at the price of clarity, maintenance, my time and m
     <li>Utilise more in-depth C++ features.</li>
     <li>Handle exiting the program during a search and releasing the necessary memory at that point.</li>
     <li>Replace node creation of MCTS with smart pointers.</li>
+    <li>Implement threads for search as class member variables (which should fix mem leak issues)</li>
 </ul>
 </br>
 <H2>Acknowledgements</H2>

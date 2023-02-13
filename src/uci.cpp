@@ -82,6 +82,7 @@ void Sicario::processInput(const std::string& input) {
 			handlePonderHit();
 			break;
 		case QUIT:
+			handleQuit();
 			break;
 		case INVALID_COMMAND:
 			sendInvalidCommand(commands);
@@ -257,11 +258,10 @@ void Sicario::handlePosition(const std::vector<std::string>& inputs) {
 }
 
 void Sicario::handleGo(const std::vector<std::string>& commands) {
-	// TODO Parse search parameters
+	// TODO Parse search parameters and utilise number of threads
 	if (this->searchTree == false) {
 		this->searchTree = true;
-		std::thread searchThread(&Sicario::search, this);
-		searchThread.detach();
+		this->threads.push_back(std::thread(&Sicario::search, this));
 	}
 }
 
@@ -271,6 +271,13 @@ void Sicario::handleStop() {
 
 void Sicario::handlePonderHit() {
 	// TODO
+}
+
+void Sicario::handleQuit() {
+	if (this->searchTree == true) this->searchTree = false;
+	for (std::thread& thr : this->threads) {
+		if (thr.joinable()) thr.join();
+	}
 }
 
 void Sicario::handlePerft(const std::vector<std::string>& commands) {

@@ -3,6 +3,7 @@
 #define SICARIO_HPP
 
 #include <atomic>
+#include <thread>
 #include "constants.hpp"
 #include "game.hpp"
 #include "uci.hpp"
@@ -35,6 +36,7 @@ class Sicario {
 	private:
 		Position position;
 		SicarioConfigs sicarioConfigs;
+		std::vector<std::thread> threads;
 		std::atomic_bool searchTree = false;
 
 		// Configurable options of the engine
@@ -125,6 +127,11 @@ class Sicario {
 		 * @brief Handle the ponderhit command.
 		 */
 		void handlePonderHit();
+
+		/**
+		 * @brief Handle the quit command.
+		 */
+		void handleQuit();
 
 		/**
 		 * @brief Handle the perft command. Used for debugging.
@@ -361,6 +368,15 @@ class Sicario {
 		 * @return Number of positions at the specified depth.
 		 */
 		uint64_t perft(const int depth, const bool root = false);
+
+		/**
+		 * @brief Get a reference to the Position object.
+		 *
+		 * @return A reference to the position object.
+		 */
+		inline Position& getPositionCopy() {
+			return this->position;
+		}
 };
 
 #endif

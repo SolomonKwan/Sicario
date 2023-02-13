@@ -38,6 +38,9 @@ uci.o: $(SRC)/uci.cpp $(SRC)/uci.hpp $(SRC)/utils.hpp
 utils.o: $(SRC)/utils.cpp $(SRC)/utils.hpp
 	$(CC) $(CFLAGS) -c $(SRC)/utils.cpp -o $(SRC)/utils.o
 
+mcts.o: $(SRC)/mcts.cpp $(SRC)/mcts.hpp $(SRC)/search.cpp
+	$(CC) $(CFLAGS) -c $(SRC)/mcts.cpp -o $(SRC)/mcts.o
+
 sicario.o: $(SRC)/sicario.cpp $(SRC)/constants.hpp
 	$(CC) $(CFLAGS) -c $(SRC)/sicario.cpp -o $(SRC)/sicario.o
 
@@ -53,8 +56,8 @@ test: test.o utils.o movegen.o $(SRC)/movegen.hpp
 generate: $(GENERATE)/generate_magic_numbers.cpp
 	$(CC) $(CFLAGS) $(GENERATE)/generate_magic_numbers.cpp $(SRC)/movegen.o -o $(GENERATE)/generate
 
-sicario: main.o game.o movegen.o uci.o sicario.o utils.o search.o evaluate.o
-	$(CC) $(CFLAGS) $(SRC)/main.o $(SRC)/game.o $(SRC)/movegen.o $(SRC)/uci.o $(SRC)/sicario.o $(SRC)/utils.o $(SRC)/search.o $(SRC)/evaluate.o -o $(SRC)/sicario
+sicario: main.o game.o movegen.o uci.o sicario.o utils.o search.o evaluate.o mcts.o
+	$(CC) $(CFLAGS) $(SRC)/main.o $(SRC)/game.o $(SRC)/movegen.o $(SRC)/uci.o $(SRC)/sicario.o $(SRC)/utils.o $(SRC)/search.o $(SRC)/evaluate.o $(SRC)/mcts.o -o $(SRC)/sicario
 
 clean-test:
 	rm $(TEST)/*.o $(TEST)/test
