@@ -144,6 +144,14 @@ std::string getPromoString(Promotion promo);
 std::string getTypeString(MoveClass type);
 
 /**
+ * @brief Convert a string in algebraic move format to a Move object and return it.
+ *
+ * @param string Move string in algebraic notation.
+ * @return Move object.
+ */
+Move getMovefromAlgebraic(std::string string);
+
+/**
  * @brief Check if the bit at 'index' of 'number' is set.
  *
  * @tparam T Type
