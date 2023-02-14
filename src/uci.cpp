@@ -165,27 +165,27 @@ ConfigOption Sicario::hashOptionsInput(const std::vector<std::string>& inputs) {
 
 void Sicario::handleUci() {
 	// ID information
-	communicate("id name " + NAME + " (" + CODENAME + " " + VERSION + ")");
-	communicate("id author " + AUTHOR + "\n");
+	Uci::communicate("id name " + NAME + " (" + CODENAME + " " + VERSION + ")");
+	Uci::communicate("id author " + AUTHOR + "\n");
 
 	// Configurable options (see SicarioConfigs struct)
-	sendOption(this->thread);
-	sendOption(this->hash);
-	sendOption(this->ponder);
-	sendOption(this->ownBook);
-	sendOption(this->multiPv);
-	sendOption(this->uciShowCurrLine);
-	sendOption(this->uciShowRefutations);
-	sendOption(this->uciLimitStrength);
-	sendOption(this->uciElo);
-	sendOption(this->uciAnalyseMode);
-	sendOption(this->uciOpponent);
+	Uci::sendOption(this->thread);
+	Uci::sendOption(this->hash);
+	Uci::sendOption(this->ponder);
+	Uci::sendOption(this->ownBook);
+	Uci::sendOption(this->multiPv);
+	Uci::sendOption(this->uciShowCurrLine);
+	Uci::sendOption(this->uciShowRefutations);
+	Uci::sendOption(this->uciLimitStrength);
+	Uci::sendOption(this->uciElo);
+	Uci::sendOption(this->uciAnalyseMode);
+	Uci::sendOption(this->uciOpponent);
 
-	communicate("uciok");
+	Uci::communicate("uciok");
 }
 
 void Sicario::handleIsReady() {
-	sendReadyOk();
+	Uci::sendReadyOk();
 }
 
 void Sicario::handleDebug(const std::vector<std::string>& inputs) {
@@ -300,13 +300,13 @@ void Sicario::handlePerft(const std::vector<std::string>& commands) {
 void Sicario::handleMove(const std::vector<std::string>& commands) {
 	Move move = getMovefromAlgebraic(commands[1]);
 	if (move == NULL_MOVE) {
-		communicate("Invalid move: " + move);
+		Uci::communicate("Invalid move: " + move);
 		return;
 	}
 
 	MoveList moves = MoveList(this->position);
 	if (!moves.contains(move) && !moves.contains(move | EN_PASSANT)) { // NOTE en-passant checks are hacky...
-		communicate("Invalid move");
+		Uci::communicate("Invalid move");
 		return;
 	}
 
@@ -384,62 +384,60 @@ void Sicario::handleOptions() {
 	std::cout << "uciOpponent " << this->sicarioConfigs.uciOpponent << '\n';
 }
 
-void Sicario::communicate(std::string communication) {
+void Uci::communicate(std::string communication) {
 	std::cout << communication << '\n';
 }
 
-void Sicario::sendOption(const OptionInfo& option) {
+void Uci::sendReadyOk() {
+	Uci::communicate("readyok");
+}
+
+void Uci::sendBestMove(MctsNode* root) {
+	std::cout << "bestmove ";
+	printMove(root->bestChild()->getInEdge(), false, true);
+}
+
+void Uci::sendCopyProtection() {
+
+}
+
+void Uci::sendRegistration() {
+
+}
+
+void Uci::sendInfo() {
+
+}
+
+void Uci::sendOption(const OptionInfo& option) {
 	std::string optionString = "option name " + option.name + " type " + option.type + " default " + option.def;
 	if (option.min != "") optionString += " min " + option.min + " max " + option.max;
 	for (std::string var : option.vars) optionString += " var " + var;
-	communicate(optionString);
-}
-
-/**
- * Sends the is readyok.
- */
-void Sicario::sendReadyOk() {
-	communicate("readyok");
-}
-
-void Sicario::sendBestMove() {
-
-}
-
-void Sicario::sendCopyProtection() {
-
-}
-
-void Sicario::sendRegistration() {
-
-}
-
-void Sicario::sendInfo() {
-
+	Uci::communicate(optionString);
 }
 
 void Sicario::sendInvalidCommand(const std::vector<std::string>& commands) {
-	communicate("Unknown command: " + commands[0]);
+	Uci::communicate("Unknown command: " + commands[0]);
 }
 
 void Sicario::sendMissingArgument(const std::vector<std::string>& inputs) {
-	communicate("Missing argument: " + concat(inputs, " "));
+	Uci::communicate("Missing argument: " + concat(inputs, " "));
 }
 
 void Sicario::sendInvalidArgument(const std::vector<std::string>& inputs) {
-	communicate("Invalid argument: " + concat(inputs, " "));
+	Uci::communicate("Invalid argument: " + concat(inputs, " "));
 }
 
 void Sicario::sendUnknownOption(const std::vector<std::string>& inputs) {
-	communicate("Unknown option: " + getOptionName(inputs));
+	Uci::communicate("Unknown option: " + getOptionName(inputs));
 }
 
 void Sicario::sendInvalidValue(const std::vector<std::string>& inputs) {
-	communicate("Invalid argument: " + getOptionValue(inputs));
+	Uci::communicate("Invalid argument: " + getOptionValue(inputs));
 }
 
 void Sicario::sendArgumentOutOfRange(const std::vector<std::string>& inputs) {
-	communicate("Argument out of range: " + getOptionValue(inputs));
+	Uci::communicate("Argument out of range: " + getOptionValue(inputs));
 }
 
 void Sicario::setOptionThread(const std::vector<std::string>& inputs) {

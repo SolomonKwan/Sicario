@@ -13,7 +13,7 @@ class Mcts : public BaseSearcher {
 class MctsNode : public BaseNode {
 	public:
 		MctsNode(MctsNode* parent, Move move, Position& pos);
-		std::unique_ptr<BaseNode>& bestChild();
+		MctsNode* bestChild();
 		MctsNode* select();
 		MctsNode* expand();
 		float simulate();

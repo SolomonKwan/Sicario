@@ -3,6 +3,7 @@
 
 #include "sicario.hpp"
 #include "mcts.hpp"
+#include "uci.hpp"
 
 // NOTE Due to way that the tree is constructed, it may result in stack overflow error due to node deletion/pruning.
 
@@ -16,22 +17,23 @@ void Mcts::search(const std::atomic_bool& searchTree) {
 		float val = leaf->simulate();
 		leaf->rollback(val);
 	}
+	Uci::sendBestMove(root.get());
 }
 
 MctsNode::MctsNode(MctsNode* parent, Move move, Position& pos) : BaseNode(parent, pos) {
 	this->inEdge = move; // CHECK initialise here? or in initialiser list?
 }
 
-std::unique_ptr<BaseNode>& MctsNode::bestChild() {
-	return *std::max_element(children.begin(), children.end(), MctsNode::Ucb1Comparator());
+MctsNode* MctsNode::bestChild() {
+	return dynamic_cast<MctsNode*>((*std::max_element(children.begin(), children.end(), MctsNode::Ucb1Comparator())).get());
 }
 
 MctsNode* MctsNode::select() {
 	if (this->children.size() == 0) return this;
 	// NOTE this currently just chooses the last one it comes across if there are multiple of equal value
-	std::unique_ptr<BaseNode>& bestChild = this->bestChild();
+	MctsNode* bestChild = this->bestChild();
 	this->getPos().processMakeMove(bestChild->getInEdge());
-	return dynamic_cast<MctsNode*>(bestChild.get())->select();
+	return bestChild->select();
 }
 
 MctsNode* MctsNode::expand() {

@@ -176,6 +176,52 @@ enum ExitCode {
 	INSUFFICIENT_MATERIAL,
 };
 
+enum UciInput {
+	// UCI Protocol GUI to engine commands
+	UCI,
+	DEBUG,
+	ISREADY,
+	SETOPTION,
+	UCINEWGAME,
+	POSITION,
+	GO,
+	STOP,
+	PONDERHIT,
+	QUIT,
+
+	// Custom commands to engine
+	PERFT,
+	MOVE,
+	UNDO,
+	DISPLAY,
+	MOVES,
+	BITBOARDS,
+	RANDOMGAME,
+	STATE,
+	OPTIONS,
+
+	// Sentinel for invalid command
+	INVALID_COMMAND
+};
+
+enum ConfigOption {
+	THREAD,
+	HASH,
+	CLEAR_HASH,
+	PONDER,
+	OWN_BOOK,
+	MULTI_PV,
+	UCI_SHOW_CURR_LINE,
+	UCI_SHOW_REFUTATIONS,
+	UCI_LIMIT_STRENGTH,
+	UCI_ELO,
+	UCI_ANALYSE_MODE,
+	UCI_OPPONENT,
+
+	// Sentinels for errors.
+	UNKNOWN_OPTION,
+};
+
 inline Square operator+(const Square& square, const Direction& direction) {
 	return static_cast<Square>(static_cast<uint>(square) + static_cast<uint>(direction));
 }

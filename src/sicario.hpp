@@ -6,7 +6,30 @@
 #include <thread>
 #include "constants.hpp"
 #include "game.hpp"
-#include "uci.hpp"
+
+struct SicarioConfigs {
+	bool debugMode = false; // This is set with the "debug" command, not "setoption".
+	int threads = 1;
+	int hash = 16; // Megabytes
+	bool ponder = false;
+	bool ownBook = false;
+	int multiPv = 1;
+	bool uciShowCurrLine = false;
+	bool uciShowRefutations = false;
+	bool uciLimitStrength = false;
+	int uciElo = 3000;
+	bool uciAnalyseMode = true;
+	std::string uciOpponent = "";
+};
+
+struct OptionInfo {
+	std::string name = "";
+	std::string type = "";
+	std::string def = "";
+	std::string min = "";
+	std::string max = "";
+	std::vector<std::string> vars = {};
+};
 
 /**
  * @brief Show the engine information.
@@ -177,45 +200,6 @@ class Sicario {
 		 * @brief Handle the options command. Used for debugging.
 		 */
 		void handleOptions();
-
-		/**
-		 * Print all UCI messages to stdin. Used to distinguish from other print commands.
-		 *
-		 * @param communication: The communication message to be sent to Uci GUI.
-		 */
-		void communicate(const std::string communication);
-
-		/**
-		 * @brief Send the options that the user can set.
-		 *
-		 * @param option Struct containing the object information.
-		 */
-		void sendOption(const OptionInfo& option);
-
-		/**
-		 * @brief Send the readyOk message.
-		 */
-		void sendReadyOk();
-
-		/**
-		 * @brief Send the bestmove message.
-		 */
-		void sendBestMove();
-
-		/**
-		 * @brief Send the copyProtection message.
-		 */
-		void sendCopyProtection();
-
-		/**
-		 * @brief Send the registration message.
-		 */
-		void sendRegistration();
-
-		/**
-		 * @brief Send the info message.
-		 */
-		void sendInfo();
 
 		/**
 		 * @brief Send the invalid command message.
