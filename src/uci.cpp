@@ -262,10 +262,10 @@ void Sicario::handlePosition(const std::vector<std::string>& inputs) {
 		return;
 	}
 
-	auto ptr = ++std::find(inputs.begin(), inputs.end(), "moves");
-	while (ptr != inputs.end()) {
+	auto ptr = std::find(inputs.begin(), inputs.end(), "moves");
+	if (ptr == inputs.end()) return;
+	while (++ptr != inputs.end()) {
 		this->position.processMakeMove(getMovefromAlgebraic(*ptr));
-		ptr++;
 	}
 }
 
