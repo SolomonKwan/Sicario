@@ -117,3 +117,25 @@ Move getMovefromAlgebraic(std::string string) {
 
 	return move;
 }
+
+std::vector<size_t> rankSort(const std::vector<float>& v_temp) {
+	std::vector<std::pair<float, size_t> > v_sort(v_temp.size());
+
+	for (size_t i = 0U; i < v_sort.size(); ++i) {
+		v_sort[i] = std::make_pair(v_temp[i], i);
+	}
+
+	std::sort(v_sort.begin(), v_sort.end());
+	std::reverse(v_sort.begin(), v_sort.end());
+
+	std::pair<double, size_t> rank;
+	std::vector<size_t> result(v_temp.size());
+
+	for (size_t i = 0U; i < v_sort.size(); ++i) {
+		if (v_sort[i].first != rank.first) {
+			rank = std::make_pair(v_sort[i].first, i);
+		}
+		result[v_sort[i].second] = rank.second + 1;
+	}
+	return result;
+}

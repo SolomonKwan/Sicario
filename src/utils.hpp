@@ -152,6 +152,15 @@ std::string getTypeString(MoveClass type);
 Move getMovefromAlgebraic(std::string string);
 
 /**
+ * @brief Calculates the ranks of the numbers in an array of length N. The smallest number has the highest rank (N),
+ * while the largest number has the lowest rank (1). Does not consider duplicate elements.
+ *
+ * @param vec Array of floats to be ranked.
+ * @return A vector corresponding to each elements rank.
+ */
+std::vector<size_t> rankSort(const std::vector<float>& vec);
+
+/**
  * @brief Check if the bit at 'index' of 'number' is set.
  *
  * @tparam T Type

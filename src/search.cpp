@@ -4,7 +4,7 @@
 
 void Sicario::search() {
 	Mcts searcher(this->getPositionCopy());
-	searcher.search(this->searchTree);
+	searcher.search(this->searchTree, this->sicarioConfigs);
 }
 
 Position& BaseSearcher::getPos() {

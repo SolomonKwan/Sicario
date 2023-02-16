@@ -9,23 +9,31 @@
 
 const float C = std::sqrt(2);
 
-void Mcts::search(const std::atomic_bool& searchTree) {
-	std::unique_ptr<MctsNode> root(new MctsNode(nullptr, NULL_MOVE, this->getPos()));
+void Mcts::search(const std::atomic_bool& searchTree, SicarioConfigs& sicarioConfigs) {
+	SearchInfo searchInfo;
+	std::unique_ptr<MctsNode> root(new MctsNode(nullptr, NULL_MOVE, this->getPos(), searchInfo));
 	while (searchTree) {
+		SearchInfo oldSearchInfo = searchInfo; // TODO implement smarter way of checking if something has changed
+
 		MctsNode* leaf = root->select();
 		leaf = leaf->expand();
 		float val = leaf->simulate();
 		leaf->rollback(val);
+
+		if (searchInfo != oldSearchInfo) Uci::sendInfo(searchInfo);
 	}
-	Uci::sendBestMove(root.get());
+	Uci::sendBestMove(root.get(), sicarioConfigs.debugMode);
 }
 
-MctsNode::MctsNode(MctsNode* parent, Move move, Position& pos) : BaseNode(parent, pos) {
+MctsNode::MctsNode(MctsNode* parent, Move move, Position& pos, SearchInfo& searchInfo) :
+		BaseNode(parent, pos, searchInfo) {
 	this->inEdge = move; // CHECK initialise here? or in initialiser list?
+	this->depth = parent == nullptr ? 0 : parent->depth + 1;
+	this->searchInfo.depth = std::max(this->searchInfo.depth, this->depth);
 }
 
 MctsNode* MctsNode::bestChild() {
-	return dynamic_cast<MctsNode*>((*std::max_element(children.begin(), children.end(), MctsNode::Ucb1Comparator())).get());
+	return dynamic_cast<MctsNode*>((*std::max_element(children.begin(), children.end(), MctsNode::Ucb1Comp())).get());
 }
 
 MctsNode* MctsNode::select() {
@@ -83,8 +91,11 @@ void MctsNode::rollback(float val) {
 	curr->visits++;
 }
 
-void MctsNode::addChild(Move move) {
-	this->children.push_back(std::unique_ptr<MctsNode>(new MctsNode(this, move, this->getPos())));
+const std::vector<MctsNode*> MctsNode::getChildren() const {
+	std::vector<MctsNode*> children;
+	for (auto& child : this->children)
+		children.push_back(dynamic_cast<MctsNode*>(child.get()));
+	return children;
 }
 
 float MctsNode::Ucb1() const {
@@ -92,4 +103,8 @@ float MctsNode::Ucb1() const {
 	return (value / static_cast<float>(visits)) + C *
 			std::sqrt(std::log(static_cast<float>(dynamic_cast<MctsNode*>(this->parent)->getVisits())) /
 			static_cast<float>(visits));
+}
+
+void MctsNode::addChild(Move move) {
+	this->children.push_back(std::unique_ptr<MctsNode>(new MctsNode(this, move, this->getPos(), this->searchInfo)));
 }

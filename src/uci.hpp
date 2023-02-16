@@ -23,8 +23,9 @@ namespace Uci {
 	 * @brief Send the bestmove message.
 	 *
 	 * @param root Pointer to McstNode object that is the root of the search tree.
+	 * @param debugMode Flag to display information on all children. Used for development and debugging.
 	 */
-	void sendBestMove(MctsNode* root);
+	void sendBestMove(MctsNode* root, bool debugMode);
 
 	/**
 	 * @brief Send the copyProtection message.
@@ -38,8 +39,10 @@ namespace Uci {
 
 	/**
 	 * @brief Send the info message.
+	 *
+	 * @param searchInfo Struct containing the search information.
 	 */
-	void sendInfo();
+	void sendInfo(SearchInfo& searchInfo);
 
 	/**
 	 * @brief Send the options that the user can set.

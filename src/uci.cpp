@@ -392,9 +392,26 @@ void Uci::sendReadyOk() {
 	Uci::communicate("readyok");
 }
 
-void Uci::sendBestMove(MctsNode* root) {
+void Uci::sendBestMove(MctsNode* root, bool debugMode) {
 	std::cout << "bestmove ";
 	printMove(root->bestChild()->getInEdge(), false, true);
+
+	if (!debugMode) return;
+
+	std::vector<float> ucb1Values;
+	for (auto child : root->getChildren())
+		ucb1Values.push_back(child->Ucb1());
+	std::vector<size_t> ucbRanks = rankSort(ucb1Values);
+
+	for (auto child : root->getChildren()) {
+		printMove(child->getInEdge(), true);
+		std::cout << "\tValue: " << child->getValue();
+		std::cout << "\tVisits: " << child->getVisits();
+		std::cout << "\tUCB1: " << ucb1Values.front();
+		std::cout << "\tRank: " << ucbRanks.front() << '\n';
+		ucb1Values.erase(ucb1Values.begin());
+		ucbRanks.erase(ucbRanks.begin());
+	}
 }
 
 void Uci::sendCopyProtection() {
@@ -405,8 +422,8 @@ void Uci::sendRegistration() {
 
 }
 
-void Uci::sendInfo() {
-
+void Uci::sendInfo(SearchInfo& searchInfo) {
+	std::cout << "depth " << searchInfo.depth << '\n';
 }
 
 void Uci::sendOption(const OptionInfo& option) {
