@@ -29,7 +29,7 @@ class BaseSearcher {
 class BaseNode {
 	public:
 		BaseNode(BaseNode* parent, Position& pos, SearchInfo& searchInfo) :
-				parent(parent), pos(pos), rootPlayer(pos.getTurn()), searchInfo(searchInfo) {} // CHECK learn about initialiser list
+				parent(parent), searchInfo(searchInfo), pos(pos), rootPlayer(pos.getTurn()) {} // CHECK learn about initialiser list
 		Move getInEdge() const;
 		Position& getPos();
 
