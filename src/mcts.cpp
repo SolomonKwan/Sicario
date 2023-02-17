@@ -1,5 +1,4 @@
 #include <memory>
-#include <iostream>
 
 #include "sicario.hpp"
 #include "mcts.hpp"
@@ -50,6 +49,8 @@ MctsNode* MctsNode::expand() {
 
 	for (Move move : moves)
 		this->addChild(move);
+
+	// TODO check if expansion expands into EOG game condition. Need to determine how to handle if this is the case.
 
 	this->getPos().processMakeMove(this->children[0]->getInEdge());
 	return dynamic_cast<MctsNode*>(this->children[0].get()); // NOTE currently just getting the first child.

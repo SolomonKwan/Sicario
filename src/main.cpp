@@ -1,5 +1,4 @@
 
-#include <iostream>
 #include "sicario.hpp"
 
 int main(int argc, char* argv[]) {

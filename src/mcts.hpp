@@ -1,7 +1,6 @@
 #ifndef MCTS_HPP
 #define MCTS_HPP
 
-#include <iostream>
 #include "search.hpp"
 
 class Mcts : public BaseSearcher {
