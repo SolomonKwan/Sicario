@@ -620,7 +620,7 @@ int pairingFunction(const int n, const int m, const int N, const int M) {
 	}
 }
 
-void generateCombination(std::array<int, 4> sizes, std::array<int, 4>& curr, std::vector<std::array<int, 4>>& res) {
+void generateCombination(std::array<int, 4> sizes, std::array<int, 4> curr, std::vector<std::array<int, 4>>& res) {
 	res.push_back(curr);
 	if (curr == sizes) return;
 
@@ -640,8 +640,7 @@ void generateCombination(std::array<int, 4> sizes, std::array<int, 4>& curr, std
 
 std::vector<std::array<int, 4>> getEndCombinations(std::array<int, 4> sizes) {
 	std::vector<std::array<int, 4>> res;
-	std::array<int, 4> curr = {0, 0, 0, 0}; // CHECK might be able to get rid of this by making it pass by value instead
-	generateCombination(sizes, curr, res);
+	generateCombination(sizes, {0, 0, 0, 0}, res);
 	return res;
 }
 
@@ -657,7 +656,7 @@ void generateLoneSquares(std::array<int, 4> sizes, std::vector<std::array<int, 4
 	}
 }
 
-void generatePairSquares(std::array<int, 4> sizes, std::array<int, 4>& curr, std::vector<std::array<int, 4>>& res) {
+void generatePairSquares(std::array<int, 4> sizes, std::array<int, 4> curr, std::vector<std::array<int, 4>>& res) {
 	// Find limiting ray length and indices of pairs to increment.
 	int smallerSize;
 	int first = -1, second = -1;
@@ -688,11 +687,10 @@ void generatePairSquares(std::array<int, 4> sizes, std::array<int, 4>& curr, std
 
 std::vector<std::array<int, 4>> getEndBlockSquares(std::array<int, 4> sizes) {
 	std::vector<std::array<int, 4>> res;
-	std::array<int, 4> curr = {0, 0, 0, 0}; // CHECK might be able to get rid of this by making it pass by value instead
 	generateLoneSquares(sizes, res);
-	generatePairSquares({sizes[0], sizes[1], 0, 0}, curr, res);
-	generatePairSquares({0, sizes[1], sizes[2], 0}, curr, res);
-	generatePairSquares({0, 0, sizes[2], sizes[3]}, curr, res);
-	generatePairSquares({sizes[0], 0, 0, sizes[3]}, curr, res);
+	generatePairSquares({sizes[0], sizes[1], 0, 0}, {0, 0, 0, 0}, res);
+	generatePairSquares({0, sizes[1], sizes[2], 0}, {0, 0, 0, 0}, res);
+	generatePairSquares({0, 0, sizes[2], sizes[3]}, {0, 0, 0, 0}, res);
+	generatePairSquares({sizes[0], 0, 0, sizes[3]}, {0, 0, 0, 0}, res);
 	return res;
 }

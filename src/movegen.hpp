@@ -68,7 +68,7 @@ std::array<std::vector<Move>, CASTLING_OPTIONS> computeCastlingMoves();
 /**
  * @brief Compute the en-passant moves.
  *
- * @return Some overly confusing data structure containing the en-passant moves. // TODO Clean up the en-passant stuffs
+ * @return Some overly confusing data structure containing the en-passant moves.
  */
 std::array<std::vector<std::vector<std::vector<Move>>>, PLAYER_COUNT> computeEnPassantMoves();
 
@@ -264,7 +264,7 @@ inline uint getBishopBlockIndex(const Bitboard reach, const Square square) {
  * @param ranges The number ranges[i] is the cardinality of the set from which values[i] comes from.
  * @return A unique index mapping based on a composition of the function pairingFunction.
  */
-int getIndex(const std::vector<int> values, const std::vector<int> ranges); // TODO Change to uint
+int getIndex(const std::vector<int> values, const std::vector<int> ranges);
 
 /**
  * @brief Maps ordered pairs of integers (n, m) to a unique int in the set {0, 1, ..., N * M - 1}.
@@ -275,7 +275,7 @@ int getIndex(const std::vector<int> values, const std::vector<int> ranges); // T
  * @param M Cardinality of the set of possible values for m.
  * @return A unique integer from the set {0, 1, ..., N * M - 1} for each ordered pair (n, m).
  */
-int pairingFunction(const int n, const int m, const int N, const int M); // TODO change to uint
+int pairingFunction(const int n, const int m, const int N, const int M);
 
 /**
  * @brief Adds the curr combination to the res vector and increments curr[0]. If an overflow occurs, it resolves the
@@ -287,7 +287,7 @@ int pairingFunction(const int n, const int m, const int N, const int M); // TODO
  * @param curr The current array combination.
  * @param res Vector of arrays to store the results.
  */
-void generateCombination(std::array<int, 4> sizes, std::array<int, 4>& curr, std::vector<std::array<int, 4>>& res); // TODO change to uint
+void generateCombination(std::array<int, 4> sizes, std::array<int, 4> curr, std::vector<std::array<int, 4>>& res);
 
 /**
  * @brief Calls generateCombination and returns a vector of arrays of all different end combinations depending on values
@@ -296,7 +296,7 @@ void generateCombination(std::array<int, 4> sizes, std::array<int, 4>& curr, std
  * @param sizes Array of ints. Each int is the cardinality of the set of possible position of the first blocking bit.
  * @return Vector of arrays of possible end combinations that are no larger than the corresponding size.
  */
-std::vector<std::array<int, 4>> getEndCombinations(std::array<int, 4> sizes); // TODO change to uint
+std::vector<std::array<int, 4>> getEndCombinations(std::array<int, 4> sizes);
 
 /**
  * @brief Generates the lone square moves for a rook when its own side is in check. The values in sizes is ordered N, E,
@@ -305,7 +305,7 @@ std::vector<std::array<int, 4>> getEndCombinations(std::array<int, 4> sizes); //
  * @param sizes Array of ints. Each int is the cardinality of the set of possible positions of the blocking bit.
  * @param res Vector of arrays to store the results.
  */
-void generateLoneSquares(std::array<int, 4> sizes, std::vector<std::array<int, 4>>& res); // TODO change to uint
+void generateLoneSquares(std::array<int, 4> sizes, std::vector<std::array<int, 4>>& res);
 
 /**
  * @brief Generates the square move pairs for a rook when its own side is in check. The values in sizes is ordered N, E,
@@ -314,7 +314,7 @@ void generateLoneSquares(std::array<int, 4> sizes, std::vector<std::array<int, 4
  * @param sizes Array of ints. Each int is the cardinality of the set of possible positions of the blocking bit.
  * @param res Vector of arrays to store the results.
  */
-void generatePairSquares(std::array<int, 4> sizes, std::array<int, 4>& curr, std::vector<std::array<int, 4>>& res); // TODO change to uint
+void generatePairSquares(std::array<int, 4> sizes, std::array<int, 4> curr, std::vector<std::array<int, 4>>& res);
 
 /**
  * @brief Generates the blocking square combinations based on the sizes array. The values in sizes is ordered N, E, S, W
@@ -323,7 +323,7 @@ void generatePairSquares(std::array<int, 4> sizes, std::array<int, 4>& curr, std
  * @param sizes Array of ints. Each int is the cardinality of the set of possible positions of the blocking bit.
  * @return std::vector<std::array<int, 4>>
  */
-std::vector<std::array<int, 4>> getEndBlockSquares(std::array<int, 4> sizes); // TODO change to uint
+std::vector<std::array<int, 4>> getEndBlockSquares(std::array<int, 4> sizes);
 
 /**
  * Information before current move is made. In the Position class, the 'history' contains structs of type History. The

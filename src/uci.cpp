@@ -254,7 +254,8 @@ void Sicario::handlePosition(const std::vector<std::string>& inputs) {
 	this->position.resetPosition();
 
 	if (inputs[1] == "fen") {
-		this->position.parseFen(concatFEN(inputs));
+		// this->position.parseFen(concatFEN(inputs));
+		this->position.parseFen(concatFEN(std::vector<std::string>(inputs.begin() + 2, inputs.end())));
 	} else if (inputs[1] == "startpos") {
 		this->position.parseFen(STANDARD_GAME);
 	} else {

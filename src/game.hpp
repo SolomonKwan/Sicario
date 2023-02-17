@@ -240,7 +240,16 @@ class Position {
 		 * @param piece Piece type to add.
 		 * @param square Square of the piece to add.
 		 */
-		void addPieceFromFen(Bitboard& pieceBB, const PieceType piece, const Square square);
+		void addFenPiece(Bitboard& pieceBB, const PieceType piece, const Square square);
+
+		/**
+		 * @brief Parses a character from the FEN string representing a piece and updates the internal variables.
+		 *
+		 * @param piece Char representing the piece to add.
+		 * @param rank The rank of the piece.
+		 * @param file The file of the piece.
+		 */
+		void parseFenChar(char piece, Rank rank, File file);
 
 		/**
 		 * @brief Get bitboard of all pieces on the board.
@@ -677,7 +686,7 @@ class Position {
 		 * @param square Square of the piece.
 		 * @param piece_captured Piece type to remove.
 		 */
-		void removePiece(const Square square, const PieceType piece_captured); // NOTE might update
+		void removePiece(const Square square, const PieceType piece_captured);
 
 		/**
 		 * @brief Update the castling permissions after a move.
