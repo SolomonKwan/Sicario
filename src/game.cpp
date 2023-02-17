@@ -54,7 +54,7 @@ namespace Hashes {
 
 template <PieceType T>
 void Position::movePiece(const Square start, const Square end) {
-	for (uint i = 0; i < this->piece_index[T]; i++) { // TODO check if in-built function to change and see if faster
+	for (uint i = 0; i < this->piece_index[T]; i++) {
 		if (this->piece_list[T][i] == start) {
 			this->piece_list[T][i] = end;
 			break;
@@ -148,7 +148,7 @@ void Position::makeNormalMove<NON_CAPTURE>(const Move move) {
 
 template <PieceType T>
 void Position::removePiece(const Square square) {
-	for (uint i = 0; i < this->piece_index[T]; i++) { // TODO check if in-built function to change and see if faster
+	for (uint i = 0; i < this->piece_index[T]; i++) {
 		if (this->piece_list[T][i] == square) {
 			this->piece_list[T][i] = this->piece_list[T][--this->piece_index[T]];
 			break;
@@ -912,74 +912,28 @@ void Position::parseFen(const std::string fen) {
 
 	// Set the pieces
 	Rank rank = RANK_8;
-	for (std::string rank_string : ranks) {
+	for (size_t rankIndex = 0; rankIndex < ranks.size(); rankIndex++, rank--) {
+		std::string rankString = ranks[rankIndex];
 		File file = FILE_A;
-
-		for (char c : rank_string) {
-			if (std::isdigit(static_cast<unsigned char>(c))) {
-				for (int i = 0; i < (c - '0'); i++) {
+		for (size_t colIndex = 0; colIndex < rankString.size(); colIndex++, file++) {
+			char pieceChar = rankString[colIndex];
+			if (std::isdigit(static_cast<unsigned char>(pieceChar))) {
+				for (int i = 0; i < (pieceChar - '0'); i++) {
 					this->pieces[RANK_COUNT * rank + file] = NO_PIECE;
 					file++;
 				}
-			} else {
-				switch (c) { // TODO override multiplication operator to remove static_casts below
-					case 'K':
-						addPieceFromFen(this->kings, W_KING, static_cast<Square>(RANK_COUNT * rank + file));
-						break;
-					case 'Q':
-						addPieceFromFen(this->queens, W_QUEEN, static_cast<Square>(RANK_COUNT * rank + file));
-						break;
-					case 'R':
-						addPieceFromFen(this->rooks, W_ROOK, static_cast<Square>(RANK_COUNT * rank + file));
-						break;
-					case 'B':
-						addPieceFromFen(this->bishops, W_BISHOP, static_cast<Square>(RANK_COUNT * rank + file));
-						this->bishop_cnt++;
-						isDark(static_cast<Square>(RANK_COUNT * rank + file)) ? this->dark_bishop_cnt++ : this->light_bishop_cnt++;
-						break;
-					case 'N':
-						addPieceFromFen(this->knights, W_KNIGHT, static_cast<Square>(RANK_COUNT * rank + file));
-						this->knight_cnt++;
-						break;
-					case 'P':
-						addPieceFromFen(this->pawns, W_PAWN, static_cast<Square>(RANK_COUNT * rank + file));
-						break;
-					case 'k':
-						addPieceFromFen(this->kings, B_KING, static_cast<Square>(RANK_COUNT * rank + file));
-						break;
-					case 'q':
-						addPieceFromFen(this->queens, B_QUEEN, static_cast<Square>(RANK_COUNT * rank + file));
-						break;
-					case 'r':
-						addPieceFromFen(this->rooks, B_ROOK, static_cast<Square>(RANK_COUNT * rank + file));
-						break;
-					case 'b':
-						addPieceFromFen(this->bishops, B_BISHOP, static_cast<Square>(RANK_COUNT * rank + file));
-						this->bishop_cnt++;
-						isDark(static_cast<Square>(RANK_COUNT * rank + file)) ? this->dark_bishop_cnt++ : this->light_bishop_cnt++;
-						break;
-					case 'n':
-						addPieceFromFen(this->knights, B_KNIGHT, static_cast<Square>(RANK_COUNT * rank + file));
-						this->knight_cnt++;
-						break;
-					case 'p':
-						addPieceFromFen(this->pawns, B_PAWN, static_cast<Square>(RANK_COUNT * rank + file));
-						break;
-				}
-
-				// Set sides and piece count
-				if (std::isupper(static_cast<unsigned char>(c))) {
-					this->sides[WHITE] |= ONE_BB << (RANK_COUNT * rank + file);
-				} else {
-					this->sides[BLACK] |= ONE_BB << (RANK_COUNT * rank + file);
-				}
-				this->piece_cnt++;
-
-				file++;
+				continue;
 			}
-		}
+			parseFenChar(pieceChar, rank, file);
 
-		rank--;
+			// Set sides and piece count
+			if (std::isupper(static_cast<unsigned char>(pieceChar))) {
+				this->sides[WHITE] |= ONE_BB << (RANK_COUNT * rank + file);
+			} else {
+				this->sides[BLACK] |= ONE_BB << (RANK_COUNT * rank + file);
+			}
+			this->piece_cnt++;
+		}
 	}
 
 	parseFenMove(parts[FEN_MOVE_INDEX]);
@@ -1078,11 +1032,60 @@ void Position::parseFenMoves(const std::string& halfmove, const std::string& ful
 	this->fullmove = std::stoi(fullmove);
 }
 
-void Position::addPieceFromFen(Bitboard& pieceBB, const PieceType piece, const Square square) {
+void Position::addFenPiece(Bitboard& pieceBB, const PieceType piece, const Square square) {
 	pieceBB |= ONE_BB << square;
 	this->piece_list[piece][this->piece_index[piece]] = square;
 	this->piece_index[piece]++;
 	this->pieces[square] = piece;
+}
+
+void Position::parseFenChar(char piece, Rank rank, File file) {
+	// auto res = RANK_COUNT * rank + file;
+
+	switch (piece) { // TODO override multiplication operator to remove static_casts below
+		case 'K':
+			addFenPiece(this->kings, W_KING, static_cast<Square>(RANK_COUNT * rank + file));
+			break;
+		case 'Q':
+			addFenPiece(this->queens, W_QUEEN, static_cast<Square>(RANK_COUNT * rank + file));
+			break;
+		case 'R':
+			addFenPiece(this->rooks, W_ROOK, static_cast<Square>(RANK_COUNT * rank + file));
+			break;
+		case 'B':
+			addFenPiece(this->bishops, W_BISHOP, static_cast<Square>(RANK_COUNT * rank + file));
+			this->bishop_cnt++;
+			isDark(static_cast<Square>(RANK_COUNT * rank + file)) ? this->dark_bishop_cnt++ : this->light_bishop_cnt++;
+			break;
+		case 'N':
+			addFenPiece(this->knights, W_KNIGHT, static_cast<Square>(RANK_COUNT * rank + file));
+			this->knight_cnt++;
+			break;
+		case 'P':
+			addFenPiece(this->pawns, W_PAWN, static_cast<Square>(RANK_COUNT * rank + file));
+			break;
+		case 'k':
+			addFenPiece(this->kings, B_KING, static_cast<Square>(RANK_COUNT * rank + file));
+			break;
+		case 'q':
+			addFenPiece(this->queens, B_QUEEN, static_cast<Square>(RANK_COUNT * rank + file));
+			break;
+		case 'r':
+			addFenPiece(this->rooks, B_ROOK, static_cast<Square>(RANK_COUNT * rank + file));
+			break;
+		case 'b':
+			addFenPiece(this->bishops, B_BISHOP, static_cast<Square>(RANK_COUNT * rank + file));
+			this->bishop_cnt++;
+			isDark(static_cast<Square>(RANK_COUNT * rank + file)) ? this->dark_bishop_cnt++ : this->light_bishop_cnt++;
+			break;
+		case 'n':
+			addFenPiece(this->knights, B_KNIGHT, static_cast<Square>(RANK_COUNT * rank + file));
+			this->knight_cnt++;
+			break;
+		case 'p':
+			addFenPiece(this->pawns, B_PAWN, static_cast<Square>(RANK_COUNT * rank + file));
+			break;
+	}
 }
 
 bool Position::insufficientMaterial() const {

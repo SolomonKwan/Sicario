@@ -23,7 +23,6 @@ const std::string STANDARD_GAME = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w
 const uint PLAYER_COUNT = 2;
 const uint SQUARE_COUNT = 64;
 const uint FILE_COUNT = 8;
-const uint RANK_COUNT = 8;
 const uint PIECE_TYPE_COUNT = 12;
 const uint CASTLING_OPTIONS = 4;
 const uint CASTLING_COMBOS = 16;
@@ -42,6 +41,9 @@ const uint FEN_HALFMOVE_INDEX = 4;
 const uint FEN_FULLMOVE_INDEX = 5;
 const uint WHITE_CASTLING = 0b11;
 const uint BLACK_CASTLING = 0b1100;
+
+typedef uint RankCount;
+const RankCount RANK_COUNT = 8;
 
 const uint16_t MOVE_MASK = 0b111111;
 const uint16_t MOVE_TYPE_MASK = 0b11;
@@ -221,49 +223,5 @@ enum ConfigOption {
 	// Sentinels for errors.
 	UNKNOWN_OPTION,
 };
-
-inline Square operator+(const Square& square, const Direction& direction) {
-	return static_cast<Square>(static_cast<uint>(square) + static_cast<uint>(direction));
-}
-
-inline Direction operator+(const Direction& direction1, const Direction& direction2) {
-	return static_cast<Direction>(static_cast<uint>(direction1) + static_cast<uint>(direction2));
-}
-
-inline int operator-(const Rank& rank, const File& file) {
-	return static_cast<int>(rank) - static_cast<int>(file);
-}
-
-inline Square operator++(Square& square) { // Pre-fix
-	square = static_cast<Square>(static_cast<uint>(square) + 1U);
-	return square;
-}
-
-inline Square operator++(Square& square, int) { // Post-fix
-	Square prev = square;
-	square = static_cast<Square>(static_cast<uint>(square) + 1U);
-	return prev;
-}
-
-inline File operator++(File& file) { // Pre-fix
-	file = static_cast<File>(static_cast<uint>(file) + 1U);
-	return file;
-}
-
-inline File operator++(File& file, int) { // Post-fix
-	File prev = file;
-	file = static_cast<File>(static_cast<uint>(file) + 1U);
-	return prev;
-}
-
-inline Rank operator--(Rank& rank, int) {
-	Rank prev = rank;
-	rank = static_cast<Rank>(static_cast<uint>(rank) - 1U);
-	return prev;
-}
-
-inline Player operator!(const Player& player) {
-	return static_cast<Player>(1U - player);
-}
 
 #endif

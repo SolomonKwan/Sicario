@@ -173,4 +173,57 @@ inline bool isSet(T number, uint index) {
 	return number & (static_cast<T>(1) << index);
 }
 
+inline Square operator+(const Square& square, const Direction& direction) {
+	return static_cast<Square>(static_cast<uint>(square) + static_cast<uint>(direction));
+}
+
+inline Direction operator+(const Direction& direction1, const Direction& direction2) {
+	return static_cast<Direction>(static_cast<uint>(direction1) + static_cast<uint>(direction2));
+}
+
+inline int operator-(const Rank& rank, const File& file) {
+	return static_cast<int>(rank) - static_cast<int>(file);
+}
+
+inline Square operator+(const Rank& rank, const File& file) {
+	return static_cast<Square>(static_cast<int>(rank) + static_cast<int>(file));
+}
+
+// BUG This operator overload is causing very bizarre behaviour when compiled with the O3 flag. Seems to cause stdin and stdout to not work in some instances.
+// inline Rank operator*(const RankCount& num, const Rank& rank) {
+// 	return static_cast<Rank>(num * rank);
+// }
+
+inline Square operator++(Square& square) { // Pre-fix
+	square = static_cast<Square>(static_cast<uint>(square) + 1U);
+	return square;
+}
+
+inline Square operator++(Square& square, int) { // Post-fix
+	Square prev = square;
+	square = static_cast<Square>(static_cast<uint>(square) + 1U);
+	return prev;
+}
+
+inline File operator++(File& file) { // Pre-fix
+	file = static_cast<File>(static_cast<uint>(file) + 1U);
+	return file;
+}
+
+inline File operator++(File& file, int) { // Post-fix
+	File prev = file;
+	file = static_cast<File>(static_cast<uint>(file) + 1U);
+	return prev;
+}
+
+inline Rank operator--(Rank& rank, int) {
+	Rank prev = rank;
+	rank = static_cast<Rank>(static_cast<uint>(rank) - 1U);
+	return prev;
+}
+
+inline Player operator!(const Player& player) {
+	return static_cast<Player>(1U - player);
+}
+
 #endif

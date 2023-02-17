@@ -36,9 +36,11 @@ void showStartUp() {
 }
 
 void Sicario::run() {
+	std::cout << "SSSSSSSSSSSSSSSSSS" << '\n';
 	std::string input("");
 	do {
 		std::getline(std::cin, input);
+		std::cout << input << '\n';
 		processInput(input);
 	} while (input != "quit");
 
