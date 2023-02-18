@@ -358,7 +358,7 @@ class Sicario {
 		 *
 		 * @return A reference to the position object.
 		 */
-		inline Position& getPositionCopy() {
+		inline Position& getPosition() {
 			return this->position;
 		}
 };

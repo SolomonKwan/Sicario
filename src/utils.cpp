@@ -139,3 +139,7 @@ std::vector<size_t> rankSort(const std::vector<float>& v_temp) {
 	}
 	return result;
 }
+
+Square mirror(Square square) {
+	return static_cast<Square>(static_cast<int>(square) ^ 56);
+}
