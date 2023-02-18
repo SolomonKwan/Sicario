@@ -7,21 +7,6 @@
 #include "constants.hpp"
 #include "game.hpp"
 
-struct SicarioConfigs {
-	bool debugMode = false; // This is set with the "debug" command, not "setoption".
-	int threads = 1;
-	int hash = 16; // Megabytes
-	bool ponder = false;
-	bool ownBook = false;
-	int multiPv = 1;
-	bool uciShowCurrLine = false;
-	bool uciShowRefutations = false;
-	bool uciLimitStrength = false;
-	int uciElo = 3000;
-	bool uciAnalyseMode = true;
-	std::string uciOpponent = "";
-};
-
 struct OptionInfo {
 	std::string name = "";
 	std::string type = "";
@@ -29,6 +14,12 @@ struct OptionInfo {
 	std::string min = "";
 	std::string max = "";
 	std::vector<std::string> vars = {};
+	std::string value;
+};
+
+struct SicarioConfigs {
+	bool debugMode = false; // This is set with the "debug" command, not "setoption".
+	OptionInfo options[CONFIGS_COUNT];
 };
 
 /**
@@ -51,6 +42,8 @@ void showStartUp();
 
 class Sicario {
 	public:
+		Sicario();
+
 		/**
 		 * @brief Start and run the engine main loop.
 		 */
@@ -61,20 +54,6 @@ class Sicario {
 		SicarioConfigs sicarioConfigs;
 		std::vector<std::thread> threads;
 		std::atomic_bool searchTree = false;
-
-		// Configurable options of the engine
-		// NOTE Currently, the default, min, max and var are all arbitrary
-		OptionInfo thread { "Thread", "spin", "1", "1", "512" };
-		OptionInfo hash { "Hash", "spin", "16", "0", "5000" };
-		OptionInfo ponder { "Ponder", "check", "false" };
-		OptionInfo ownBook { "OwnBook", "check", "false" };
-		OptionInfo multiPv { "MultiPV", "spin", "1", "1", "5" };
-		OptionInfo uciShowCurrLine { "UCI_ShowCurrLine", "check", "false" };
-		OptionInfo uciShowRefutations { "UCI_ShowRefutations", "check", "false" };
-		OptionInfo uciLimitStrength { "UCI_LimitStrength", "check", "false" };
-		OptionInfo uciElo { "UCI_Elo", "spin", "3000", "1000", "3500" };
-		OptionInfo uciAnalyseMode { "UCI_AnalyseMode", "check", "true" };
-		OptionInfo uciOpponent { "UCI_Opponent", "string", "" };
 
 		/**
 		 * Parses the GUI input string and calls handlers for commands.
@@ -324,6 +303,13 @@ class Sicario {
 		 * @param inputs Entire input given to the GUI.
 		 */
 		void setOptionUciOpponent(const std::vector<std::string>& inputs);
+
+		/**
+		 * @brief Set the expandTime option.
+		 *
+		 * @param inputs Entire input given to the GUI.
+		 */
+		void setOptionExpandTime(const std::vector<std::string>& inputs);
 
 		/**
 		 * @brief Get the option name from the setOption command.

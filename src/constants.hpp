@@ -207,7 +207,6 @@ enum UciInput {
 enum ConfigOption {
 	THREAD,
 	HASH,
-	CLEAR_HASH,
 	PONDER,
 	OWN_BOOK,
 	MULTI_PV,
@@ -217,8 +216,10 @@ enum ConfigOption {
 	UCI_ELO,
 	UCI_ANALYSE_MODE,
 	UCI_OPPONENT,
+	EXPAND_TIME,
+	CLEAR_HASH,
 
-	// Sentinels for errors.
+	CONFIGS_COUNT,
 	UNKNOWN_OPTION,
 };
 
