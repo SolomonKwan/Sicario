@@ -2,8 +2,12 @@
 #include "sicario.hpp"
 #include "mcts.hpp"
 
+#include <iostream>
+#include "evaluate.hpp"
+
 void Sicario::search() {
-	Mcts searcher(this->getPositionCopy());
+	Mcts searcher(this->getPosition());
+	std::cout << Evaluator::psqtEvaluation(this->getPosition()) << '\n';
 	searcher.search(this->searchTree, this->sicarioConfigs);
 }
 

@@ -161,6 +161,14 @@ Move getMovefromAlgebraic(std::string string);
 std::vector<size_t> rankSort(const std::vector<float>& vec);
 
 /**
+ * @brief Get the corresponding square on the vertically opposite side of the board. E.g., mirror(A1) = A8.
+ *
+ * @param square Square to mirror.
+ * @return Square Vertically corresponding square.
+ */
+Square mirror(Square square);
+
+/**
  * @brief Check if the bit at 'index' of 'number' is set.
  *
  * @tparam T Type
