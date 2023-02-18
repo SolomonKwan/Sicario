@@ -294,8 +294,17 @@ void Sicario::handleQuit() {
 }
 
 void Sicario::handlePerft(const std::vector<std::string>& commands) {
+	auto start = std::chrono::high_resolution_clock::now();
 	uint64_t totalNodes = perft(std::stoi(commands[1]), true);
+	auto finish = std::chrono::high_resolution_clock::now();
 	std::cout << "Nodes searched: " << totalNodes << '\n';
+
+	if (this->sicarioConfigs.debugMode) {
+		std::cout << std::chrono::duration_cast<std::chrono::nanoseconds>(finish - start).count() << "ns\n";
+		std::cout << std::chrono::duration_cast<std::chrono::microseconds>(finish - start).count() << "μs\n";
+		std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(finish - start).count() << "ms\n";
+		std::cout << std::chrono::duration_cast<std::chrono::seconds>(finish - start).count() << "s\n";
+	}
 }
 
 void Sicario::handleMove(const std::vector<std::string>& commands) {
