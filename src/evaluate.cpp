@@ -136,6 +136,13 @@ float Evaluator::getPieceEvaluation(Position& position) {
 	return value;
 }
 
+float Evaluator::evaluate(Position& position, MoveList& moves) {
+	if (position.isEOG(moves) == WHITE_WINS) return std::numeric_limits<float>::max();
+	if (position.isEOG(moves) == BLACK_WINS) return std::numeric_limits<float>::min();
+	if (position.isEOG(moves)) return 0;
+	return getPieceEvaluation(position) + psqtEvaluation(position);
+}
+
 GameStage Evaluator::getStage(Position& position) {
 	if (position.getCastling() != 0) {
 		return OPENING;

@@ -250,6 +250,15 @@ namespace Evaluator {
 	float getPieceEvaluation(Position& position);
 
 	/**
+	 * @brief Evaluate the current position.
+	 *
+	 * @param position Reference to the position to evaluate.
+	 * @param moves MoveList of the current available moves.
+	 * @return Evaluation of the position.
+	 */
+	float evaluate(Position& position, MoveList& moves);
+
+	/**
 	 * @brief Returns the stage of the position.
 	 *
 	 * @param position Position object to evaluate.

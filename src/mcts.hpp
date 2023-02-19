@@ -5,8 +5,9 @@
 
 class Mcts : public BaseSearcher {
 	public:
-		Mcts(Position& pos) : BaseSearcher(pos) {}
-		void search(const std::atomic_bool& searchTree, SicarioConfigs& sicarioConfigs);
+		Mcts(Position& pos, const std::atomic_bool& searchTree, const SicarioConfigs& sicarioConfigs) :
+				BaseSearcher(pos, searchTree, sicarioConfigs) {}
+		void search();
 };
 
 class MctsNode : public BaseNode {
