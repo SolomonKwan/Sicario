@@ -16,13 +16,16 @@ struct SearchInfo {
 
 class BaseSearcher {
 	public:
-		BaseSearcher(const Position& pos) : pos(pos), rootPlayer(pos.getTurn()) {}
-		virtual void search(const std::atomic_bool& searchTree, SicarioConfigs& sicarioConfigs) = 0;
+		BaseSearcher(const Position& pos, const std::atomic_bool& searchTree, const SicarioConfigs& sicarioConfigs) :
+				pos(pos), rootPlayer(pos.getTurn()), searchTree(searchTree), sicarioConfigs(sicarioConfigs) {}
+		virtual void search() = 0;
 		Position& getPos();
 
 	protected:
 		Position pos;
 		const Player rootPlayer;
+		const std::atomic_bool& searchTree;
+		const SicarioConfigs& sicarioConfigs;
 };
 
 class BaseNode {

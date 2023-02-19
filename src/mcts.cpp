@@ -8,7 +8,7 @@
 
 const float C = std::sqrt(2);
 
-void Mcts::search(const std::atomic_bool& searchTree, SicarioConfigs& sicarioConfigs) {
+void Mcts::search() {
 	SearchInfo searchInfo;
 	std::unique_ptr<MctsNode> root(new MctsNode(nullptr, NULL_MOVE, this->getPos(), searchInfo));
 	while (searchTree) {

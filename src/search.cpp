@@ -6,9 +6,8 @@
 #include "evaluate.hpp"
 
 void Sicario::search() {
-	Mcts searcher(this->getPosition());
-	std::cout << Evaluator::psqtEvaluation(this->getPosition()) << '\n';
-	searcher.search(this->searchTree, this->sicarioConfigs);
+	Mcts searcher(this->getPosition(), this->searchTree, this->sicarioConfigs);
+	searcher.search();
 }
 
 Position& BaseSearcher::getPos() {
