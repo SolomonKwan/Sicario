@@ -49,7 +49,7 @@ Sicario::Sicario() {
 	sicarioConfigs.options[UCI_ELO] = { "UCI_Elo", "spin", "3000", "1000", "3500" };
 	sicarioConfigs.options[UCI_ANALYSE_MODE] = { "UCI_AnalyseMode", "check", "true" };
 	sicarioConfigs.options[UCI_OPPONENT] = { "UCI_Opponent", "string", "" };
-	sicarioConfigs.options[EXPAND_TIME] = { "ExpandTime", "spin", "50", "1", "500" };
+	sicarioConfigs.options[EXPAND_TIME] = { "ExpandTime", "spin", "500", "100", "5000" };
 	sicarioConfigs.options[CLEAR_HASH] = { "ClearHash", "button" };
 
 	// Set the configs to the default
