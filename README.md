@@ -67,7 +67,4 @@ for the move precomputation (at the price of clarity, maintenance, my time and m
 There are likely others that I have missed.</br>
 </br>
 
-TODO three fold repitition bug
-TODO CHeck fullmove increment is occurring at right time
-TODO draw by insufficient material
-TODO use arrow operator... ran into small isseus that took ages to figure out due to this
+TODO Due to way that the tree is constructed, it may result in stack overflow error due to node deletion/pruning. Need a better way of deletion.

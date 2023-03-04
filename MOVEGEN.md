@@ -100,8 +100,5 @@ Similar to rook moves
 </br>
 </br>
 
-We can build a bitboard of pinned pieces by getting (WLOG) the rook range bitboard from the king's square and AND-ing it with the rook range bitboard of all enemy rook and queen pieces. Any resulting set bits indicates either a pinned friendly piece, or an enemy piece with a ranged x-ray attacker.
-NOTE This might well be useful later on for checking x-ray attacks.
-
 For pinned moves, we can also do a similar thing. Once we know a piece is pinned, we can build a custom bitboard that maskes out the rays in which we don't care.
 Using this new bitboard, we mask out our own pieces too and just search for the moves as per usual.

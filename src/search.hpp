@@ -7,17 +7,21 @@
 #include "sicario.hpp"
 
 struct SearchInfo {
-	int depth = 0;
+	public:
+		SearchInfo();
+		bool getHasChanged();
+		void setHasChanged(bool hasChanged);
+		int getDepth();
+		void setDepth(int depth);
 
-	bool operator!=(const SearchInfo& s) {
-		return this->depth != s.depth;
-	}
+	private:
+		bool hasChanged;
+		int depth;
 };
 
 class BaseSearcher {
 	public:
-		BaseSearcher(const Position& pos, const std::atomic_bool& searchTree, const SicarioConfigs& sicarioConfigs) :
-				pos(pos), rootPlayer(pos.getTurn()), searchTree(searchTree), sicarioConfigs(sicarioConfigs) {}
+		BaseSearcher(const Position& pos, const std::atomic_bool& searchTree, const SicarioConfigs& sicarioConfigs);
 		virtual void search() = 0;
 		Position& getPos();
 
@@ -30,19 +34,18 @@ class BaseSearcher {
 
 class BaseNode {
 	public:
-		BaseNode(BaseNode* parent, Position& pos, SearchInfo& searchInfo) :
-				parent(parent), searchInfo(searchInfo), pos(pos), rootPlayer(pos.getTurn()) {} // CHECK learn about initialiser list
+		BaseNode(BaseNode* parent, Move inEdge, Position& pos, SearchInfo& searchInfo);
 		Move getInEdge() const;
 		Position& getPos();
 
 	protected:
-		int depth;
-		Move inEdge;
 		BaseNode* parent;
-		SearchInfo& searchInfo;
-		std::vector<std::unique_ptr<BaseNode>> children; // CHECK unique? or shared?
+		Move inEdge;
 		Position& pos;
 		const Player rootPlayer;
+		SearchInfo& searchInfo;
+		std::vector<std::unique_ptr<BaseNode>> children;
+		int depth;
 
 		virtual void addChild(Move move) = 0;
 };

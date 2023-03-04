@@ -306,21 +306,20 @@ void Sicario::handlePerft(const std::vector<std::string>& commands) {
 
 void Sicario::handleMove(const std::vector<std::string>& commands) {
 	Move move = getMovefromAlgebraic(commands[1]);
+
+	// Invalid move format
 	if (move == NULL_MOVE) {
 		Uci::communicate("Invalid move: " + move);
 		return;
 	}
 
 	MoveList moves = MoveList(this->position);
-	if (!moves.contains(move) && !moves.contains(move | EN_PASSANT)) { // NOTE en-passant checks are hacky...
-		Uci::communicate("Invalid move");
-		return;
-	}
-
 	if (moves.contains(move)) {
 		this->position.processMakeMove(move);
-	} else {
+	} else if (moves.contains(move | EN_PASSANT)) {
 		this->position.processMakeMove(move | EN_PASSANT);
+	} else {
+		Uci::communicate("Invalid move");
 	}
 }
 
@@ -391,18 +390,18 @@ void Uci::sendBestMove(MctsNode* root, bool debugMode) {
 
 	if (!debugMode) return;
 
-	std::vector<float> ucb1Values;
+	std::vector<float> UCTValues;
 	for (auto child : root->getChildren())
-		ucb1Values.push_back(child->Ucb1());
-	std::vector<size_t> ucbRanks = rankSort(ucb1Values);
+		UCTValues.push_back(child->UCT());
+	std::vector<size_t> ucbRanks = rankSort(UCTValues);
 
 	for (auto child : root->getChildren()) {
 		printMove(child->getInEdge(), true);
 		std::cout << "\tValue: " << child->getValue();
 		std::cout << "\tVisits: " << child->getVisits();
-		std::cout << "\tUCB1: " << ucb1Values.front();
+		std::cout << "\tUCT: " << UCTValues.front();
 		std::cout << "\tRank: " << ucbRanks.front() << '\n';
-		ucb1Values.erase(ucb1Values.begin());
+		UCTValues.erase(UCTValues.begin());
 		ucbRanks.erase(ucbRanks.begin());
 	}
 }
@@ -416,7 +415,7 @@ void Uci::sendRegistration() {
 }
 
 void Uci::sendInfo(SearchInfo& searchInfo) {
-	std::cout << "depth " << searchInfo.depth << '\n';
+	std::cout << "depth " << searchInfo.getDepth() << '\n';
 }
 
 void Uci::sendOption(const OptionInfo& option) {

@@ -5,8 +5,7 @@
 
 class Mcts : public BaseSearcher {
 	public:
-		Mcts(Position& pos, const std::atomic_bool& searchTree, const SicarioConfigs& sicarioConfigs) :
-				BaseSearcher(pos, searchTree, sicarioConfigs) {}
+		Mcts(Position& pos, const std::atomic_bool& searchTree, const SicarioConfigs& sicarioConfigs);
 		void search();
 };
 
@@ -21,18 +20,18 @@ class MctsNode : public BaseNode {
 		const std::vector<MctsNode*> getChildren() const;
 		inline float getValue() { return this->value; }
 		inline uint getVisits() { return this->visits; }
-		float Ucb1() const;
+		float UCT() const;
 
 	private:
-		float value = 0;
-		uint visits = 0;
+		float value;
+		uint visits;
 
 		void addChild(Move move);
 		uint getVisits() const { return this->visits; }
 
-		struct Ucb1Comp {
+		struct UCTComp {
 			bool operator()(const std::unique_ptr<BaseNode>& a, const std::unique_ptr<BaseNode>& b) const {
-				return dynamic_cast<MctsNode*>(a.get())->Ucb1() < dynamic_cast<MctsNode*>(b.get())->Ucb1();
+				return dynamic_cast<MctsNode*>(a.get())->UCT() < dynamic_cast<MctsNode*>(b.get())->UCT();
 			}
 		};
 };

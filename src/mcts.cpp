@@ -1,43 +1,56 @@
 #include <memory>
+#include <random>
 
 #include "sicario.hpp"
 #include "mcts.hpp"
 #include "uci.hpp"
 
-// NOTE Due to way that the tree is constructed, it may result in stack overflow error due to node deletion/pruning.
-
-const float C = std::sqrt(2);
+Mcts::Mcts(Position& pos, const std::atomic_bool& searchTree, const SicarioConfigs& sicarioConfigs)
+	: BaseSearcher(pos, searchTree, sicarioConfigs) {}
 
 void Mcts::search() {
 	SearchInfo searchInfo;
 	std::unique_ptr<MctsNode> root(new MctsNode(nullptr, NULL_MOVE, this->getPos(), searchInfo));
 	while (searchTree) {
-		SearchInfo oldSearchInfo = searchInfo; // TODO implement smarter way of checking if something has changed
+		searchInfo.setHasChanged(false);
 
 		MctsNode* leaf = root->select();
 		leaf = leaf->expand();
 		float val = leaf->simulate();
 		leaf->rollback(val);
 
-		if (searchInfo != oldSearchInfo) Uci::sendInfo(searchInfo);
+		if (searchInfo.getHasChanged()) Uci::sendInfo(searchInfo);
 	}
 	Uci::sendBestMove(root.get(), sicarioConfigs.debugMode);
 }
 
-MctsNode::MctsNode(MctsNode* parent, Move move, Position& pos, SearchInfo& searchInfo) :
-		BaseNode(parent, pos, searchInfo) {
-	this->inEdge = move; // CHECK initialise here? or in initialiser list?
-	this->depth = parent == nullptr ? 0 : parent->depth + 1;
-	this->searchInfo.depth = std::max(this->searchInfo.depth, this->depth);
-}
+MctsNode::MctsNode(MctsNode* parent, Move move, Position& pos, SearchInfo& searchInfo)
+	: BaseNode(parent, move, pos, searchInfo)
+	, value(0)
+	, visits(0) {}
 
 MctsNode* MctsNode::bestChild() {
-	return dynamic_cast<MctsNode*>((*std::max_element(children.begin(), children.end(), MctsNode::Ucb1Comp())).get());
+	std::vector<MctsNode*> bestChildren;
+	float maxUCT = std::numeric_limits<float>::min();
+	for (auto& child : this->children) {
+		float uct = dynamic_cast<MctsNode*>(child.get())->UCT();
+		if (uct > maxUCT) {
+			bestChildren.clear();
+			bestChildren.push_back(dynamic_cast<MctsNode*>(child.get()));
+			maxUCT = uct;
+		} else if (uct == maxUCT) {
+			bestChildren.push_back(dynamic_cast<MctsNode*>(child.get()));
+		}
+	}
+
+	if (bestChildren.size() == 1) return bestChildren.front();
+	static std::mt19937 generator(std::random_device{}());
+	std::uniform_int_distribution<std::size_t> distribution(0, bestChildren.size() - 1);
+	return bestChildren[distribution(generator)];
 }
 
 MctsNode* MctsNode::select() {
 	if (this->children.size() == 0) return this;
-	// NOTE this currently just chooses the last one it comes across if there are multiple of equal value
 	MctsNode* bestChild = this->bestChild();
 	this->getPos().processMakeMove(bestChild->getInEdge());
 	return bestChild->select();
@@ -50,10 +63,9 @@ MctsNode* MctsNode::expand() {
 	for (Move move : moves)
 		this->addChild(move);
 
-	// TODO check if expansion expands into EOG game condition. Need to determine how to handle if this is the case.
-
-	this->getPos().processMakeMove(this->children[0]->getInEdge());
-	return dynamic_cast<MctsNode*>(this->children[0].get()); // NOTE currently just getting the first child.
+	auto bestChild = this->bestChild();
+	this->getPos().processMakeMove(bestChild->getInEdge());
+	return bestChild;
 }
 
 float MctsNode::simulate() {
@@ -99,11 +111,13 @@ const std::vector<MctsNode*> MctsNode::getChildren() const {
 	return children;
 }
 
-float MctsNode::Ucb1() const {
+float MctsNode::UCT() const {
 	if (this->visits == 0) return std::numeric_limits<float>::max();
-	return (value / static_cast<float>(visits)) + C *
-			std::sqrt(std::log(static_cast<float>(dynamic_cast<MctsNode*>(this->parent)->getVisits())) /
+	float C = std::sqrt(2);
+	float exploitation = value / static_cast<float>(visits);
+	float exploration = C * std::sqrt(std::log(static_cast<float>(dynamic_cast<MctsNode*>(this->parent)->getVisits())) /
 			static_cast<float>(visits));
+	return exploitation + exploration;
 }
 
 void MctsNode::addChild(Move move) {
