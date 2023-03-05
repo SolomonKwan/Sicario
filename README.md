@@ -68,3 +68,6 @@ There are likely others that I have missed.</br>
 </br>
 
 TODO Due to way that the tree is constructed, it may result in stack overflow error due to node deletion/pruning. Need a better way of deletion.
+TODO For simulate stage of mcts, we might have to change or investigate what values are appropriate to return since the actual paper
+for the UCT formula assumes that we take the average win rate only (i.e. ignoring draws and losses). Obviously, we need to include
+draws and losses since a draw is better than a loss if a win is not possible.

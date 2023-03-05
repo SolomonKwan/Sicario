@@ -31,7 +31,7 @@ MctsNode::MctsNode(MctsNode* parent, Move move, Position& pos, SearchInfo& searc
 
 MctsNode* MctsNode::bestChild() {
 	std::vector<MctsNode*> bestChildren;
-	float maxUCT = std::numeric_limits<float>::min();
+	float maxUCT = -std::numeric_limits<float>::max();
 	for (auto& child : this->children) {
 		float uct = dynamic_cast<MctsNode*>(child.get())->UCT();
 		if (uct > maxUCT) {
@@ -42,6 +42,8 @@ MctsNode* MctsNode::bestChild() {
 			bestChildren.push_back(dynamic_cast<MctsNode*>(child.get()));
 		}
 	}
+
+	assert(bestChildren.size() != 0);
 
 	if (bestChildren.size() == 1) return bestChildren.front();
 	static std::mt19937 generator(std::random_device{}());
@@ -84,23 +86,23 @@ float MctsNode::simulate() {
 	}
 
 	if (code == WHITE_WINS) {
-		return this->rootPlayer == WHITE ? 1 : -1;
+		return this->rootPlayer == WHITE ? 1 : 0;
 	} else if (code == BLACK_WINS) {
-		return this->rootPlayer == BLACK ? 1 : -1;
+		return this->rootPlayer == BLACK ? 1 : 0;
 	}
-	return 0;
+	return 0.5;
 }
 
 void MctsNode::rollback(float val) {
 	MctsNode* curr = this;
 	while (curr->parent != nullptr) {
 		curr->visits++;
-		curr->value += this->pos.getTurn() == this->rootPlayer ? -1 * val : val;
+		curr->value += val;
 		curr = dynamic_cast<MctsNode*>(curr->parent);
 		this->pos.processUndoMove();
 	}
 
-	curr->value += this->pos.getTurn() == this->rootPlayer ? -1 * val : val;
+	curr->value += val;
 	curr->visits++;
 }
 

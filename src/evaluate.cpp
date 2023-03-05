@@ -138,7 +138,7 @@ float Evaluator::getPieceEvaluation(Position& position) {
 
 float Evaluator::evaluate(Position& position, MoveList& moves) {
 	if (position.isEOG(moves) == WHITE_WINS) return std::numeric_limits<float>::max();
-	if (position.isEOG(moves) == BLACK_WINS) return std::numeric_limits<float>::min();
+	if (position.isEOG(moves) == BLACK_WINS) return -std::numeric_limits<float>::max();
 	if (position.isEOG(moves)) return 0;
 	return getPieceEvaluation(position) + psqtEvaluation(position);
 }

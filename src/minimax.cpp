@@ -7,7 +7,7 @@ MiniMax::MiniMax(Position& pos, const std::atomic_bool& searchTree, const Sicari
 	: BaseSearcher(pos, searchTree, sicarioConfigs) {}
 
 void MiniMax::search() {
-	float minInfinity = std::numeric_limits<float>::min();
+	float minInfinity = -std::numeric_limits<float>::max();
 	float maxInfinity = std::numeric_limits<float>::max();
 	int depth = 5;
 	evaluate(pos, depth, minInfinity, maxInfinity, pos.getTurn());
@@ -17,7 +17,7 @@ float MiniMax::evaluate(Position& pos, int depth, float alpha, float beta, Playe
 	MoveList moves = MoveList(pos);
 	if (depth == 0) return Evaluator::evaluate(pos, moves);
 
-	float maxEval = std::numeric_limits<float>::min();
+	float maxEval = -std::numeric_limits<float>::max();
 	float minEval = std::numeric_limits<float>::max();
 
 	for (Move move : moves) {
