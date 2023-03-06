@@ -47,7 +47,7 @@ BaseNode::BaseNode(BaseNode* parent, Move inEdge, Position& pos, SearchInfo& sea
 	: parent(parent)
 	, inEdge(inEdge)
 	, pos(pos)
-	, rootPlayer(pos.getTurn())
+	, rootPlayer(parent == nullptr ? pos.getTurn() : parent->rootPlayer)
 	, searchInfo(searchInfo) {
 	this->depth = this->parent == nullptr ? 0 : this->parent->depth + 1;
 	this->searchInfo.setDepth(std::max(this->searchInfo.getDepth(), this->depth));

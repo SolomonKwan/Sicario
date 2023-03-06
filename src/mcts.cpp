@@ -31,7 +31,7 @@ MctsNode::MctsNode(MctsNode* parent, Move move, Position& pos, SearchInfo& searc
 
 MctsNode* MctsNode::bestChild() {
 	std::vector<MctsNode*> bestChildren;
-	float maxUCT = -std::numeric_limits<float>::max();
+	float maxUCT = 0;
 	for (auto& child : this->children) {
 		float uct = dynamic_cast<MctsNode*>(child.get())->UCT();
 		if (uct > maxUCT) {
@@ -40,6 +40,28 @@ MctsNode* MctsNode::bestChild() {
 			maxUCT = uct;
 		} else if (uct == maxUCT) {
 			bestChildren.push_back(dynamic_cast<MctsNode*>(child.get()));
+		}
+	}
+
+	assert(bestChildren.size() != 0);
+
+	if (bestChildren.size() == 1) return bestChildren.front();
+	static std::mt19937 generator(std::random_device{}());
+	std::uniform_int_distribution<std::size_t> distribution(0, bestChildren.size() - 1);
+	return bestChildren[distribution(generator)];
+}
+
+MctsNode* MctsNode::bestAvgValueChild() {
+	std::vector<MctsNode*> bestChildren;
+	float maxAvgValue = 0;
+	for (auto& child : this->children) {
+		MctsNode* childNode = dynamic_cast<MctsNode*>(child.get());
+		if (childNode->averageValue() > maxAvgValue) {
+			bestChildren.clear();
+			bestChildren.push_back(childNode);
+			maxAvgValue = childNode->averageValue();
+		} else if (childNode->averageValue() == maxAvgValue) {
+			bestChildren.push_back(childNode);
 		}
 	}
 
@@ -120,6 +142,10 @@ float MctsNode::UCT() const {
 	float exploration = C * std::sqrt(std::log(static_cast<float>(dynamic_cast<MctsNode*>(this->parent)->getVisits())) /
 			static_cast<float>(visits));
 	return exploitation + exploration;
+}
+
+float MctsNode::averageValue() const {
+	return this->value / this->visits;
 }
 
 void MctsNode::addChild(Move move) {

@@ -386,23 +386,27 @@ void Uci::sendReadyOk() {
 
 void Uci::sendBestMove(MctsNode* root, bool debugMode) {
 	std::cout << "bestmove ";
-	printMove(root->bestChild()->getInEdge(), false, true);
+	printMove(root->bestAvgValueChild()->getInEdge(), false, true);
 
 	if (!debugMode) return;
 
 	std::vector<float> UCTValues;
-	for (auto child : root->getChildren())
+	std::vector<float> avgValues;
+	for (auto child : root->getChildren()) {
 		UCTValues.push_back(child->UCT());
-	std::vector<size_t> ucbRanks = rankSort(UCTValues);
+		avgValues.push_back(child->averageValue());
+	}
+	std::vector<size_t> avgValueRanks = rankSort(avgValues);
 
 	for (auto child : root->getChildren()) {
 		printMove(child->getInEdge(), true);
 		std::cout << "\tValue: " << child->getValue();
 		std::cout << "\tVisits: " << child->getVisits();
+		std::cout << "\tAvg value: " << child->averageValue();
 		std::cout << "\tUCT: " << UCTValues.front();
-		std::cout << "\tRank: " << ucbRanks.front() << '\n';
+		std::cout << "\tRank: " << avgValueRanks.front() << '\n';
 		UCTValues.erase(UCTValues.begin());
-		ucbRanks.erase(ucbRanks.begin());
+		avgValueRanks.erase(avgValueRanks.begin());
 	}
 }
 

@@ -13,6 +13,7 @@ class MctsNode : public BaseNode {
 	public:
 		MctsNode(MctsNode* parent, Move move, Position& pos, SearchInfo& searchInfo);
 		MctsNode* bestChild();
+		MctsNode* bestAvgValueChild();
 		MctsNode* select();
 		MctsNode* expand();
 		float simulate();
@@ -21,6 +22,7 @@ class MctsNode : public BaseNode {
 		inline float getValue() { return this->value; }
 		inline uint getVisits() { return this->visits; }
 		float UCT() const;
+		float averageValue() const;
 
 	private:
 		float value;
