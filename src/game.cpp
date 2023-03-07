@@ -10,6 +10,7 @@
 #include "game.hpp"
 #include "utils.hpp"
 #include "bitboard.hpp"
+#include "evaluate.hpp"
 
 namespace Moves {
 	const MoveFamilies KING = computeKingMoves();
@@ -1671,6 +1672,11 @@ void Position::displayBitboards() const {
 	displayBB(this->knights);
 	std::cout << "Pawns:" << '\n';
 	displayBB(this->pawns);
+}
+
+float Position::computePositionEvaluation() {
+	MoveList moves = MoveList(*this);
+	return Evaluator::evaluate(*this, moves);
 }
 
 std::string concatFEN(const std::vector<std::string> strings) {

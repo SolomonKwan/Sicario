@@ -11,7 +11,7 @@ class Mcts : public BaseSearcher {
 
 class MctsNode : public BaseNode {
 	public:
-		MctsNode(MctsNode* parent, Move move, Position& pos, SearchInfo& searchInfo);
+		MctsNode(MctsNode* parent, Move move, Position& pos, SearchInfo& searchInfo, float evaluation);
 		MctsNode* bestChild();
 		MctsNode* bestAvgValueChild();
 		MctsNode* select();
@@ -23,17 +23,19 @@ class MctsNode : public BaseNode {
 		inline uint getVisits() { return this->visits; }
 		float UCT() const;
 		float averageValue() const;
+		float getEvaluation() const;
 
 	private:
 		float value;
 		uint visits;
+		float evaluation;
 
 		void addChild(Move move);
 		uint getVisits() const { return this->visits; }
 
 		struct UCTComp {
 			bool operator()(const std::unique_ptr<BaseNode>& a, const std::unique_ptr<BaseNode>& b) const {
-				return dynamic_cast<MctsNode*>(a.get())->UCT() < dynamic_cast<MctsNode*>(b.get())->UCT();
+				return static_cast<MctsNode*>(a.get())->UCT() < static_cast<MctsNode*>(b.get())->UCT();
 			}
 		};
 };

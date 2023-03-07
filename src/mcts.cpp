@@ -4,13 +4,15 @@
 #include "sicario.hpp"
 #include "mcts.hpp"
 #include "uci.hpp"
+#include "evaluate.hpp"
 
 Mcts::Mcts(Position& pos, const std::atomic_bool& searchTree, const SicarioConfigs& sicarioConfigs)
 	: BaseSearcher(pos, searchTree, sicarioConfigs) {}
 
 void Mcts::search() {
 	SearchInfo searchInfo;
-	std::unique_ptr<MctsNode> root(new MctsNode(nullptr, NULL_MOVE, this->getPos(), searchInfo));
+	float evaluation = this->getPos().computePositionEvaluation();
+	std::unique_ptr<MctsNode> root(new MctsNode(nullptr, NULL_MOVE, this->getPos(), searchInfo, evaluation));
 	while (searchTree) {
 		searchInfo.setHasChanged(false);
 
@@ -24,22 +26,23 @@ void Mcts::search() {
 	Uci::sendBestMove(root.get(), sicarioConfigs.debugMode);
 }
 
-MctsNode::MctsNode(MctsNode* parent, Move move, Position& pos, SearchInfo& searchInfo)
+MctsNode::MctsNode(MctsNode* parent, Move move, Position& pos, SearchInfo& searchInfo, float evaluation)
 	: BaseNode(parent, move, pos, searchInfo)
 	, value(0)
-	, visits(0) {}
+	, visits(0)
+	, evaluation(evaluation) {}
 
 MctsNode* MctsNode::bestChild() {
 	std::vector<MctsNode*> bestChildren;
 	float maxUCT = 0;
 	for (auto& child : this->children) {
-		float uct = dynamic_cast<MctsNode*>(child.get())->UCT();
+		float uct = static_cast<MctsNode*>(child.get())->UCT();
 		if (uct > maxUCT) {
 			bestChildren.clear();
-			bestChildren.push_back(dynamic_cast<MctsNode*>(child.get()));
+			bestChildren.push_back(static_cast<MctsNode*>(child.get()));
 			maxUCT = uct;
 		} else if (uct == maxUCT) {
-			bestChildren.push_back(dynamic_cast<MctsNode*>(child.get()));
+			bestChildren.push_back(static_cast<MctsNode*>(child.get()));
 		}
 	}
 
@@ -55,7 +58,7 @@ MctsNode* MctsNode::bestAvgValueChild() {
 	std::vector<MctsNode*> bestChildren;
 	float maxAvgValue = 0;
 	for (auto& child : this->children) {
-		MctsNode* childNode = dynamic_cast<MctsNode*>(child.get());
+		MctsNode* childNode = static_cast<MctsNode*>(child.get());
 		if (childNode->averageValue() > maxAvgValue) {
 			bestChildren.clear();
 			bestChildren.push_back(childNode);
@@ -120,7 +123,7 @@ void MctsNode::rollback(float val) {
 	while (curr->parent != nullptr) {
 		curr->visits++;
 		curr->value += val;
-		curr = dynamic_cast<MctsNode*>(curr->parent);
+		curr = static_cast<MctsNode*>(curr->parent);
 		this->pos.processUndoMove();
 	}
 
@@ -131,23 +134,32 @@ void MctsNode::rollback(float val) {
 const std::vector<MctsNode*> MctsNode::getChildren() const {
 	std::vector<MctsNode*> children;
 	for (auto& child : this->children)
-		children.push_back(dynamic_cast<MctsNode*>(child.get()));
+		children.push_back(static_cast<MctsNode*>(child.get()));
 	return children;
 }
 
 float MctsNode::UCT() const {
 	if (this->visits == 0) return std::numeric_limits<float>::max();
 	float C = std::sqrt(2);
+	float heuristic = Evaluator::transformEvaluation(this->evaluation) / (std::pow(1.05, this->visits));
 	float exploitation = value / static_cast<float>(visits);
-	float exploration = C * std::sqrt(std::log(static_cast<float>(dynamic_cast<MctsNode*>(this->parent)->getVisits())) /
+	float exploration = C * std::sqrt(std::log(static_cast<float>(static_cast<MctsNode*>(this->parent)->getVisits())) /
 			static_cast<float>(visits));
-	return exploitation + exploration;
+	return heuristic + exploitation + exploration;
 }
 
 float MctsNode::averageValue() const {
 	return this->value / this->visits;
 }
 
+float MctsNode::getEvaluation() const {
+	return this->evaluation;
+}
+
 void MctsNode::addChild(Move move) {
-	this->children.push_back(std::unique_ptr<MctsNode>(new MctsNode(this, move, this->getPos(), this->searchInfo)));
+	this->pos.processMakeMove(move);
+	this->children.push_back(std::unique_ptr<MctsNode>(
+		new MctsNode(this, move, this->pos, this->searchInfo, this->pos.computePositionEvaluation())
+	));
+	this->pos.processUndoMove();
 }

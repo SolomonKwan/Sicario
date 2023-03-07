@@ -143,6 +143,12 @@ float Evaluator::evaluate(Position& position, MoveList& moves) {
 	return getPieceEvaluation(position) + psqtEvaluation(position);
 }
 
+float Evaluator::transformEvaluation(float eval) {
+	if (eval == -std::numeric_limits<float>::max()) return 0;
+	if (eval == std::numeric_limits<float>::max()) return 100;
+	return 200 + eval;
+}
+
 GameStage Evaluator::getStage(Position& position) {
 	if (position.getCastling() != 0) {
 		return OPENING;

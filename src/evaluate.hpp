@@ -258,6 +258,8 @@ namespace Evaluator {
 	 */
 	float evaluate(Position& position, MoveList& moves);
 
+	float transformEvaluation(float eval);
+
 	/**
 	 * @brief Returns the stage of the position.
 	 *

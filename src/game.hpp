@@ -74,6 +74,13 @@ class Position {
 		void displayBitboards() const;
 
 		/**
+		 * @brief Compute and return the evaluation of the current position.
+		 *
+		 * @return The heuristic evaluation of the current position.
+		 */
+		float computePositionEvaluation();
+
+		/**
 		 * @brief Get the current turn.
 		 *
 		 * @return Turn of current position.
