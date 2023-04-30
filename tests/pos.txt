@@ -1,5 +1,6 @@
 Positional positions
 r4rk1/4R2p/pp6/3p3q/3Pp3/1Q3pPN/PP3P1P/4R1K1 b - - 0 1
+3B4/1r2p3/r2p1p2/bkp1P1p1/1p1P1PPp/p1P4P/PPB1K3/8 w - - 0 1 (actually a forced draw)
 
 Mate in 2
 r2qkb1r/pp2nppp/3p4/2pNN1B1/2BnP3/3P4/PPP2PPP/R2bK2R w KQkq - 1 0
