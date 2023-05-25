@@ -12,8 +12,8 @@
 #include <array>
 
 const std::string NAME = "Sicario";
-const std::string CODENAME = "Iteration-7";
-const std::string VERSION = "v0.7.0";
+const std::string CODENAME = "Iteration-8";
+const std::string VERSION = "v0.8.0";
 const std::string AUTHOR = "S. Kwan";
 const std::string CHESS_PROGRAMMING = "www.chessprogramming.org";
 const std::string STOCKFISH = "Stockfish";
