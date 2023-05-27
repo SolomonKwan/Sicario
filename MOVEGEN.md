@@ -1,107 +1,281 @@
-# Overview
-Just a file for jotting down my thoughts about the move generation. When generating moves, the 2 main rules of the game we must keep in mind is that we must not:
-<ul>
-    <li>Move our king into check (including capturing defended pieces); and</li>
-    <li>Move a piece in such a way that exposes our king to check</li>
-</ul>
-As a result, we must be mindful of checking <strong>pins</strong>.
-</br>
-Keep in mind that when a piece is pinned, it can still move along the line in which it is pinned.
-</br>
-</br>
-The move generation can be split into 3 main cases depending on the state of the board.
-<ul>
-    <li>Moves when in double in check</li>
-    <li>Moves when in check</li>
-    <li>Moves when not in check</li>
-</ul>
-</br>
+# Move Generation Explanations
+This contains an explanation of how the move generation works. Move generation is based on the bitboard
+representation of the current position as well as other data structures. The main concept underpinning move generation
+is the use of magic bitboards. Purely for the sake of not being just an ordinary magic bitboard implementation, I used a
+slightly tweaked approach that involves precomputing indices into precomputed move arrays. This allows us to get the
+moves of a piece in the position fairly quickly while also avoiding the problem of calculating and storing redundant
+move sets. Current investigation indicates that this approach gives several orders of magnitude advantage when it comes
+to memory consumption for the move generation portion only. Legal move generation is also a happy convenience.
 
-# Double Check Moves
-King must move. Things to keep in mind when doing this:
-<ul>
-    <li>Capturing own pieces</li>
-    <li>Move king into check</li>
-    <li>Capturing defended piece</li>
-</ul>
-We shall use magic bitboards for king move generation. Let us assume that we have a precomputed array of the reach of a king on every square. Assuming we have a bitboard of potential destination squares for the king, we multiply this by a magic number and then shift it to get a unique index into a precomputed array of moves.
-</br>
-</br>
-We can easily exclude capturing own pieces using bit manipulation to mask out our own pieces from the reach.
-</br>
-</br>
-To check if we are moving the king into check, we will need check if the destination square is attacked. Will need to retrieve the rook reach mask and bishop reach mask to check respective attacks (including queen for both). Check if square is attacked by knight. Check if attacked by pawn.
-</br>
-</br>
-<strong>king cannot move along the line of check</strong>.
-</br>
-</br>
-The same checks as the one immediately above cover this case too.
-</br>
-</br>
+## Explanation
+To explain the approach used I will first explain a few basic concepts. The first shall be understanding the magic
+bitboard approach. I learnt the concept here https://www.chessprogramming.org/Magic_Bitboards, but I shall explain.
 
-## <strong>King move generation will be pseudolegal. Need to check if moving to defended square.</strong>
+### Bitboards
 
+I use unsigned 64 bit integers to represent various board states. Specifically, I have such integers for the white
+pieces, black pieces, kings, queens, rooks, bishops, knights and pawns. First, note that the kings, queens, rooks,
+bishops, knights and pawns bitboards do not distinguish between sides. That information is captured in the white and
+black pieces bitboards.
 
-</br>
-</br>
+I have followed the convention that the least significant bit corresponds to the square a1 followed by b1, then c1 and
+so on until h1. After this point, it will begin a2, b2,... and follow the same pattern until the final square h8.
 
-# Check Moves
-Either we move the king, block the check or capture the checking piece.
-</br>
-</br>
-If we are moving the king out of check, we can follow the same as the above pseudolegal move generation. However, we have to remember that the <strong>king cannot move along the line of check</strong>.
-</br>
-</br>
-To block. Can create a check ray, including the checker. Find direction of checker, and mask out the other rays. Iterate over own pieces and check if the reach intersects with the check ray and checker bitboard. If it intersects then we can index into a precomputed array of moves. Will need magic bitboard for pawns and knights. Will need special magic nums for rook and bishops for blocks specifically.
-</br>
-</br>
+Using this convention, if there is a white king on e1 and no other pieces on the board, then the kings and white
+bitboards will both look as follows in binary:
 
-# Non-Check Moves
-Same checks for king as the above.
-</br>
-</br>
-Pinned pieces can move and capture along the line of being pinned.
-</br>
-</br>
+<code>0xb0000000000000000000000000000000000000000000000000000000000010000</code>
 
-# King Moves
-Precompute king reach bitboard for each square
-</br>
-Precompute magic numbers for king on each square.
-</br>
-Precompute index for king on each square.
-</br>
-Precompute set of possible permutation of king on each square from the bitboard and store moves for it.
-</br>
+This can be represented in the more intuitive format of:
+
+```
+00000000
+00000000
+00000000
+00000000
+00000000
+00000000
+00000000
+00001000
+```
+
+And so in the starting position of a normal game of chess, the white bitboard and kings bitboards would look as follows
+respectively:
+
+```
+00000000        00001000
+00000000        00000000
+00000000        00000000
+00000000        00000000
+00000000        00000000
+00000000        00000000
+11111111        00000000
+11111111        00001000
+```
+
+Bitwise AND-ing these two bitboards would give us all the white kings. A similar approach is used for any piece
+type/colour combination.
+
+### Magic Bitboards
+
+Magic bitboards are so named because they use "magic numbers" to retrieve moves for ranged pieces. These magic numbers
+have to be found via guess and check but are only needed to be found once and can then be hardcoded. The ones I found
+are in <code>bitboard.hpp</code>. The general approach is as follows:
+
 <ol>
-    <li>To get moves for King, get reach bitboard by square.</li>
-    <li>For each square in moore neigh, if not own piece check if attacked</li>
-    <li>If not attacked add it to a bitboard</li>
-    <li>Multiply bitboard by king magic number and shift to get unique index</li>
-    <li>Use index to get precomputed moves</li>
+    <li>Create the occupancy bitboard: <code>whiteBB | blackBB = occ</code></li>
+    <li>Mask out unneeded bits: <code>occ & mask = mOcc</code></li>
+    <li>Multiply by the magic bitboard: <code>mOcc * mn = out</code></li>
+    <li>Shift the result to get the unique index: <code>out >> shift = index</code></li>
 </ol>
-The moves will be valid except possibly moving the king into check. Need to check every move that destination square is not attacked.
-</br>
-</br>
 
-# Rook Moves
+To more clearly understand how they are used (and thus a hint on how we can find them) let us see an example. Suppose we
+have a random position from some game and we create an occupancy bitboard by taking our white and black bitboards and
+performing a bitwise OR. The resulting bitboard will contain 0s and 1s where a 1 would indicate that a piece, either
+white or black, is on that square. Say that the bitboard we got was the following:
+
+```
+10001101
+01000000
+00001010
+00000000
+01001000
+00000000
+01100100
+10001001
+```
+
+Say we have a rook on e4 and we want its available moves. We start by bitwise AND-ing this bitboard with a precomputed
+mask for rooks on e4 to get only the occupants of the rank and file that the rook is on.
+
+```
+occupancy & mask = masked occupancy
+
+10001101     00000000     00000000
+01000000     00001000     00000000
+00001010     00001000     00001000
+00000000 AND 00001000  =  00000000
+01001000  &  01110110     01000000
+00000000     00001000     00000000
+01100100     00001000     00000000
+10001001     00000000     00000000
+```
+
+Note that the mask does not include the edge squares. This is because we can reach the edge squares whether or not there
+is a piece on them (we are currently ignoring illegal captures of own pieces). This ultimately helps to reduce the
+amount of memory needed since the end result will be 4 bits shorter.
+
+Using this masked occupancy bitboard, we can multiply it by a precomputed "magic number". This is an unsigned 64 bit
+number we found through trial-and-error that gives a unique string of bits in the n most significant positions of the
+result for every possible occupancy. The number n will be the number of set bits in the mask. Taking only these n most
+significant bits therefore gives us a unique number for every possible masked occupancy for when a rook is on e4. This
+will be our unique index into a precomputed set of moves/bit masks or whatever we want. Hopefully the following
+illustrates this more clearly.
+
+```
+In the above example, the mask contains 10 set bits.
+
+masked occupancy * magic number = output
+We then shift this "output" to get the 10 most significant bits as our index.
+
+00000000   ........   CDEFGHIJ      CDEFGHIJ
+00000000   ........   ......AB      ......AB
+00001000   .some...   ........      ........
+00000000 * .magic.. = ........ then ........ >> (64 - 10) = ABCDEFGHIJ
+01000000   .number.   ........      ........
+00000000   ........   ........      ........
+00000000   ........   ........      ........
+00000000   ........   ........      ........
+```
+
+The bits <code>ABCDEFGHIJ</code> now form the unique index for this particular occupancy. Now, this same magic number
+above would have to produce a unique index for every possible occupancy when a rook is on e4. This is the key part of
+this perfect hashing algorithm. An analgous approach is done for bishops, and a queen is basically just a rook and
+bishop combined.
+
+I believe the traditional approach from here is to use the resulting unique index to get the moves for a piece either
+as a bitboard of possible moves or actual precomputed moves. It must be noted that this would result in pseudo-legal
+moves at it allows capturing a player's own pieces. Therefore the move legality must be checked beforehand. This is the
+basic idea of the magic bitboard approach. It is a perfect hashing algorithm.
+
+### Drawbacks
+
+This approach above does have some drawbacks. As mentioned, one of them is that it is a pseudo-legal move generator.
+
+The other problem is that it has a lot of redundancy for pieces that have ranged-based movement (queens, rooks and
+bishops). This is because the first blockers (occupied bits) on each "ray" of the masked occupancies are what determines
+the available moves. The occupancies after the blockers of each "ray" are redundant. For example:
+
+```
+00000000     00001000                00000000
+00000000     00000000                00000000
+00001000     00001000                00001000
+00000000  ,  00000000  both lead to  00001000
+01000000     11000000                01110111
+00001000     00001000                00001000
+00000000     00001000                00000000
+00000000     00000000                00000000
+```
+
+Since each possible occupancy leads to a unique index which is then used to map to a distinct piece of data (move set or
+move bitboard), this results in duplication of data. This is especially the case where the first blockers on each ray
+are the first squares available. All remaining squares on each ray have no influence. E.g., a rook on e4 immediately
+surrounded by pieces on all sides has only 1 possible set of pseudo-legal moves, namely the following:
+
+```
+00000000
+00000000
+00000000
+00001000
+00010100
+00001000
+00000000
+00000000
+```
+
+But the number of possible occupancy masks is 2^10 = 1024. And so we have 1024 unique indices pointing to separate
+pieces of memory that store a (possibly large) object which all have the same value. My tweaked approach fixes this
+problem (as well as the pseudo-legal move problem) by using an subsequent mapping based on a bitboard of legal moves.
+
+### My Tweaked Approach
+
+My tweaked approach follows on from the steps listed above (near Magic Bitboards) and goes as follows:
+
 <ol>
-    <li>Mask rook file and rank (remove the rook itself)</li>
-    <li>Multiply by magic num and bit shift to get unique index</li>
-    <li>Use unique index to find the reach</li>
-    <li>Then we can use the reach and mask out our own pieces</li>
-    <li>Then multiply by a different magic number and shift to get index into precomputed moves</li>
+    <li>The last step completed gave us a unique index which we will call <code>index1</code>.</li>
+    <li>Index into a precomputed set of indices: <code>indices[index1] = index2</code>.</li>
+    <li>Retrieve a reach bitboard: <code>precomputedBB[index2] = reachBB</code>.</li>
+    <li>Clear self captures with the negated bitboard of the moving side: <code>reachBB = reachBB & ~sideBB</code>.</li>
+    <li>Multiply by the magic number (a different one this time): <code>reachBB * mn = out</code>.</li>
+    <li>Shift to get a unique index: <code>out >> shift = index3</code>.</li>
 </ol>
-</br>
 
-# Bishop Moves
-Similar to rook moves
-</br>
-</br>
+This final index is then used to index into a precomputed move array. The key parts of this approach are step 2 and 4.
+In the vanilla approach <code>index1</code> would be unique for every possible occupancy and used to index into an array
+or bitboard of pseudo-legal moves. As mentioned before, this leads to repeated values. Instead, step 2 uses
+<code>index1</code> to index into a precomputed indices array that maps to a new index, <code>index2</code>, that gives
+constructive collisions for occupancies that map to the same move set.
 
-We can build a bitboard of pinned pieces by getting (WLOG) the rook range bitboard from the king's square and AND-ing it with the rook range bitboard of all enemy rook and queen pieces. Any resulting set bits indicates either a pinned friendly piece, or an enemy piece with a ranged x-ray attacker.
-NOTE This might well be useful later on for checking x-ray attacks.
+```
+Old way: index1 -> move object
+a1 -> obj1
+a2 -> obj2
+   ...
+aM -> objM
+aN -> objN
+Here, obj1 to objM are all different memory addresses that contain the same value.
 
-For pinned moves, we can also do a similar thing. Once we know a piece is pinned, we can build a custom bitboard that maskes out the rays in which we don't care.
-Using this new bitboard, we mask out our own pieces too and just search for the moves as per usual.
+Tweaked way: index1 -> index2 -> move object
+a1 -> b1 -> obj1
+a2 -> b1 -> obj1
+      ...
+aM -> b1 -> obj1
+aN -> b2 -> obj2
+```
+
+In this contrived example above, all of the first stage indices, except the last one, lead to the same theoretical move
+set. The intermediary second stage of indices creates convenient collisions to the same object in memory.
+
+Using this method, instead of duplicating move arrays/bitboards that are at least 64 bits long to potentially hundreds
+long, we are instead duplicating only 16 bit indices in the second stage indices. For a single rook on a single square
+this may not appear to be much, but for both rooks and bishops on all 64 squares it is considerable.
+
+As you may notice in step 4, although not necessary, it is a convenient way of restricting the moves retrieved to legal
+moves. A happy convenience.
+
+This concludes an explanation of the basic ideas underpinning move generation using magic bitboards. Traditionally, the
+magic bitboard approach is used only for ranged piece movements but I have used it for all piece move generation except
+en-passant and castling. En-passant is rare enough that we can treat them on demand. Castling is also easy and quick
+enough to check on demand.
+
+## Implementation Overview
+
+Move generation in Sicario is split into 3 cases:
+<ul>
+    <li>Double check moves</li>
+    <li>Single check moves</li>
+    <li>Non-check moves</li>
+</ul>
+
+When the king is in <strong>double check</strong>, the king <strong>must</strong> move. Things to keep in mind when
+doing this:
+<ul>
+    <li>The king cannot capture pieces of the same colour.</li>
+    <li>The king cannot capture a defended piece.</li>
+    <li>The king cannot move to an attacked square.</li>
+</ul>
+
+When the king is in <strong>single check</strong> one of the following must occur:
+
+<ul>
+    <li>The check is blocked.</li>
+    <li>The checking piece is captured.</li>
+    <li>The king moves out of check to a square that is not attacked.</li>
+</ul>
+
+In both the single and double check situations, one must be mindful when generating moves that the king cannot move
+along any of the lines of check as it would still remain in check after the move is completed.
+
+<strong>Non-check</strong> moves are retrieved by iterating over every piece and retrieving the legal moves. The only
+things to keep in mind are the following:
+
+<ul>
+    <li>The king cannot move to an attacked square (i.e. into check).</li>
+    <li>The king cannot capture a defended piece (equivalent to the previous point).</li>
+    <li>Pinned pieces cannot move out of the line of pin, but they can move along it.</li>
+</ul>
+
+### General Idea of the Implementation
+
+The general idea used in Sicario for legal move generation for each piece is as follows:
+
+<ol>
+    <li>Construct a bitboard where a set bit indicates a legal move for that piece to that square.</li>
+    <li>Multiply this bitboard by the appropriate magic number to get a result.</li>
+    <li>Shift this result to get an index.</li>
+    <li>Use this to index into a precomputed moves data structure.</li>
+</ol>
+
+The only part that differs majorly for some of the pieces is the first step where we construct a bitboard of legal
+moves. As mentioned before, traditinoally the magic bitboard approach is used for range-based pieces only. I have used
+it for all pieces instead. Turns out to be more straightforward (unsurprisingly) for non-range based pieces.
