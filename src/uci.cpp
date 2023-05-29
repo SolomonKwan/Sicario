@@ -106,7 +106,7 @@ void Sicario::processInput(const std::string& input) {
 			handleBitboards();
 			break;
 		case RANDOMGAME:
-			handleRandom();
+			handleRandom(commands);
 			break;
 		case STATE:
 			handleState();
@@ -267,7 +267,7 @@ void Sicario::handlePosition(const std::vector<std::string>& inputs) {
 	}
 }
 
-void Sicario::handleGo(const std::vector<std::string>& commands) {
+void Sicario::handleGo(const std::vector<std::string>& inputs) {
 	// TODO Parse search parameters and utilise number of threads
 	if (this->searchTree == false) {
 		this->searchTree = true;
@@ -290,9 +290,9 @@ void Sicario::handleQuit() {
 	}
 }
 
-void Sicario::handlePerft(const std::vector<std::string>& commands) {
+void Sicario::handlePerft(const std::vector<std::string>& inputs) {
 	auto start = std::chrono::high_resolution_clock::now();
-	uint64_t totalNodes = perft(std::stoi(commands[1]), true);
+	uint64_t totalNodes = perft(std::stoi(inputs[1]), true);
 	auto finish = std::chrono::high_resolution_clock::now();
 	std::cout << "Nodes searched: " << totalNodes << '\n';
 
@@ -304,8 +304,8 @@ void Sicario::handlePerft(const std::vector<std::string>& commands) {
 	}
 }
 
-void Sicario::handleMove(const std::vector<std::string>& commands) {
-	Move move = getMovefromAlgebraic(commands[1]);
+void Sicario::handleMove(const std::vector<std::string>& inputs) {
+	Move move = getMovefromAlgebraic(inputs[1]);
 	if (move == NULL_MOVE) {
 		Uci::communicate("Invalid move: " + move);
 		return;
@@ -345,8 +345,10 @@ void Sicario::handleBitboards() {
 	this->position.displayBitboards();
 }
 
-void Sicario::handleRandom() {
-	for (int i = 0; i < 1000000000; i++) {
+void Sicario::handleRandom(const std::vector<std::string> &inputs) {
+	std::unordered_map<ExitCode, int> results;
+	int iterations = inputs.size() == 2 ? std::stoi(inputs[1]) : 100;
+	for (int i = 0; i < iterations; i++) {
 		MoveList moves = MoveList(this->position);
 		std::vector<Move> playedMoves;
 		int moveCount = 0;
@@ -357,12 +359,30 @@ void Sicario::handleRandom() {
 			moves = MoveList(this->position);
 			moveCount++;
 		}
-		showEogMessage(this->position.isEOG(moves));
+		results[this->position.isEOG(moves)]++;
+
+		// Undo moves back to original position.
 		while (moveCount > 0) {
 			this->position.processUndoMove();
 			moveCount--;
 		}
 	}
+
+	// Print overall results
+	int total = 0;
+	for (auto pair : results) total += pair.second;
+	printf("WHITE_WINS: \t\t%d\t %.2f%%\n", results[WHITE_WINS],
+			static_cast<float>(results[WHITE_WINS]) / total * 100);
+	printf("BLACK_WINS: \t\t%d\t %.2f%%\n", results[BLACK_WINS],
+			static_cast<float>(results[BLACK_WINS]) / total * 100);
+	printf("STALEMATE: \t\t%d\t %.2f%%\n", results[STALEMATE],
+			static_cast<float>(results[STALEMATE]) / total * 100);
+	printf("THREE_FOLD_REPETITION: \t%d\t %.2f%%\n", results[THREE_FOLD_REPETITION],
+			static_cast<float>(results[THREE_FOLD_REPETITION]) / total * 100);
+	printf("FIFTY_MOVES_RULE: \t%d\t %.2f%%\n", results[FIFTY_MOVES_RULE],
+			static_cast<float>(results[FIFTY_MOVES_RULE]) / total * 100);
+	printf("INSUFFICIENT_MATERIAL: \t%d\t %.2f%%\n", results[INSUFFICIENT_MATERIAL],
+			static_cast<float>(results[INSUFFICIENT_MATERIAL]) / total * 100);
 }
 
 void Sicario::handleState() {
@@ -426,8 +446,8 @@ void Uci::sendOption(const OptionInfo& option) {
 	Uci::communicate(optionString);
 }
 
-void Sicario::sendInvalidCommand(const std::vector<std::string>& commands) {
-	Uci::communicate("Unknown command: " + commands[0]);
+void Sicario::sendInvalidCommand(const std::vector<std::string>& inputs) {
+	Uci::communicate("Unknown command: " + inputs[0]);
 }
 
 void Sicario::sendMissingArgument(const std::vector<std::string>& inputs) {

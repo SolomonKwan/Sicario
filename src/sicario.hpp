@@ -137,13 +137,17 @@ class Sicario {
 
 		/**
 		 * @brief Handle the perft command. Used for debugging.
+		 *
+		 * @param inputs Entire input given to the GUI.
 		 */
-		void handlePerft(const std::vector<std::string>&);
+		void handlePerft(const std::vector<std::string>& inputs);
 
 		/**
 		 * @brief Handle the move command. Used for debugging.
+		 *
+		 * @param inputs Entire input given to the GUI.
 		 */
-		void handleMove(const std::vector<std::string>&);
+		void handleMove(const std::vector<std::string>& inputs);
 
 		/**
 		 * @brief Handle the undo command. Used for debugging.
@@ -167,8 +171,10 @@ class Sicario {
 
 		/**
 		 * @brief Handle the random command. Used for debugging.
+		 *
+		 * @param inputs Entire input given to the GUI.
 		 */
-		void handleRandom();
+		void handleRandom(const std::vector<std::string>& inputs);
 
 		/**
 		 * @brief Handle the state command. Used for debugging.
@@ -183,44 +189,44 @@ class Sicario {
 		/**
 		 * @brief Send the invalid command message.
 		 *
-		 * @param commands Entire input given to the GUI.
+		 * @param inputs Entire input given to the GUI.
 		 */
-		void sendInvalidCommand(const std::vector<std::string>& commands);
+		void sendInvalidCommand(const std::vector<std::string>& inputs);
 
 		/**
 		 * @brief Send the missing argument message.
 		 *
-		 * @param commands Entire input given to the GUI.
+		 * @param inputs Entire input given to the GUI.
 		 */
-		void sendMissingArgument(const std::vector<std::string>&);
+		void sendMissingArgument(const std::vector<std::string>& inputs);
 
 		/**
 		 * @brief Send the invalid argument message.
 		 *
-		 * @param commands Entire input given to the GUI.
+		 * @param inputs Entire input given to the GUI.
 		 */
-		void sendInvalidArgument(const std::vector<std::string>&);
+		void sendInvalidArgument(const std::vector<std::string>& inputs);
 
 		/**
 		 * @brief Send the unknown option message.
 		 *
-		 * @param commands Entire input given to the GUI.
+		 * @param inputs Entire input given to the GUI.
 		 */
-		void sendUnknownOption(const std::vector<std::string>&);
+		void sendUnknownOption(const std::vector<std::string>& inputs);
 
 		/**
 		 * @brief Send the invalid value message.
 		 *
-		 * @param commands Entire input given to the GUI.
+		 * @param inputs Entire input given to the GUI.
 		 */
-		void sendInvalidValue(const std::vector<std::string>&);
+		void sendInvalidValue(const std::vector<std::string>& inputs);
 
 		/**
 		 * @brief Send the argument out fo range message.
 		 *
-		 * @param commands Entire input given to the GUI.
+		 * @param inputs Entire input given to the GUI.
 		 */
-		void sendArgumentOutOfRange(const std::vector<std::string>&);
+		void sendArgumentOutOfRange(const std::vector<std::string>& inputs);
 
 		/**
 		 * @brief Set the thread option.
@@ -314,16 +320,18 @@ class Sicario {
 		/**
 		 * @brief Get the option name from the setOption command.
 		 *
-		 * @return Entire input given to the GUI.
+		 * @param inputs Entire input given to the GUI.
+		 * @return Name of the input option.
 		 */
-		std::string getOptionName(const std::vector<std::string>&);
+		std::string getOptionName(const std::vector<std::string>& inputs);
 
 		/**
 		 * @brief Get the option value from the setOption command.
 		 *
-		 * @return Entire input given to the GUI.
+		 * @param inputs Entire input given to the GUI.
+		 * @return Value of the input option.
 		 */
-		std::string getOptionValue(const std::vector<std::string>&);
+		std::string getOptionValue(const std::vector<std::string>& inputs);
 
 		/**
 		 * @brief Begins search.

@@ -7,7 +7,7 @@ void MiniMax::search() {
 	float minInfinity = std::numeric_limits<float>::min();
 	float maxInfinity = std::numeric_limits<float>::max();
 	int depth = 5;
-	float val = evaluate(pos, depth, minInfinity, maxInfinity, pos.getTurn());
+	evaluate(pos, depth, minInfinity, maxInfinity, pos.getTurn());
 }
 
 float MiniMax::evaluate(Position& pos, int depth, float alpha, float beta, Player player) {
