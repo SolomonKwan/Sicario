@@ -1,5 +1,4 @@
-#ifndef CONSTANTS_HPP
-#define CONSTANTS_HPP
+#pragma once
 
 #ifndef NDEBUG
 	#define DEBUG_LOG(x) std::cout << "\u001b[35m[ DEBUG ] " << x << "\033[0m\n";
@@ -266,5 +265,3 @@ inline Rank operator--(Rank& rank, int) {
 inline Player operator!(const Player& player) {
 	return static_cast<Player>(1U - player);
 }
-
-#endif

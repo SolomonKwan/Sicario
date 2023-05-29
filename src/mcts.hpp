@@ -1,5 +1,4 @@
-#ifndef MCTS_HPP
-#define MCTS_HPP
+#pragma once
 
 #include "search.hpp"
 
@@ -36,5 +35,3 @@ class MctsNode : public BaseNode {
 			}
 		};
 };
-
-#endif

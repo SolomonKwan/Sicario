@@ -1,6 +1,5 @@
 
-#ifndef EVALUATE_HPP
-#define EVALUATE_HPP
+#pragma once
 
 #include "constants.hpp"
 #include "game.hpp"
@@ -266,5 +265,3 @@ namespace Evaluator {
 	 */
 	GameStage getStage(Position& position);
 };
-
-#endif

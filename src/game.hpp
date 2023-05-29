@@ -1,5 +1,4 @@
-#ifndef GAME_HPP
-#define GAME_HPP
+#pragma once
 
 #include <cmath>
 
@@ -835,5 +834,3 @@ std::array<Hash, CASTLING_COMBOS> generateCastlingHash();
  * @return Array of size 8 (number of files) of Hashes.
  */
 std::array<Hash, FILE_COUNT> generateEnPassantHash();
-
-#endif

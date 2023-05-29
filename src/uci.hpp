@@ -1,6 +1,4 @@
-
-#ifndef UCI_HPP
-#define UCI_HPP
+#pragma once
 
 #include "sicario.hpp"
 #include "game.hpp"
@@ -58,5 +56,3 @@ namespace Uci {
  * @param code ExitCode of the current position.
  */
 void showEogMessage(ExitCode code);
-
-#endif

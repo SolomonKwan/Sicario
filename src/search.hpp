@@ -1,5 +1,4 @@
-#ifndef SEARCH_HPP
-#define SEARCH_HPP
+#pragma once
 
 #include <vector>
 #include <memory>
@@ -46,5 +45,3 @@ class BaseNode {
 
 		virtual void addChild(Move move) = 0;
 };
-
-#endif

@@ -1,6 +1,4 @@
-
-#ifndef MOVEGEN_HPP
-#define MOVEGEN_HPP
+#pragma once
 
 #ifdef USE_PEXT
 #include <x86intrin.h>
@@ -337,5 +335,3 @@ struct History {
 	Move move;          // The move that resulted in the current position.
 	PieceType captured; // The piece captured just before the current position (if any).
 };
-
-#endif

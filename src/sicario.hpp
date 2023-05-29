@@ -1,6 +1,4 @@
-
-#ifndef SICARIO_HPP
-#define SICARIO_HPP
+#pragma once
 
 #include <atomic>
 #include <thread>
@@ -356,5 +354,3 @@ class Sicario {
 			return this->position;
 		}
 };
-
-#endif

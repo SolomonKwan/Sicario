@@ -1,5 +1,4 @@
-#ifndef MINIMAX_HPP
-#define MINIMAX_HPP
+#pragma once
 
 #include "search.hpp"
 
@@ -10,5 +9,3 @@ class MiniMax : public BaseSearcher {
 		void search();
 		float evaluate(Position& pos, int depth, float alpha, float beta, Player player);
 };
-
-#endif

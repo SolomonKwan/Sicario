@@ -1,5 +1,4 @@
-#ifndef BITBOARD_HPP
-#define BITBOARD_HPP
+#pragma once
 
 #include "constants.hpp"
 
@@ -458,5 +457,3 @@ namespace Shifts::Block {
 		60, 60, 60, 60, 60, 60, 60, 60
 	};
 }
-
-#endif

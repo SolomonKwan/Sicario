@@ -1,5 +1,4 @@
-#ifndef UTILS_HPP
-#define UTILS_HPP
+#pragma once
 
 #include "constants.hpp"
 #include <vector>
@@ -180,5 +179,3 @@ template<typename T>
 inline bool isSet(T number, uint index) {
 	return number & (static_cast<T>(1) << index);
 }
-
-#endif
