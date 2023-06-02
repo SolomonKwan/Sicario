@@ -54,10 +54,7 @@ either for development/debugging purposes or just for curiosity. They are as fol
 	<li><code>display</code> - Displays an UNICODE representation of the current game state.</li>
 	<li><code>moves</code> - Displays the current moves available in the position in algebraic notation.</li>
 	<li><code>bitboards</code> - Displays the bitboards of the current position (useful for debugging).</li>
-	<li>
-		<code>random</code> - Plays out 1000000000 games to the end with completely random moves. Only prints to console
-		the end result of each game (who wins or the kind of draw).
-	</li>
+	<li><code>random</code> - Plays random games to the end and prints to the console the end results.</li>
 	<li>
 		<code>state</code> - Prints the state of the current position. (i.e. Normal ply (game is still ongoing), type of
 		checkmate, or type of draw).
