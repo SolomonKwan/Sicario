@@ -13,7 +13,7 @@ about 32 bit CPUs).
 To compile it using the GNU C++ compiler, run the following:
 
 ```
-make [OPTIMISE=TRUE|FALSE] [NDEBUG=TRUE|FALSE] [PEXT=TRUE|FALSE]
+make [OPTIMISE=TRUE|FALSE] [NDEBUG=TRUE|FALSE] [PEXT=TRUE|FALSE] sicario
 ```
 
 If any of the available options (<code>OPTIMISE</code>, <code>NDEBUG</code>, <code>PEXT</code>) are not provided, it is
