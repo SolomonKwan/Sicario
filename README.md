@@ -67,32 +67,45 @@ either for development/debugging purposes or just for curiosity. They are as fol
 
 ## Testing
 
-In the <code>tests</code> directory are the resources and files that are needed to run the tests. The
-<code>test.cpp</code> file was used only for initial stages of development (hence all the hardcoding). It is not needed
-anymore but I keep it around on the off chance it becomes useful. Should you wish to compile it, simply run the
-<code>make test</code> (assuming you are using GNU). This should create an executable called <code>test</code> in the
-<code>tests</code> directory. Running this executable should result in 570 passing tests. If any are failing then you
-have probably made an unintended change to a file somewhere. In that, sense its a good sanity check test.
+In the <code>tests</code> directory are the resources and files that are needed to run the tests.
 
-The shell script <code>test.sh</code> is also a sanity check testing script but more comprehensive. Some of the
-functionality of this script will require Stockfish. The following is how to run:
+There are 2 shell scripts in this directory. They are <code>perftSuite.sh</code> and <code>perftDiff.sh</code>. The
+former is for running perft on Sicario for a bunch of different test cases and checking that it counts the correct
+number of leaf nodes. The latter, is for when there is a bug in the engine and you want to find out where it differs
+from another engine.
+
+The script <code>perftSuite.sh</code> is for testing move generation. It should be run whenever changes are made. If all
+tests are passing, then you can be confident that there are no obvious mistakes (needless to say, not a guarantee). It
+is used as follows:
 
 ```
-./test.sh [perft depth position]|perft_suite|check
+Usage: ./perftsuite depth
+    depth: The depth to perform the perft to. Any integer from 1 to 6.
 ```
 
-The first option (<code>perft depth position</code>) runs the perft command on both Sicario and Stockfish and compares
-the output of both to show any discrepancies. The argument <code>depth</code> is the depth to run perft to and
-<code>position</code> is the FEN representation of the position to run perft on.
+The maximum depth is 6 because it takes an inordinate amount of time to compute at greater depths. If you wish to add a
+new position to the suite, add it to the <code>perftsuite.epd</code> file in the same format as the other entries.
 
-The second option (<code>perft_suite</code>) runs perft on all the positions in the file <code>perftsuite.epd</code> to
-a depth of 6 and compares the number of leaf nodes counted to the known value recorded in the file.
+The script <code>perftDiff.sh</code> is useful when there is an error in move generation. Running this will show a
+breakdown of where Sicario differs to Stockfish in the perft result. It is used as follows:
 
-The last option (<code>check</code>) runs perft on the start and "kiwipete" position for both Sicario and Stockfish and
-compares the number of leaf nodes counted.
+```
+Usage: ./perftDiff.sh depth fen
+    depth: The depth to perform the perft to.
+    fen: FEN string of the position to run perft on. Enclose with quotes (", ')
+```
+
+Currently, it assumes that there is an existing Stockfish binary called <code>stockfish</code> in the same
+directory. You will have to include this binary youself first.
 
 The file <code>pos.txt</code> contains some different forced mate positions or positions where there is/are only a
 number of moves that are not losing. These can be used in the future for AI testing.
+
+The <code>test.cpp</code> file was used only for initial stages of development (hence all the hardcoding). It is not
+needed anymore but I keep it around on the off chance it becomes useful. Should you wish to compile it, simply run the
+<code>make test</code> (assuming you are using GNU). This should create an executable called <code>test</code> in the
+<code>tests</code> directory. Running this executable should result in 570 passing tests. If any are failing then you
+have probably made an unintended change to a file somewhere.
 
 ## More Information
 
@@ -101,22 +114,6 @@ There are 2 other markdown files in this repo.
 <ul>
 	<li><code>AI.md</code> - Contains information on how the AI works.</li>
 	<li><code>MOVEGEN.md</code> - Contains information on how move generation works.</li>
-</ul>
-
-## Known Issues
-
-If you find an issue, a bug, or even something you think can be improved feel free to raise an issue. As this is still
-an ongoing project there are likely to be issues here and there.
-
-<ul>
-	<li>
-		In some terminal fonts, the name and logo does not render correctly. Might be worth trying to determine whether
-		or not something will render correctly (not sure if fixable).
-	</li>
-	<li>
-		The PV table or history position counter may have collisions due to different positions having the same hash.
-		Very unlikely, but possible. May need some kind of check
-	</li>
 </ul>
 
 ## Acknowledgements
