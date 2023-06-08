@@ -523,8 +523,8 @@ void Sicario::setOptionUciAnalyseMode(const std::string& value) {
 void Sicario::setOptionUciOpponent(const std::string& value) {
 	std::vector<std::string> values = split(value, " ");
 	OptionInfo& option = sicarioConfigs.options[UCI_OPPONENT];
-	if (value != "" || values.size() < 4 || !isValidTitle(values[0]) || !isValidElo(values[1]) ||
-			!isValidPlayerType(values[2])) {
+	if (value != "" && (values.size() < 4 || !isValidTitle(values[0]) || !isValidElo(values[1]) ||
+			!isValidPlayerType(values[2]))) {
 		sendInvalidArgument(value, "[GM|IM|FM|WGM|WIM|none] [<elo>|none] [computer|human] <name>");
 		return;
 	}
