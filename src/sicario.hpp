@@ -5,6 +5,8 @@
 #include "constants.hpp"
 #include "game.hpp"
 
+struct SetOptionPair;
+
 struct OptionInfo {
 	std::string name = "";
 	std::string type = "";
@@ -66,14 +68,6 @@ class Sicario {
 		 * @return Type of the input string.
 		 */
 		UciInput hashCommandInput(const std::string&);
-
-		/**
-		 * @brief Hash the input for a setoption command.
-		 *
-		 * @param inputs Entire input given to the GUI.
-		 * @return Type of the setOption command.
-		 */
-		ConfigOption hashOptionsInput(const std::vector<std::string>& inputs);
 
 		/**
 		 * @brief Handle the uci command.
@@ -188,57 +182,133 @@ class Sicario {
 		 * @brief Send the invalid command message.
 		 *
 		 * @param inputs Entire input given to the GUI.
+		 * @param customMsg A custom error message.
 		 */
-		void sendInvalidCommand(const std::vector<std::string>& inputs);
+		void sendInvalidCommand(const std::vector<std::string>& inputs, const std::string& customMsg = "");
 
 		/**
 		 * @brief Send the missing argument message.
 		 *
 		 * @param inputs Entire input given to the GUI.
+		 * @param customMsg A custom error message.
 		 */
-		void sendMissingArgument(const std::vector<std::string>& inputs);
+		void sendMissingArgument(const std::vector<std::string>& inputs, const std::string& customMsg = "");
 
 		/**
 		 * @brief Send the invalid argument message.
 		 *
-		 * @param inputs Entire input given to the GUI.
+		 * @param value The invalid value.
+		 * @param customMsg A custom error message.
 		 */
-		void sendInvalidArgument(const std::vector<std::string>& inputs);
+		void sendInvalidArgument(const std::string& value, const std::string& customMsg = "");
 
 		/**
 		 * @brief Send the unknown option message.
 		 *
-		 * @param inputs Entire input given to the GUI.
+		 * @param option The unknown option.
+		 * @param customMsg A custom error message.
 		 */
-		void sendUnknownOption(const std::vector<std::string>& inputs);
+		void sendUnknownOption(const std::string& option, const std::string& customMsg = "");
 
 		/**
 		 * @brief Send the invalid value message.
 		 *
-		 * @param inputs Entire input given to the GUI.
+		 * @param value The value that is invalid.
+		 * @param customMsg A custom error message.
 		 */
-		void sendInvalidValue(const std::vector<std::string>& inputs);
+		void sendInvalidValue(const std::string& value, const std::string& customMsg = "");
 
 		/**
-		 * @brief Send the argument out fo range message.
+		 * @brief Send the argument out of range message.
 		 *
-		 * @param inputs Entire input given to the GUI.
+		 * @param value The value that is out of range.
+		 * @param customMsg A custom error message.
 		 */
-		void sendArgumentOutOfRange(const std::vector<std::string>& inputs);
+		void sendArgumentOutOfRange(const std::string& value, const std::string& customMsg = "");
 
 		/**
-		 * @brief Set the thread option.
+		 * @brief Set the Thread option.
 		 *
-		 * @param inputs Entire input given to the GUI.
+		 * @param value The value to set Thread to.
 		 */
-		void setOptionThread(const std::vector<std::string>& inputs);
+		void setOptionThread(const std::string& value);
 
 		/**
-		 * @brief Set the hash option.
+		 * @brief Set the Hash option.
 		 *
-		 * @param inputs Entire input given to the GUI.
+		 * @param inputs The value to set Hash to.
 		 */
-		void setOptionHash(const std::vector<std::string>& inputs);
+		void setOptionHash(const std::string& value);
+
+		/**
+		 * @brief Set the Ponder option.
+		 *
+		 * @param value The value to set Ponder to.
+		 */
+		void setOptionPonder(const std::string& value);
+
+		/**
+		 * @brief Set the OwnBook option.
+		 *
+		 * @param value The value to set OwnBook to.
+		 */
+		void setOptionOwnBook(const std::string& value);
+
+		/**
+		 * @brief Set the MultiPV option.
+		 *
+		 * @param value The value to set MultiPV to.
+		 */
+		void setOptionMultiPV(const std::string& value);
+
+		/**
+		 * @brief Set the UCI_ShowCurrLine option.
+		 *
+		 * @param value The value to set UCI_ShowCurrLine to.
+		 */
+		void setOptionUciShowCurrLine(const std::string& value);
+
+		/**
+		 * @brief Set the UCI_ShowRefutations option.
+		 *
+		 * @param value The value to set UCI_ShowRefutations to.
+		 */
+		void setOptionUciShowRefutations(const std::string& value);
+
+		/**
+		 * @brief Set the UCI_LimitStrength option.
+		 *
+		 * @param value The value to set UCI_LimitStrength to.
+		 */
+		void setOptionUciLimitStrength(const std::string& value);
+
+		/**
+		 * @brief Set the UCI_Elo option.
+		 *
+		 * @param value The value to set UCI_Elo to.
+		 */
+		void setOptionUciElo(const std::string& value);
+
+		/**
+		 * @brief Set the UCI_AnalyseMode option.
+		 *
+		 * @param value The value to set UCI_AnalyseMode to.
+		 */
+		void setOptionUciAnalyseMode(const std::string& value);
+
+		/**
+		 * @brief Set the UCI_Opponent option.
+		 *
+		 * @param value The value to set UCI_Opponent to.
+		 */
+		void setOptionUciOpponent(const std::string& value);
+
+		/**
+		 * @brief Set the ExpandTime option.
+		 *
+		 * @param value The value to set ExpandTime to.
+		 */
+		void setOptionExpandTime(const std::string& value);
 
 		/**
 		 * @brief Clear the hash.
@@ -246,90 +316,12 @@ class Sicario {
 		void setOptionClearHash();
 
 		/**
-		 * @brief Set the ponder option.
+		 * @brief Get the name and value of the setoption command.
 		 *
 		 * @param inputs Entire input given to the GUI.
+		 * @return SetOptionPair struct containing the name and value.
 		 */
-		void setOptionPonder(const std::vector<std::string>& inputs);
-
-		/**
-		 * @brief Set the ownBook option.
-		 *
-		 * @param inputs Entire input given to the GUI.
-		 */
-		void setOptionOwnBook(const std::vector<std::string>& inputs);
-
-		/**
-		 * @brief Set the multiPV option.
-		 *
-		 * @param inputs Entire input given to the GUI.
-		 */
-		void setOptionMultiPV(const std::vector<std::string>& inputs);
-
-		/**
-		 * @brief Set the uciShowCurrLine option.
-		 *
-		 * @param inputs Entire input given to the GUI.
-		 */
-		void setOptionUciShowCurrLine(const std::vector<std::string>& inputs);
-
-		/**
-		 * @brief Set the uciShowRefutations option.
-		 *
-		 * @param inputs Entire input given to the GUI.
-		 */
-		void setOptionUciShowRefutations(const std::vector<std::string>& inputs);
-
-		/**
-		 * @brief Set the uciLimitStrength option.
-		 *
-		 * @param inputs Entire input given to the GUI.
-		 */
-		void setOptionUciLimitStrength(const std::vector<std::string>& inputs);
-
-		/**
-		 * @brief Set the uciElo option.
-		 *
-		 * @param inputs Entire input given to the GUI.
-		 */
-		void setOptionUciElo(const std::vector<std::string>& inputs);
-
-		/**
-		 * @brief Set the uciAnalyseMode option.
-		 *
-		 * @param inputs Entire input given to the GUI.
-		 */
-		void setOptionUciAnalyseMode(const std::vector<std::string>& inputs);
-
-		/**
-		 * @brief Set the uciOpponent option.
-		 *
-		 * @param inputs Entire input given to the GUI.
-		 */
-		void setOptionUciOpponent(const std::vector<std::string>& inputs);
-
-		/**
-		 * @brief Set the expandTime option.
-		 *
-		 * @param inputs Entire input given to the GUI.
-		 */
-		void setOptionExpandTime(const std::vector<std::string>& inputs);
-
-		/**
-		 * @brief Get the option name from the setOption command.
-		 *
-		 * @param inputs Entire input given to the GUI.
-		 * @return Name of the input option.
-		 */
-		std::string getOptionName(const std::vector<std::string>& inputs);
-
-		/**
-		 * @brief Get the option value from the setOption command.
-		 *
-		 * @param inputs Entire input given to the GUI.
-		 * @return Value of the input option.
-		 */
-		std::string getOptionValue(const std::vector<std::string>& inputs);
+		SetOptionPair getOptionNameAndValue(const std::vector<std::string>& inputs);
 
 		/**
 		 * @brief Begins search.

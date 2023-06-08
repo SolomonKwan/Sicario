@@ -219,7 +219,6 @@ enum ConfigOption {
 	CLEAR_HASH,
 
 	CONFIGS_COUNT,
-	UNKNOWN_OPTION,
 };
 
 inline Square operator+(const Square& square, const Direction& direction) {

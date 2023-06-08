@@ -140,6 +140,18 @@ std::vector<size_t> rankSort(const std::vector<float>& v_temp) {
 	return result;
 }
 
+std::string trim(std::string string) {
+	string.erase(string.begin(), std::find_if(string.begin(), string.end(), [](unsigned char ch) {
+		return !std::isspace(ch);
+	}));
+
+	string.erase(std::find_if(string.rbegin(), string.rend(), [](unsigned char ch) {
+		return !std::isspace(ch);
+	}).base(), string.end());
+
+	return string;
+}
+
 Square mirror(Square square) {
 	return static_cast<Square>(static_cast<int>(square) ^ 56);
 }
