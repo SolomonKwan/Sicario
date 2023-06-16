@@ -198,6 +198,7 @@ enum UciInput {
 	RANDOMGAME,
 	STATE,
 	OPTIONS,
+	DATA,
 
 	// Sentinel for invalid command
 	INVALID_COMMAND
