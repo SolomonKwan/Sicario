@@ -9,37 +9,40 @@ OK="[  ${GREEN}OK${NC}  ]"
 FAIL="[ ${RED}FAIL${NC} ]"
 ERROR="[ ${YELLOW}ERRO${NC} ]"
 
+ERASE="\033[1K\r"
+
 main() {
 	helpCommand "$@"
-	cleanKeep "$@"
+	manualClean "$@"
 
 	# Test UCI commands
-	testUci
-	testDebug
-	testIsready
-	testSetoption
-	testUcinewgame
-	testPosition
-	testGo
-	testStop
-	testPonderhit
-	testQuit
+	echo "Testing UCI commands"
+	staticTest UCI
+	staticTest DEBUG
+	staticTest ISREADY
+	staticTest SETOPTION
+	staticTest UCINEWGAME
+	staticTest POSITION
+	variableTest GO
+	variableTest STOP
+	variableTest PONDERHIT
+	variableTest QUIT
 
 	# Test custom UCI commands
-	testPerft
-	testMove
-	testUndo
-	testDisplay
-	testMoves
-	testBitboards
-	testRandomgame
-	testState
-	testOptions
-	testData
-	testInvalid_command
+	staticTest PERFT
+	staticTest MOVE
+	staticTest UNDO
+	staticTest DISPLAY
+	staticTest MOVES
+	staticTest BITBOARDS
+	staticTest RANDOMGAME
+	staticTest STATE
+	staticTest OPTIONS
+	staticTest DATA
+	staticTest INVALID_COMMAND
 
 	# Test multiple commands
-	testMultiple
+	staticTest MULTIPLE
 
 	# Clean up
 	clean
@@ -56,285 +59,62 @@ helpCommand() {
 	fi
 }
 
-# Clean the keep files
-cleanKeep() {
+# Clean the tmp and keep files manually.
+manualClean() {
 	if [[ "$*" == *"-k"* ]]
 	then
-		rm output/*.tmp.keep
+		rm -f output/*.tmp
+		rm -f output/*.tmp.keep
 		exit 0
 	fi
 }
 
-testUci() {
-	printf "Testing UCI...\t\t\t"
-	../src/sicario > output/UCI.tmp < input/UCI.txt
+staticTest() {
+	printf "[  --  ] Testing $1..."
 
-	# Show result
-	if cmp -s output/UCI.tmp output/UCI.txt;
+	# Check if necessary files exist.
+	if ! filesExist $1
 	then
-		printf "$OK\n"
+		printf "$ERASE"
+		printf "$ERROR Input and/or output files (\"$1.txt\") do not exist.\n"
+		return 1
+	fi
+
+	# Parse the delay
+	if [ $# -lt 2 ]
+	then
+		DELAY=5
 	else
-		printf "$FAIL\n"
-		mv output/UCI.tmp output/UCI.tmp.keep
+		DELAY=$2
+	fi
+
+	# Run and compare result
+	timeout $DELAY ../src/sicario > output/$1.tmp < input/$1.txt
+	if [ $? -eq 124 ]
+	then
+		printf "$ERASE"
+		printf "$FAIL $1 - Timeout.\n"
+	elif cmp -s output/$1.tmp output/$1.txt;
+	then
+		printf "$ERASE"
+		printf "$OK $1\n"
+	else
+		printf "$ERASE"
+		printf "$FAIL $1 - Different output.\n"
+		mv output/$1.tmp output/$1.tmp.keep
 	fi
 }
 
-testDebug() {
-	printf "Testing DEBUG...\t\t"
-	../src/sicario > output/DEBUG.tmp < input/DEBUG.txt
-
-	# Show result
-	if cmp -s output/DEBUG.tmp output/DEBUG.txt;
-	then
-		printf "$OK\n"
-	else
-		printf "$FAIL\n"
-		mv output/DEBUG.tmp output/DEBUG.tmp.keep
-	fi
+variableTest() {
+	printf "$ERROR $1 - Not implemented\n"
 }
 
-testIsready() {
-	printf "Testing ISREADY...\t\t"
-	../src/sicario > output/ISREADY.tmp < input/ISREADY.txt
-
-	# Show result
-	if cmp -s output/ISREADY.tmp output/ISREADY.txt;
-	then
-		printf "$OK\n"
-	else
-		printf "$FAIL\n"
-		mv output/ISREADY.tmp output/ISREADY.tmp.keep
-	fi
-}
-
-testSetoption() {
-	printf "Testing SETOPTION...\t\t"
-	../src/sicario > output/SETOPTION.tmp < input/SETOPTION.txt
-
-	# Show result
-	if cmp -s output/SETOPTION.tmp output/SETOPTION.txt;
-	then
-		printf "$OK\n"
-	else
-		printf "$FAIL\n"
-		mv output/SETOPTION.tmp output/SETOPTION.tmp.keep
-	fi
-}
-
-testUcinewgame() {
-	printf "Testing UCINEWGAME...\t\t"
-	../src/sicario > output/UCINEWGAME.tmp < input/UCINEWGAME.txt
-
-	# Show result
-	if cmp -s output/UCINEWGAME.tmp output/UCINEWGAME.txt;
-	then
-		printf "$OK\n"
-	else
-		printf "$FAIL\n"
-		mv output/UCINEWGAME.tmp output/UCINEWGAME.tmp.keep
-	fi
-}
-
-testPosition() {
-	printf "Testing POSITION...\t\t"
-	../src/sicario > output/POSITION.tmp < input/POSITION.txt
-
-	# Show result
-	if cmp -s output/POSITION.tmp output/POSITION.txt;
-	then
-		printf "$OK\n"
-	else
-		printf "$FAIL\n"
-		mv output/POSITION.tmp output/POSITION.tmp.keep
-	fi
-}
-
-testGo() {
-	printf "Testing GO...\t\t\t$ERROR\n"
-}
-
-testStop() {
-	printf "Testing STOP...\t\t\t$ERROR\n"
-}
-
-testPonderhit() {
-	printf "Testing PONDERHIT...\t\t$ERROR\n"
-}
-
-testQuit() {
-	printf "Testing QUIT...\t\t\t"
-	../src/sicario > output/QUIT.tmp < input/QUIT.txt
-
-	# Show result
-	if cmp -s output/QUIT.tmp output/QUIT.txt;
-	then
-		printf "$OK\n"
-	else
-		printf "$FAIL\n"
-		mv output/QUIT.tmp output/QUIT.tmp.keep
-	fi
-}
-
-testPerft() {
-	printf "Testing PERFT...\t\t"
-	../src/sicario > output/PERFT.tmp < input/PERFT.txt
-
-	# Show result
-	if cmp -s output/PERFT.tmp output/PERFT.txt;
-	then
-		printf "$OK\n"
-	else
-		printf "$FAIL\n"
-		mv output/PERFT.tmp output/PERFT.tmp.keep
-	fi
-}
-
-testMove() {
-	printf "Testing MOVE...\t\t\t"
-	../src/sicario > output/MOVE.tmp < input/MOVE.txt
-
-	# Show result
-	if cmp -s output/MOVE.tmp output/MOVE.txt;
-	then
-		printf "$OK\n"
-	else
-		printf "$FAIL\n"
-		mv output/MOVE.tmp output/MOVE.tmp.keep
-	fi
-}
-
-testUndo() {
-	printf "Testing UNDO...\t\t\t"
-	../src/sicario > output/UNDO.tmp < input/UNDO.txt
-
-	# Show result
-	if cmp -s output/UNDO.tmp output/UNDO.txt;
-	then
-		printf "$OK\n"
-	else
-		printf "$FAIL\n"
-		mv output/UNDO.tmp output/UNDO.tmp.keep
-	fi
-}
-
-testDisplay() {
-	printf "Testing DISPLAY...\t\t"
-	../src/sicario > output/DISPLAY.tmp < input/DISPLAY.txt
-
-	# Show result
-	if cmp -s output/DISPLAY.tmp output/DISPLAY.txt;
-	then
-		printf "$OK\n"
-	else
-		printf "$FAIL\n"
-		mv output/DISPLAY.tmp output/DISPLAY.tmp.keep
-	fi
-}
-
-testMoves() {
-	printf "Testing MOVES...\t\t"
-	../src/sicario > output/MOVES.tmp < input/MOVES.txt
-
-	# Show result
-	if cmp -s output/MOVES.tmp output/MOVES.txt;
-	then
-		printf "$OK\n"
-	else
-		printf "$FAIL\n"
-		mv output/MOVES.tmp output/MOVES.tmp.keep
-	fi
-}
-
-testBitboards() {
-	printf "Testing BITBOARDS...\t\t"
-	../src/sicario > output/BITBOARDS.tmp < input/BITBOARDS.txt
-
-	# Show result
-	if cmp -s output/BITBOARDS.tmp output/BITBOARDS.txt;
-	then
-		printf "$OK\n"
-	else
-		printf "$FAIL\n"
-		mv output/BITBOARDS.tmp output/BITBOARDS.tmp.keep
-	fi
-}
-
-testRandomgame() {
-	printf "Testing RANDOMGAME...\t\t"
-	../src/sicario > output/RANDOMGAME.tmp < input/RANDOMGAME.txt
-
-	# Show result
-	if cmp -s output/RANDOMGAME.tmp output/RANDOMGAME.txt;
-	then
-		printf "$OK\n"
-	else
-		printf "$FAIL\n"
-		mv output/RANDOMGAME.tmp output/RANDOMGAME.tmp.keep
-	fi
-}
-
-testState() {
-	printf "Testing STATE...\t\t"
-	../src/sicario > output/STATE.tmp < input/STATE.txt
-
-	# Show result
-	if cmp -s output/STATE.tmp output/STATE.txt;
-	then
-		printf "$OK\n"
-	else
-		printf "$FAIL\n"
-		mv output/STATE.tmp output/STATE.tmp.keep
-	fi
-}
-
-testOptions() {
-	printf "Testing OPTIONS...\t\t"
-	../src/sicario > output/OPTIONS.tmp < input/OPTIONS.txt
-
-	# Show result
-	if cmp -s output/OPTIONS.tmp output/OPTIONS.txt;
-	then
-		printf "$OK\n"
-	else
-		printf "$FAIL\n"
-		mv output/OPTIONS.tmp output/OPTIONS.tmp.keep
-	fi
-}
-
-testData() {
-	printf "Testing DATA...\t\t\t"
-	../src/sicario > output/DATA.tmp < input/DATA.txt
-
-	# Show result
-	if cmp -s output/DATA.tmp output/DATA.txt;
-	then
-		printf "$OK\n"
-	else
-		printf "$FAIL\n"
-		mv output/DATA.tmp output/DATA.tmp.keep
-	fi
-}
-
-testInvalid_command() {
-	printf "Testing INVALID_COMMAND...\t"
-	../src/sicario > output/INVALID_COMMAND.tmp < input/INVALID_COMMAND.txt
-
-	# Show result
-	if cmp -s output/INVALID_COMMAND.tmp output/INVALID_COMMAND.txt;
-	then
-		printf "$OK\n"
-	else
-		printf "$FAIL\n"
-		mv output/INVALID_COMMAND.tmp output/INVALID_COMMAND.tmp.keep
-	fi
-}
-
-testMultiple() {
-	printf "Testing multiple...\t\t$ERROR\n"
+filesExist() {
+	[ -f output/$1.txt ] || [ -f input/$1.txt ]
 }
 
 clean() {
-	rm output/*.tmp
+	rm -f output/*.tmp
 }
 
 main "$@"
