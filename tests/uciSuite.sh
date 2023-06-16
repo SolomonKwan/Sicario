@@ -162,7 +162,17 @@ testPonderhit() {
 }
 
 testQuit() {
-	printf "Testing QUIT...\t\t\t$ERROR\n"
+	printf "Testing QUIT...\t\t\t"
+	../src/sicario > output/QUIT.tmp < input/QUIT.txt
+
+	# Show result
+	if cmp -s output/QUIT.tmp output/QUIT.txt;
+	then
+		printf "$OK\n"
+	else
+		printf "$FAIL\n"
+		mv output/QUIT.tmp output/QUIT.tmp.keep
+	fi
 }
 
 testPerft() {
