@@ -1673,6 +1673,12 @@ void Position::displayBitboards() const {
 	displayBB(this->pawns);
 }
 
+void Position::clearData() {
+	this->history.clear();
+	this->positionCounts.clear();
+	incrementPositionCounter();
+}
+
 std::string concatFEN(const std::vector<std::string> strings) {
 	std::string result = "";
 	for (uint i = 0; i < strings.size(); i++) {
