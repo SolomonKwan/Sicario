@@ -122,7 +122,17 @@ testSetoption() {
 }
 
 testUcinewgame() {
-	printf "Testing UCINEWGAME...\t\t$ERROR\n"
+	printf "Testing UCINEWGAME...\t\t"
+	../src/sicario > output/UCINEWGAME.tmp < input/UCINEWGAME.txt
+
+	# Show result
+	if cmp -s output/UCINEWGAME.tmp output/UCINEWGAME.txt;
+	then
+		printf "$OK\n"
+	else
+		printf "$FAIL\n"
+		mv output/UCINEWGAME.tmp output/UCINEWGAME.tmp.keep
+	fi
 }
 
 testPosition() {
