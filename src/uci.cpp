@@ -144,7 +144,7 @@ UciInput Sicario::hashCommandInput(const std::string& input) {
 	if (input == "random") return RANDOMGAME;
 	if (input == "state") return STATE;
 	if (input == "options") return OPTIONS;
-	if (input == "history") return DATA;
+	if (input == "data") return DATA;
 
 	return INVALID_COMMAND;
 }

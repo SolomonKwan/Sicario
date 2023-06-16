@@ -35,6 +35,7 @@ main() {
 	testRandomgame
 	testState
 	testOptions
+	testData
 	testInvalid_command
 
 	# Test multiple commands
@@ -277,6 +278,20 @@ testOptions() {
 	else
 		printf "$FAIL\n"
 		mv output/OPTIONS.tmp output/OPTIONS.tmp.keep
+	fi
+}
+
+testData() {
+	printf "Testing DATA...\t\t\t"
+	../src/sicario > output/DATA.tmp < input/DATA.txt
+
+	# Show result
+	if cmp -s output/DATA.tmp output/DATA.txt;
+	then
+		printf "$OK\n"
+	else
+		printf "$FAIL\n"
+		mv output/DATA.tmp output/DATA.tmp.keep
 	fi
 }
 

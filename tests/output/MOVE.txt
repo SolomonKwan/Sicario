@@ -40,3 +40,4 @@ En-passant: e3
 Halfmove: 0
 Fullmove: 1
 
+Invalid move
