@@ -300,11 +300,9 @@ void Sicario::handleRandom(const std::vector<std::string> &inputs) {
 	int iterations = inputs.size() == 2 ? std::stoi(inputs[1]) : 100;
 	for (int i = 0; i < iterations; i++) {
 		MoveList moves = MoveList(this->position);
-		std::vector<Move> playedMoves;
 		int moveCount = 0;
 		while (!this->position.isEOG(moves)) {
 			Move move = moves.randomMove();
-			playedMoves.push_back(move);
 			this->position.processMakeMove(move);
 			moves = MoveList(this->position);
 			moveCount++;
@@ -342,8 +340,11 @@ void Sicario::handleState() {
 
 void Sicario::handleOptions() {
 	for (int index = THREAD; index < CONFIGS_COUNT; index++) {
-		std::cout << sicarioConfigs.options[index].name << ' ';
-		std::cout << sicarioConfigs.options[index].value << '\n';
+		std::cout << sicarioConfigs.options[index].name;
+		if (sicarioConfigs.options[index].value != "")
+			std::cout << ' ' << sicarioConfigs.options[index].value << '\n';
+		else
+			std::cout << '\n';
 	}
 }
 
@@ -390,7 +391,8 @@ void Uci::sendInfo(SearchInfo& searchInfo) {
 }
 
 void Uci::sendOption(const OptionInfo& option) {
-	std::string optionString = "option name " + option.name + " type " + option.type + " default " + option.def;
+	std::string optionString =
+			"option name " + option.name + " type " + option.type + (option.def != "" ? " default " + option.def : "");
 	if (option.min != "") optionString += " min " + option.min + " max " + option.max;
 	for (std::string var : option.vars) optionString += " var " + var;
 	Uci::communicate(optionString);

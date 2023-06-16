@@ -1,0 +1,4 @@
+bitboards
+position fen 7K/7p/7k/8/8/8/8/8 b - - 0 1
+bitboards
+quit

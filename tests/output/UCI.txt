@@ -1,0 +1,29 @@
+  _______  _________  _______   ________   ________  _________  _______
+ (  ____ \ )__   __( (  ____ \ (  ____  ) (  ____  ) \__   __/ (  ___  )
+ | (    \/    ) (    | (    \/ | (    ) | | (    ) |    ) (    | (   ) |
+ | (_____     | |    | |       | (____) | | (____) |    | |    | |   | |
+ (_____  )    | |    | |       |  ____  | |     ___)    | |    | |   | |
+       ) |    | |    | |       | (    ) | | (\ (        | |    | |   | |
+ /\____) |  __) (__  | (____/\ | )    ( | | ) \ \___ ___) (___ | (___) |
+ \_______) /_______\ (_______/ |/      \| |/   \___/ )_______( (_______)
+
+Sicario (Iteration-8 v0.8.0)
+By S. Kwan
+
+id name Sicario (Iteration-8 v0.8.0)
+id author S. Kwan
+
+option name Thread type spin default 1 min 1 max 512
+option name Hash type spin default 16 min 0 max 5000
+option name Ponder type check default false
+option name OwnBook type check default false
+option name MultiPV type spin default 1 min 1 max 5
+option name UCI_ShowCurrLine type check default false
+option name UCI_ShowRefutations type check default false
+option name UCI_LimitStrength type check default false
+option name UCI_Elo type spin default 3000 min 1000 max 3500
+option name UCI_AnalyseMode type check default true
+option name UCI_Opponent type string
+option name ExpandTime type spin default 50 min 1 max 500
+option name ClearHash type button
+uciok

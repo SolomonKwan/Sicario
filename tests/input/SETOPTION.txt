@@ -1,0 +1,17 @@
+options
+setoption name thread value 2
+setoption name hash value 32
+setoption name ponder value true
+setoption name ownbook value true
+setoption name multipv value 2
+setoption name uci_showcurrline value true
+setoption name uci_showrefutations value true
+setoption name uci_limitstrength value true
+setoption name uci_elo value 2000
+setoption name uci_analysemode value false
+setoption name UCI_Opponent value GM 2800 human Gary Kasparov
+setoption name expandtime value 100
+options
+setoption name UCI_Opponent value
+options
+quit
