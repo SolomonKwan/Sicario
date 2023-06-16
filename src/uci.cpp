@@ -84,9 +84,6 @@ void Sicario::processInput(const std::string& input) {
 		case QUIT:
 			handleQuit();
 			break;
-		case INVALID_COMMAND:
-			sendInvalidCommand(commands);
-			break;
 		case PERFT:
 			handlePerft(commands);
 			break;
@@ -114,6 +111,13 @@ void Sicario::processInput(const std::string& input) {
 		case OPTIONS:
 			handleOptions();
 			break;
+		case DATA:
+			handleData();
+			break;
+		case INVALID_COMMAND:
+		default:
+			sendInvalidCommand(commands);
+			break;
 	}
 }
 
@@ -140,6 +144,7 @@ UciInput Sicario::hashCommandInput(const std::string& input) {
 	if (input == "random") return RANDOMGAME;
 	if (input == "state") return STATE;
 	if (input == "options") return OPTIONS;
+	if (input == "history") return DATA;
 
 	return INVALID_COMMAND;
 }
@@ -346,6 +351,19 @@ void Sicario::handleOptions() {
 		else
 			std::cout << '\n';
 	}
+}
+
+void Sicario::handleData() {
+	// Print the move history.
+	const std::vector<History>& historyVec = this->getPosition().getHistory();
+	for (const History& history : historyVec) {
+		printMove(history.move, false);
+		if (&history != &historyVec.back()) std::cout << ' ';
+	}
+	std::cout << '\n';
+
+	// Print the positionCounts size.
+	std::cout << this->getPosition().getPositionCounts().size() << '\n';
 }
 
 void Uci::communicate(std::string communication) {

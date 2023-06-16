@@ -100,6 +100,15 @@ class Position {
 		}
 
 		/**
+		 * @brief Get the positionCounts map.
+		 *
+		 * @return Reference to the positionCounts map.
+		 */
+		inline const std::unordered_map<Bitboard, int>& getPositionCounts() const {
+			return this->positionCounts;
+		}
+
+		/**
 		 * @brief Get the castling permissions.
 		 *
 		 * @return Integer representing castling permissions.
