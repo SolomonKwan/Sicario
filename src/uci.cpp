@@ -200,7 +200,7 @@ void Sicario::handleSetOption(const std::vector<std::string>& inputs) {
 }
 
 void Sicario::handleUciNewGame() {
-	// TODO Depends on implementation. Will do at end.
+	this->getPosition().clearData();
 }
 
 void Sicario::handlePosition(const std::vector<std::string>& inputs) {

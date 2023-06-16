@@ -159,6 +159,12 @@ class Position {
 			return this->piece_list[T][index];
 		}
 
+		/**
+		 * @brief Clears the history and positionCount data. Should be called when the ucinewgame command is received.
+		 * Leaves the positionCounts object with a single entry with a count of 1 for the current position.
+		 */
+		void clearData();
+
 	private:
 		// Non-position information
 		Player turn;
