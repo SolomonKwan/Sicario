@@ -24,9 +24,9 @@ main() {
 	staticTest UCINEWGAME
 	staticTest POSITION
 	variableTest GO
-	variableTest STOP
-	variableTest PONDERHIT
-	variableTest QUIT
+	notImplemented STOP
+	notImplemented PONDERHIT
+	notImplemented QUIT
 
 	# Test custom UCI commands
 	staticTest PERFT
@@ -42,7 +42,7 @@ main() {
 	staticTest INVALID_COMMAND
 
 	# Test multiple commands
-	staticTest MULTIPLE
+	notImplemented MULTIPLE
 
 	# Clean up
 	clean
@@ -106,7 +106,50 @@ staticTest() {
 }
 
 variableTest() {
-	printf "$ERROR $1 - Not implemented\n"
+	printf "[  --  ] Testing $1..."
+
+	# Check if necessary files exist.
+	if ! filesExist $1
+	then
+		printf "$ERASE"
+		printf "$ERROR Input and/or output files (\"$1.txt\") do not exist.\n"
+		return 1
+	fi
+
+	# Parse the delay
+	if [ $# -lt 2 ]
+	then
+		DELAY=5
+	else
+		DELAY=$2
+	fi
+
+	# Set up named pipe
+	mkfifo fifo
+	../src/sicario > output/$1.tmp.keep < fifo &
+
+	# Run and input commands
+	exec 3>fifo
+	while IFS= read -r line || [[ -n "$line" ]]; do
+		if [[ $line == "delay "* ]]
+		then
+			sleep $(cut -d " " -f2- <<< "$line")
+		else
+			echo $line >&3
+		fi
+	done < input/$1.txt
+	exec 3>&-
+
+	# Clean up
+	rm fifo
+
+	# Show result
+	printf "$ERASE"
+	printf "$ERROR $1 - hmmmm...\n"
+}
+
+notImplemented() {
+	printf "$ERROR $1 - Not implemented.\n"
 }
 
 filesExist() {
