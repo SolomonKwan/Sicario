@@ -185,7 +185,6 @@ void Sicario::handleSetOption(const std::vector<std::string>& inputs) {
 	else if (name == "uci_elo") return setOptionUciElo(value);
 	else if (name == "uci_analysemode") return setOptionUciAnalyseMode(value);
 	else if (name == "uci_opponent") return setOptionUciOpponent(value);
-	else if (name == "expandtime") return setOptionExpandTime(value);
 	else if (name == "clearhash") return setOptionClearHash();
 	else {
 		std::cerr << "This should not be happening..." << '\n';
@@ -526,15 +525,6 @@ void Sicario::setOptionUciOpponent(const std::string& value) {
 	if (value != "" && (values.size() < 4 || !isValidTitle(values[0]) || !isValidElo(values[1]) ||
 			!isValidPlayerType(values[2]))) {
 		sendInvalidArgument(value, "[GM|IM|FM|WGM|WIM|none] [<elo>|none] [computer|human] <name>");
-		return;
-	}
-	option.value = value;
-}
-
-void Sicario::setOptionExpandTime(const std::string& value) {
-	OptionInfo& option = sicarioConfigs.options[EXPAND_TIME];
-	if (std::stoi(value) < std::stoi(option.min) || std::stoi(value) > std::stoi(option.max)) {
-		sendArgumentOutOfRange(value);
 		return;
 	}
 	option.value = value;
