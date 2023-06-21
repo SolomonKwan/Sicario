@@ -84,9 +84,6 @@ void Sicario::processInput(const std::string& input) {
 		case QUIT:
 			handleQuit();
 			break;
-		case INVALID_COMMAND:
-			sendInvalidCommand(commands);
-			break;
 		case PERFT:
 			handlePerft(commands);
 			break;
@@ -114,6 +111,13 @@ void Sicario::processInput(const std::string& input) {
 		case OPTIONS:
 			handleOptions();
 			break;
+		case DATA:
+			handleData();
+			break;
+		case INVALID_COMMAND:
+		default:
+			sendInvalidCommand(commands);
+			break;
 	}
 }
 
@@ -140,6 +144,7 @@ UciInput Sicario::hashCommandInput(const std::string& input) {
 	if (input == "random") return RANDOMGAME;
 	if (input == "state") return STATE;
 	if (input == "options") return OPTIONS;
+	if (input == "data") return DATA;
 
 	return INVALID_COMMAND;
 }
@@ -194,7 +199,7 @@ void Sicario::handleSetOption(const std::vector<std::string>& inputs) {
 }
 
 void Sicario::handleUciNewGame() {
-	// TODO Depends on implementation. Will do at end.
+	this->getPosition().clearData();
 }
 
 void Sicario::handlePosition(const std::vector<std::string>& inputs) {
@@ -299,11 +304,9 @@ void Sicario::handleRandom(const std::vector<std::string> &inputs) {
 	int iterations = inputs.size() == 2 ? std::stoi(inputs[1]) : 100;
 	for (int i = 0; i < iterations; i++) {
 		MoveList moves = MoveList(this->position);
-		std::vector<Move> playedMoves;
 		int moveCount = 0;
 		while (!this->position.isEOG(moves)) {
 			Move move = moves.randomMove();
-			playedMoves.push_back(move);
 			this->position.processMakeMove(move);
 			moves = MoveList(this->position);
 			moveCount++;
@@ -341,9 +344,25 @@ void Sicario::handleState() {
 
 void Sicario::handleOptions() {
 	for (int index = THREAD; index < CONFIGS_COUNT; index++) {
-		std::cout << sicarioConfigs.options[index].name << ' ';
-		std::cout << sicarioConfigs.options[index].value << '\n';
+		std::cout << sicarioConfigs.options[index].name;
+		if (sicarioConfigs.options[index].value != "")
+			std::cout << ' ' << sicarioConfigs.options[index].value << '\n';
+		else
+			std::cout << '\n';
 	}
+}
+
+void Sicario::handleData() {
+	// Print the move history.
+	const std::vector<History>& historyVec = this->getPosition().getHistory();
+	for (const History& history : historyVec) {
+		printMove(history.move, false);
+		if (&history != &historyVec.back()) std::cout << ' ';
+	}
+	std::cout << '\n';
+
+	// Print the positionCounts size.
+	std::cout << this->getPosition().getPositionCounts().size() << '\n';
 }
 
 void Uci::communicate(std::string communication) {
@@ -385,11 +404,12 @@ void Uci::sendRegistration() {
 }
 
 void Uci::sendInfo(SearchInfo& searchInfo) {
-	std::cout << "depth " << searchInfo.depth << '\n';
+	std::cout << "info depth " << searchInfo.depth << '\n';
 }
 
 void Uci::sendOption(const OptionInfo& option) {
-	std::string optionString = "option name " + option.name + " type " + option.type + " default " + option.def;
+	std::string optionString =
+			"option name " + option.name + " type " + option.type + (option.def != "" ? " default " + option.def : "");
 	if (option.min != "") optionString += " min " + option.min + " max " + option.max;
 	for (std::string var : option.vars) optionString += " var " + var;
 	Uci::communicate(optionString);

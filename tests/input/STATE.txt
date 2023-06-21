@@ -1,0 +1,128 @@
+state
+position fen 5R1k/7p/7K/8/8/8/8/8 b - - 0 1
+state
+position fen 5r1K/7p/7k/8/8/8/8/8 w - - 0 1
+state
+position fen 8/8/8/8/8/7k/7p/7K w - - 0 1
+state
+position fen rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
+move g1f3
+move g8f6
+move f3g1
+move f6g8
+move g1f3
+move g8f6
+move f3g1
+move f6g8
+state
+position fen 4k3/8/8/8/8/8/8/4K2R w - - 0 1
+move h1h7
+move e8d8
+move e1d2
+move d8c8
+move h7c7
+move c8b8
+move c7h7
+move b8c8
+move h7h2
+move c8d8
+move d2e1
+move d8c8
+move e1f2
+move c8b8
+move h2h6
+move b8a7
+move f2g1
+move a7a8
+move g1f1
+move a8b7
+move f1g2
+move b7b8
+move h6f6
+move b8a7
+move f6d6
+move a7b8
+move g2g1
+move b8a8
+move d6d3
+move a8b8
+move d3d5
+move b8c7
+move g1h2
+move c7b7
+move d5d2
+move b7c8
+move h2h3
+move c8b7
+move d2h2
+move b7b6
+move h2e2
+move b6c7
+move h3g4
+move c7d6
+move e2e5
+move d6d7
+move g4h4
+move d7c7
+move e5h5
+move c7c6
+move h4g5
+move c6b7
+move g5f6
+move b7a6
+move f6e6
+move a6b6
+move e6f6
+move b6c6
+move f6f7
+move c6d6
+move h5h1
+move d6c7
+move f7f6
+move c7b8
+move f6f7
+move b8b7
+move h1h6
+move b7c8
+move h6h5
+move c8d8
+move f7g7
+move d8e7
+move g7g8
+move e7d7
+move g8f7
+move d7c6
+move f7f8
+move c6d7
+move f8f7
+move d7d8
+move f7e6
+move d8c8
+move h5f5
+move c8b7
+move e6f6
+move b7a6
+move f5h5
+move a6a7
+move h5h8
+move a7b6
+move f6g6
+move b6b5
+move g6g5
+move b5a5
+move g5h4
+move a5b6
+move h8b8
+move b6c5
+move h4g3
+move c5c4
+state
+position fen 4k3/8/8/8/8/8/8/4K2R w - - 0 1
+move h1h5
+move e8f7
+move h5f5
+move f7e6
+move e1e2
+move e6f5
+state
+quit

@@ -100,6 +100,15 @@ class Position {
 		}
 
 		/**
+		 * @brief Get the positionCounts map.
+		 *
+		 * @return Reference to the positionCounts map.
+		 */
+		inline const std::unordered_map<Bitboard, int>& getPositionCounts() const {
+			return this->positionCounts;
+		}
+
+		/**
 		 * @brief Get the castling permissions.
 		 *
 		 * @return Integer representing castling permissions.
@@ -149,6 +158,12 @@ class Position {
 		inline const Square getPieceSquare(const uint index) const {
 			return this->piece_list[T][index];
 		}
+
+		/**
+		 * @brief Clears the history and positionCount data. Should be called when the ucinewgame command is received.
+		 * Leaves the positionCounts object with a single entry with a count of 1 for the current position.
+		 */
+		void clearData();
 
 	private:
 		// Non-position information

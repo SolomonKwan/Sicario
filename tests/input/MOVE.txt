@@ -1,0 +1,5 @@
+display
+move e2e4
+display
+move e2e4
+quit

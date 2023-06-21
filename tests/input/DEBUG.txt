@@ -1,0 +1,4 @@
+debug on
+perft 1
+debug off
+quit

@@ -179,6 +179,11 @@ class Sicario {
 		void handleOptions();
 
 		/**
+		 * @brief Handle the data command. Used for debugging.
+		 */
+		void handleData();
+
+		/**
 		 * @brief Send the invalid command message.
 		 *
 		 * @param inputs Entire input given to the GUI.
