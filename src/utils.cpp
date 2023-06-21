@@ -36,14 +36,12 @@ bool isPostiveInteger(const std::string str) {
 
 void displayBB(const uint64_t position) {
 	std::string positionString = std::bitset<SQUARE_COUNT>(position).to_string();
-	std::cout << "\n";
 	for (int i = 0; i < 8; i++) {
 		// Reverse each line then print.
 		std::string line = positionString.substr(8 * i, 8);
 		std::reverse(line.begin(), line.end());
 		std::cout << line << '\n';
 	}
-	std::cout << '\n' << std::flush;
 }
 
 void printMove(const Move move, const bool extraInfo, const bool flush) {
@@ -138,6 +136,18 @@ std::vector<size_t> rankSort(const std::vector<float>& v_temp) {
 		result[v_sort[i].second] = rank.second + 1;
 	}
 	return result;
+}
+
+std::string trim(std::string string) {
+	string.erase(string.begin(), std::find_if(string.begin(), string.end(), [](unsigned char ch) {
+		return !std::isspace(ch);
+	}));
+
+	string.erase(std::find_if(string.rbegin(), string.rend(), [](unsigned char ch) {
+		return !std::isspace(ch);
+	}).base(), string.end());
+
+	return string;
 }
 
 Square mirror(Square square) {

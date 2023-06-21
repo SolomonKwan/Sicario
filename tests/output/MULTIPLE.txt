@@ -1,0 +1,298 @@
+  _______  _________  _______   ________   ________  _________  _______
+ (  ____ \ )__   __( (  ____ \ (  ____  ) (  ____  ) \__   __/ (  ___  )
+ | (    \/    ) (    | (    \/ | (    ) | | (    ) |    ) (    | (   ) |
+ | (_____     | |    | |       | (____) | | (____) |    | |    | |   | |
+ (_____  )    | |    | |       |  ____  | |     ___)    | |    | |   | |
+       ) |    | |    | |       | (    ) | | (\ (        | |    | |   | |
+ /\____) |  __) (__  | (____/\ | )    ( | | ) \ \___ ___) (___ | (___) |
+ \_______) /_______\ (_______/ |/      \| |/   \___/ )_______( (_______)
+
+Sicario (Iteration-8 v0.8.0)
+By S. Kwan
+
+id name Sicario (Iteration-8 v0.8.0)
+id author S. Kwan
+
+option name Thread type spin default 1 min 1 max 512
+option name Hash type spin default 16 min 0 max 5000
+option name Ponder type check default false
+option name OwnBook type check default false
+option name MultiPV type spin default 1 min 1 max 5
+option name UCI_ShowCurrLine type check default false
+option name UCI_ShowRefutations type check default false
+option name UCI_LimitStrength type check default false
+option name UCI_Elo type spin default 3000 min 1000 max 3500
+option name UCI_AnalyseMode type check default true
+option name UCI_Opponent type string
+option name ClearHash type button
+uciok
+readyok
+Thread 1
+Hash 16
+Ponder false
+OwnBook false
+MultiPV 1
+UCI_ShowCurrLine false
+UCI_ShowRefutations false
+UCI_LimitStrength false
+UCI_Elo 3000
+UCI_AnalyseMode true
+UCI_Opponent
+ClearHash
+Thread 2
+Hash 32
+Ponder true
+OwnBook true
+MultiPV 2
+UCI_ShowCurrLine true
+UCI_ShowRefutations true
+UCI_LimitStrength true
+UCI_Elo 2000
+UCI_AnalyseMode false
+UCI_Opponent GM 2800 human Gary Kasparov
+ClearHash
+Unknown command: option
+Thread 2
+Hash 32
+Ponder true
+OwnBook true
+MultiPV 2
+UCI_ShowCurrLine true
+UCI_ShowRefutations true
+UCI_LimitStrength true
+UCI_Elo 2000
+UCI_AnalyseMode false
+UCI_Opponent
+ClearHash
+b1c3: 1
+b1a3: 1
+g1h3: 1
+g1f3: 1
+a2a3: 1
+a2a4: 1
+b2b3: 1
+b2b4: 1
+c2c3: 1
+c2c4: 1
+d2d3: 1
+d2d4: 1
+e2e3: 1
+e2e4: 1
+f2f3: 1
+f2f4: 1
+g2g3: 1
+g2g4: 1
+h2h3: 1
+h2h4: 1
+Nodes searched: 20
+regex [0-9]+ns
+regex [0-9]+μs
+regex [0-9]+ms
+regex [0-9]+s
+b1c3: 1
+b1a3: 1
+g1h3: 1
+g1f3: 1
+a2a3: 1
+a2a4: 1
+b2b3: 1
+b2b4: 1
+c2c3: 1
+c2c4: 1
+d2d3: 1
+d2d4: 1
+e2e3: 1
+e2e4: 1
+f2f3: 1
+f2f4: 1
+g2g3: 1
+g2g4: 1
+h2h3: 1
+h2h4: 1
+Nodes searched: 20
+b5c6: 3
+b5d7: 22
+b5c4: 20
+b5d3: 21
+b5e2: 21
+b5f1: 21
+b5a6: 3
+b5b6: 2
+b5c5: 17
+b5d5: 1
+b5e5: 22
+b5f5: 22
+b5g5: 22
+b5h5: 22
+b5b4: 15
+b5b3: 15
+b5b2: 15
+b5b1: 15
+b5a5: 20
+a4b6: 13
+a4c5: 1
+a4c3: 13
+a4b2: 13
+c7b8q: 1
+c7b8r: 1
+c7b8b: 13
+c7b8n: 13
+e4e5: 13
+a2a3: 13
+c2c3: 13
+c2c4: 13
+g2g3: 14
+g2g4: 14
+h2h3: 13
+h2h4: 13
+Nodes searched: 473
+Invalid move
+White wins
+Normal ply
+b5d5 b7a6
+3
+There are 35 moves
+d5e6 Normal n
+d5f7 Normal n
+d5g8 Normal n
+d5c4 Normal n
+d5b3 Normal n
+d5c6 Normal n
+d5b7 Normal n
+d5a8 Normal n
+d5e5 Normal n
+d5f5 Normal n
+d5g5 Normal n
+d5h5 Normal n
+d5d4 Normal n
+d5d3 Normal n
+d5d2 Normal n
+d5d1 Normal n
+d5c5 Normal n
+d5b5 Normal n
+d5a5 Normal n
+a4b6 Normal n
+a4c5 Normal n
+a4c3 Normal n
+a4b2 Normal n
+h2h3 Normal n
+h2h4 Normal n
+e4e5 Normal n
+a2a3 Normal n
+c2c3 Normal n
+c2c4 Normal n
+g2g3 Normal n
+g2g4 Normal n
+c7b8 Promotion q
+c7b8 Promotion r
+c7b8 Promotion b
+c7b8 Promotion n
+readyok
+8 [1;30;47m  [0m[1;30;45m♜ [0m[1;30;47m♝ [0m[1;30;45m  [0m[1;30;47m  [0m[1;30;45m  [0m[1;30;47m  [0m[1;30;45m♜ [0m
+7 [1;30;45m♟ [0m[1;30;47m  [0m[1;30;45m♙ [0m[1;30;47m♟ [0m[1;30;45m  [0m[1;30;47m  [0m[1;30;45m  [0m[1;30;47m♟ [0m
+6 [1;30;47m♚ [0m[1;30;45m♝ [0m[1;30;47m  [0m[1;30;45m♙ [0m[1;30;47m  [0m[1;30;45m  [0m[1;30;47m  [0m[1;30;45m♞ [0m
+5 [1;30;45m  [0m[1;30;47m  [0m[1;30;45m  [0m[1;30;47m♕ [0m[1;30;45m  [0m[1;30;47m  [0m[1;30;45m  [0m[1;30;47m  [0m
+4 [1;30;47m♘ [0m[1;30;45m  [0m[1;30;47m  [0m[1;30;45m  [0m[1;30;47m♙ [0m[1;30;45m♟ [0m[1;30;47m  [0m[1;30;45m  [0m
+3 [1;30;45m  [0m[1;30;47m  [0m[1;30;45m  [0m[1;30;47m  [0m[1;30;45m  [0m[1;30;47m  [0m[1;30;45m  [0m[1;30;47m  [0m
+2 [1;30;47m♙ [0m[1;30;45m  [0m[1;30;47m♙ [0m[1;30;45m  [0m[1;30;47m  [0m[1;30;45m  [0m[1;30;47m♙ [0m[1;30;45m♙ [0m
+1 [1;30;45m  [0m[1;30;47m  [0m[1;30;45m  [0m[1;30;47m  [0m[1;30;45m  [0m[1;30;47m  [0m[1;30;45m  [0m[1;30;47m♔ [0m
+  a b c d e f g h
+Turn: white
+Castling: -
+En-passant: -
+Halfmove: 3
+Fullmove: 1
+
+
+1
+regex info depth [1-9]+
+regex bestmove [a-h][1-8][a-h][1-8][n|b|r|q]
+regex info depth [1-9]+
+regex bestmove [a-h][1-8][a-h][1-8][n|b|r|q]
+8 [1;30;47m  [0m[1;30;45m♜ [0m[1;30;47m♝ [0m[1;30;45m  [0m[1;30;47m  [0m[1;30;45m  [0m[1;30;47m  [0m[1;30;45m♜ [0m
+7 [1;30;45m♟ [0m[1;30;47m  [0m[1;30;45m♙ [0m[1;30;47m♟ [0m[1;30;45m  [0m[1;30;47m  [0m[1;30;45m  [0m[1;30;47m♟ [0m
+6 [1;30;47m♚ [0m[1;30;45m♝ [0m[1;30;47m  [0m[1;30;45m♙ [0m[1;30;47m  [0m[1;30;45m  [0m[1;30;47m  [0m[1;30;45m♞ [0m
+5 [1;30;45m  [0m[1;30;47m  [0m[1;30;45m  [0m[1;30;47m♕ [0m[1;30;45m  [0m[1;30;47m  [0m[1;30;45m  [0m[1;30;47m  [0m
+4 [1;30;47m♘ [0m[1;30;45m  [0m[1;30;47m  [0m[1;30;45m  [0m[1;30;47m♙ [0m[1;30;45m♟ [0m[1;30;47m  [0m[1;30;45m  [0m
+3 [1;30;45m  [0m[1;30;47m  [0m[1;30;45m  [0m[1;30;47m  [0m[1;30;45m  [0m[1;30;47m  [0m[1;30;45m  [0m[1;30;47m  [0m
+2 [1;30;47m♙ [0m[1;30;45m  [0m[1;30;47m♙ [0m[1;30;45m  [0m[1;30;47m  [0m[1;30;45m  [0m[1;30;47m♙ [0m[1;30;45m♙ [0m
+1 [1;30;45m  [0m[1;30;47m  [0m[1;30;45m  [0m[1;30;47m  [0m[1;30;45m  [0m[1;30;47m  [0m[1;30;45m  [0m[1;30;47m♔ [0m
+  a b c d e f g h
+Turn: white
+Castling: -
+En-passant: -
+Halfmove: 3
+Fullmove: 1
+
+White:
+00000000
+00100000
+00010000
+00010000
+10001000
+00000000
+10100011
+00000001
+Black:
+01100001
+10010001
+11000001
+00000000
+00000100
+00000000
+00000000
+00000000
+Kings:
+00000000
+00000000
+10000000
+00000000
+00000000
+00000000
+00000000
+00000001
+Queens:
+00000000
+00000000
+00000000
+00010000
+00000000
+00000000
+00000000
+00000000
+Rooks:
+01000001
+00000000
+00000000
+00000000
+00000000
+00000000
+00000000
+00000000
+Bishops:
+00100000
+00000000
+01000000
+00000000
+00000000
+00000000
+00000000
+00000000
+Knights:
+00000000
+00000000
+00000001
+00000000
+10000000
+00000000
+00000000
+00000000
+Pawns:
+00000000
+10110001
+00010000
+00000000
+00001100
+00000000
+10100011
+00000000

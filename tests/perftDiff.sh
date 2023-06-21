@@ -22,9 +22,10 @@ main() {
 
 # Prints the usage message.
 showUsageMessage() {
-	echo "Usage: ./perftDiff.sh depth fen"
+	echo "Usage: ./perftDiff.sh depth fen [-h]"
 	echo "    depth: The depth to perform the perft to."
 	echo "    fen: FEN string of the position to run perft on. Enclose with quotes (\", ')"
+	echo "    -h: Display usage message."
 }
 
 # Checks for help flag.

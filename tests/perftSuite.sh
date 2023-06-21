@@ -20,10 +20,10 @@ main() {
 		local val=$(sicario "$FEN" $depth | cut -c 17-)
 		if [[ $val -eq $actualVal ]]
 		then
-			printf "[ ${GREEN}PASSED${NC} ] ${FEN}\n"
+			printf "[  ${GREEN}OK${NC}  ] ${FEN}\n"
 			((passedTests++))
 		else
-			printf "[ ${RED}FAILED${NC} ] ${FEN}\n"
+			printf "[ ${RED}FAIL${NC} ] ${FEN}\n"
 		fi
 	done < ./perftsuite.epd
 
@@ -32,16 +32,17 @@ main() {
 	then
 		echo "Perft suite testing OK"
 	else
-		printf "${GREEN}PASSED${NC}: $((passedTests))\n"
-		printf "${RED}FAILED${NC}: $((totalTests - passedTests))\n"
+		printf "${GREEN}OK${NC}: $((passedTests))\n"
+		printf "${RED}FAIL${NC}: $((totalTests - passedTests))\n"
 	fi
 	rm res.tmp
 }
 
 # Prints the usage message.
 showUsageMessage() {
-	echo "Usage: ./perftsuite depth"
+	echo "Usage: ./perftsuite depth [-h]"
 	echo "    depth: The depth to perform the perft to. Any integer from 1 to 6."
+	echo "    -h: Display usage message."
 }
 
 # Checks for help flag.

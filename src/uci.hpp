@@ -56,3 +56,8 @@ namespace Uci {
  * @param code ExitCode of the current position.
  */
 void showEogMessage(ExitCode code);
+
+struct SetOptionPair {
+	std::string name;
+	std::string value;
+};

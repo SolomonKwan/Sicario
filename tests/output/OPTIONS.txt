@@ -1,0 +1,24 @@
+  _______  _________  _______   ________   ________  _________  _______
+ (  ____ \ )__   __( (  ____ \ (  ____  ) (  ____  ) \__   __/ (  ___  )
+ | (    \/    ) (    | (    \/ | (    ) | | (    ) |    ) (    | (   ) |
+ | (_____     | |    | |       | (____) | | (____) |    | |    | |   | |
+ (_____  )    | |    | |       |  ____  | |     ___)    | |    | |   | |
+       ) |    | |    | |       | (    ) | | (\ (        | |    | |   | |
+ /\____) |  __) (__  | (____/\ | )    ( | | ) \ \___ ___) (___ | (___) |
+ \_______) /_______\ (_______/ |/      \| |/   \___/ )_______( (_______)
+
+Sicario (Iteration-8 v0.8.0)
+By S. Kwan
+
+Thread 1
+Hash 16
+Ponder false
+OwnBook false
+MultiPV 1
+UCI_ShowCurrLine false
+UCI_ShowRefutations false
+UCI_LimitStrength false
+UCI_Elo 3000
+UCI_AnalyseMode true
+UCI_Opponent
+ClearHash

@@ -198,6 +198,7 @@ enum UciInput {
 	RANDOMGAME,
 	STATE,
 	OPTIONS,
+	DATA,
 
 	// Sentinel for invalid command
 	INVALID_COMMAND
@@ -215,11 +216,9 @@ enum ConfigOption {
 	UCI_ELO,
 	UCI_ANALYSE_MODE,
 	UCI_OPPONENT,
-	EXPAND_TIME,
 	CLEAR_HASH,
 
 	CONFIGS_COUNT,
-	UNKNOWN_OPTION,
 };
 
 inline Square operator+(const Square& square, const Direction& direction) {

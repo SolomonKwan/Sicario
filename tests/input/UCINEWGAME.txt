@@ -1,0 +1,5 @@
+data
+move e2e4 e7e5
+ucinewgame
+data
+quit

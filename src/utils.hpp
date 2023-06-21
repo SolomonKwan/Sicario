@@ -168,6 +168,14 @@ std::vector<size_t> rankSort(const std::vector<float>& vec);
 Square mirror(Square square);
 
 /**
+ * @brief Returns a copy of the string with leading and trailing whitepaces removed.
+ *
+ * @param string The string to trim.
+ * @return A copy of the string with the leading and the trailing whitespaces removed.
+ */
+std::string trim(std::string string);
+
+/**
  * @brief Check if the bit at 'index' of 'number' is set.
  *
  * @tparam T Type

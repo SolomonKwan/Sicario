@@ -1,0 +1,4 @@
+go
+delay 5
+stop
+quit
