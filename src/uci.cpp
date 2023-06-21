@@ -405,7 +405,7 @@ void Uci::sendRegistration() {
 }
 
 void Uci::sendInfo(SearchInfo& searchInfo) {
-	std::cout << "depth " << searchInfo.depth << '\n';
+	std::cout << "info depth " << searchInfo.depth << '\n';
 }
 
 void Uci::sendOption(const OptionInfo& option) {

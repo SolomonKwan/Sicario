@@ -18,15 +18,15 @@ main() {
 	# Test UCI commands
 	echo "Testing UCI commands"
 	staticTest UCI
-	staticTest DEBUG
+	variableTest DEBUG
 	staticTest ISREADY
 	staticTest SETOPTION
 	staticTest UCINEWGAME
 	staticTest POSITION
 	variableTest GO
-	notImplemented STOP
+	variableTest STOP
 	notImplemented PONDERHIT
-	notImplemented QUIT
+	variableTest QUIT
 
 	# Test custom UCI commands
 	staticTest PERFT
@@ -42,27 +42,26 @@ main() {
 	staticTest INVALID_COMMAND
 
 	# Test multiple commands
-	notImplemented MULTIPLE
+	variableTest MULTIPLE
 
 	# Clean up
-	clean
+	clean "$@"
 }
 
 # Checks for help flag.
 helpCommand() {
-	if [[ "$*" == *"-h"* ]]
-	then
+	if [[ "$*" == *"-h"* ]]; then
 		echo "Usage: ./uciSuite.sh [-h]"
 		echo "    -h: Display usage message."
-		echo "    -k: Clean the keep files."
+		echo "    -c: Clean the keep files."
+		echo "    -k: Keep files from tests."
 		exit 0
 	fi
 }
 
 # Clean the tmp and keep files manually.
 manualClean() {
-	if [[ "$*" == *"-k"* ]]
-	then
+	if [[ "$*" == *"-c"* ]]; then
 		rm -f output/*.tmp
 		rm -f output/*.tmp.keep
 		exit 0
@@ -73,16 +72,12 @@ staticTest() {
 	printf "[  --  ] Testing $1..."
 
 	# Check if necessary files exist.
-	if ! filesExist $1
-	then
-		printf "$ERASE"
-		printf "$ERROR Input and/or output files (\"$1.txt\") do not exist.\n"
+	if ! filesExist $1; then
 		return 1
 	fi
 
 	# Parse the delay
-	if [ $# -lt 2 ]
-	then
+	if [ $# -lt 2 ]; then
 		DELAY=5
 	else
 		DELAY=$2
@@ -90,12 +85,10 @@ staticTest() {
 
 	# Run and compare result
 	timeout $DELAY ../src/sicario > output/$1.tmp < input/$1.txt
-	if [ $? -eq 124 ]
-	then
+	if [ $? -eq 124 ]; then
 		printf "$ERASE"
-		printf "$FAIL $1 - Timeout.\n"
-	elif cmp -s output/$1.tmp output/$1.txt;
-	then
+		printf "$ERROR $1 - Timeout.\n"
+	elif cmp -s output/$1.tmp output/$1.txt; then
 		printf "$ERASE"
 		printf "$OK $1\n"
 	else
@@ -109,30 +102,19 @@ variableTest() {
 	printf "[  --  ] Testing $1..."
 
 	# Check if necessary files exist.
-	if ! filesExist $1
-	then
-		printf "$ERASE"
-		printf "$ERROR Input and/or output files (\"$1.txt\") do not exist.\n"
+	if ! filesExist $1; then
 		return 1
-	fi
-
-	# Parse the delay
-	if [ $# -lt 2 ]
-	then
-		DELAY=5
-	else
-		DELAY=$2
 	fi
 
 	# Set up named pipe
 	mkfifo fifo
-	../src/sicario > output/$1.tmp.keep < fifo &
+	../src/sicario > output/$1.tmp < fifo &
+	sicariopid=$!
 
 	# Run and input commands
 	exec 3>fifo
 	while IFS= read -r line || [[ -n "$line" ]]; do
-		if [[ $line == "delay "* ]]
-		then
+		if [[ $line == "delay "* ]]; then
 			sleep $(cut -d " " -f2- <<< "$line")
 		else
 			echo $line >&3
@@ -143,9 +125,26 @@ variableTest() {
 	# Clean up
 	rm fifo
 
-	# Show result
-	printf "$ERASE"
-	printf "$ERROR $1 - hmmmm...\n"
+	# Check if process has ended
+	sleep 1
+	if kill -9 $sicariopid &> /dev/null; then
+		printf "$ERASE"
+		printf "$ERROR $1 - Sicario process was not ended correctly.\n"
+		return
+	fi
+
+	# Compare and show results
+	python3 compare.py $1
+	if [ $? -eq 0 ]; then
+		printf "$ERASE"
+		printf "$OK $1\n"
+	else
+		printf "$ERASE"
+		printf "$FAIL $1 - Different output.\n"
+		mv output/$1.tmp output/$1.tmp.keep
+	fi
+
+	return 0
 }
 
 notImplemented() {
@@ -153,11 +152,18 @@ notImplemented() {
 }
 
 filesExist() {
-	[ -f output/$1.txt ] || [ -f input/$1.txt ]
+	if ! [ -f output/$1.txt ] || ! [ -f input/$1.txt ]; then
+		printf "$ERASE"
+		printf "$ERROR Input and/or output files (\"$1.txt\") do not exist.\n"
+		return 1
+	fi
+	return 0
 }
 
 clean() {
-	rm -f output/*.tmp
+	if [[ "$*" != *"-k"* ]]; then
+		rm -f output/*.tmp
+	fi
 }
 
 main "$@"
