@@ -72,7 +72,7 @@ void assertEquals(TestType testType, T expected, T actual, int testNum) {
 	std::string testName = TESTS_NAMES[testType] + std::to_string(TESTS_COUNTS[testType]);
 	if (actual == expected) {
 		TESTS_PASSED++;
-		std::cout << testName  << "\t[ \033[0;32mPASSED\033[0m ]" << '\n';
+		std::cout << testName  << "\t[  \033[0;32mOK\033[0m  ]" << '\n';
 	} else {
 		TESTS_FAILED++;
 		std::cout << testName << "\t[ \033[0;31mFAILED\033[0m ]\t";
@@ -285,7 +285,7 @@ void run_getRookMovesIndex_tests() {
 			std::cout << testName << "\t[ \033[0;31mFAILED\033[0m ]\tSquare: " << squareName[sq] << '\n';
 		} else {
 			TESTS_PASSED++;
-			std::cout << testName << "\t[ \033[0;32mPASSED\033[0m ]\t" << '\n';
+			std::cout << testName << "\t[  \033[0;32mOK\033[0m  ]\t" << '\n';
 		}
 	}
 }
@@ -459,7 +459,7 @@ void run_getBishopMovesIndex_tests() {
 			std::cout << testName << "\t[ \033[0;31mFAILED\033[0m ]\tSquare: " << squareName[sq] << '\n';
 		} else {
 			TESTS_PASSED++;
-			std::cout << testName << "\t[ \033[0;32mPASSED\033[0m ]\t" << '\n';
+			std::cout << testName << "\t[  \033[0;32mOK\033[0m  ]\t" << '\n';
 		}
 	}
 }
@@ -506,7 +506,7 @@ void run_knightMagicNums_tests() {
 			std::cout << testName << "\t[ \033[0;31mFAILED\033[0m ]\tSquare: " << squareName[sq] << '\n';
 		} else {
 			TESTS_PASSED++;
-			std::cout << testName << "\t[ \033[0;32mPASSED\033[0m ]\t" << '\n';
+			std::cout << testName << "\t[  \033[0;32mOK\033[0m  ]\t" << '\n';
 		}
 	}
 }
@@ -553,7 +553,7 @@ void run_kingMagicNums_tests() {
 			std::cout << testName << "\t[ \033[0;31mFAILED\033[0m ]\tSquare: " << squareName[sq] << '\n';
 		} else {
 			TESTS_PASSED++;
-			std::cout << testName << "\t[ \033[0;32mPASSED\033[0m ]\t" << '\n';
+			std::cout << testName << "\t[  \033[0;32mOK\033[0m  ]\t" << '\n';
 		}
 	}
 }
@@ -596,7 +596,7 @@ void run_blackPawnMagicNums_tests() {
 			std::cout << testName << "\t[ \033[0;31mFAILED\033[0m ]\tSquare: " << squareName[sq] << '\n';
 		} else {
 			TESTS_PASSED++;
-			std::cout << testName << "\t[ \033[0;32mPASSED\033[0m ]\t" << '\n';
+			std::cout << testName << "\t[  \033[0;32mOK\033[0m  ]\t" << '\n';
 		}
 	}
 }
@@ -639,7 +639,7 @@ void run_whitePawnMagicNums_tests() {
 			std::cout << testName << "\t[ \033[0;31mFAILED\033[0m ]\tSquare: " << squareName[sq] << '\n';
 		} else {
 			TESTS_PASSED++;
-			std::cout << testName << "\t[ \033[0;32mPASSED\033[0m ]\t" << '\n';
+			std::cout << testName << "\t[  \033[0;32mOK\033[0m  ]\t" << '\n';
 		}
 	}
 }
@@ -681,7 +681,7 @@ void run_rookBlockMagicNums_tests() {
 			std::cout << testName << "\t[ \033[0;31mFAILED\033[0m ]\tSquare: " << squareName[sq] << '\n';
 		} else {
 			TESTS_PASSED++;
-			std::cout << testName << "\t[ \033[0;32mPASSED\033[0m ]" << '\n';
+			std::cout << testName << "\t[  \033[0;32mOK\033[0m  ]" << '\n';
 		}
 	}
 }
@@ -723,7 +723,7 @@ void run_bishopBlockMagicNums_tests() {
 			std::cout << testName << "\t[ \033[0;31mFAILED\033[0m ]\tSquare: " << squareName[sq] << '\n';
 		} else {
 			TESTS_PASSED++;
-			std::cout << testName << "\t[ \033[0;32mPASSED\033[0m ]" << '\n';
+			std::cout << testName << "\t[  \033[0;32mOK\033[0m  ]" << '\n';
 		}
 	}
 }
