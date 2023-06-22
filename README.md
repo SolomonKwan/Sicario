@@ -13,7 +13,7 @@ about 32 bit CPUs).
 To compile it using the GNU C++ compiler, run the following:
 
 ```
-make [OPTIMISE=TRUE|FALSE] [NDEBUG=TRUE|FALSE] [PEXT=TRUE|FALSE] sicario
+make [OPTIMISE=1|2|3] [NDEBUG=TRUE|FALSE] [PEXT=TRUE|FALSE]
 ```
 
 If any of the available options (<code>OPTIMISE</code>, <code>NDEBUG</code>, <code>PEXT</code>) are not provided, it is
@@ -21,18 +21,19 @@ assumed to take on the value <code>FALSE</code>. The meaning of the available op
 
 <ul>
 	<li>
-		<code>OPTIMISE</code> - If <code>TRUE</code> then the program compiles with the <code>-O3</code> flag, else it
-		does not compile with any optimisation flag.</br>
+		<code>OPTIMISE</code> - If provided, must be one of <code>1</code>, <code>2</code> or <code>3</code>,
+		corresponding to <code>-O1</code>, <code>-O2</code> and <code>-O3</code> respectively. If none is provided, the
+		optimise flag is not used.</br>
 	</li>
 	<li>
-		<code>NDEBUG</code> - If <code>TRUE</code> then all asserts and debugging related code is not compiled, else
-		they are compiled. </br>
+		<code>NDEBUG</code> - If <code>TRUE</code> then all asserts and debugging related code is not compiled. If
+		<code>FALSE</code> they are compiled. </br>
 	</li>
 	<li>
 		<code>PEXT</code> - If <code>TRUE</code> then the program will use the intrinsic <code>PEXT</code> (parallel
-		bit extract) intrinsic function when compiling, else it will use an alternative (more conventional)
-		implementation. Note that this should only be <code>TRUE</code> if the CPU that the program is to run on
-		supports the <code>PEXT</code> instruction.</br>
+		bit extract) intrinsic function when compiling. If <code>FALSE</code> it will use an alternative (more
+		conventional) implementation. Note that this should only be <code>TRUE</code> if the CPU that the program is to
+		run on supports the <code>PEXT</code> instruction.</br>
 	</li>
 </ul>
 
@@ -45,21 +46,35 @@ UCI protocol (keep in mind that not everything is implemented yet). I have inclu
 either for development/debugging purposes or just for curiosity. They are as follows:
 
 <ul>
-	<li><code>perft depth</code> - Performs perft to the given <code>depth</code>.</li>
+	<li>
+		<code>perft depth</code> - Performs perft to the given <code>depth</code>.
+	</li>
 	<li>
 		<code>move alg_move</code> - Makes <code>alg_move</code> in the current position. The argument
 		<code>alg_move</code> is given in algebraic notation.
 	</li>
-	<li><code>undo</code> - Undoes the last move played.</li>
-	<li><code>display</code> - Displays an UNICODE representation of the current game state.</li>
-	<li><code>moves</code> - Displays the current moves available in the position in algebraic notation.</li>
-	<li><code>bitboards</code> - Displays the bitboards of the current position (useful for debugging).</li>
-	<li><code>random</code> - Plays random games to the end and prints to the console the end results.</li>
+	<li>
+		<code>undo</code> - Undoes the last move played.
+	</li>
+	<li>
+		<code>display</code> - Displays an UNICODE representation of the current game state.
+	</li>
+	<li>
+		<code>moves</code> - Displays the current moves available in the position in algebraic notation.
+	</li>
+	<li>
+		<code>bitboards</code> - Displays the bitboards of the current position (useful for debugging).
+	</li>
+	<li>
+		<code>random</code> - Plays out completely random games and shows the end results.
+	</li>
 	<li>
 		<code>state</code> - Prints the state of the current position. (i.e. Normal ply (game is still ongoing), type of
 		checkmate, or type of draw).
 	</li>
-	<li><code>options</code> - Displays the engine options and their current values.</li>
+	<li>
+		<code>options</code> - Displays the engine options and their current values.
+	</li>
 </ul>
 
 ## Testing

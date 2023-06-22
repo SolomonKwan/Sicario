@@ -199,7 +199,9 @@ class Position {
 		Hash hash;
 
 		/**
-		 * @brief Get the piece type based on the base piece type.
+		 * @brief Get the piece type based on the base piece type, the side to move, and the enemy argument. E.g. if it
+		 * is white's turn to move, the template parameter is KING, and the argument enemy = false, then the function
+		 * returns W_KING. If instead enemy = true, it returns B_KING.
 		 *
 		 * @tparam T Base piece type.
 		 * @param enemy Whether or not to get the enemy piece instead. Default is false.
@@ -209,7 +211,8 @@ class Position {
 		inline PieceType getPieceType(const bool enemy = false) const;
 
 		/**
-		 * @brief Moves the piece from start to end square. Updates the piece_list and pieces array.
+		 * @brief Moves the piece from start to end square. Updates the piece_list and pieces array for the moved piece.
+		 * Does not take into account possible captures or promotions (i.e. assumes a normal move).
 		 *
 		 * @tparam T Piece type.
 		 * @param start Start square.
@@ -217,6 +220,41 @@ class Position {
 		 */
 		template <PieceType T>
 		void movePiece(const Square start, const Square end);
+
+		/**
+		 * @brief Checks if the specified castling bit is set.
+		 *
+		 * @tparam C The castling bit to check.
+		 * @return True if the castling bit still exists, else false.
+		 */
+		template <Castling C>
+		bool castleBit() const;
+
+		/**
+		 * @brief Return the character for the dark square of the printed board.
+		 *
+		 * @param str The character of the piece to display.
+		 * @return A string of the dark square with the piece character.
+		 */
+		std::string darkSquare(const std::string str) const;
+
+		/**
+		 * @brief Return the character for the light square of the printed board.
+		 *
+		 * @param str The character of the piece to display.
+		 * @return A string of the light square with the piece character.
+		 */
+		std::string lightSquare(const std::string str) const;
+
+		/**
+		 * @brief Get the ANSI characters to display a single square.
+		 *
+		 * @param piece The piece to display on the square if any.
+		 * @param letterMode Whether or to display in letter mode.
+		 * @param square The square to display on (used for distinguishing light and dark squares).
+		 * @return The string to display the square with the piece.
+		 */
+		std::string getSquareCharacters(const PieceType piece, const bool letterMode, const Square square) const;
 
 		/**
 		 * @brief Parse the turn part of the fen and set the turn variable accordingly.
@@ -605,7 +643,7 @@ class Position {
 		void addPiece(const Square square);
 
 		/**
-		 * @brief Make a promotion move.
+		 * @brief Make a promotion move. Updates the bitboards, piece_list, piece_index and pieces arrays.
 		 *
 		 * @tparam T Move type (capture/non-capture).
 		 * @param move Move to make.
@@ -614,13 +652,13 @@ class Position {
 		void makePromotionMove(const Move move);
 
 		/**
-		 * @brief Make a normal move.
+		 * @brief Update the sides bitboards for both a capture and non-capture normal move.
 		 *
 		 * @tparam T Move type (capture/non-capture).
 		 * @param move Move to make.
 		 */
 		template <MoveType T>
-		void makeNormalMove(const Move move);
+		void normalMoveSidesBitboards(const Move move);
 
 		/**
 		 * @brief Update the corresponding piece bitboard.
@@ -652,9 +690,9 @@ class Position {
 		void removePiecePromotion(const Move move);
 
 		/**
-		 * @brief Update the piece bitboard for a specified move.
+		 * @brief Update the corresponding piece bitboard for a specified move.
 		 *
-		 * @tparam T Base piece type of piece being moved.
+		 * @tparam T Base piece type of the piece being moved.
 		 * @param start Starting square.
 		 * @param end Ending square.
 		 */
@@ -728,6 +766,14 @@ class Position {
 		 * @brief Update the fullmove counter.
 		 */
 		void updateFullmove();
+
+		/**
+		 * @brief Update the piece, knight and bishop counts.
+		 *
+		 * @param piece_captured The piece that is being captured (if any).
+		 * @param move The move to make.
+		 */
+		void updatePieceCounts(const PieceType piece_captured, const Move move);
 
 		/**
 		 * @brief Update the turn.

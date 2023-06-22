@@ -1,72 +1,84 @@
-ifeq ($(OPTIMISE), TRUE)
-	OPTIONS = -O3
+# Optimise flag
+ifeq ($(OPTIMISE), 1)
+    OPTIMISE_FLAG = -O1
+else ifeq ($(OPTIMISE), 2)
+    OPTIMISE_FLAG = -O2
+else ifeq ($(OPTIMISE), 3)
+    OPTIMISE_FLAG = -O3
+else ifneq ($(OPTIMISE),)
+    $(error Unknown OPTIMISE flag: "$(OPTIMISE)")
 endif
+OPTIONS = $(OPTIMISE_FLAG)
 
+# Debugging flag
+NDEBUG := FALSE
 ifeq ($(NDEBUG), TRUE)
-	OPTIONS := $(OPTIONS) -DNDEBUG
+    OPTIONS := $(OPTIONS) -DNDEBUG
+else ifneq ($(NDEBUG), FALSE)
+    $(error Unknown NDEBUG flag: "$(NDEBUG)")
 endif
 
+# PEXT flag
+PEXT := FALSE
 ifeq ($(PEXT), TRUE)
-	OPTIONS := $(OPTIONS) -DUSE_PEXT -march=native
+    OPTIONS := $(OPTIONS) -DUSE_PEXT -march=native
+else ifneq ($(PEXT), FALSE)
+    $(error Unknown PEXT flag: "$(PEXT)")
 endif
 
-SRC = ./src
-TEST = ./tests
-GENERATE = ./magic_numbers
+# Relative directories
+SRC_DIR = ./src
+TEST_DIR = ./tests
+GENERATE_DIR = ./magic_numbers
 
+# Compilation flags
 CC = g++
 CFLAGS = -std=c++20 -g -pedantic -Wall $(OPTIONS)
 THREAD = -pthread
 
 all: test sicario generate
 
-movegen.o: $(SRC)/movegen.cpp $(SRC)/movegen.hpp $(SRC)/constants.hpp $(SRC)/game.hpp
-	$(CC) $(CFLAGS) -c $(SRC)/movegen.cpp -o $(SRC)/movegen.o
+movegen.o: $(SRC_DIR)/movegen.cpp $(SRC_DIR)/movegen.hpp $(SRC_DIR)/game.hpp $(SRC_DIR)/utils.hpp
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/movegen.cpp -o $(SRC_DIR)/movegen.o
 
-game.o: $(SRC)/game.cpp $(SRC)/game.hpp $(SRC)/constants.hpp $(SRC)/movegen.hpp $(SRC)/utils.hpp $(SRC)/bitboard.hpp
-	$(CC) $(CFLAGS) -c $(SRC)/game.cpp -o $(SRC)/game.o
+game.o: $(SRC_DIR)/game.cpp $(SRC_DIR)/game.hpp $(SRC_DIR)/constants.hpp $(SRC_DIR)/utils.hpp $(SRC_DIR)/bitboard.hpp
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/game.cpp -o $(SRC_DIR)/game.o
 
-search.o: $(SRC)/search.cpp $(SRC)/search.hpp $(SRC)/constants.hpp $(SRC)/movegen.hpp $(SRC)/evaluate.hpp
-	$(CC) $(CFLAGS) -c $(SRC)/search.cpp -o $(SRC)/search.o
+search.o: $(SRC_DIR)/search.cpp $(SRC_DIR)/search.hpp $(SRC_DIR)/constants.hpp $(SRC_DIR)/movegen.hpp
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/search.cpp -o $(SRC_DIR)/search.o
 
-evaluate.o: $(SRC)/evaluate.cpp $(SRC)/evaluate.hpp $(SRC)/constants.hpp
-	$(CC) $(CFLAGS) -c $(SRC)/evaluate.cpp -o $(SRC)/evaluate.o
+uci.o: $(SRC_DIR)/uci.cpp $(SRC_DIR)/uci.hpp $(SRC_DIR)/utils.hpp
+	$(CC) $(CFLAGS) $(THREAD) -c $(SRC_DIR)/uci.cpp -o $(SRC_DIR)/uci.o
 
-uci.o: $(SRC)/uci.cpp $(SRC)/uci.hpp $(SRC)/utils.hpp
-	$(CC) $(CFLAGS) $(THREAD) -c $(SRC)/uci.cpp -o $(SRC)/uci.o
+utils.o: $(SRC_DIR)/utils.cpp $(SRC_DIR)/utils.hpp
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/utils.cpp -o $(SRC_DIR)/utils.o
 
-utils.o: $(SRC)/utils.cpp $(SRC)/utils.hpp
-	$(CC) $(CFLAGS) -c $(SRC)/utils.cpp -o $(SRC)/utils.o
+mcts.o: $(SRC_DIR)/mcts.cpp $(SRC_DIR)/mcts.hpp $(SRC_DIR)/search.hpp
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/mcts.cpp -o $(SRC_DIR)/mcts.o
 
-mcts.o: $(SRC)/mcts.cpp $(SRC)/mcts.hpp $(SRC)/search.hpp
-	$(CC) $(CFLAGS) -c $(SRC)/mcts.cpp -o $(SRC)/mcts.o
+sicario.o: $(SRC_DIR)/sicario.cpp $(SRC_DIR)/constants.hpp
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/sicario.cpp -o $(SRC_DIR)/sicario.o
 
-minimax.o: $(SRC)/minimax.cpp $(SRC)/minimax.hpp $(SRC)/search.hpp
-	$(CC) $(CFLAGS) -c $(SRC)/minimax.cpp -o $(SRC)/minimax.o
+test.o: $(TEST_DIR)/test.cpp
+	$(CC) $(CFLAGS) -c $(TEST_DIR)/test.cpp -o $(TEST_DIR)/test.o
 
-sicario.o: $(SRC)/sicario.cpp $(SRC)/constants.hpp
-	$(CC) $(CFLAGS) -c $(SRC)/sicario.cpp -o $(SRC)/sicario.o
+main.o: $(SRC_DIR)/main.cpp $(SRC_DIR)/movegen.hpp $(SRC_DIR)/game.hpp $(SRC_DIR)/uci.hpp $(SRC_DIR)/sicario.hpp
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/main.cpp -o $(SRC_DIR)/main.o
 
-test.o: $(TEST)/test.cpp
-	$(CC) $(CFLAGS) -c $(TEST)/test.cpp -o $(TEST)/test.o
+test: test.o utils.o movegen.o $(SRC_DIR)/movegen.hpp
+	$(CC) $(CFLAGS) $(TEST_DIR)/test.o $(SRC_DIR)/utils.o $(SRC_DIR)/movegen.o -o $(TEST_DIR)/test
 
-main.o: $(SRC)/main.cpp $(SRC)/movegen.hpp $(SRC)/game.hpp $(SRC)/uci.hpp $(SRC)/sicario.hpp
-	$(CC) $(CFLAGS) -c $(SRC)/main.cpp -o $(SRC)/main.o
+generate: $(GENERATE_DIR)/generate_magic_numbers.cpp
+	$(CC) $(CFLAGS) $(GENERATE_DIR)/generate_magic_numbers.cpp $(SRC_DIR)/movegen.o -o $(GENERATE_DIR)/generate
 
-test: test.o utils.o movegen.o $(SRC)/movegen.hpp
-	$(CC) $(CFLAGS) $(TEST)/test.o $(SRC)/utils.o $(SRC)/movegen.o -o $(TEST)/test
-
-generate: $(GENERATE)/generate_magic_numbers.cpp
-	$(CC) $(CFLAGS) $(GENERATE)/generate_magic_numbers.cpp $(SRC)/movegen.o -o $(GENERATE)/generate
-
-sicario: main.o game.o movegen.o uci.o sicario.o utils.o search.o evaluate.o mcts.o minimax.o
-	$(CC) $(CFLAGS) $(SRC)/main.o $(SRC)/game.o $(SRC)/movegen.o $(SRC)/uci.o $(SRC)/sicario.o $(SRC)/utils.o $(SRC)/search.o $(SRC)/evaluate.o $(SRC)/mcts.o $(SRC)/minimax.o -o $(SRC)/sicario
+sicario: main.o game.o movegen.o uci.o sicario.o utils.o search.o mcts.o
+	$(CC) $(CFLAGS) $(SRC_DIR)/*.o -o $(SRC_DIR)/sicario
 
 clean-test:
-	rm $(TEST)/*.o $(TEST)/test
+	rm $(TEST_DIR)/*.o $(TEST_DIR)/test
 
 clean-generate:
-	rm $(GENERATE)/generate
+	rm $(GENERATE_DIR)/generate
 
 clean:
-	rm $(SRC)/*.o $(TEST)/*.o $(SRC)/sicario $(GENERATE)/generate $(TEST)/test
+	rm $(SRC_DIR)/*.o $(TEST_DIR)/*.o $(SRC_DIR)/sicario $(GENERATE_DIR)/generate $(TEST_DIR)/test

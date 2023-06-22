@@ -2,9 +2,6 @@
 #include "sicario.hpp"
 #include "mcts.hpp"
 
-#include <iostream>
-#include "evaluate.hpp"
-
 void Sicario::search() {
 	Mcts searcher(this->getPosition(), this->searchTree, this->sicarioConfigs);
 	searcher.search();
