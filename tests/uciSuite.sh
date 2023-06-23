@@ -36,6 +36,7 @@ main() {
 	staticTest MOVES
 	staticTest BITBOARDS
 	staticTest RANDOMGAME
+	# TODO Add a bunch of different drawing conditions including manual moves made for 3 fold repetitions
 	staticTest STATE
 	staticTest OPTIONS
 	staticTest DATA

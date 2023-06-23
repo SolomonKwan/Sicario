@@ -217,7 +217,7 @@ void Sicario::handlePosition(const std::vector<std::string>& inputs) {
 	auto ptr = std::find(inputs.begin(), inputs.end(), "moves");
 	if (ptr == inputs.end()) return;
 	while (++ptr != inputs.end()) {
-		this->position.processMakeMove(getMovefromAlgebraic(*ptr));
+		this->position.makeMove(getMovefromAlgebraic(*ptr));
 	}
 }
 
@@ -272,14 +272,14 @@ void Sicario::handleMove(const std::vector<std::string>& inputs) {
 	}
 
 	if (moves.contains(move)) {
-		this->position.processMakeMove(move);
+		this->position.makeMove(move);
 	} else {
-		this->position.processMakeMove(move | EN_PASSANT);
+		this->position.makeMove(move | EN_PASSANT);
 	}
 }
 
 void Sicario::handleUndo() {
-	this->position.processUndoMove();
+	this->position.undoMove();
 }
 
 void Sicario::handleDisplay() {
@@ -307,7 +307,7 @@ void Sicario::handleRandom(const std::vector<std::string> &inputs) {
 		int moveCount = 0;
 		while (!this->position.isEOG(moves)) {
 			Move move = moves.randomMove();
-			this->position.processMakeMove(move);
+			this->position.makeMove(move);
 			moves = MoveList(this->position);
 			moveCount++;
 		}
@@ -315,7 +315,7 @@ void Sicario::handleRandom(const std::vector<std::string> &inputs) {
 
 		// Undo moves back to original position.
 		while (moveCount > 0) {
-			this->position.processUndoMove();
+			this->position.undoMove();
 			moveCount--;
 		}
 	}

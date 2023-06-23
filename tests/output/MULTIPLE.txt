@@ -133,11 +133,6 @@ a4b6: 13
 a4c5: 1
 a4c3: 13
 a4b2: 13
-c7b8q: 1
-c7b8r: 1
-c7b8b: 13
-c7b8n: 13
-e4e5: 13
 a2a3: 13
 c2c3: 13
 c2c4: 13
@@ -145,6 +140,11 @@ g2g3: 14
 g2g4: 14
 h2h3: 13
 h2h4: 13
+e4e5: 13
+c7b8q: 1
+c7b8r: 1
+c7b8b: 13
+c7b8n: 13
 Nodes searched: 473
 Invalid move
 White wins
@@ -175,14 +175,14 @@ a4b6 Normal n
 a4c5 Normal n
 a4c3 Normal n
 a4b2 Normal n
-h2h3 Normal n
-h2h4 Normal n
-e4e5 Normal n
 a2a3 Normal n
 c2c3 Normal n
 c2c4 Normal n
 g2g3 Normal n
 g2g4 Normal n
+h2h3 Normal n
+h2h4 Normal n
+e4e5 Normal n
 c7b8 Promotion q
 c7b8 Promotion r
 c7b8 Promotion b

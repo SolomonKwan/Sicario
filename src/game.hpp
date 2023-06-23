@@ -18,7 +18,7 @@ class Position {
 		/**
 		 * @brief Initialise the Position object. Uses a FEN string of a normal starting position if none is given.
 		 *
-		 * @param fen FEN string of the state to instantiate the object with.
+		 * @param fen FEN string of the state to instantiate the object with. Default is the standard starting position.
 		 */
 		Position(const std::string fen = STANDARD_GAME);
 
@@ -55,12 +55,12 @@ class Position {
 		 * @param move The move to perform.
 		 * @param hash Whether or not to hash the positions. Defaulted to true.
 		 */
-		void processMakeMove(const Move move, const bool hash = true);
+		void makeMove(const Move move, const bool hash = true);
 
 		/**
 		 * @brief Undoes the last move made.
 		 */
-		void processUndoMove();
+		void undoMove();
 
 		/**
 		 * @brief Display the board position and information.
@@ -199,16 +199,46 @@ class Position {
 		Hash hash;
 
 		/**
-		 * @brief Get the piece type based on the base piece type, the side to move, and the enemy argument. E.g. if it
-		 * is white's turn to move, the template parameter is KING, and the argument enemy = false, then the function
-		 * returns W_KING. If instead enemy = true, it returns B_KING.
+		 * @brief Zeroes out the bit in the given bitboard.
 		 *
-		 * @tparam T Base piece type.
-		 * @param enemy Whether or not to get the enemy piece instead. Default is false.
-		 * @return The piece type.
+		 * @param bitboard The bitboard to modify.
+		 * @param square The square to zero out.
 		 */
-		template<BasePieceType T>
-		inline PieceType getPieceType(const bool enemy = false) const;
+		inline void zeroBit(Bitboard& bitboard, const Square square) const {
+			bitboard &= ~(ONE_BB << square);
+		}
+
+		/**
+		 * @brief Sets the bit in the given bitboard.
+		 *
+		 * @param bitboard The bitboard to modify.
+		 * @param square The square to set.
+		 */
+		inline void setBit(Bitboard& bitboard, const Square square) const {
+			bitboard |= ONE_BB << square;
+		}
+
+		/**
+		 * @brief Zeroes out the given start and sets the given end square in the given bitboard. Assumes a priori that
+		 * the start bit is already set and that the end bit is not already set.
+		 *
+		 * @param bitboard The bitboard to modify.
+		 * @param start The square to zero out.
+		 * @param end The square to set.
+		 */
+		inline void zeroAndSetBit(Bitboard& bitboard, const Square start, const Square end) const {
+			bitboard ^= ONE_BB << start | ONE_BB << end;
+		}
+
+		/**
+		 * @brief Check if the move will be a capturing move.
+		 *
+		 * @param move The move to check.
+		 * @return True if the move will be a capturing move, else false.
+		 */
+		inline bool capturingMove(const Move move) {
+			return this->pieces[end(move)] != NO_PIECE;
+		}
 
 		/**
 		 * @brief Moves the piece from start to end square. Updates the piece_list and pieces array for the moved piece.
@@ -220,6 +250,18 @@ class Position {
 		 */
 		template <PieceType T>
 		void movePiece(const Square start, const Square end);
+
+		/**
+		 * @brief Get the piece type based on the base piece type, the side to move, and the enemy argument. E.g. if it
+		 * is white's turn to move, the template parameter is KING, and the argument enemy = false, then the function
+		 * returns W_KING. If instead enemy = true, it returns B_KING.
+		 *
+		 * @tparam T Base piece type.
+		 * @param enemy Whether or not to get the enemy piece instead. Default is false.
+		 * @return The piece type.
+		 */
+		template<BasePieceType T>
+		inline PieceType getPieceType(const bool enemy = false) const;
 
 		/**
 		 * @brief Checks if the specified castling bit is set.
@@ -249,12 +291,11 @@ class Position {
 		/**
 		 * @brief Get the ANSI characters to display a single square.
 		 *
-		 * @param piece The piece to display on the square if any.
-		 * @param letterMode Whether or to display in letter mode.
 		 * @param square The square to display on (used for distinguishing light and dark squares).
+		 * @param letterMode Whether or to display in letter mode.
 		 * @return The string to display the square with the piece.
 		 */
-		std::string getSquareCharacters(const PieceType piece, const bool letterMode, const Square square) const;
+		std::string getSquareCharacters(const Square square, const bool letterMode) const;
 
 		/**
 		 * @brief Parse the turn part of the fen and set the turn variable accordingly.
@@ -290,18 +331,17 @@ class Position {
 		 *
 		 * @param pieceBB The corresponding piece bitboard to update.
 		 * @param piece Piece type to add.
-		 * @param square Square of the piece to add.
+		 * @param squareIndex The square index of the piece.
 		 */
-		void addFenPiece(Bitboard& pieceBB, const PieceType piece, const Square square);
+		void addFenPiece(Bitboard& pieceBB, const PieceType piece, const int squareIndex);
 
 		/**
 		 * @brief Parses a character from the FEN string representing a piece and updates the internal variables.
 		 *
 		 * @param piece Char representing the piece to add.
-		 * @param rank The rank of the piece.
-		 * @param file The file of the piece.
+		 * @param squareIndex The square index of the piece.
 		 */
-		void parseFenChar(char piece, Rank rank, File file);
+		void parseFenChar(const char piece, const int squareIndex);
 
 		/**
 		 * @brief Get bitboard of all pieces on the board.
@@ -595,12 +635,13 @@ class Position {
 		inline PieceType getPromotionPiece(const Move& move) const;
 
 		/**
-		 * @brief Make a move of the specified type.
+		 * @brief Make a move of the specified class and type.
 		 *
-		 * @tparam T Type of move to make.
+		 * @tparam C Class of the move to make.
+		 * @tparam T Type of the move to make.
 		 * @param move Move to make.
 		 */
-		template<MoveClass T>
+		template<MoveClass C, MoveType T>
 		void makeMove(const Move move);
 
 		/**
@@ -726,13 +767,6 @@ class Position {
 		void placeCapturedPiece(const PieceType piece, const Square square);
 
 		/**
-		 * @brief Check if the game has ended by insufficient material.
-		 *
-		 * @return True if draw by insufficient material, else false.
-		 */
-		bool insufficientMaterial() const;
-
-		/**
 		 * @brief Remove piece from the specified square.
 		 *
 		 * @param square Square of the piece.
@@ -785,7 +819,39 @@ class Position {
 		 *
 		 * @return True if draw by threefold repetition, else false.
 		 */
-		bool isThreeFoldRep() const;
+		bool isDrawThreeFoldRep() const;
+
+		/**
+		 * @brief Check if the current position is a draw by fifty move rule.
+		 *
+		 * @return True if draw by fifty move rule, else false.
+		 */
+		inline bool isDrawFiftyMoveRule() const {
+			return this->halfmove == 100;
+		}
+
+		/**
+		 * @brief Check if the game has ended by insufficient material.
+		 *
+		 * @return True if draw by insufficient material, else false.
+		 */
+		bool isDrawInsufficientMaterial() const;
+
+		/**
+		 * @brief Check if the current position is a draw by stalemate.
+		 *
+		 * @param move_list The movelist of the current position.
+		 * @return True if the current position is stalemate, else false.
+		 */
+		bool isDrawStalemate(MoveList& move_list) const;
+
+		/**
+		 * @brief Check if the current position is a checkmate.
+		 *
+		 * @param move_list The movelist of the current position.
+		 * @return True if the current position is a checkmate, else false.
+		 */
+		bool isCheckmate(MoveList& move_list) const;
 
 		/**
 		 * @brief Increment the current position count.
