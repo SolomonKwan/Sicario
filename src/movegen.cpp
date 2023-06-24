@@ -33,7 +33,7 @@ MoveFamilies computeKingMoves() {
 			int shift = 0;
 			for (Square dest : destinations) {
 				if ((j >> shift) & 1UL) {
-					moves.push_back(square | (dest << DESTINATION_SHIFT));
+					moves.push_back(square | (dest << DEST_SHIFT));
 				}
 				occ |= ((j >> shift) & 1UL) << dest;
 				shift++;
@@ -71,7 +71,7 @@ MoveFamilies computeKnightMoves() {
 			int shift = 0;
 			for (Square dest : destinations) {
 				if ((j >> shift) & 1UL) {
-					moves.push_back(square | (dest << DESTINATION_SHIFT));
+					moves.push_back(square | (dest << DEST_SHIFT));
 				}
 				occ |= ((j >> shift) & 1UL) << dest;
 				shift++;
@@ -121,12 +121,12 @@ MoveFamilies computePawnMovesBySide(const Player player) {
 			for (Square dest : destinations) {
 				if ((j >> shift) & 1UL) {
 					if (rank(dest) == RANK_1 || rank(dest) == RANK_8) {
-						moves.push_back(square | (dest << DESTINATION_SHIFT) | PROMOTION | pQUEEN);
-						moves.push_back(square | (dest << DESTINATION_SHIFT) | PROMOTION | pROOK);
-						moves.push_back(square | (dest << DESTINATION_SHIFT) | PROMOTION | pBISHOP);
-						moves.push_back(square | (dest << DESTINATION_SHIFT) | PROMOTION | pKNIGHT);
+						moves.push_back(square | (dest << DEST_SHIFT) | PROMOTION | pQUEEN);
+						moves.push_back(square | (dest << DEST_SHIFT) | PROMOTION | pROOK);
+						moves.push_back(square | (dest << DEST_SHIFT) | PROMOTION | pBISHOP);
+						moves.push_back(square | (dest << DEST_SHIFT) | PROMOTION | pKNIGHT);
 					} else {
-						moves.push_back(square | (dest << DESTINATION_SHIFT));
+						moves.push_back(square | (dest << DEST_SHIFT));
 					}
 				}
 				occ |= ((j >> shift) & 1UL) << dest;
@@ -156,22 +156,22 @@ MoveFamilies computeRookMoves() {
 
 			for (int i = 0; i < selection[0]; i++) {
 				reach |= ONE_BB << (square + N * (i + 1));
-				moves.push_back(square | ((square + N * (i + 1)) << DESTINATION_SHIFT));
+				moves.push_back(square | ((square + N * (i + 1)) << DEST_SHIFT));
 			}
 
 			for (int i = 0; i < selection[1]; i++) {
 				reach |= ONE_BB << (square + E * (i + 1));
-				moves.push_back(square | ((square + E * (i + 1)) << DESTINATION_SHIFT));
+				moves.push_back(square | ((square + E * (i + 1)) << DEST_SHIFT));
 			}
 
 			for (int i = 0; i < selection[2]; i++) {
 				reach |= ONE_BB << (square + S * (i + 1));
-				moves.push_back(square | ((square + S * (i + 1)) << DESTINATION_SHIFT));
+				moves.push_back(square | ((square + S * (i + 1)) << DEST_SHIFT));
 			}
 
 			for (int i = 0; i < selection[3]; i++) {
 				reach |= ONE_BB << (square + W * (i + 1));
-				moves.push_back(square | ((square + W * (i + 1)) << DESTINATION_SHIFT));
+				moves.push_back(square | ((square + W * (i + 1)) << DEST_SHIFT));
 			}
 
 			int magicIndex = getRookMovesIndex(reach, square);
@@ -198,22 +198,22 @@ MoveFamilies computeBishopMoves() {
 
 			for (int i = 0; i < selection[0]; i++) {
 				reach |= ONE_BB << (square + NE * (i + 1));
-				moves.push_back(square | ((square + NE * (i + 1)) << DESTINATION_SHIFT));
+				moves.push_back(square | ((square + NE * (i + 1)) << DEST_SHIFT));
 			}
 
 			for (int i = 0; i < selection[1]; i++) {
 				reach |= ONE_BB << (square + SE * (i + 1));
-				moves.push_back(square | ((square + SE * (i + 1)) << DESTINATION_SHIFT));
+				moves.push_back(square | ((square + SE * (i + 1)) << DEST_SHIFT));
 			}
 
 			for (int i = 0; i < selection[2]; i++) {
 				reach |= ONE_BB << (square + SW * (i + 1));
-				moves.push_back(square | ((square + SW * (i + 1)) << DESTINATION_SHIFT));
+				moves.push_back(square | ((square + SW * (i + 1)) << DEST_SHIFT));
 			}
 
 			for (int i = 0; i < selection[3]; i++) {
 				reach |= ONE_BB << (square + NW * (i + 1));
-				moves.push_back(square | ((square + NW * (i + 1)) << DESTINATION_SHIFT));
+				moves.push_back(square | ((square + NW * (i + 1)) << DEST_SHIFT));
 			}
 
 			int magicIndex = getBishopMovesIndex(reach, square);
@@ -225,10 +225,10 @@ MoveFamilies computeBishopMoves() {
 
 std::array<MoveVector, CASTLING_OPTIONS> computeCastlingMoves() {
 	std::array<MoveVector, CASTLING_OPTIONS> moves;
-	moves[WKSC] = {E1 | G1 << DESTINATION_SHIFT | CASTLING};
-	moves[WQSC] = {E1 | C1 << DESTINATION_SHIFT | CASTLING};
-	moves[BKSC] = {E8 | G8 << DESTINATION_SHIFT | CASTLING};
-	moves[BQSC] = {E8 | C8 << DESTINATION_SHIFT | CASTLING};
+	moves[WKSC] = {E1 | G1 << DEST_SHIFT | CASTLING};
+	moves[WQSC] = {E1 | C1 << DEST_SHIFT | CASTLING};
+	moves[BKSC] = {E8 | G8 << DEST_SHIFT | CASTLING};
+	moves[BQSC] = {E8 | C8 << DEST_SHIFT | CASTLING};
 	return moves;
 }
 
@@ -237,24 +237,24 @@ std::array<std::vector<MoveFamily>, PLAYER_COUNT> computeEnPassantMoves() {
 	std::vector<MoveFamily>& blackMove = moves[BLACK];
 	std::vector<MoveFamily>& whiteMove = moves[WHITE];
 	blackMove = {
-		{{B4 | A3 << DESTINATION_SHIFT | EN_PASSANT}, {B4 | A3 << DESTINATION_SHIFT | EN_PASSANT}},
-		{{A4 | B3 << DESTINATION_SHIFT | EN_PASSANT}, {C4 | B3 << DESTINATION_SHIFT | EN_PASSANT}},
-		{{B4 | C3 << DESTINATION_SHIFT | EN_PASSANT}, {D4 | C3 << DESTINATION_SHIFT | EN_PASSANT}},
-		{{C4 | D3 << DESTINATION_SHIFT | EN_PASSANT}, {E4 | D3 << DESTINATION_SHIFT | EN_PASSANT}},
-		{{D4 | E3 << DESTINATION_SHIFT | EN_PASSANT}, {F4 | E3 << DESTINATION_SHIFT | EN_PASSANT}},
-		{{E4 | F3 << DESTINATION_SHIFT | EN_PASSANT}, {G4 | F3 << DESTINATION_SHIFT | EN_PASSANT}},
-		{{F4 | G3 << DESTINATION_SHIFT | EN_PASSANT}, {H4 | G3 << DESTINATION_SHIFT | EN_PASSANT}},
-		{{G4 | H3 << DESTINATION_SHIFT | EN_PASSANT}, {G4 | H3 << DESTINATION_SHIFT | EN_PASSANT}}
+		{{B4 | A3 << DEST_SHIFT | EN_PASSANT}, {B4 | A3 << DEST_SHIFT | EN_PASSANT}},
+		{{A4 | B3 << DEST_SHIFT | EN_PASSANT}, {C4 | B3 << DEST_SHIFT | EN_PASSANT}},
+		{{B4 | C3 << DEST_SHIFT | EN_PASSANT}, {D4 | C3 << DEST_SHIFT | EN_PASSANT}},
+		{{C4 | D3 << DEST_SHIFT | EN_PASSANT}, {E4 | D3 << DEST_SHIFT | EN_PASSANT}},
+		{{D4 | E3 << DEST_SHIFT | EN_PASSANT}, {F4 | E3 << DEST_SHIFT | EN_PASSANT}},
+		{{E4 | F3 << DEST_SHIFT | EN_PASSANT}, {G4 | F3 << DEST_SHIFT | EN_PASSANT}},
+		{{F4 | G3 << DEST_SHIFT | EN_PASSANT}, {H4 | G3 << DEST_SHIFT | EN_PASSANT}},
+		{{G4 | H3 << DEST_SHIFT | EN_PASSANT}, {G4 | H3 << DEST_SHIFT | EN_PASSANT}}
 	};
 	whiteMove = {
-		{{B5 | A6 << DESTINATION_SHIFT | EN_PASSANT}, {B5 | A6 << DESTINATION_SHIFT | EN_PASSANT}},
-		{{A5 | B6 << DESTINATION_SHIFT | EN_PASSANT}, {C5 | B6 << DESTINATION_SHIFT | EN_PASSANT}},
-		{{B5 | C6 << DESTINATION_SHIFT | EN_PASSANT}, {D5 | C6 << DESTINATION_SHIFT | EN_PASSANT}},
-		{{C5 | D6 << DESTINATION_SHIFT | EN_PASSANT}, {E5 | D6 << DESTINATION_SHIFT | EN_PASSANT}},
-		{{D5 | E6 << DESTINATION_SHIFT | EN_PASSANT}, {F5 | E6 << DESTINATION_SHIFT | EN_PASSANT}},
-		{{E5 | F6 << DESTINATION_SHIFT | EN_PASSANT}, {G5 | F6 << DESTINATION_SHIFT | EN_PASSANT}},
-		{{F5 | G6 << DESTINATION_SHIFT | EN_PASSANT}, {H5 | G6 << DESTINATION_SHIFT | EN_PASSANT}},
-		{{G5 | H6 << DESTINATION_SHIFT | EN_PASSANT}, {G5 | H6 << DESTINATION_SHIFT | EN_PASSANT}}
+		{{B5 | A6 << DEST_SHIFT | EN_PASSANT}, {B5 | A6 << DEST_SHIFT | EN_PASSANT}},
+		{{A5 | B6 << DEST_SHIFT | EN_PASSANT}, {C5 | B6 << DEST_SHIFT | EN_PASSANT}},
+		{{B5 | C6 << DEST_SHIFT | EN_PASSANT}, {D5 | C6 << DEST_SHIFT | EN_PASSANT}},
+		{{C5 | D6 << DEST_SHIFT | EN_PASSANT}, {E5 | D6 << DEST_SHIFT | EN_PASSANT}},
+		{{D5 | E6 << DEST_SHIFT | EN_PASSANT}, {F5 | E6 << DEST_SHIFT | EN_PASSANT}},
+		{{E5 | F6 << DEST_SHIFT | EN_PASSANT}, {G5 | F6 << DEST_SHIFT | EN_PASSANT}},
+		{{F5 | G6 << DEST_SHIFT | EN_PASSANT}, {H5 | G6 << DEST_SHIFT | EN_PASSANT}},
+		{{G5 | H6 << DEST_SHIFT | EN_PASSANT}, {G5 | H6 << DEST_SHIFT | EN_PASSANT}}
 	};
 	return moves;
 }
@@ -273,22 +273,22 @@ MoveFamilies computeRookBlockMoves() {
 			MoveVector moves;
 			uint64_t occ = ZERO_BB;
 			if (selection[0]) {
-				moves.push_back(square | (square + (N * selection[0])) << DESTINATION_SHIFT);
+				moves.push_back(square | (square + (N * selection[0])) << DEST_SHIFT);
 				occ |= ONE_BB << (square + (N * selection[0]));
 			}
 
 			if (selection[1]) {
-				moves.push_back(square | (square + (E * selection[1])) << DESTINATION_SHIFT);
+				moves.push_back(square | (square + (E * selection[1])) << DEST_SHIFT);
 				occ |= ONE_BB << (square + (E * selection[1]));
 			}
 
 			if (selection[2]) {
-				moves.push_back(square | (square + (S * selection[2])) << DESTINATION_SHIFT);
+				moves.push_back(square | (square + (S * selection[2])) << DEST_SHIFT);
 				occ |= ONE_BB << (square + (S * selection[2]));
 			}
 
 			if (selection[3]) {
-				moves.push_back(square | (square + (W * selection[3])) << DESTINATION_SHIFT);
+				moves.push_back(square | (square + (W * selection[3])) << DEST_SHIFT);
 				occ |= ONE_BB << (square + (W * selection[3]));
 			}
 
@@ -313,22 +313,22 @@ MoveFamilies computeBishopBlockMoves() {
 			MoveVector moves;
 			uint64_t occ = ZERO_BB;
 			if (selection[0]) {
-				moves.push_back(square | (square + (NE * selection[0])) << DESTINATION_SHIFT);
+				moves.push_back(square | (square + (NE * selection[0])) << DEST_SHIFT);
 				occ |= ONE_BB << (square + (NE * selection[0]));
 			}
 
 			if (selection[1]) {
-				moves.push_back(square | (square + (SE * selection[1])) << DESTINATION_SHIFT);
+				moves.push_back(square | (square + (SE * selection[1])) << DEST_SHIFT);
 				occ |= ONE_BB << (square + (SE * selection[1]));
 			}
 
 			if (selection[2]) {
-				moves.push_back(square | (square + (SW * selection[2])) << DESTINATION_SHIFT);
+				moves.push_back(square | (square + (SW * selection[2])) << DEST_SHIFT);
 				occ |= ONE_BB << (square + (SW * selection[2]));
 			}
 
 			if (selection[3]) {
-				moves.push_back(square | (square + (NW * selection[3])) << DESTINATION_SHIFT);
+				moves.push_back(square | (square + (NW * selection[3])) << DEST_SHIFT);
 				occ |= ONE_BB << (square + (NW * selection[3]));
 			}
 

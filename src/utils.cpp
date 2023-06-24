@@ -84,38 +84,6 @@ std::string getTypeString(const MoveClass type) {
 	}
 }
 
-Move getMovefromAlgebraic(std::string string) {
-	Move move = 0;
-	if (string[0] < 'a' || string[0] > 'h' || string[2] < 'a' || string[2] > 'h') {
-		return NULL_MOVE;
-	}
-
-	if (string[1] < '1' || string[1] > '8' || string[3] < '1' || string[3] > '8') {
-		return NULL_MOVE;
-	}
-
-	int start_file = string[0] - 'a';
-	int start_rank = string[1] - '1';
-	int end_file = string[2] - 'a';
-	int end_rank = string[3] - '1';
-
-	if (string.length() == 5) {
-		move |= PROMOTION;
-		if (string[4] == 'q') {
-			move |= pQUEEN;
-		} else if (string[4] == 'r') {
-			move |= pROOK;
-		} else if (string[4] == 'b') {
-			move |= pBISHOP;
-		}
-	}
-
-	move |= 8 * start_rank + start_file;
-	move |= ((8 * end_rank + end_file) << 6);
-
-	return move;
-}
-
 std::vector<size_t> rankSort(const std::vector<float>& v_temp) {
 	std::vector<std::pair<float, size_t> > v_sort(v_temp.size());
 

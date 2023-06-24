@@ -218,7 +218,7 @@ void Sicario::handlePosition(const std::vector<std::string>& inputs) {
 	auto ptr = std::find(inputs.begin(), inputs.end(), "moves");
 	if (ptr == inputs.end()) return;
 	while (++ptr != inputs.end()) {
-		this->position.processMakeMove(getMovefromAlgebraic(*ptr));
+		this->position.processMakeMove(this->getPosition().getMovefromAlgebraic(*ptr));
 	}
 }
 
@@ -260,23 +260,19 @@ void Sicario::handlePerft(const std::vector<std::string>& inputs) {
 }
 
 void Sicario::handleMove(const std::vector<std::string>& inputs) {
-	Move move = getMovefromAlgebraic(inputs[1]);
+	Move move = this->getPosition().getMovefromAlgebraic(inputs[1]);
 	if (move == NULL_MOVE) {
 		Uci::communicate("Invalid move: " + move);
 		return;
 	}
 
 	MoveList moves = MoveList(this->position);
-	if (!moves.contains(move) && !moves.contains(move | EN_PASSANT)) { // NOTE en-passant checks are hacky...
+	if (!moves.contains(move)) {
 		Uci::communicate("Invalid move");
 		return;
 	}
 
-	if (moves.contains(move)) {
-		this->position.processMakeMove(move);
-	} else {
-		this->position.processMakeMove(move | EN_PASSANT);
-	}
+	this->position.processMakeMove(move);
 }
 
 void Sicario::handleUndo() {

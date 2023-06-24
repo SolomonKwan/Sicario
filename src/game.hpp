@@ -165,6 +165,14 @@ class Position {
 		 */
 		void clearData();
 
+		/**
+		 * @brief Convert a string in algebraic move format to a Move object and return it.
+		 *
+		 * @param string Move string in algebraic notation.
+		 * @return Move object.
+		 */
+		Move getMovefromAlgebraic(const std::string& string) const;
+
 	private:
 		// Non-position information
 		Player turn;

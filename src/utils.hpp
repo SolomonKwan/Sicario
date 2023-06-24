@@ -75,7 +75,7 @@ inline Square start(Move move) {
  * @return The end square encoded in the move.
  */
 inline Square end(Move move) {
-	return static_cast<Square>((move >> DESTINATION_SHIFT) & MOVE_MASK);
+	return static_cast<Square>((move >> DEST_SHIFT) & MOVE_MASK);
 }
 
 /**
@@ -141,14 +141,6 @@ std::string getPromoString(Promotion promo);
  * @return String of the move type.
  */
 std::string getTypeString(MoveClass type);
-
-/**
- * @brief Convert a string in algebraic move format to a Move object and return it.
- *
- * @param string Move string in algebraic notation.
- * @return Move object.
- */
-Move getMovefromAlgebraic(std::string string);
 
 /**
  * @brief Calculates the ranks of the numbers in an array of length N. The smallest number has the highest rank (N),
