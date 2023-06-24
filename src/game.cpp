@@ -136,8 +136,8 @@ void Position::resetPosition() {
 }
 
 ExitCode Position::isEOG(MoveList& move_list) const {
-	if (this->isDrawThreeFoldRep()) return THREE_FOLD_REPETITION;
 	if (this->isDrawFiftyMoveRule()) return FIFTY_MOVES_RULE;
+	if (this->isDrawThreeFoldRep()) return THREE_FOLD_REPETITION;
 	if (this->isDrawInsufficientMaterial()) return INSUFFICIENT_MATERIAL;
 	if (this->isDrawStalemate(move_list)) return STALEMATE;
 	if (this->isCheckmate(move_list)) {
