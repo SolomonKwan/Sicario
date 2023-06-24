@@ -84,7 +84,7 @@ staticTest() {
 	fi
 
 	# Run and compare result
-	timeout $DELAY ../src/sicario > output/$1.tmp < input/$1.txt
+	timeout $DELAY ../../src/sicario > output/$1.tmp < input/$1.txt
 	if [ $? -eq 124 ]; then
 		printf "$ERASE"
 		printf "$ERROR $1 - Timeout.\n"
@@ -108,7 +108,7 @@ variableTest() {
 
 	# Set up named pipe
 	mkfifo fifo
-	../src/sicario > output/$1.tmp < fifo &
+	../../src/sicario > output/$1.tmp < fifo &
 	sicariopid=$!
 
 	# Run and input commands

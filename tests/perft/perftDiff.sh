@@ -57,7 +57,7 @@ getFen() {
 
 # Runs the perft command on sicario and records and processes the result for later vimdiff.
 sicario() {
-	../src/sicario > ./sicario.tmp <<-EOF
+	../../src/sicario > ./sicario.tmp <<-EOF
 		position fen $2
 		perft $1
 		quit

@@ -71,7 +71,7 @@ getDepth() {
 
 # Runs the perft command on sicario and returns the result.
 sicario() {
-	../src/sicario > ./res.tmp <<-EOF
+	../../src/sicario > ./res.tmp <<-EOF
 		position fen $1
 		perft $2
 		quit
