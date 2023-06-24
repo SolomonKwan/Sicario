@@ -203,7 +203,7 @@ class Position {
 
 		// Position history
 		std::vector<History> history;
-		std::unordered_map<Bitboard, int> positionCounts;
+		std::unordered_map<Hash, int> positionCounts;
 		Hash hash;
 
 		/**
@@ -868,8 +868,10 @@ class Position {
 
 		/**
 		 * @brief Decrement the current position count.
+		 *
+		 * @param hash Hash of the position count to decrement.
 		 */
-		void decrementPositionCounter(Hash);
+		void decrementPositionCounter(Hash hash);
 };
 
 class MoveList {

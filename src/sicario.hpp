@@ -184,6 +184,11 @@ class Sicario {
 		void handleData();
 
 		/**
+		 * @brief Handle the has command. Used for debugging.
+		 */
+		void handleHash();
+
+		/**
 		 * @brief Send the invalid command message.
 		 *
 		 * @param inputs Entire input given to the GUI.

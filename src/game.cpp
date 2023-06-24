@@ -1637,7 +1637,7 @@ void Position::removePiece(const Square square, const PieceType piece_captured) 
 	}
 }
 
-void Position::decrementPositionCounter(const Bitboard hash) {
+void Position::decrementPositionCounter(const Hash hash) {
 	auto it = this->positionCounts.find(hash);
 	if (it != this->positionCounts.end()) {
 		this->positionCounts[hash]--;

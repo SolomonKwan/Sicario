@@ -114,6 +114,9 @@ void Sicario::processInput(const std::string& input) {
 		case DATA:
 			handleData();
 			break;
+		case HASHCOUNT:
+			handleHash();
+			break;
 		case INVALID_COMMAND:
 		default:
 			sendInvalidCommand(commands);
@@ -145,6 +148,7 @@ UciInput Sicario::hashCommandInput(const std::string& input) {
 	if (input == "state") return STATE;
 	if (input == "options") return OPTIONS;
 	if (input == "data") return DATA;
+	if (input == "hash") return HASHCOUNT;
 
 	return INVALID_COMMAND;
 }
@@ -359,6 +363,12 @@ void Sicario::handleData() {
 
 	// Print the positionCounts size.
 	std::cout << this->getPosition().getPositionCounts().size() << '\n';
+}
+
+void Sicario::handleHash() {
+	Hash hash = this->getPosition().getHash();
+	std::cout << hash << '\n';
+	std::cout << this->getPosition().getPositionCounts().find(hash)->second << '\n';
 }
 
 void Uci::communicate(std::string communication) {
