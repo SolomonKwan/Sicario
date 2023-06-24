@@ -24,7 +24,6 @@ option name UCI_LimitStrength type check default false
 option name UCI_Elo type spin default 3000 min 1000 max 3500
 option name UCI_AnalyseMode type check default true
 option name UCI_Opponent type string
-option name ExpandTime type spin default 50 min 1 max 500
 option name ClearHash type button
 uciok
 readyok
@@ -39,7 +38,6 @@ UCI_LimitStrength false
 UCI_Elo 3000
 UCI_AnalyseMode true
 UCI_Opponent
-ExpandTime 50
 ClearHash
 Thread 2
 Hash 32
@@ -52,7 +50,6 @@ UCI_LimitStrength true
 UCI_Elo 2000
 UCI_AnalyseMode false
 UCI_Opponent GM 2800 human Gary Kasparov
-ExpandTime 100
 ClearHash
 Unknown command: option
 Thread 2
@@ -66,7 +63,6 @@ UCI_LimitStrength true
 UCI_Elo 2000
 UCI_AnalyseMode false
 UCI_Opponent
-ExpandTime 100
 ClearHash
 b1c3: 1
 b1a3: 1

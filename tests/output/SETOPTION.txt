@@ -21,7 +21,6 @@ UCI_LimitStrength false
 UCI_Elo 3000
 UCI_AnalyseMode true
 UCI_Opponent
-ExpandTime 50
 ClearHash
 Thread 2
 Hash 32
@@ -34,7 +33,6 @@ UCI_LimitStrength true
 UCI_Elo 2000
 UCI_AnalyseMode false
 UCI_Opponent GM 2800 human Gary Kasparov
-ExpandTime 100
 ClearHash
 Thread 2
 Hash 32
@@ -47,5 +45,4 @@ UCI_LimitStrength true
 UCI_Elo 2000
 UCI_AnalyseMode false
 UCI_Opponent
-ExpandTime 100
 ClearHash

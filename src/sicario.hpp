@@ -309,13 +309,6 @@ class Sicario {
 		void setOptionUciOpponent(const std::string& value);
 
 		/**
-		 * @brief Set the ExpandTime option.
-		 *
-		 * @param value The value to set ExpandTime to.
-		 */
-		void setOptionExpandTime(const std::string& value);
-
-		/**
 		 * @brief Clear the hash.
 		 */
 		void setOptionClearHash();

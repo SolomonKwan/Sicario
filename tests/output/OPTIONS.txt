@@ -21,5 +21,4 @@ UCI_LimitStrength false
 UCI_Elo 3000
 UCI_AnalyseMode true
 UCI_Opponent
-ExpandTime 50
 ClearHash
