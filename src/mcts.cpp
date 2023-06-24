@@ -39,7 +39,7 @@ MctsNode* MctsNode::select() {
 	if (this->children.size() == 0) return this;
 	// NOTE this currently just chooses the last one it comes across if there are multiple of equal value
 	MctsNode* bestChild = this->bestChild();
-	this->getPos().processMakeMove(bestChild->getInEdge());
+	this->getPos().makeMove(bestChild->getInEdge());
 	return bestChild->select();
 }
 
@@ -52,7 +52,7 @@ MctsNode* MctsNode::expand() {
 
 	// TODO check if expansion expands into EOG game condition. Need to determine how to handle if this is the case.
 
-	this->getPos().processMakeMove(this->children[0]->getInEdge());
+	this->getPos().makeMove(this->children[0]->getInEdge());
 	return dynamic_cast<MctsNode*>(this->children[0].get()); // NOTE currently just getting the first child.
 }
 
@@ -61,13 +61,13 @@ float MctsNode::simulate() {
 	int moveCount = 0;
 	ExitCode code;
 	while (!(code = this->pos.isEOG(moves))) {
-		this->pos.processMakeMove(moves.randomMove());
+		this->pos.makeMove(moves.randomMove());
 		moves = MoveList(this->pos);
 		moveCount++;
 	}
 
 	while (moveCount > 0) {
-		this->pos.processUndoMove();
+		this->pos.undoMove();
 		moveCount--;
 	}
 
@@ -85,7 +85,7 @@ void MctsNode::rollback(float val) {
 		curr->visits++;
 		curr->value += this->pos.getTurn() == this->rootPlayer ? -1 * val : val;
 		curr = dynamic_cast<MctsNode*>(curr->parent);
-		this->pos.processUndoMove();
+		this->pos.undoMove();
 	}
 
 	curr->value += this->pos.getTurn() == this->rootPlayer ? -1 * val : val;
