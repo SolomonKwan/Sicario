@@ -24,14 +24,13 @@ main() {
 showUsageMessage() {
 	echo "Usage: ./perftDiff.sh depth fen [-h]"
 	echo "    depth: The depth to perform the perft to."
-	echo "    fen: FEN string of the position to run perft on. Enclose with quotes (\", ')"
+	echo "    fen: FEN string of the position to run perft on. Enclose with quotes (\", ')."
 	echo "    -h: Display usage message."
 }
 
 # Checks for help flag.
 helpCommand() {
-	if [[ "$*" == *"-h"* ]]
-	then
+	if [[ "$*" == *"-h"* ]]; then
 		showUsageMessage
 		exit 0
 	fi
@@ -39,8 +38,7 @@ helpCommand() {
 
 # Checks the depth input and returns the FEN string.
 parseInputs() {
-	if [ "$#" -lt 1 ] || [ "$#" -gt 2 ] || [[ ! $1 =~ ^[0-9]+$ ]] || [ $1 -lt 1 ]
-	then
+	if [ "$#" -lt 1 ] || [ "$#" -gt 2 ] || [[ ! $1 =~ ^[0-9]+$ ]] || [ $1 -lt 1 ]; then
 		echo "Invalid arguments"
 		showUsageMessage
 		exit -1
@@ -51,8 +49,7 @@ parseInputs() {
 getFen() {
 	# Return the FEN string to test.
 	res="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
-	if [ "$#" -eq 2 ]
-	then
+	if [ "$#" -eq 2 ]; then
 		res="$2"
 	fi
 	echo $res

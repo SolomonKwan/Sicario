@@ -18,8 +18,7 @@ main() {
 		local FEN="${line%%;*}"
 		local actualVal=$(echo $line | grep -Eo "D$depth [^;]*(| ;)" | grep -Eo "\b[0-9]+\b")
 		local val=$(sicario "$FEN" $depth | cut -c 17-)
-		if [[ $val -eq $actualVal ]]
-		then
+		if [[ $val -eq $actualVal ]]; then
 			printf "[  ${GREEN}OK${NC}  ] ${FEN}\n"
 			((passedTests++))
 		else
@@ -28,8 +27,7 @@ main() {
 	done < ./perftsuite.epd
 
 	# Show end result
-	if [[ $passedTests -eq $totalTests ]]
-	then
+	if [[ $passedTests -eq $totalTests ]]; then
 		echo "Perft suite testing OK"
 	else
 		printf "${GREEN}OK${NC}: $((passedTests))\n"
@@ -47,8 +45,7 @@ showUsageMessage() {
 
 # Checks for help flag.
 helpCommand() {
-	if [[ "$*" == *"-h"* ]]
-	then
+	if [[ "$*" == *"-h"* ]]; then
 		showUsageMessage
 		exit 0
 	fi
@@ -56,8 +53,7 @@ helpCommand() {
 
 # Checks the depth input and returns the FEN string.
 parseInputs() {
-	if  [ ! -z $1 ] && ([[ ! $1 =~ ^[0-9]+$ ]] || [ $1 -gt 6 ] || [ $1 -lt 1 ])
-	then
+	if  [ ! -z $1 ] && ([[ ! $1 =~ ^[0-9]+$ ]] || [ $1 -gt 6 ] || [ $1 -lt 1 ]); then
 		echo "Invalid input"
 		showUsageMessage
 		exit -1
@@ -67,8 +63,7 @@ parseInputs() {
 # Get the depth.
 getDepth() {
 	local depth="6"
-	if [ ! -z $1 ]
-	then
+	if [ ! -z $1 ]; then
 		depth=$1
 	fi
 	echo $depth

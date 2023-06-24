@@ -21,7 +21,7 @@ main() {
 # Checks for help flag.
 helpCommand() {
 	if [[ "$*" == *"-h"* ]]; then
-		echo "Usage: ./whiteCheckMateTests.sh [-h] [-c] [-k]"
+		echo "Usage: ./blackCheckmateTests.sh [-h] [-c] [-k]"
 		echo "    -h: Display usage message."
 		echo "    -c: Clean the keep files."
 		echo "    -k: Keep files from tests."
