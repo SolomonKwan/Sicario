@@ -737,7 +737,7 @@ void Position::updateEnPassant(const Move move) {
 	if (!pawnMove || !doublePush) return;
 
 	this->en_passant = end(move) + (this->turn == WHITE ? S : N);
-	this->hash ^= Hashes::EN_PASSANT[file(this->en_passant)];
+	this->hash ^= Hashes::EN_PASSANT[file(this->en_passant)]; // TODO
 }
 
 void Position::updateHalfmove(const Move move) {
@@ -1147,7 +1147,7 @@ void Position::getCheckMoves(uint& moves_index, MoveSet pos_moves[MOVESET_SIZE])
 	getBishopCheckedMoves(moves_index, pos_moves);
 	getKnightCheckedMoves(moves_index, pos_moves);
 	getPawnCheckedMoves(moves_index, pos_moves);
-	getEnPassantCheckMoves(moves_index, pos_moves);
+	getEnPassantMoves(moves_index, pos_moves);
 }
 
 void Position::getQueenCheckedMoves(uint& moves_index, MoveSet pos_moves[MOVESET_SIZE]) const { // TODO continue hereeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
@@ -1409,20 +1409,8 @@ void Position::getEnPassantMoves(uint& moves_index, MoveSet pos_moves[MOVESET_SI
 
 	for (Square square : pawnSquares) {
 		if (!validEnPassantMove(square)) continue;
-		pos_moves[moves_index++] = &Moves::EN_PASSANT[this->turn][file(this->en_passant)][file(square) < file(this->en_passant) ? 0 : 1];
-	}
-}
-
-void Position::getEnPassantCheckMoves(uint& moves_index, MoveSet pos_moves[MOVESET_SIZE]) const {
-	if (!this->en_passant) return;
-
-	std::vector<Square> pawnSquares;
-	if (file(this->en_passant) != FILE_A) pawnSquares.push_back(this->en_passant + (this->turn == WHITE ? SW : NW));
-	if (file(this->en_passant) != FILE_H) pawnSquares.push_back(this->en_passant + (this->turn == WHITE ? SE : NE));
-
-	for (Square square : pawnSquares) {
-		if (!validEnPassantMove(square)) continue;
-		pos_moves[moves_index++] = &Moves::EN_PASSANT[this->turn][file(this->en_passant)][file(square) < file(this->en_passant) ? 0 : 1];
+		int rightCapture = file(square) < file(this->en_passant) ? 0 : 1;
+		pos_moves[moves_index++] = &Moves::EN_PASSANT[this->turn][file(this->en_passant)][rightCapture];
 	}
 }
 
@@ -1629,7 +1617,7 @@ bool Position::validEnPassantMove(const Square square) const {
 	bool enPassantPinned = this->isPinnedByBishop(this->en_passant);
 	bool verPinned = this->isPinnedByRook(square);
 	bool horPinned = oneBitSet(this->getPieces() & this->rook_ep_pins & ~(ONE_BB << square | ONE_BB << capturedPawn));
-	return attackPawn && !verPinned && (!bishopPinned || (bishopPinned && enPassantPinned)) && !horPinned;
+	return attackPawn && !horPinned && !verPinned && (!bishopPinned || (bishopPinned && enPassantPinned));
 }
 
 std::string concatFEN(const std::vector<std::string> strings) {

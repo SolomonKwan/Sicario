@@ -507,14 +507,6 @@ class Position {
 		void getPawnCheckedMoves(uint& moves_index, MoveSet pos_moves[MOVESET_SIZE]) const;
 
 		/**
-		 * @brief Add vectors of en-passant moves to the pos_moves array for when the king is in check.
-		 *
-		 * @param moves_index Index of the first empty position in the pos_moves array.
-		 * @param pos_moves Array that holds pointers to vectors of moves.
-		 */
-		void getEnPassantCheckMoves(uint& moves_index, MoveSet pos_moves[MOVESET_SIZE]) const;
-
-		/**
 		 * @brief Add vectors of moves to the pos_moves array for when there is no check.
 		 *
 		 * @param moves_index Index of the first empty position in the pos_moves array.
