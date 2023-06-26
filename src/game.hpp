@@ -206,6 +206,9 @@ class Position {
 		std::unordered_map<Hash, int> positionCounts;
 		Hash hash;
 
+		// Auxiliary variable to assist with en passant hashing.
+		bool epHashed;
+
 		/**
 		 * @brief Zeroes out the bit in the given bitboard.
 		 *
@@ -757,12 +760,18 @@ class Position {
 		void updateCastling(const Square start, const Square end);
 
 		/**
-		 * @brief Update the en-passant state and hash. This must be called before updates to the bitboards, pieces and
+		 * @brief Update the en-passant state. This must be called before updates to the bitboards, pieces and
 		 * piece_list.
 		 *
 		 * @param move The move being made.
 		 */
 		void updateEnPassant(const Move move);
+
+		/**
+		 * @brief Update the en-passant hash. This must be called at the end of each call to
+		 * makeMove(const Move move, const bool hash).
+		 */
+		void updateEnPassantHash();
 
 		/**
 		 * @brief Update the halfmove counter. This must be called before updates to the pieces array.

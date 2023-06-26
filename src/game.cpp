@@ -133,6 +133,9 @@ void Position::resetPosition() {
 	this->history.clear();
 	this->positionCounts.clear();
 	this->hash = ZERO_BB;
+
+	// Auxiliary variable
+	this->epHashed = false;
 }
 
 ExitCode Position::isEOG(MoveList& move_list) const {
@@ -449,7 +452,9 @@ void Position::makeMove(const Move move, const bool hash) {
 	updateFullmove();
 	updateTurn();
 
-	if (hash) incrementPositionCounter();
+	if (!hash) return;
+	updateEnPassantHash();
+	incrementPositionCounter();
 }
 
 template<>
@@ -658,6 +663,7 @@ bool Position::castleBit<BQSC>() const {
 
 void Position::updateTurn() {
 	this->turn = !this->turn;
+	this->hash ^= Hashes::TURN;
 }
 
 void Position::display() const {
@@ -727,17 +733,28 @@ void Position::updateCastling(const Square start, const Square end) {
 
 void Position::updateEnPassant(const Move move) {
 	// Update existing en passant.
-	if (this->en_passant != NONE)
+	if (this->en_passant != NONE && this->epHashed)
 		this->hash ^= Hashes::EN_PASSANT[file(this->en_passant)];
 	this->en_passant = NONE;
+	this->epHashed = false;
 
 	// Update to new en passant.
 	bool pawnMove = this->pieces[start(move)] == W_PAWN || this->pieces[start(move)] == B_PAWN;
 	bool doublePush = std::abs(rank(start(move)) - rank(end(move))) == DOUBLE_PAWN_PUSH;
-	if (!pawnMove || !doublePush) return;
+	if (pawnMove && doublePush)
+		this->en_passant = end(move) + (this->turn == WHITE ? S : N);
+}
 
-	this->en_passant = end(move) + (this->turn == WHITE ? S : N);
-	this->hash ^= Hashes::EN_PASSANT[file(this->en_passant)]; // TODO
+void Position::updateEnPassantHash() {
+	if (this->en_passant == NONE) return;
+
+	setPinAndCheckRayBitboards();
+	uint movesIndex = 0;
+	MoveSet moveSets[MOVESET_SIZE];
+	getEnPassantMoves(movesIndex, moveSets);
+	if (movesIndex == 0) return;
+	this->hash ^= Hashes::EN_PASSANT[file(this->en_passant)];
+	this->epHashed = true;
 }
 
 void Position::updateHalfmove(const Move move) {
@@ -750,9 +767,8 @@ void Position::updateHalfmove(const Move move) {
 }
 
 void Position::updateFullmove() {
-	if (this->turn != BLACK) return;
-	this->fullmove++;
-	this->hash ^= Hashes::TURN;
+	if (this->turn == BLACK)
+		this->fullmove++;
 }
 
 void Position::updatePieceCounts(const PieceType piece_captured, const Move move) {
@@ -1235,8 +1251,14 @@ void Position::initialiseHash() {
 	this->hash ^= Hashes::CASTLING[castling];
 
 	// Hash en-passant
-	if (this->en_passant != NONE)
+	setPinAndCheckRayBitboards();
+	uint movesIndex = 0;
+	MoveSet moveSets[MOVESET_SIZE];
+	getEnPassantMoves(movesIndex, moveSets);
+	if (this->en_passant != NONE && movesIndex != 0) {
 		this->hash ^= Hashes::EN_PASSANT[file(this->en_passant)];
+		this->epHashed = true;
+	}
 }
 
 void Position::getNormalMoves(uint& moves_index, MoveSet pos_moves[MOVESET_SIZE]) const {
