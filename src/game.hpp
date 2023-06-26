@@ -212,7 +212,7 @@ class Position {
 		 * @param bitboard The bitboard to modify.
 		 * @param square The square to zero out.
 		 */
-		inline void zeroBit(Bitboard& bitboard, const Square square) const {
+		inline void zeroBitBB(Bitboard& bitboard, const Square square) const {
 			bitboard &= ~(ONE_BB << square);
 		}
 
@@ -222,7 +222,7 @@ class Position {
 		 * @param bitboard The bitboard to modify.
 		 * @param square The square to set.
 		 */
-		inline void setBit(Bitboard& bitboard, const Square square) const {
+		inline void setBitBB(Bitboard& bitboard, const Square square) const {
 			bitboard |= ONE_BB << square;
 		}
 
@@ -234,7 +234,9 @@ class Position {
 		 * @param start The square to zero out.
 		 * @param end The square to set.
 		 */
-		inline void zeroAndSetBit(Bitboard& bitboard, const Square start, const Square end) const {
+		inline void zeroAndSetBitBB(Bitboard& bitboard, const Square start, const Square end) const {
+			assert(isSet<Bitboard>(bitboard, start) == true);
+			assert(isSet<Bitboard>(bitboard, end) == false);
 			bitboard ^= ONE_BB << start | ONE_BB << end;
 		}
 
@@ -701,15 +703,6 @@ class Position {
 		void makePromotionMove(const Move move);
 
 		/**
-		 * @brief Update the sides bitboards for both a capture and non-capture normal move.
-		 *
-		 * @tparam T Move type (capture/non-capture).
-		 * @param move Move to make.
-		 */
-		template <MoveType T>
-		void normalMoveSidesBitboards(const Move move);
-
-		/**
 		 * @brief Update the corresponding piece bitboard.
 		 *
 		 * @param move Promotion move being made.
@@ -737,25 +730,6 @@ class Position {
 		 * @param move Promotion move being made.
 		 */
 		void removePiecePromotion(const Move move);
-
-		/**
-		 * @brief Update the corresponding piece bitboard for a specified move.
-		 *
-		 * @tparam T Base piece type of the piece being moved.
-		 * @param start Starting square.
-		 * @param end Ending square.
-		 */
-		template<BasePieceType T>
-		void movePieceBitboard(const Square start, const Square end);
-
-		/**
-		 * @brief Add a piece to the corresponding bitboard.
-		 *
-		 * @tparam T Base piece type.
-		 * @param square Square of piece to add.
-		 */
-		template<BasePieceType T>
-		void addToBitboard(const Square square);
 
 		/**
 		 * @brief Move a piece from the start to end square.
@@ -791,18 +765,19 @@ class Position {
 		void updateCastling(const Square start, const Square end);
 
 		/**
-		 * @brief Update the en-passant hash.
+		 * @brief Update the en-passant state and hash. This must be called before updates to the bitboards, pieces and
+		 * piece_list.
 		 *
-		 * @param clear Whether or not clear the en-passant square.
+		 * @param move The move being made.
 		 */
-		void updateEnPassant(const bool clear);
+		void updateEnPassant(const Move move);
 
 		/**
-		 * @brief Update the halfmove counter.
+		 * @brief Update the halfmove counter. This must be called before updates to the pieces array.
 		 *
-		 * @param zero Whether or not to zero the halfmove counter.
+		 * @param move The move being made.
 		 */
-		void updateHalfmove(const bool zero);
+		void updateHalfmove(const Move move);
 
 		/**
 		 * @brief Update the fullmove counter.
@@ -872,6 +847,19 @@ class Position {
 		 * @param hash Hash of the position count to decrement.
 		 */
 		void decrementPositionCounter(Hash hash);
+
+		/**
+		 * @brief Check if the pawn on the given square can make a valid en passant capture on the current en passant
+		 * square. To make this check, it checks the following:
+		 * 1 - There is a pawn of the current player to move on the given square.
+		 * 2 - The pawn is not pinned vertically.
+		 * 3 - The pawn is not pinned horizontally (i.e. both the capturing and captured pawn are not pinned).
+		 * 4 - The pawn is not pinned diagonally on the off-diagonal from the capturing diagonal.
+		 *
+		 * @param square The square of the potential capturing pawn.
+		 * @return True if a valid en passant capture can be made by the pawn on the given square, else false.
+		 */
+		bool validEnPassantMove(const Square square) const;
 };
 
 class MoveList {

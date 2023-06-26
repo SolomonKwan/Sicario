@@ -39,8 +39,9 @@ const uint FEN_CASTLING_INDEX = 2;
 const uint FEN_EN_PASSANT_INDEX = 3;
 const uint FEN_HALFMOVE_INDEX = 4;
 const uint FEN_FULLMOVE_INDEX = 5;
-const uint WHITE_CASTLING = 0b11;
+const uint WHITE_CASTLING = 0b0011;
 const uint BLACK_CASTLING = 0b1100;
+const uint DOUBLE_PAWN_PUSH = 2;
 
 const uint16_t MOVE_MASK = 0b111111;
 const uint16_t MOVE_TYPE_MASK = 0b11;

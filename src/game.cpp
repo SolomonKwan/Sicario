@@ -219,9 +219,9 @@ inline PieceType Position::getPieceType<PAWN>(const bool enemy) const {
 template <>
 void Position::makePromotionMove<CAPTURE>(const Move move) {
 	// Update bitboards.
-	zeroAndSetBit(this->sides[this->turn], start(move), end(move));
-	zeroBit(this->sides[!this->turn], end(move));
-	zeroBit(this->pawns, start(move));
+	zeroAndSetBitBB(this->sides[this->turn], start(move), end(move));
+	zeroBitBB(this->sides[!this->turn], end(move));
+	zeroBitBB(this->pawns, start(move));
 	removeFromBitboardPromotion(move);
 	addToPromotionBitboard(move);
 
@@ -238,8 +238,8 @@ void Position::makePromotionMove<CAPTURE>(const Move move) {
 template <>
 void Position::makePromotionMove<NON_CAPTURE>(const Move move) {
 	// Update bitboards
-	zeroAndSetBit(this->sides[this->turn], start(move), end(move));
-	zeroBit(this->pawns, start(move));
+	zeroAndSetBitBB(this->sides[this->turn], start(move), end(move));
+	zeroBitBB(this->pawns, start(move));
 	addToPromotionBitboard(move);
 
 	// Update piece_list and pieces
@@ -247,17 +247,6 @@ void Position::makePromotionMove<NON_CAPTURE>(const Move move) {
 
 	// Add the new piece
 	addPiecePromotion(move);
-}
-
-template <>
-void Position::normalMoveSidesBitboards<CAPTURE>(const Move move) {
-	this->sides[this->turn] ^= ONE_BB << start(move) | ONE_BB << end(move);
-	this->sides[!this->turn] ^= ONE_BB << end(move);
-}
-
-template <>
-void Position::normalMoveSidesBitboards<NON_CAPTURE>(const Move move) {
-	this->sides[this->turn] ^= ONE_BB << start(move) | ONE_BB << end(move);
 }
 
 template <PieceType T>
@@ -280,136 +269,50 @@ void Position::addPiece(const Square square) {
 
 template <Square KS, Square KE, Square RS, Square RE, PieceType K, PieceType R>
 void Position::makeCastlingMove() {
+	// Update piece hash
+	this->hash ^= Hashes::PIECES[K][KS];
+	this->hash ^= Hashes::PIECES[K][KE];
+	this->hash ^= Hashes::PIECES[R][RS];
+	this->hash ^= Hashes::PIECES[R][RE];
+
 	// Update bitboards
-	this->sides[this->turn] ^= ONE_BB << KS | ONE_BB << KE | ONE_BB << RS | ONE_BB << RE;
-	this->kings ^= ONE_BB << KS | ONE_BB << KE;
-	this->rooks ^= ONE_BB << RS | ONE_BB << RE;
+	zeroAndSetBitBB(this->sides[this->turn], KS, KE);
+	zeroAndSetBitBB(this->sides[this->turn], RS, RE);
+	zeroAndSetBitBB(this->kings, KS, KE);
+	zeroAndSetBitBB(this->rooks, RS, RE);
 
 	// Update piece_list and pieces
 	movePiece<K>(KS, KE);
 	movePiece<R>(RS, RE);
-
-	// Update piece hash
-	this->hash ^= Hashes::PIECES[K][KS] ^ Hashes::PIECES[K][KE] ^ Hashes::PIECES[R][RS] ^ Hashes::PIECES[R][RE];
-
-	// Update non-position information
-	updateCastling(KS, KE);
-	updateEnPassant(true);
-	updateFullmove();
-	updateHalfmove(false);
-	updateTurn();
-}
-
-template<>
-void Position::movePieceBitboard<KING>(const Square start, const Square end) {
-	this->kings ^= ONE_BB << start | ONE_BB << end;
-}
-
-template<>
-void Position::movePieceBitboard<QUEEN>(const Square start, const Square end) {
-	this->queens ^= ONE_BB << start | ONE_BB << end;
-}
-
-template<>
-void Position::movePieceBitboard<ROOK>(const Square start, const Square end) {
-	this->rooks ^= ONE_BB << start | ONE_BB << end;
-}
-
-template<>
-void Position::movePieceBitboard<BISHOP>(const Square start, const Square end) {
-	this->bishops ^= ONE_BB << start | ONE_BB << end;
-}
-
-template<>
-void Position::movePieceBitboard<KNIGHT>(const Square start, const Square end) {
-	this->knights ^= ONE_BB << start | ONE_BB << end;
-}
-
-template<>
-void Position::movePieceBitboard<PAWN>(const Square start, const Square end) {
-	bool notUndoMove = (start < end && this->turn == WHITE) || (start > end && this->turn == BLACK);
-	if (std::abs(rank(end) - rank(start)) == 2 && notUndoMove) {
-		this->en_passant = start + (this->turn == WHITE ? N : S);
-		this->hash ^= Hashes::EN_PASSANT[file(this->en_passant)];
-	}
-	this->pawns ^= ONE_BB << start | ONE_BB << end;
-}
-
-template<>
-void Position::addToBitboard<KING>(const Square square) {
-	this->kings ^= ONE_BB << square;
-}
-
-template<>
-void Position::addToBitboard<QUEEN>(const Square square) {
-	this->queens ^= ONE_BB << square;
-}
-
-template<>
-void Position::addToBitboard<ROOK>(const Square square) {
-	this->rooks ^= ONE_BB << square;
-}
-
-template<>
-void Position::addToBitboard<BISHOP>(const Square square) {
-	this->bishops ^= ONE_BB << square;
-}
-
-template<>
-void Position::addToBitboard<KNIGHT>(const Square square) {
-	this->knights ^= ONE_BB << square;
-}
-
-template<>
-void Position::addToBitboard<PAWN>(const Square square) {
-	this->pawns ^= ONE_BB << square;
 }
 
 template<>
 void Position::makeMove<NORMAL, NON_CAPTURE>(const Move move) {
-	updateEnPassant(true);
-	PieceType piece_moved = this->pieces[start(move)];
-
-	// Update pieces, piece_list and bitboard.
-	normalMoveSidesBitboards<NON_CAPTURE>(move);
-	movePieceAndUpdateBitboard(piece_moved, start(move), end(move));
-
 	// Update hash
+	PieceType piece_moved = this->pieces[start(move)];
 	this->hash ^= Hashes::PIECES[piece_moved][start(move)];
 	this->hash ^= Hashes::PIECES[piece_moved][end(move)];
 
-	// Update non-position information
-	updateCastling(start(move), end(move));
-	updateEnPassant(false);
-	updateFullmove();
-	updateHalfmove(piece_moved == W_PAWN || piece_moved == B_PAWN);
-	updateTurn();
+	// Update bitboards, pieces and piece_list.
+	zeroAndSetBitBB(this->sides[this->turn], start(move), end(move));
+	movePieceAndUpdateBitboard(piece_moved, start(move), end(move));
 }
 
 template<>
 void Position::makeMove<NORMAL, CAPTURE>(const Move move) {
-	updateEnPassant(true);
-
+	// Update hash
 	PieceType piece_captured = this->pieces[end(move)];
 	PieceType piece_moved = this->pieces[start(move)];
-
-	// Update pieces, piece_list and bitboard.
-	removePiece(end(move), piece_captured);
-	normalMoveSidesBitboards<CAPTURE>(move);
-	updatePieceCounts(piece_captured, move);
-	movePieceAndUpdateBitboard(piece_moved, start(move), end(move));
-
-	// Update hash
 	this->hash ^= Hashes::PIECES[piece_moved][start(move)];
 	this->hash ^= Hashes::PIECES[piece_moved][end(move)];
 	this->hash ^= Hashes::PIECES[piece_captured][end(move)];
 
-	// Update non-position information
-	updateCastling(start(move), end(move));
-	updateEnPassant(false);
-	updateFullmove();
-	updateHalfmove(true);
-	updateTurn();
+	// Update pieces, piece_list and bitboard.
+	removePiece(end(move), piece_captured);
+	zeroAndSetBitBB(this->sides[this->turn], start(move), end(move));
+	zeroBitBB(this->sides[!this->turn], end(move));
+	updatePieceCounts(piece_captured, move);
+	movePieceAndUpdateBitboard(piece_moved, start(move), end(move));
 }
 
 template<>
@@ -440,12 +343,17 @@ void Position::makeMove<CASTLING, NON_CAPTURE>(const Move move) {
 
 template<>
 void Position::makeMove<EN_PASSANT, CAPTURE>(const Move move) {
-	Square takenPawnSquare = this->en_passant + (this->turn == WHITE ? S : N);
+	// Update hash
+	Square takenPawnSquare = end(move) + (this->turn == WHITE ? S : N);
+	this->hash ^= Hashes::PIECES[getPieceType<PAWN>()][start(move)];
+	this->hash ^= Hashes::PIECES[getPieceType<PAWN>()][end(move)];
+	this->hash ^= Hashes::PIECES[getPieceType<PAWN>(true)][takenPawnSquare];
 
 	// Update bitboards
-	this->sides[this->turn] ^= (ONE_BB << start(move) | ONE_BB << end(move));
-	this->sides[!this->turn] ^= ONE_BB << takenPawnSquare;
-	this->pawns ^= (ONE_BB << start(move) | ONE_BB << end(move) | ONE_BB << takenPawnSquare);
+	zeroAndSetBitBB(this->sides[this->turn], start(move), end(move));
+	zeroBitBB(this->sides[!this->turn], takenPawnSquare);
+	zeroAndSetBitBB(this->pawns, start(move), end(move));
+	zeroBitBB(this->pawns, takenPawnSquare);
 
 	// Update piece positions
 	this->turn == WHITE ? movePiece<W_PAWN>(start(move), end(move)) : movePiece<B_PAWN>(start(move), end(move));
@@ -453,17 +361,6 @@ void Position::makeMove<EN_PASSANT, CAPTURE>(const Move move) {
 
 	// Update piece count
 	this->piece_cnt--;
-
-	// Update hash
-	this->hash ^= Hashes::PIECES[getPieceType<PAWN>()][start(move)];
-	this->hash ^= Hashes::PIECES[getPieceType<PAWN>()][end(move)];
-	this->hash ^= Hashes::PIECES[takenPawnSquare][takenPawnSquare];
-
-	// Update non-position information
-	updateEnPassant(true);
-	updateFullmove();
-	updateHalfmove(true);
-	updateTurn();
 }
 
 template<>
@@ -496,13 +393,6 @@ void Position::makeMove<PROMOTION, CAPTURE>(const Move move) {
 	// Update hash
 	this->hash ^= Hashes::PIECES[piece_moved][start(move)];
 	this->hash ^= Hashes::PIECES[piece_captured][end(move)];
-
-	// Update non-position information
-	updateCastling(start(move), end(move));
-	updateEnPassant(true);
-	updateFullmove();
-	updateHalfmove(true);
-	updateTurn();
 }
 
 template<>
@@ -531,25 +421,19 @@ void Position::makeMove<PROMOTION, NON_CAPTURE>(const Move move) {
 
 	// Update hash
 	this->hash ^= Hashes::PIECES[piece_moved][start(move)];
-
-	// Update non-position information
-	updateCastling(start(move), end(move));
-	updateEnPassant(true);
-	updateFullmove();
-	updateHalfmove(true);
-	updateTurn();
 }
 
 void Position::makeMove(const Move move, const bool hash) {
 	if (move == NULL_MOVE) return;
 	saveHistory(move);
+	updateEnPassant(move);
+	updateCastling(start(move), end(move));
+	updateHalfmove(move);
 
 	PieceType piece_captured = this->pieces[end(move)];
 	switch (type(move)) {
 		case NORMAL:
-			piece_captured == NO_PIECE ?
-					makeMove<NORMAL, NON_CAPTURE>(move) :
-					makeMove<NORMAL, CAPTURE>(move);
+			piece_captured == NO_PIECE ? makeMove<NORMAL, NON_CAPTURE>(move) : makeMove<NORMAL, CAPTURE>(move);
 			break;
 		case CASTLING:
 			makeMove<CASTLING, NON_CAPTURE>(move);
@@ -558,11 +442,12 @@ void Position::makeMove(const Move move, const bool hash) {
 			makeMove<EN_PASSANT, CAPTURE>(move);
 			break;
 		default:
-			piece_captured == NO_PIECE ?
-					makeMove<PROMOTION, NON_CAPTURE>(move) :
-					makeMove<PROMOTION, CAPTURE>(move);
+			piece_captured == NO_PIECE ? makeMove<PROMOTION, NON_CAPTURE>(move) : makeMove<PROMOTION, CAPTURE>(move);
 			break;
 	}
+
+	updateFullmove();
+	updateTurn();
 
 	if (hash) incrementPositionCounter();
 }
@@ -657,7 +542,7 @@ void Position::undoMove<PROMOTION>() {
 	// Replace pawn
 	this->turn == WHITE ? addPiece<W_PAWN>(start(prev.move)) : addPiece<B_PAWN>(start(prev.move));
 	this->sides[this->turn] ^= ONE_BB << start(prev.move);
-	addToBitboard<PAWN>(start(prev.move));
+	setBitBB(this->pawns, start(prev.move));
 }
 
 template<>
@@ -753,22 +638,22 @@ void Position::undoMove() {
 
 template <>
 bool Position::castleBit<WKSC>() const {
-	return this->castling & (1 << WKSC);
+	return this->castling & (1U << WKSC);
 }
 
 template <>
 bool Position::castleBit<WQSC>() const {
-	return this->castling & (1 << WQSC);
+	return this->castling & (1U << WQSC);
 }
 
 template <>
 bool Position::castleBit<BKSC>() const {
-	return this->castling & (1 << BKSC);
+	return this->castling & (1U << BKSC);
 }
 
 template <>
 bool Position::castleBit<BQSC>() const {
-	return this->castling & (1 << BQSC);
+	return this->castling & (1U << BQSC);
 }
 
 void Position::updateTurn() {
@@ -819,61 +704,55 @@ void Position::display() const {
 }
 
 void Position::updateCastling(const Square start, const Square end) {
-	if (start == E1 && WHITE_CASTLING & this->castling) {
-		this->hash ^= Hashes::CASTLING[this->castling];
-		this->castling &= BLACK_CASTLING;
-		this->hash ^= Hashes::CASTLING[this->castling];
-	} else if (start == E8 && BLACK_CASTLING & this->castling) {
-		this->hash ^= Hashes::CASTLING[this->castling];
-		this->castling &= WHITE_CASTLING;
-		this->hash ^= Hashes::CASTLING[this->castling];
+	uint prevCastling = this->castling;
+
+	// Update appropriate castling bits.
+	if (start == E1 && (this->castleBit<WKSC>() || this->castleBit<WQSC>())) {
+		this->castling &= ~WHITE_CASTLING;
+	} else if (start == E8 && (this->castleBit<BKSC>() || this->castleBit<BQSC>())) {
+		this->castling &= ~BLACK_CASTLING;
 	} else {
-		if ((start == H1 || end == H1) && isSet(this->castling, WKSC)) {
-			this->hash ^= Hashes::CASTLING[this->castling];
-			this->castling &= ~(1 << WKSC);
-			this->hash ^= Hashes::CASTLING[this->castling];
-		}
+		if (start == H1 || end == H1) this->castling &= ~(1U << WKSC);
+		if (start == A1 || end == A1) this->castling &= ~(1U << WQSC);
+		if (start == H8 || end == H8) this->castling &= ~(1U << BKSC);
+		if (start == A8 || end == A8) this->castling &= ~(1U << BQSC);
+	}
 
-		if ((start == A1 || end == A1) && isSet(this->castling, WQSC)) {
-			this->hash ^= Hashes::CASTLING[this->castling];
-			this->castling &= ~(1 << WQSC);
-			this->hash ^= Hashes::CASTLING[this->castling];
-		}
-
-		if ((start == H8 || end == H8) && isSet(this->castling, BKSC)) {
-			this->hash ^= Hashes::CASTLING[this->castling];
-			this->castling &= ~(1 << BKSC);
-			this->hash ^= Hashes::CASTLING[this->castling];
-		}
-
-		if ((start == A8 || end == A8) && isSet(this->castling, BQSC)) {
-			this->hash ^= Hashes::CASTLING[this->castling];
-			this->castling &= ~(1 << BQSC);
-			this->hash ^= Hashes::CASTLING[this->castling];
-		}
+	// Update hash.
+	if (prevCastling != this->castling) {
+		this->hash ^= Hashes::CASTLING[prevCastling];
+		this->hash ^= Hashes::CASTLING[this->castling];
 	}
 }
 
-void Position::updateEnPassant(const bool clear) {
+void Position::updateEnPassant(const Move move) {
+	// Update existing en passant.
 	if (this->en_passant != NONE)
 		this->hash ^= Hashes::EN_PASSANT[file(this->en_passant)];
-	if (clear)
-		this->en_passant = NONE;
+	this->en_passant = NONE;
+
+	// Update to new en passant.
+	bool pawnMove = this->pieces[start(move)] == W_PAWN || this->pieces[start(move)] == B_PAWN;
+	bool doublePush = std::abs(rank(start(move)) - rank(end(move))) == DOUBLE_PAWN_PUSH;
+	if (!pawnMove || !doublePush) return;
+
+	this->en_passant = end(move) + (this->turn == WHITE ? S : N);
+	this->hash ^= Hashes::EN_PASSANT[file(this->en_passant)];
 }
 
-void Position::updateHalfmove(const bool zero) {
-	if (zero) {
+void Position::updateHalfmove(const Move move) {
+	bool pawnMove = this->pieces[start(move)] == W_PAWN || this->pieces[start(move)] == B_PAWN;
+	bool captureMove = this->pieces[end(move)] != NO_PIECE;
+	if (pawnMove || captureMove)
 		this->halfmove = 0;
-	} else {
+	else
 		this->halfmove++;
-	}
 }
 
 void Position::updateFullmove() {
-	if (this->turn == BLACK) {
-		this->fullmove++;
-		this->hash ^= Hashes::TURN;
-	}
+	if (this->turn != BLACK) return;
+	this->fullmove++;
+	this->hash ^= Hashes::TURN;
 }
 
 void Position::updatePieceCounts(const PieceType piece_captured, const Move move) {
@@ -892,32 +771,32 @@ void Position::placeCapturedPiece(const PieceType piece, const Square square) {
 		case W_KING:
 		case B_KING:
 			this->turn == WHITE ? addPiece<B_KING>(square) : addPiece<W_KING>(square);
-			addToBitboard<KING>(square);
+			setBitBB(this->kings, square);
 			break;
 		case W_QUEEN:
 		case B_QUEEN:
 			this->turn == WHITE ? addPiece<B_QUEEN>(square) : addPiece<W_QUEEN>(square);
-			addToBitboard<QUEEN>(square);
+			setBitBB(this->queens, square);
 			break;
 		case W_ROOK:
 		case B_ROOK:
 			this->turn == WHITE ? addPiece<B_ROOK>(square) : addPiece<W_ROOK>(square);
-			addToBitboard<ROOK>(square);
+			setBitBB(this->rooks, square);
 			break;
 		case W_BISHOP:
 		case B_BISHOP:
 			this->turn == WHITE ? addPiece<B_BISHOP>(square) : addPiece<W_BISHOP>(square);
-			addToBitboard<BISHOP>(square);
+			setBitBB(this->bishops, square);
 			break;
 		case W_KNIGHT:
 		case B_KNIGHT:
 			this->turn == WHITE ? addPiece<B_KNIGHT>(square) : addPiece<W_KNIGHT>(square);
-			addToBitboard<KNIGHT>(square);
+			setBitBB(this->knights, square);
 			break;
 		case W_PAWN:
 		case B_PAWN:
 			this->turn == WHITE ? addPiece<B_PAWN>(square) : addPiece<W_PAWN>(square);
-			addToBitboard<PAWN>(square);
+			setBitBB(this->pawns, square);
 			break;
 		default:
 			assert(false);
@@ -928,36 +807,36 @@ void Position::movePieceAndUpdateBitboard(const PieceType piece, const Square st
 	switch (piece) {
 		case W_KING:
 		case B_KING:
+			zeroAndSetBitBB(this->kings, start, end);
 			this->turn == WHITE ? movePiece<W_KING>(start, end) : movePiece<B_KING>(start, end);
-			movePieceBitboard<KING>(start, end);
 			break;
 		case W_QUEEN:
 		case B_QUEEN:
 			this->turn == WHITE ? movePiece<W_QUEEN>(start, end) : movePiece<B_QUEEN>(start, end);
-			movePieceBitboard<QUEEN>(start, end);
+			zeroAndSetBitBB(this->queens, start, end);
 			break;
 		case W_ROOK:
 		case B_ROOK:
 			this->turn == WHITE ? movePiece<W_ROOK>(start, end) : movePiece<B_ROOK>(start, end);
-			movePieceBitboard<ROOK>(start, end);
+			zeroAndSetBitBB(this->rooks, start, end);
 			break;
 		case W_BISHOP:
 		case B_BISHOP:
 			this->turn == WHITE ? movePiece<W_BISHOP>(start, end) : movePiece<B_BISHOP>(start, end);
-			movePieceBitboard<BISHOP>(start, end);
+			zeroAndSetBitBB(this->bishops, start, end);
 			break;
 		case W_KNIGHT:
 		case B_KNIGHT:
 			this->turn == WHITE ? movePiece<W_KNIGHT>(start, end) : movePiece<B_KNIGHT>(start, end);
-			movePieceBitboard<KNIGHT>(start, end);
+			zeroAndSetBitBB(this->knights, start, end);
 			break;
 		case W_PAWN:
 		case B_PAWN:
 			this->turn == WHITE ? movePiece<W_PAWN>(start, end) : movePiece<B_PAWN>(start, end);
-			movePieceBitboard<PAWN>(start, end);
+			zeroAndSetBitBB(this->pawns, start, end);
 			break;
 		default:
-			std::cout << "This shouldn't be happening... " << piece << '\n';
+			std::cerr << "This shouldn't be happening... " << piece << '\n';
 			assert(false);
 	}
 }
@@ -976,16 +855,16 @@ void Position::saveHistory(const Move move) {
 void Position::addToPromotionBitboard(const Move move) {
 	switch (promo(move)) {
 		case pQUEEN:
-			setBit(this->queens, end(move));
+			setBitBB(this->queens, end(move));
 			break;
 		case pROOK:
-			setBit(this->rooks, end(move));
+			setBitBB(this->rooks, end(move));
 			break;
 		case pBISHOP:
-			setBit(this->bishops, end(move));
+			setBitBB(this->bishops, end(move));
 			break;
 		case pKNIGHT:
-			setBit(this->knights, end(move));
+			setBitBB(this->knights, end(move));
 			break;
 		default:
 			assert(false);
@@ -996,19 +875,19 @@ void Position::removeFromBitboardPromotion(const Move move) {
 	switch (this->pieces[end(move)]) {
 		case W_QUEEN:
 		case B_QUEEN:
-			zeroBit(this->queens, end(move));
+			zeroBitBB(this->queens, end(move));
 			break;
 		case W_ROOK:
 		case B_ROOK:
-			zeroBit(this->rooks, end(move));
+			zeroBitBB(this->rooks, end(move));
 			break;
 		case W_BISHOP:
 		case B_BISHOP:
-			zeroBit(this->bishops, end(move));
+			zeroBitBB(this->bishops, end(move));
 			break;
 		case W_KNIGHT:
 		case B_KNIGHT:
-			zeroBit(this->knights, end(move));
+			zeroBitBB(this->knights, end(move));
 			break;
 		default:
 			assert(false);
@@ -1525,22 +1404,12 @@ void Position::getEnPassantMoves(uint& moves_index, MoveSet pos_moves[MOVESET_SI
 	if (!this->en_passant) return;
 
 	std::vector<Square> pawnSquares;
-	if (file(this->en_passant) != FILE_A)
-		pawnSquares.push_back(this->en_passant + (this->turn == WHITE ? SW : NW));
-	if (file(this->en_passant) != FILE_H)
-		pawnSquares.push_back(this->en_passant + (this->turn == WHITE ? SE : NE));
+	if (file(this->en_passant) != FILE_A) pawnSquares.push_back(this->en_passant + (this->turn == WHITE ? SW : NW));
+	if (file(this->en_passant) != FILE_H) pawnSquares.push_back(this->en_passant + (this->turn == WHITE ? SE : NE));
 
 	for (Square square : pawnSquares) {
-		bool attackPawn = this->pieces[square] == getPieceType<PAWN>();
-		bool pinnedByBishop = isPinnedByBishop(square);
-		bool enPassantPinned = isPinnedByBishop(this->en_passant);
-		bool pinnedByRook = isPinnedByRook(square);
-		if (attackPawn && (!pinnedByBishop || (pinnedByBishop && enPassantPinned)) && !pinnedByRook) { // TODO simplify
-			bool pinned = oneBitSet(getPieces() & rook_ep_pins & ~(ONE_BB << square | ONE_BB << (this->en_passant +
-					(this->turn == WHITE ? S : N))));
-			if (!pinned) pos_moves[moves_index++] = &Moves::EN_PASSANT[this->turn][file(this->en_passant)]
-					[file(square) < file(this->en_passant) ? 0 : 1];
-		}
+		if (!validEnPassantMove(square)) continue;
+		pos_moves[moves_index++] = &Moves::EN_PASSANT[this->turn][file(this->en_passant)][file(square) < file(this->en_passant) ? 0 : 1];
 	}
 }
 
@@ -1548,19 +1417,12 @@ void Position::getEnPassantCheckMoves(uint& moves_index, MoveSet pos_moves[MOVES
 	if (!this->en_passant) return;
 
 	std::vector<Square> pawnSquares;
-	if (file(this->en_passant) != FILE_A)
-		pawnSquares.push_back(this->en_passant + (this->turn == WHITE ? SW : NW));
-	if (file(this->en_passant) != FILE_H)
-		pawnSquares.push_back(this->en_passant + (this->turn == WHITE ? SE : NE));
+	if (file(this->en_passant) != FILE_A) pawnSquares.push_back(this->en_passant + (this->turn == WHITE ? SW : NW));
+	if (file(this->en_passant) != FILE_H) pawnSquares.push_back(this->en_passant + (this->turn == WHITE ? SE : NE));
 
 	for (Square square : pawnSquares) {
-		if ((this->pieces[square] == getPieceType<PAWN>()) && (!isPinnedByBishop(square) ||
-				(isPinnedByBishop(square) && isPinnedByBishop(this->en_passant))) && !isPinnedByRook(square)) { // TODO simplify
-			bool pinned = oneBitSet(getPieces() & this->rook_ep_pins & ~(ONE_BB << square |
-					ONE_BB << (this->en_passant + (this->turn == WHITE ? S : N))));
-			if (!pinned) pos_moves[moves_index++] = &Moves::EN_PASSANT[turn][file(this->en_passant)]
-					[file(square) < file(this->en_passant) ? 0 : 1];
-		}
+		if (!validEnPassantMove(square)) continue;
+		pos_moves[moves_index++] = &Moves::EN_PASSANT[this->turn][file(this->en_passant)][file(square) < file(this->en_passant) ? 0 : 1];
 	}
 }
 
@@ -1758,6 +1620,16 @@ void Position::clearData() {
 	this->history.clear();
 	this->positionCounts.clear();
 	incrementPositionCounter();
+}
+
+bool Position::validEnPassantMove(const Square square) const {
+	Square capturedPawn = this->en_passant + (this->turn == WHITE ? S : N);
+	bool attackPawn = this->pieces[square] == this->getPieceType<PAWN>();
+	bool bishopPinned = this->isPinnedByBishop(square);
+	bool enPassantPinned = this->isPinnedByBishop(this->en_passant);
+	bool verPinned = this->isPinnedByRook(square);
+	bool horPinned = oneBitSet(this->getPieces() & this->rook_ep_pins & ~(ONE_BB << square | ONE_BB << capturedPawn));
+	return attackPawn && !verPinned && (!bishopPinned || (bishopPinned && enPassantPinned)) && !horPinned;
 }
 
 std::string concatFEN(const std::vector<std::string> strings) {
