@@ -11,10 +11,10 @@ def compare(name: str):
 			if i == False and j == False: return False
 		elif expected[i].startswith("regex "):
 			pattern = re.compile(expected[i].split("regex ")[1])
-			if not pattern.match(actual[j]): return False
+			if pattern.match(actual[j]) is None: return False
 			i += 1
 			j += 1
-		elif not expected[i] == actual[j]:
+		elif expected[i] != actual[j]:
 			return False
 		else:
 			i += 1

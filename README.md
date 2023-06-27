@@ -79,8 +79,26 @@ either for development/debugging purposes or just for curiosity. They are as fol
 
 ## Testing
 
-In the <code>tests</code> directory are the resources and files that are needed to run the tests.
+In the <code>tests</code> directory are the resources that are needed to run the tests. There are a few directories and
+files here.
 
+### Directory: eog
+The <code>eog</code> directory contains a script (<code>eogTest.sh</code>) and a directory for each of the possible end
+of game conditions. To run:
+
+```
+Usage: ./eogTest.sh test [-h] [-c] [-k]
+    test: The test to run. One of the directory names.
+    -h: Display usage message.
+    -c: Clean the keep files.
+    -k: Keep files from tests.
+```
+
+Running this will run the tests located in the <code>inputs.txt</code> files of each directory and compares it with the
+expected output. Additional tests can be added by appending a new game to the corresponding <code>games.pgn</code> file
+and running the <code>convertPgnToSmith.py</code> script.
+
+### Directory: perft
 There are 2 shell scripts in this directory. They are <code>perftSuite.sh</code> and <code>perftDiff.sh</code>. The
 former is for running perft on Sicario for a bunch of different test cases and checking that it counts the correct
 number of leaf nodes. The latter, is for when there is a bug in the engine and you want to find out where it differs
@@ -109,6 +127,31 @@ Usage: ./perftDiff.sh depth fen
 
 Currently, it assumes that there is an existing Stockfish binary called <code>stockfish</code> in the same
 directory. You will have to include this binary youself first.
+
+### Directory: uci
+This directory is for testing the uci and custom commands. Also used for testing more complex combinations of commands.
+To run:
+
+```
+Usage: ./uciSuite.sh [-h]
+    -h: Display usage message.
+    -c: Clean the keep files.
+    -k: Keep files from tests.
+```
+
+This will run through all the tests available. To add a new test, follow the same pattern and add an input and output
+file. The python script <code>compare.py</code> is used to compare the test cases where the output is variable. Variable
+output tests are handled using regex expressions.
+
+### convertPgnToSmith.py
+The file <code>convertPgnToSmith.py</code> converts the game(s) in a given PGN file to smith notation in a specified
+output file. To run:
+
+```
+python convertPgnToSmith.py path/to/PGN path/to/output
+```
+
+Each line in the output file will contain the moves of a game in smith notation.
 
 The file <code>pos.txt</code> contains some different forced mate positions or positions where there is/are only a
 number of moves that are not losing. These can be used in the future for AI testing.

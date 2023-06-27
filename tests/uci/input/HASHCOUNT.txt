@@ -1,0 +1,10 @@
+hash
+move g1f3
+hash
+move g8f6
+hash
+move f3g1
+hash
+move f6g8
+hash
+quit
