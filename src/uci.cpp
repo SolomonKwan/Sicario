@@ -117,6 +117,9 @@ void Sicario::processInput(const std::string& input) {
 		case HASHCOUNT:
 			handleHash();
 			break;
+		case LETTERMODE:
+			handleLetterMode(commands);
+			break;
 		case INVALID_COMMAND:
 		default:
 			sendInvalidCommand(commands);
@@ -149,6 +152,7 @@ UciInput Sicario::hashCommandInput(const std::string& input) {
 	if (input == "options") return OPTIONS;
 	if (input == "data") return DATA;
 	if (input == "hash") return HASHCOUNT;
+	if (input == "lettermode") return LETTERMODE;
 
 	return INVALID_COMMAND;
 }
@@ -283,7 +287,7 @@ void Sicario::handleUndo() {
 }
 
 void Sicario::handleDisplay() {
-	this->position.display();
+	this->position.display(this->sicarioConfigs.letterMode);
 }
 
 void Sicario::handleMoves() {
@@ -369,6 +373,17 @@ void Sicario::handleHash() {
 	Hash hash = this->getPosition().getHash();
 	std::cout << hash << '\n';
 	std::cout << this->getPosition().getPositionCounts().find(hash)->second << '\n';
+}
+
+void Sicario::handleLetterMode(const std::vector<std::string>& inputs) {
+	if (inputs.size() != 2)
+		sendMissingArgument(inputs);
+	else if (inputs[1] != "on" && inputs[1] != "off")
+		sendInvalidArgument(inputs[1]);
+	else if (inputs.size() == 2 && inputs[1] == "on")
+		this->sicarioConfigs.letterMode = true;
+	else if (inputs.size() == 2 && inputs[1] == "off")
+		this->sicarioConfigs.letterMode = false;
 }
 
 void Uci::communicate(std::string communication) {

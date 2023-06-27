@@ -666,9 +666,8 @@ void Position::updateTurn() {
 	this->hash ^= Hashes::TURN;
 }
 
-void Position::display() const {
+void Position::display(const bool letterMode) const {
 	// Print the pieces
-	bool letterMode = false;
 	for (int rank = RANK_8; rank >= RANK_1; rank--) {
 		std::cout << static_cast<char>((rank - 7) + '8') << ' ';
 		for (int file = FILE_A; file <= FILE_H; file++)
@@ -1603,7 +1602,7 @@ std::string Position::getSquareCharacters(const Square square, const bool letter
 		case B_PAWN:
 			return letterMode ? "p " : isDark(square) ? darkSquare("\u265F") : lightSquare("\u265F");
 		default:
-			return isDark(square) ? darkSquare(" ") : lightSquare(" ");
+			return letterMode ? "  " : isDark(square) ? darkSquare(" ") : lightSquare(" ");
 	}
 }
 

@@ -19,6 +19,7 @@ struct OptionInfo {
 
 struct SicarioConfigs {
 	bool debugMode = false; // This is set with the "debug" command, not "setoption".
+	bool letterMode = false; // This is set with the "lettermode" command, not "setoption".
 	OptionInfo options[CONFIGS_COUNT];
 };
 
@@ -187,6 +188,13 @@ class Sicario {
 		 * @brief Handle the has command. Used for debugging.
 		 */
 		void handleHash();
+
+		/**
+		 * @brief Handle the lettermode command.
+		 *
+		 * @param inputs Entire input given to the GUI.
+		 */
+		void handleLetterMode(const std::vector<std::string>& inputs);
 
 		/**
 		 * @brief Send the invalid command message.

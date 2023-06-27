@@ -1,0 +1,14 @@
+display
+lettermode on
+display
+lettermode on
+display
+lettermode off
+display
+display
+lettermode off
+display
+move e2e4
+lettermode on
+display
+quit

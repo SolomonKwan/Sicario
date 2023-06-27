@@ -201,6 +201,7 @@ enum UciInput {
 	OPTIONS,
 	DATA,
 	HASHCOUNT,
+	LETTERMODE,
 
 	// Sentinel for invalid command
 	INVALID_COMMAND

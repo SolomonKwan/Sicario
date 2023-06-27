@@ -65,7 +65,7 @@ class Position {
 		/**
 		 * @brief Display the board position and information.
 		 */
-		void display() const;
+		void display(const bool letterMode = false) const;
 
 		/**
 		 * @brief Display the bitboards. Used for debugging.

@@ -40,6 +40,7 @@ main() {
 	staticTest OPTIONS
 	staticTest DATA
 	variableTest HASHCOUNT
+	variableTest LETTERMODE
 	staticTest INVALID_COMMAND
 
 	# Test multiple commands
