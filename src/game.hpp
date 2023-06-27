@@ -925,14 +925,6 @@ class MoveList {
 };
 
 /**
- * @brief Concatenates the FEN substrings into a single string.
- *
- * @param strings Substrings of the FEN string.
- * @return Complete FEN string.
- */
-std::string concatFEN(const std::vector<std::string> strings);
-
-/**
  * @brief Generate zobrist piece hashes using a predefined seed.
  *
  * @return Array of size 12 (each piece for each colour) containing arrays of size SQUARE_COUNT Hashes.

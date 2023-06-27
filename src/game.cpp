@@ -1642,14 +1642,6 @@ bool Position::validEnPassantMove(const Square square) const {
 	return attackPawn && !horPinned && !verPinned && (!bishopPinned || (bishopPinned && enPassantPinned));
 }
 
-std::string concatFEN(const std::vector<std::string> strings) {
-	std::string result = "";
-	for (uint i = 0; i < strings.size(); i++) {
-		result += strings[i] + " ";
-	}
-	return result;
-}
-
 MoveList::MoveList(Position& position) {
 	position.getMoves(this->moves_index, this->moveSets);
 }
@@ -1662,9 +1654,8 @@ Move MoveList::randomMove() const {
 
 uint64_t MoveList::size() const {
 	uint64_t count = 0;
-	for (uint i = 0; i < this->moves_index; i++) {
+	for (uint i = 0; i < this->moves_index; i++)
 		count += this->moveSets[i]->size();
-	}
 	return count;
 }
 
@@ -1706,11 +1697,10 @@ MoveList::Iterator& MoveList::Iterator::operator++() { // Prefix increment
 		this->j = 0;
 	}
 
-	if (this->i != this->vecCnt) {
+	if (this->i != this->vecCnt)
 		this->ptr = &(*this->moves[this->i])[this->j];
-	} else { // Point to end of iterator
+	else // Point to end of iterator
 		this->ptr = this->endAddr;
-	}
 	return *this;
 }
 
@@ -1750,9 +1740,8 @@ std::array<Hash, CASTLING_COMBOS> generateCastlingHash() {
 	std::default_random_engine generator(272); // Fixed random seed
 	std::uniform_int_distribution<uint64_t> distribution(0, MAX_BB);
 	std::array<Hash, CASTLING_COMBOS> hashes;
-	for (uint i = 0; i < CASTLING_COMBOS; i++) {
+	for (uint i = 0; i < CASTLING_COMBOS; i++)
 		hashes[i] = distribution(generator);
-	}
 	return hashes;
 }
 
@@ -1760,8 +1749,7 @@ std::array<Hash, FILE_COUNT> generateEnPassantHash() {
 	std::default_random_engine generator(162); // Fixed random seed
 	std::uniform_int_distribution<uint64_t> distribution(0, MAX_BB);
 	std::array<Hash, FILE_COUNT> hashes;
-	for (uint i = 0; i < FILE_COUNT; i++) {
+	for (uint i = 0; i < FILE_COUNT; i++)
 		hashes[i] = distribution(generator);
-	}
 	return hashes;
 }

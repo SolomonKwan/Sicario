@@ -118,6 +118,13 @@ std::string trim(std::string string) {
 	return string;
 }
 
+std::string concatFEN(const std::vector<std::string> strings, const std::string delim) {
+	std::string result = "";
+	for (uint i = 0; i < strings.size(); i++)
+		result += strings[i] + delim;
+	return result;
+}
+
 Square mirror(Square square) {
 	return static_cast<Square>(static_cast<int>(square) ^ 56);
 }

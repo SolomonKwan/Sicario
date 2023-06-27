@@ -168,6 +168,15 @@ Square mirror(Square square);
 std::string trim(std::string string);
 
 /**
+ * @brief Concatenates the FEN substrings into a single string.
+ *
+ * @param strings Substrings of the FEN string.
+ * @param delim The delimeter string. Defaulted to a space.
+ * @return Complete FEN string.
+ */
+std::string concatFEN(const std::vector<std::string> strings, const std::string delim = " ");
+
+/**
  * @brief Check if the bit at 'index' of 'number' is set.
  *
  * @tparam T Type
