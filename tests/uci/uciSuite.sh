@@ -35,7 +35,7 @@ main() {
 	staticTest DISPLAY
 	staticTest MOVES
 	staticTest BITBOARDS
-	staticTest RANDOMGAME
+	variableTest RANDOMGAME
 	staticTest STATE
 	staticTest OPTIONS
 	staticTest DATA
