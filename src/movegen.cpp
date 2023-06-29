@@ -9,9 +9,11 @@
 #include "game.hpp"
 #include "utils.hpp"
 
+typedef std::array<int, 4> ArrayFour;
+
 struct RaysPairs {
-	std::array<int, 4> sizes;
-	std::array<Direction, 4> directions;
+	ArrayFour sizes;
+	ArrayFour directions;
 };
 
 typedef void (*GetSquares)(const Square, std::vector<Square>&);
@@ -99,10 +101,10 @@ void pawnMoveGenerator(const Square start, const Square end, MoveVector& moves) 
  * @return A RaysPairs struct containg the sizes and directions of each ray.
  */
 RaysPairs getRookRayPairs(const Square square) {
-	int northSize = std::max(RANK_8 - rank(square), 0);
-	int eastSize = std::max(FILE_H - file(square), 0);
-	int southSize = std::max(static_cast<int>(rank(square)), 0);
-	int westSize = std::max(static_cast<int>(file(square)), 0);
+	int northSize = RANK_8 - rank(square);
+	int eastSize  = FILE_H - file(square);
+	int southSize = rank(square);
+	int westSize  = file(square);
 	return {
 		{northSize, eastSize, southSize, westSize},
 		{N, E, S, W}
@@ -116,12 +118,56 @@ RaysPairs getRookRayPairs(const Square square) {
  * @return A RaysPairs struct containg the sizes and directions of each ray.
  */
 RaysPairs getBishopRayPairs(const Square square) {
-	int northEastSize = std::max(std::min(RANK_8 - rank(square), FILE_H - file(square)), 0);
-	int southEastSize = std::max(std::min(static_cast<int>(rank(square)), FILE_H - file(square)), 0);
-	int southWestSize = std::max(std::min(static_cast<int>(rank(square)), static_cast<int>(file(square))), 0);
-	int northWestSize = std::max(std::min(RANK_8 - static_cast<int>(rank(square)), static_cast<int>(file(square))), 0);
+	int northEastSize = std::min(RANK_8 - rank(square), FILE_H - file(square));
+	int southEastSize = std::min(static_cast<int>(rank(square)), FILE_H - file(square));
+	int southWestSize = std::min(static_cast<int>(rank(square)), static_cast<int>(file(square)));
+	int northWestSize = std::min(RANK_8 - rank(square), static_cast<int>(file(square)));
 	return {
 		{northEastSize, southEastSize, southWestSize, northWestSize},
+		{NE, SE, SW, NW}
+	};
+}
+
+RaysPairs rookReachIndexRaySizes(const Square square) {
+	int northSize = std::max(6 - rank(square), 0);
+	int eastSize  = std::max(6 - file(square), 0);
+	int southSize = std::max(rank(square) - 1, 0);
+	int westSize  = std::max(file(square) - 1, 0);
+	return {
+		{northSize, eastSize, southSize, westSize},
+		{N, E, S, W}
+	};
+}
+
+RaysPairs bishopReachIndexRaySizes(const Square square) {
+	int northeastSize = std::max(std::min(6 - rank(square), 6 - file(square)), 0);
+	int southeastSize = std::max(std::min(rank(square) - 1, 6 - file(square)), 0);
+	int southwestSize = std::max(std::min(rank(square) - 1, file(square) - 1), 0);
+	int northwestSize = std::max(std::min(6 - rank(square), file(square) - 1), 0);
+	return {
+		{northeastSize, southeastSize, southwestSize, northwestSize},
+		{NE, SE, SW, NW}
+	};
+}
+
+RaysPairs rookReachRaySizes(const Square square) {
+	int northSize = 7 - (square / 8);
+	int eastSize  = 7 - (square % 8);
+	int southSize = square / 8;
+	int westSize  = square % 8;
+	return {
+		{northSize, eastSize, southSize, westSize},
+		{N, E, S, W}
+	};
+}
+
+RaysPairs bishopReachRaySizes(const Square square) {
+	int northeastSize = std::min(7 - square / 8, 7 - square % 8);
+	int southeastSize = std::min(square / 8, 7 - square % 8);
+	int southwestSize = std::min(square / 8, square % 8);
+	int northwestSize = std::min(7 - square / 8, square % 8);
+	return {
+		{northeastSize, southeastSize, southwestSize, northwestSize},
 		{NE, SE, SW, NW}
 	};
 }
@@ -185,7 +231,7 @@ MoveFamilies computeRangedMoves(GetRayPairs getRayPairs, GetMovesIndex getMovesI
 		movesSet.resize(std::pow(2, SQUARE_COUNT - shift[square]));
 		RaysPairs pair = getRayPairs(square);
 
-		for (std::array<int, 4> selection : getEndCombinations(pair.sizes)) {
+		for (ArrayFour selection : getEndCombinations(pair.sizes)) {
 			uint64_t reach = ZERO_BB;
 			MoveVector moves;
 
@@ -274,7 +320,7 @@ MoveFamilies computeBlockMoves(GetRayPairs getRayPairs, GetMovesIndex getMovesIn
 		movesSet.resize((int)std::pow(2, SQUARE_COUNT - shift[square]));
 		RaysPairs pair = getRayPairs(square);
 
-		for (std::array<int, 4> selection : getEndBlockSquares(pair.sizes)) {
+		for (ArrayFour selection : getEndBlockSquares(pair.sizes)) {
 			MoveVector moves;
 			uint64_t occ = ZERO_BB;
 
@@ -299,28 +345,6 @@ MoveFamilies computeBishopBlockMoves() {
 	return computeBlockMoves(getBishopRayPairs, getBishopBlockIndex, Shifts::Block::BISHOP);
 }
 
-RaysPairs rookReachIndexRaySizes(const Square square) {
-	int northSize = std::max(6 - rank(square), 0);
-	int eastSize = std::max(6 - file(square), 0);
-	int southSize = std::max(rank(square) - 1, 0);
-	int westSize = std::max(file(square) - 1, 0);
-	return {
-		{northSize, eastSize, southSize, westSize},
-		{N, E, S, W}
-	};
-}
-
-RaysPairs bishopReachIndexRaySizes(const Square square) {
-	int northeastSize = std::max(std::min(6 - rank(square), 6 - file(square)), 0);
-	int southeastSize = std::max(std::min(rank(square) - 1, 6 - file(square)), 0);
-	int southwestSize = std::max(std::min(rank(square) - 1, file(square) - 1), 0);
-	int northwestSize = std::max(std::min(6 - rank(square), file(square) - 1), 0);
-	return {
-		{northeastSize, southeastSize, southwestSize, northwestSize},
-		{NE, SE, SW, NW}
-	};
-}
-
 IndicesFamily computeReachIndices(GetRayPairs getRayPairs, GetMovesIndex getMovesIndex) {
 	IndicesFamily pieceIndices;
 	for (Square square = A1; square <= H8; square++) {
@@ -333,7 +357,7 @@ IndicesFamily computeReachIndices(GetRayPairs getRayPairs, GetMovesIndex getMove
 		for (uint16_t j = 0; j < maxOccupancy; j++) {
 			uint64_t occ = ZERO_BB;
 			int shift = 0;
-			std::array<int, 4> blockers = {0};
+			ArrayFour blockers = {0};
 
 			for (int index = 0; index < 4; index++) {
 				for (int k = 0; k < pairs.sizes[index]; k++, shift++) {
@@ -367,28 +391,6 @@ IndicesFamily computeBishopReachIndices() {
 	return computeReachIndices(bishopReachIndexRaySizes, getBishopReachIndex);
 }
 
-RaysPairs rookReachRaySizes(const Square square) {
-	int northSize = std::max(7 - (square / 8), 0);
-	int eastSize = std::max(7 - (square % 8), 0);
-	int southSize = std::max(square / 8, 0);
-	int westSize = std::max(square % 8, 0);
-	return {
-		{northSize, eastSize, southSize, westSize},
-		{N, E, S, W}
-	};
-}
-
-RaysPairs bishopReachRaySizes(const Square square) {
-	int northeastSize = std::max(std::min(7 - square / 8, 7 - square % 8), 0);
-	int southeastSize = std::max(std::min(square / 8, 7 - square % 8), 0);
-	int southwestSize = std::max(std::min(square / 8, square % 8), 0);
-	int northwestSize = std::max(std::min(7 - square / 8, square % 8), 0);
-	return {
-		{northeastSize, southeastSize, southwestSize, northwestSize},
-		{NE, SE, SW, NW}
-	};
-}
-
 BitboardFamily computeReaches(ReachIndices getReachIndices, GetRayPairs getRayPairs, GetMovesIndex getReachIndex, const Bitboard mask[SQUARE_COUNT]) {
 	const IndicesFamily PIECE = getReachIndices();
 	BitboardFamily reaches;
@@ -396,9 +398,9 @@ BitboardFamily computeReaches(ReachIndices getReachIndices, GetRayPairs getRayPa
 		BitboardVector& reachSet = reaches[square];
 		reachSet.resize(*std::max_element(PIECE[square].begin(), PIECE[square].end()) + 1);
 		RaysPairs pairs = getRayPairs(square);
-		std::vector<std::array<int, 4>> combos = getEndCombinations(pairs.sizes);
+		std::vector<ArrayFour> combos = getEndCombinations(pairs.sizes);
 
-		for (std::array<int, 4> combo : combos) {
+		for (ArrayFour combo : combos) {
 			Bitboard occ = ZERO_BB;
 			Bitboard reach = ZERO_BB;
 
@@ -428,14 +430,14 @@ std::array<std::vector<std::vector<Square>>, SQUARE_COUNT> computeKingReachSquar
 	for (Square square = A1; square <= H8; square++) {
 		std::vector<std::vector<Square>>& reachSet = kingReaches[square];
 		std::vector<Square> destinations;
-		if (square / RANK_COUNT != 7) destinations.push_back(square + N);
-		if (square % FILE_COUNT != 7) destinations.push_back(square + E);
-		if (square / RANK_COUNT != 0) destinations.push_back(square + S);
-		if (square % FILE_COUNT != 0) destinations.push_back(square + W);
-		if (square / RANK_COUNT != 7 && square % FILE_COUNT != 7) destinations.push_back(square + NE);
-		if (square / RANK_COUNT != 0 && square % FILE_COUNT != 7) destinations.push_back(square + SE);
-		if (square / RANK_COUNT != 0 && square % FILE_COUNT != 0) destinations.push_back(square + SW);
-		if (square / RANK_COUNT != 7 && square % FILE_COUNT != 0) destinations.push_back(square + NW);
+		if (square / RANK_COUNT != RANK_8) destinations.push_back(square + N);
+		if (square % FILE_COUNT != FILE_H) destinations.push_back(square + E);
+		if (square / RANK_COUNT != RANK_1) destinations.push_back(square + S);
+		if (square % FILE_COUNT != FILE_A) destinations.push_back(square + W);
+		if (square / RANK_COUNT != RANK_8 && square % FILE_COUNT != FILE_H) destinations.push_back(square + NE);
+		if (square / RANK_COUNT != RANK_1 && square % FILE_COUNT != FILE_H) destinations.push_back(square + SE);
+		if (square / RANK_COUNT != RANK_1 && square % FILE_COUNT != FILE_A) destinations.push_back(square + SW);
+		if (square / RANK_COUNT != RANK_8 && square % FILE_COUNT != FILE_A) destinations.push_back(square + NW);
 
 		uint16_t maxOccupancy = static_cast<uint16_t>(pow(2, destinations.size()));
 		reachSet.resize(maxOccupancy);
@@ -525,7 +527,7 @@ int pairingFunction(const int n, const int m, const int N, const int M) {
 		return n + m * N;
 }
 
-void generateCombination(std::array<int, 4> sizes, std::array<int, 4> curr, std::vector<std::array<int, 4>>& res) {
+void generateCombination(ArrayFour sizes, ArrayFour curr, std::vector<ArrayFour>& res) {
 	res.push_back(curr);
 	if (curr == sizes) return;
 
@@ -543,16 +545,16 @@ void generateCombination(std::array<int, 4> sizes, std::array<int, 4> curr, std:
 	generateCombination(sizes, curr, res);
 }
 
-std::vector<std::array<int, 4>> getEndCombinations(std::array<int, 4> sizes) {
-	std::vector<std::array<int, 4>> res;
+std::vector<ArrayFour> getEndCombinations(ArrayFour sizes) {
+	std::vector<ArrayFour> res;
 	generateCombination(sizes, {0, 0, 0, 0}, res);
 	return res;
 }
 
-void generateLoneSquares(std::array<int, 4> sizes, std::vector<std::array<int, 4>>& res) {
+void generateLoneSquares(ArrayFour sizes, std::vector<ArrayFour>& res) {
 	for (uint i = 0; i < sizes.size(); i++) {
 		for (int j = 0; j <= sizes[i]; j++) {
-			std::array<int, 4> combo = {0, 0, 0, 0};
+			ArrayFour combo = {0, 0, 0, 0};
 			combo[i] = j;
 			if (std::find(res.begin(), res.end(), combo) == res.end())
 				res.push_back(combo);
@@ -560,7 +562,7 @@ void generateLoneSquares(std::array<int, 4> sizes, std::vector<std::array<int, 4
 	}
 }
 
-void generatePairSquares(std::array<int, 4> sizes, std::array<int, 4> curr, std::vector<std::array<int, 4>>& res) {
+void generatePairSquares(ArrayFour sizes, ArrayFour curr, std::vector<ArrayFour>& res) {
 	// Find limiting ray length and indices of pairs to increment.
 	int smallerSize;
 	int first = -1, second = -1;
@@ -580,7 +582,7 @@ void generatePairSquares(std::array<int, 4> sizes, std::array<int, 4> curr, std:
 
 	// Generate the pairs
 	for (int i = 0; i <= smallerSize; i++) {
-		std::array<int, 4> combo = {0, 0, 0, 0};
+		ArrayFour combo = {0, 0, 0, 0};
 		combo[first] = i;
 		combo[second] = i;
 		if (std::find(res.begin(), res.end(), combo) == res.end())
@@ -588,8 +590,8 @@ void generatePairSquares(std::array<int, 4> sizes, std::array<int, 4> curr, std:
 	}
 }
 
-std::vector<std::array<int, 4>> getEndBlockSquares(std::array<int, 4> sizes) {
-	std::vector<std::array<int, 4>> res;
+std::vector<ArrayFour> getEndBlockSquares(ArrayFour sizes) {
+	std::vector<ArrayFour> res;
 	generateLoneSquares(sizes, res);
 	generatePairSquares({sizes[0], sizes[1], 0, 0}, {0, 0, 0, 0}, res);
 	generatePairSquares({0, sizes[1], sizes[2], 0}, {0, 0, 0, 0}, res);

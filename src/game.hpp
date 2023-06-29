@@ -44,10 +44,9 @@ class Position {
 		/**
 		 * @brief Retrives all legal moves of the current position.
 		 *
-		 * @param moves_index Current index of the first empty position in the pos_moves array.
-		 * @param pos_moves Array that holds pointers to vectors of moves.
+		 * @param moves Reference to moveList to populate.
 		 */
-		void getMoves(uint& moves_index, MoveSet pos_moves[MOVESET_SIZE]);
+		void getMoves(MoveList& moves);
 
 		/**
 		 * @brief Performs the given move on the board position.
@@ -456,122 +455,115 @@ class Position {
 		/**
 		 * @brief Add the vector of king moves to the pos_moves array.
 		 *
-		 * @param moves_index Index of the first empty position in the pos_moves array.
-		 * @param pos_moves Array that holds pointers to vectors of moves.
+		 * @param moves Reference to moveList to populate.
 		 */
-		void getKingMoves(uint& moves_index, MoveSet pos_moves[MOVESET_SIZE]) const;
+		void getKingMoves(MoveList& moves) const;
 
 		/**
 		 * @brief Add vectors of moves to the pos_moves array for when the king is in check.
 		 *
-		 * @param moves_index Index of the first empty position in the pos_moves array.
-		 * @param pos_moves Array that holds pointers to vectors of moves.
+		 * @param moves Reference to moveList to populate.
 		 */
-		void getCheckMoves(uint& moves_index, MoveSet pos_moves[MOVESET_SIZE]) const;
+		void getCheckMoves(MoveList& moves) const;
 
 		/**
 		 * @brief Add vectors of queen moves to the pos_moves array for when the king is in check.
 		 *
-		 * @param moves_index Index of the first empty position in the pos_moves array.
-		 * @param pos_moves Array that holds pointers to vectors of moves.
+		 * @param moves Reference to moveList to populate.
 		 */
-		void getQueenCheckedMoves(uint& moves_index, MoveSet pos_moves[MOVESET_SIZE]) const;
+		void getQueenCheckedMoves(MoveList& moves) const;
 
 		/**
 		 * @brief Add vectors of rook moves to the pos_moves array for when the king is in check.
 		 *
-		 * @param moves_index Index of the first empty position in the pos_moves array.
-		 * @param pos_moves Array that holds pointers to vectors of moves.
+		 * @param moves Reference to moveList to populate.
 		 */
-		void getRookCheckedMoves(uint& moves_index, MoveSet pos_moves[MOVESET_SIZE]) const;
+		void getRookCheckedMoves(MoveList& moves) const;
 
 		/**
 		 * @brief Add vectors of bishop moves to the pos_moves array for when the king is in check.
 		 *
-		 * @param moves_index Index of the first empty position in the pos_moves array.
-		 * @param pos_moves Array that holds pointers to vectors of moves.
+		 * @param moves Reference to moveList to populate.
 		 */
-		void getBishopCheckedMoves(uint& moves_index, MoveSet pos_moves[MOVESET_SIZE]) const;
+		void getBishopCheckedMoves(MoveList& moves) const;
 
 		/**
 		 * @brief Add vectors of knight moves to the pos_moves array for when the king is in check.
 		 *
-		 * @param moves_index Index of the first empty position in the pos_moves array.
-		 * @param pos_moves Array that holds pointers to vectors of moves.
+		 * @param moves Reference to moveList to populate.
 		 */
-		void getKnightCheckedMoves(uint& moves_index, MoveSet pos_moves[MOVESET_SIZE]) const;
+		void getKnightCheckedMoves(MoveList& moves) const;
 
 		/**
 		 * @brief Add vectors of pawn moves to the pos_moves array for when the king is in check.
 		 *
-		 * @param moves_index Index of the first empty position in the pos_moves array.
-		 * @param pos_moves Array that holds pointers to vectors of moves.
+		 * @param moves Reference to moveList to populate.
 		 */
-		void getPawnCheckedMoves(uint& moves_index, MoveSet pos_moves[MOVESET_SIZE]) const;
+		void getPawnCheckedMoves(MoveList& moves) const;
 
 		/**
 		 * @brief Add vectors of moves to the pos_moves array for when there is no check.
 		 *
-		 * @param moves_index Index of the first empty position in the pos_moves array.
-		 * @param pos_moves Array that holds pointers to vectors of moves.
+		 * @param moves Reference to moveList to populate.
 		 */
-		void getNormalMoves(uint& moves_index, MoveSet pos_moves[MOVESET_SIZE]) const;
+		void getNormalMoves(MoveList& moves) const;
 
 		/**
 		 * @brief Add vectors of queen moves to the pos_moves array for when there is no check.
 		 *
-		 * @param moves_index Index of the first empty position in the pos_moves array.
-		 * @param pos_moves Array that holds pointers to vectors of moves.
+		 * @param moves Reference to moveList to populate.
 		 */
-		void getQueenMoves(uint& moves_index, MoveSet pos_moves[MOVESET_SIZE]) const;
+		void getQueenMoves(MoveList& moves) const;
 
 		/**
 		 * @brief Add vectors of rook moves to the pos_moves array for when there is no check.
 		 *
-		 * @param moves_index Index of the first empty position in the pos_moves array.
-		 * @param pos_moves Array that holds pointers to vectors of moves.
+		 * @param moves Reference to moveList to populate.
 		 */
-		void getRookMoves(uint& moves_index, MoveSet pos_moves[MOVESET_SIZE]) const;
+		void getRookMoves(MoveList& moves) const;
 
 		/**
 		 * @brief Add vectors of bishop moves to the pos_moves array for when there is no check.
 		 *
-		 * @param moves_index Index of the first empty position in the pos_moves array.
-		 * @param pos_moves Array that holds pointers to vectors of moves.
+		 * @param moves Reference to moveList to populate.
 		 */
-		void getBishopMoves(uint& moves_index, MoveSet pos_moves[MOVESET_SIZE]) const;
+		void getBishopMoves(MoveList& moves) const;
 
 		/**
 		 * @brief Add vectors of knight moves to the pos_moves array for when there is no check.
 		 *
-		 * @param moves_index Index of the first empty position in the pos_moves array.
-		 * @param pos_moves Array that holds pointers to vectors of moves.
+		 * @param moves Reference to moveList to populate.
 		 */
-		void getKnightMoves(uint& moves_index, MoveSet pos_moves[MOVESET_SIZE]) const;
+		void getKnightMoves(MoveList& moves) const;
 
 		/**
 		 * @brief Add vectors of castling moves to the pos_moves array.
 		 *
-		 * @param moves_index Index of the first empty position in the pos_moves array.
-		 * @param pos_moves Array that holds pointers to vectors of moves.
+		 * @param moves Reference to moveList to populate.
 		 */
-		void getCastlingMoves(uint& moves_index, MoveSet pos_moves[MOVESET_SIZE]) const;
+		void getCastlingMoves(MoveList& moves) const;
+
+		bool validWKSC() const;
+
+		bool validWQSC() const;
+
+		bool validBKSC() const;
+
+		bool validBQSC() const;
 
 		/**
 		 * @brief Add vectors of en-passant moves to the pos_moves array for when there is no check.
 		 *
-		 * @param moves_index Index of the first empty position in the pos_moves array.
-		 * @param pos_moves Array that holds pointers to vectors of moves.
+		 * @param moves Reference to moveList to populate.
 		 */
-		void getEnPassantMoves(uint& moves_index, MoveSet pos_moves[MOVESET_SIZE]) const;
+		void getEnPassantMoves(MoveList& moves) const;
 
 		/**
 		 * @brief Add vectors of pawn moves to the pos_moves array for when there is no check.
 		 *
-		 * @param moves_index Index of the first empty position in the pos_moves array.
-		 * @param pos_moves Array that holds pointers to vectors of moves.
+		 * @param moves Reference to moveList to populate.
 		 */
-		void getPawnMoves(uint& moves_index, MoveSet pos_moves[MOVESET_SIZE]) const;
+		void getPawnMoves(MoveList& moves) const;
 
 		/**
 		 * @brief Get the reach bitboard of a rook on the specified square.
@@ -595,21 +587,19 @@ class Position {
 		 * @brief Add vector of moves to the pos_moves array for a diagonally pinned queen/bishop on the specified
 		 * square.
 		 *
-		 * @param moves_index Index of the first empty position in the pos_moves array.
-		 * @param pos_moves Array that holds pointers to vectors of moves.
+		 * @param moves Reference to moveList to populate.
 		 * @param square Square of the piece.
 		 */
-		void getBishopPinMoves(uint& moves_index, MoveSet pos_moves[MOVESET_SIZE], const Square square) const;
+		void getBishopPinMoves(MoveList& moves, const Square square) const;
 
 		/**
 		 * @brief Add vector of moves to the pos_moves array for a horizontally or vertically pinned queen/bishop on the
 		 * specified square.
 		 *
-		 * @param moves_index Index of the first empty position in the pos_moves array.
-		 * @param pos_moves Array that holds pointers to vectors of moves.
+		 * @param moves Reference to moveList to populate.
 		 * @param square Square of the piece.
 		 */
-		void getRookPinMoves(uint& moves_index, MoveSet pos_moves[MOVESET_SIZE], const Square square) const;
+		void getRookPinMoves(MoveList& moves, const Square square) const;
 
 		/**
 		 * @brief Check if the given square is occupied.
@@ -891,6 +881,13 @@ class MoveList {
 		 * @return A random move from the movelist.
 		 */
 		Move randomMove() const;
+
+		/**
+		 * @brief Add a moveset.
+		 *
+		 * @param moveset The moveset to add.
+		 */
+		void addMoves(const MoveSet& moveset);
 
 		struct Iterator {
 			Iterator(int vecCnt, int i, int j, MoveSet* pos_moves, const Move* endMove);
