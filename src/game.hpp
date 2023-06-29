@@ -543,12 +543,32 @@ class Position {
 		 */
 		void getCastlingMoves(MoveList& moves) const;
 
+		/**
+		 * @brief Check if a white side king castle is valid in the current position.
+		 *
+		 * @return Return true if valid, else false.
+		 */
 		bool validWKSC() const;
 
+		/**
+		 * @brief Check if a white side queen castle is valid in the current position.
+		 *
+		 * @return Return true if valid, else false.
+		 */
 		bool validWQSC() const;
 
+		/**
+		 * @brief Check if a black side king castle is valid in the current position.
+		 *
+		 * @return Return true if valid, else false.
+		 */
 		bool validBKSC() const;
 
+		/**
+		 * @brief Check if a black side queen castle is valid in the current position.
+		 *
+		 * @return Return true if valid, else false.
+		 */
 		bool validBQSC() const;
 
 		/**

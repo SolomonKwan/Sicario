@@ -177,6 +177,46 @@ std::string trim(std::string string);
 std::string concatFEN(const std::vector<std::string> strings, const std::string delim = " ");
 
 /**
+ * @brief Zeroes out the bit in the given number.
+ *
+ * @tparam T Data type of number to alter.
+ * @param num The num to modify.
+ * @param index The index to zero out.
+ */
+template<typename T>
+inline void zeroBit(T& num, const int index) {
+	num &= ~(static_cast<T>(1) << index);
+}
+
+/**
+ * @brief Sets the bit in the given number.
+ *
+ * @tparam T Data type of number to alter.
+ * @param num The number to modify.
+ * @param index The index to set.
+ */
+template<typename T>
+inline void setBit(T& num, const int index) {
+	num |= static_cast<T>(1) << index;
+}
+
+/**
+ * @brief Zeroes out the given start and sets the given end bit in the given number. Assumes a priori that the start bit
+ * is already set and that the end bit is not already set.
+ *
+ * @tparam T Data type of number to alter.
+ * @param num The number to modify.
+ * @param start The index to zero out.
+ * @param end The index to set.
+ */
+template<typename T>
+inline void zeroAndSetBit(T& num, const int start, const int end) {
+	assert(isSet<T>(num, start) == true);
+	assert(isSet<T>(num, end) == false);
+	num ^= static_cast<T>(1) << start | static_cast<T>(1) << end;
+}
+
+/**
  * @brief Check if the bit at 'index' of 'number' is set.
  *
  * @tparam T Type
