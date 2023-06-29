@@ -753,7 +753,7 @@ void Position::updateEnPassantHash() {
 	setPinAndCheckRayBitboards();
 	MoveList moves = MoveList(*this);
 	getEnPassantMoves(moves);
-	if (moves.moves_index == 0) return;
+	if (moves.moves_index != 0) return;
 	this->hash ^= Hashes::EN_PASSANT[file(this->en_passant)];
 	this->epHashed = true;
 }
