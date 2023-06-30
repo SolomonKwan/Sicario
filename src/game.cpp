@@ -496,18 +496,11 @@ void Position::undoMove<NORMAL>() {
 	if (prev.captured == NO_PIECE) return;
 	placeCapturedPiece(prev.captured, end(prev.move));
 	this->pieceCnt++;
-	switch (prev.captured) {
-		case W_KNIGHT:
-		case B_KNIGHT:
-			this->knightCnt++;
-			break;
-		case W_BISHOP:
-		case B_BISHOP:
-			this->bishopCnt++;
-			isDark(end(prev.move)) ? this->darkBishopCnt++ : this->lightBishopCnt++;
-			break;
-		default:
-			break;
+	if (prev.captured == W_KNIGHT || prev.captured == B_KNIGHT) {
+		this->knightCnt++;
+	} else if (prev.captured == W_BISHOP || prev.captured == B_BISHOP) {
+		this->bishopCnt++;
+		isDark(end(prev.move)) ? this->darkBishopCnt++ : this->lightBishopCnt++;
 	}
 }
 
@@ -1384,9 +1377,10 @@ void Position::getPawnMoves(MoveList& moves) const {
 			// Double push
 			Rank startRank = this->turn == WHITE ? RANK_2 : RANK_7;
 			bool onStartRank = rank(pawnSquare) == startRank;
-			bool emptyDoublePush = !isSet<Bitboard>(getPieces(), pawnSquare + push + push);
+			Direction doublePush = this->turn == WHITE ? NN : SS;
+			bool emptyDoublePush = !isSet<Bitboard>(getPieces(), pawnSquare + doublePush);
 			if (onStartRank && emptyPush && emptyDoublePush)
-				setBit<Bitboard>(reach, pawnSquare + push + push);
+				setBit<Bitboard>(reach, pawnSquare + doublePush);
 
 			if (reach != ZERO_BB)
 				moves.addMoves(&Moves::PAWN[this->turn][pawnSquare][getPawnMovesIndex(reach, pawnSquare, this->turn)]);
