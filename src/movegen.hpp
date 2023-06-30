@@ -329,7 +329,7 @@ std::vector<std::array<int, 4>> getEndBlockSquares(std::array<int, 4> sizes);
  */
 struct History {
 	uint castling;      // Castling permissions immediately before the current position.
-	Square en_passant;  // En passant permission immediately before the current position.
+	Square enPassant;  // En passant permission immediately before the current position.
 	uint halfmove;      // Halfmove count immediately before the current position.
 	uint64_t hash;      // The hash of immediately before the current position.
 	Move move;          // The move that resulted in the current position.

@@ -122,7 +122,7 @@ class Position {
 		 * @return Piece count.
 		 */
 		inline const uint getPieceCnt() const {
-			return this->piece_cnt;
+			return this->pieceCnt;
 		}
 
 		/**
@@ -131,7 +131,7 @@ class Position {
 		 * @return Queen count.
 		 */
 		inline const uint getQueenCount() const {
-			return this->piece_index[W_QUEEN] + this->piece_index[B_QUEEN];
+			return this->pieceIndex[W_QUEEN] + this->pieceIndex[B_QUEEN];
 		}
 
 		/**
@@ -143,7 +143,7 @@ class Position {
 		 */
 		template <PieceType T>
 		inline const uint getPieceIndex() const {
-			return this->piece_index[T];
+			return this->pieceIndex[T];
 		}
 
 		/**
@@ -155,7 +155,7 @@ class Position {
 		 */
 		template <PieceType T>
 		inline const Square getPieceSquare(const uint index) const {
-			return this->piece_list[T][index];
+			return this->pieceList[T][index];
 		}
 
 		/**
@@ -176,29 +176,29 @@ class Position {
 		// Non-position information
 		Player turn;
 		uint castling;
-		Square en_passant;
+		Square enPassant;
 		uint halfmove, fullmove;
 
 		// Bitboards
 		Bitboard sides[PLAYER_COUNT];
 		Bitboard kings, queens, rooks, bishops, knights, pawns;
-		Bitboard rook_pins;
-		Bitboard bishop_pins;
-		Bitboard check_rays;
+		Bitboard rookPins;
+		Bitboard bishopPins;
+		Bitboard checkRays;
 		Bitboard checkers;
-		Bitboard rook_ep_pins;
+		Bitboard rookEpPins;
 
 		// Piece positions
-		uint piece_index[PIECE_TYPE_COUNT];
-		Square piece_list[PIECE_TYPE_COUNT][MAX_PIECE_COUNT];
+		uint pieceIndex[PIECE_TYPE_COUNT];
+		Square pieceList[PIECE_TYPE_COUNT][MAX_PIECE_COUNT];
 		PieceType pieces[SQUARE_COUNT];
 
 		// Piece counts for insufficient material checks.
-		uint piece_cnt;
-		uint knight_cnt;
-		uint bishop_cnt;
-		uint light_bishop_cnt;
-		uint dark_bishop_cnt;
+		uint pieceCnt;
+		uint knightCnt;
+		uint bishopCnt;
+		uint lightBishopCnt;
+		uint darkBishopCnt;
 
 		// Position history
 		std::vector<History> history;
@@ -207,40 +207,6 @@ class Position {
 
 		// Auxiliary variable to assist with en passant hashing.
 		bool epHashed;
-
-		/**
-		 * @brief Zeroes out the bit in the given bitboard.
-		 *
-		 * @param bitboard The bitboard to modify.
-		 * @param square The square to zero out.
-		 */
-		inline void zeroBitBB(Bitboard& bitboard, const Square square) const {
-			bitboard &= ~(ONE_BB << square);
-		}
-
-		/**
-		 * @brief Sets the bit in the given bitboard.
-		 *
-		 * @param bitboard The bitboard to modify.
-		 * @param square The square to set.
-		 */
-		inline void setBitBB(Bitboard& bitboard, const Square square) const {
-			bitboard |= ONE_BB << square;
-		}
-
-		/**
-		 * @brief Zeroes out the given start and sets the given end square in the given bitboard. Assumes a priori that
-		 * the start bit is already set and that the end bit is not already set.
-		 *
-		 * @param bitboard The bitboard to modify.
-		 * @param start The square to zero out.
-		 * @param end The square to set.
-		 */
-		inline void zeroAndSetBitBB(Bitboard& bitboard, const Square start, const Square end) const {
-			assert(isSet<Bitboard>(bitboard, start) == true);
-			assert(isSet<Bitboard>(bitboard, end) == false);
-			bitboard ^= ONE_BB << start | ONE_BB << end;
-		}
 
 		/**
 		 * @brief Check if the move will be a capturing move.
@@ -253,7 +219,7 @@ class Position {
 		}
 
 		/**
-		 * @brief Moves the piece from start to end square. Updates the piece_list and pieces array for the moved piece.
+		 * @brief Moves the piece from start to end square. Updates the pieceList and pieces array for the moved piece.
 		 * Does not take into account possible captures or promotions (i.e. assumes a normal move).
 		 *
 		 * @tparam T Piece type.
@@ -338,7 +304,7 @@ class Position {
 		void parseFenMoves(const std::string& halfmove, const std::string& fullmove);
 
 		/**
-		 * @brief Adds a piece to the Position object. Updates the piece_list, piece_index and pieces arrays as well as
+		 * @brief Adds a piece to the Position object. Updates the pieceList, pieceIndex and pieces arrays as well as
 		 * the corresponding piece bitboard.
 		 *
 		 * @param pieceBB The corresponding piece bitboard to update.
@@ -370,7 +336,7 @@ class Position {
 		 * @return The king square of the player to move.
 		 */
 		inline Square getKingSquare() const {
-			return this->piece_list[this->turn][KING_INDEX];
+			return this->pieceList[this->turn][KING_INDEX];
 		}
 
 		/**
@@ -400,7 +366,7 @@ class Position {
 		 * @return True if the piece on is pinned, else false.
 		 */
 		inline bool isPinnedByRook(const Square square) const {
-			return (ONE_BB << square) & this->rook_pins;
+			return (ONE_BB << square) & this->rookPins;
 		}
 
 		/**
@@ -410,7 +376,7 @@ class Position {
 		 * @return True if the piece is pinned, else false.
 		 */
 		inline bool isPinnedByBishop(const Square square) const {
-			return (ONE_BB << square) & this->bishop_pins;
+			return (ONE_BB << square) & this->bishopPins;
 		}
 
 		/**
@@ -435,7 +401,7 @@ class Position {
 		void setCheckers();
 
 		/**
-		 * @brief Set the rook_pins, bishop_pins and check_ray bitboards.
+		 * @brief Set the rookPins, bishopPins and check_ray bitboards.
 		 */
 		void setPinAndCheckRayBitboards();
 
@@ -681,7 +647,7 @@ class Position {
 		void makeCastlingMove();
 
 		/**
-		 * @brief Remove the piece from the specified square. Updates the piece_list, piece_index and piece arrays.
+		 * @brief Remove the piece from the specified square. Updates the pieceList, pieceIndex and piece arrays.
 		 *
 		 * @tparam T Piece type to remove.
 		 * @param square Square of the piece.
@@ -690,7 +656,7 @@ class Position {
 		void removePiece(const Square square);
 
 		/**
-		 * @brief Add the piece to the specified square. Updates the piece_list, piece_index and piece arrays.
+		 * @brief Add the piece to the specified square. Updates the pieceList, pieceIndex and piece arrays.
 		 *
 		 * @tparam T Piece type to add.
 		 * @param square Square of the piece.
@@ -699,7 +665,7 @@ class Position {
 		void addPiece(const Square square);
 
 		/**
-		 * @brief Make a promotion move. Updates the bitboards, piece_list, piece_index and pieces arrays.
+		 * @brief Make a promotion move. Updates the bitboards, pieceList, pieceIndex and pieces arrays.
 		 *
 		 * @tparam T Move type (capture/non-capture).
 		 * @param move Move to make.
@@ -722,14 +688,14 @@ class Position {
 		void removeFromBitboardPromotion(const Move move);
 
 		/**
-		 * @brief Add the promotion piece type to the corresponding piece_list, piece_index and pieces arrays.
+		 * @brief Add the promotion piece type to the corresponding pieceList, pieceIndex and pieces arrays.
 		 *
 		 * @param move Promotion move being made.
 		 */
 		void addPiecePromotion(const Move move);
 
 		/**
-		 * @brief Remove the captured piece during a promotion from the corresponding piece_list, piece_index and
+		 * @brief Remove the captured piece during a promotion from the corresponding pieceList, pieceIndex and
 		 * pieces arrays.
 		 *
 		 * @param move Promotion move being made.
@@ -771,7 +737,7 @@ class Position {
 
 		/**
 		 * @brief Update the en-passant state. This must be called before updates to the bitboards, pieces and
-		 * piece_list.
+		 * pieceList.
 		 *
 		 * @param move The move being made.
 		 */
