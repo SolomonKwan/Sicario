@@ -513,35 +513,21 @@ void Position::undoMove<PROMOTION>() {
 	PieceType promoted = this->pieces[end(prev.move)];
 	removePiece(end(prev.move), promoted);
 	zeroBit<Bitboard>(this->sides[this->turn], end(prev.move));
-	switch (promoted) {
-		case W_KNIGHT:
-		case B_KNIGHT:
-			this->knight_cnt--;
-			break;
-		case W_BISHOP:
-		case B_BISHOP:
-			this->bishop_cnt--;
-			isDark(end(prev.move)) ? this->dark_bishop_cnt-- : this->light_bishop_cnt--;
-			break;
-		default:
-			break;
+	if (promoted == W_KNIGHT || promoted == B_KNIGHT) {
+		this->knight_cnt--;
+	} else if (promoted == W_BISHOP || promoted == B_BISHOP) {
+		this->bishop_cnt--;
+		isDark(end(prev.move)) ? this->dark_bishop_cnt-- : this->light_bishop_cnt--;
 	}
 
 	// Replace captured piece
 	if (prev.captured != NO_PIECE) {
 		this->piece_cnt++;
-		switch (prev.captured) {
-			case W_KNIGHT:
-			case B_KNIGHT:
-				this->knight_cnt++;
-				break;
-			case W_BISHOP:
-			case B_BISHOP:
-				this->bishop_cnt++;
-				isDark(end(prev.move)) ? this->dark_bishop_cnt++ : this->light_bishop_cnt++;
-				break;
-			default:
-				break;
+		if (prev.captured == W_KNIGHT || prev.captured == B_KNIGHT) {
+			this->knight_cnt++;
+		} else if (prev.captured == W_BISHOP || prev.captured == B_BISHOP) {
+			this->bishop_cnt++;
+			isDark(end(prev.move)) ? this->dark_bishop_cnt++ : this->light_bishop_cnt++;
 		}
 		placeCapturedPiece(prev.captured, end(prev.move));
 	}
