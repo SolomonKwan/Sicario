@@ -4,7 +4,6 @@
 
 #include <iostream>
 #include <bitset>
-#include <random>
 #include <cassert>
 
 #include "game.hpp"
@@ -1172,7 +1171,7 @@ void Position::getCheckMoves(MoveList& moves) const {
 	getBishopCheckedMoves(moves);
 	getKnightCheckedMoves(moves);
 	getPawnCheckedMoves(moves);
-	getEnPassantMoves(moves);
+	getEnPassantCheckMoves(moves);
 }
 
 void Position::getQueenCheckedMoves(MoveList& moves) const {
@@ -1473,6 +1472,24 @@ void Position::getEnPassantMoves(MoveList& moves) const {
 	}
 }
 
+void Position::getEnPassantCheckMoves(MoveList& moves) const {
+	if (this->enPassant == NONE || !(this->checkers & this->pawns)) return;
+
+	std::vector<Square> pawnSquares;
+	if (file(this->enPassant) != FILE_A) pawnSquares.push_back(this->enPassant + (this->turn == WHITE ? SW : NW));
+	if (file(this->enPassant) != FILE_H) pawnSquares.push_back(this->enPassant + (this->turn == WHITE ? SE : NE));
+
+	for (Square square : pawnSquares) {
+		bool attackPawn = this->pieces[square] == getPieceType<PAWN>();
+		bool verPinned = isPinnedByRook(square);
+
+		if (attackPawn && !verPinned) {
+			int rightCapture = file(square) < file(this->enPassant) ? 0 : 1;
+			moves.addMoves(&Moves::EN_PASSANT[turn][file(this->enPassant)][rightCapture]);
+		}
+	}
+}
+
 inline bool Position::inDoubleCheck() const {
 	#ifdef USE_PEXT
 	return _blsr_u64(this->checkers) != ZERO_BB;
@@ -1686,10 +1703,14 @@ MoveList::MoveList(Position& position) {
 	position.getMoves(*this);
 }
 
+std::random_device rdev;
+std::mt19937 rgen(rdev());
+std::uniform_int_distribution<int> rndNum(0, 16);
+
 Move MoveList::randomMove() const {
-	uint vecIndex = std::rand() % (this->moves_index);
-	uint movesIndex = std::rand() % (this->moveSets[vecIndex]->size());
-	return (*this->moveSets[vecIndex])[movesIndex];
+	int vecIndex = rndNum(rgen) % this->moves_index;
+	int movIndex = rndNum(rgen) % this->moveSets[vecIndex]->size();
+	return (*this->moveSets[vecIndex])[movIndex];
 }
 
 uint64_t MoveList::size() const {

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cmath>
+#include <random>
 
 #include "constants.hpp"
 #include "movegen.hpp"
@@ -419,91 +420,91 @@ class Position {
 		bool inCheck() const;
 
 		/**
-		 * @brief Add the vector of king moves to the pos_moves array.
+		 * @brief Add the vector of king moves to the move list.
 		 *
 		 * @param moves Reference to moveList to populate.
 		 */
 		void getKingMoves(MoveList& moves) const;
 
 		/**
-		 * @brief Add vectors of moves to the pos_moves array for when the king is in check.
+		 * @brief Add vectors of moves to the move list for when the king is in check.
 		 *
 		 * @param moves Reference to moveList to populate.
 		 */
 		void getCheckMoves(MoveList& moves) const;
 
 		/**
-		 * @brief Add vectors of queen moves to the pos_moves array for when the king is in check.
+		 * @brief Add vectors of queen moves to the move list for when the king is in check.
 		 *
 		 * @param moves Reference to moveList to populate.
 		 */
 		void getQueenCheckedMoves(MoveList& moves) const;
 
 		/**
-		 * @brief Add vectors of rook moves to the pos_moves array for when the king is in check.
+		 * @brief Add vectors of rook moves to the move list for when the king is in check.
 		 *
 		 * @param moves Reference to moveList to populate.
 		 */
 		void getRookCheckedMoves(MoveList& moves) const;
 
 		/**
-		 * @brief Add vectors of bishop moves to the pos_moves array for when the king is in check.
+		 * @brief Add vectors of bishop moves to the move list for when the king is in check.
 		 *
 		 * @param moves Reference to moveList to populate.
 		 */
 		void getBishopCheckedMoves(MoveList& moves) const;
 
 		/**
-		 * @brief Add vectors of knight moves to the pos_moves array for when the king is in check.
+		 * @brief Add vectors of knight moves to the move list for when the king is in check.
 		 *
 		 * @param moves Reference to moveList to populate.
 		 */
 		void getKnightCheckedMoves(MoveList& moves) const;
 
 		/**
-		 * @brief Add vectors of pawn moves to the pos_moves array for when the king is in check.
+		 * @brief Add vectors of pawn moves to the move list for when the king is in check.
 		 *
 		 * @param moves Reference to moveList to populate.
 		 */
 		void getPawnCheckedMoves(MoveList& moves) const;
 
 		/**
-		 * @brief Add vectors of moves to the pos_moves array for when there is no check.
+		 * @brief Add vectors of moves to the move list for when there is no check.
 		 *
 		 * @param moves Reference to moveList to populate.
 		 */
 		void getNormalMoves(MoveList& moves) const;
 
 		/**
-		 * @brief Add vectors of queen moves to the pos_moves array for when there is no check.
+		 * @brief Add vectors of queen moves to the move list for when there is no check.
 		 *
 		 * @param moves Reference to moveList to populate.
 		 */
 		void getQueenMoves(MoveList& moves) const;
 
 		/**
-		 * @brief Add vectors of rook moves to the pos_moves array for when there is no check.
+		 * @brief Add vectors of rook moves to the move list for when there is no check.
 		 *
 		 * @param moves Reference to moveList to populate.
 		 */
 		void getRookMoves(MoveList& moves) const;
 
 		/**
-		 * @brief Add vectors of bishop moves to the pos_moves array for when there is no check.
+		 * @brief Add vectors of bishop moves to the move list for when there is no check.
 		 *
 		 * @param moves Reference to moveList to populate.
 		 */
 		void getBishopMoves(MoveList& moves) const;
 
 		/**
-		 * @brief Add vectors of knight moves to the pos_moves array for when there is no check.
+		 * @brief Add vectors of knight moves to the move list for when there is no check.
 		 *
 		 * @param moves Reference to moveList to populate.
 		 */
 		void getKnightMoves(MoveList& moves) const;
 
 		/**
-		 * @brief Add vectors of castling moves to the pos_moves array.
+		 * @brief Add vectors of castling moves to the move list.
 		 *
 		 * @param moves Reference to moveList to populate.
 		 */
@@ -538,14 +539,21 @@ class Position {
 		bool validBQSC() const;
 
 		/**
-		 * @brief Add vectors of en-passant moves to the pos_moves array for when there is no check.
+		 * @brief Add vectors of en-passant moves to the move list for when there is no check.
 		 *
 		 * @param moves Reference to moveList to populate.
 		 */
 		void getEnPassantMoves(MoveList& moves) const;
 
 		/**
-		 * @brief Add vectors of pawn moves to the pos_moves array for when there is no check.
+		 * @brief Add vectors of en-passant check moves to the move list for when there is no check.
+		 *
+		 * @param moves Reference to moveList to populate.
+		 */
+		void getEnPassantCheckMoves(MoveList& moves) const;
+
+		/**
+		 * @brief Add vectors of pawn moves to the move list for when there is no check.
 		 *
 		 * @param moves Reference to moveList to populate.
 		 */
@@ -570,7 +578,7 @@ class Position {
 		Bitboard getBishopReachBB(const Bitboard occupancy, const Square square) const;
 
 		/**
-		 * @brief Add vector of moves to the pos_moves array for a diagonally pinned queen/bishop on the specified
+		 * @brief Add vector of moves to the move list for a diagonally pinned queen/bishop on the specified
 		 * square.
 		 *
 		 * @param moves Reference to moveList to populate.
@@ -579,7 +587,7 @@ class Position {
 		void getBishopPinMoves(MoveList& moves, const Square square) const;
 
 		/**
-		 * @brief Add vector of moves to the pos_moves array for a horizontally or vertically pinned queen/bishop on the
+		 * @brief Add vector of moves to the move list for a horizontally or vertically pinned queen/bishop on the
 		 * specified square.
 		 *
 		 * @param moves Reference to moveList to populate.

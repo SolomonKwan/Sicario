@@ -17,7 +17,6 @@ main() {
 
 	# Vimdiff the results
 	vimdiff sicario.tmp stockfish.tmp
-	rm sicario.tmp stockfish.tmp
 }
 
 # Prints the usage message.

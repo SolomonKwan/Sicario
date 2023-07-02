@@ -26,6 +26,14 @@ else ifneq ($(PEXT), FALSE)
     $(error Unknown PEXT flag: "$(PEXT)")
 endif
 
+# Profiling flag
+GPROF := FALSE
+ifeq ($(GPROF), TRUE)
+    OPTIONS := $(OPTIONS) -pg
+else ifneq ($(GPROF), FALSE)
+    $(error Unknown GPROF flag: "$(GPROF)")
+endif
+
 # Relative directories
 SRC_DIR = ./src
 TEST_DIR = ./tests
