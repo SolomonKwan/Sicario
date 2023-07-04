@@ -40,7 +40,19 @@ manualClean() {
 }
 
 runTests() {
+	if [ ! -z $1 ]; then
+		runSingleTest $1
+	else
+		runAllTests
+	fi
+}
+
+runSingleTest() {
+	printf "$1 testing...\n"
+
 	number=1
+	success=0
+	failed=0
 	while IFS= read -r line || [[ -n "$line" ]]; do
 		# Generate the input
 		for word in $line; do
@@ -53,12 +65,13 @@ runTests() {
 		timeout 5s ../../src/sicario > $1/output$number.tmp < $1/input$number.tmp
 
 		if [ $? -eq 124 ]; then
+			((failed++))
 			printf "$ERASE"
 			printf "$ERROR $number - Timeout.\n"
 		elif cmp -s $1/output$number.tmp $1/output.txt; then
-			printf "$ERASE"
-			printf "$OK $number\n"
+			((success++))
 		else
+			((failed++))
 			printf "$ERASE"
 			printf "$FAIL $number - Different output.\n"
 			mv $1/output$number.tmp $1/output$number.tmp.keep
@@ -67,7 +80,21 @@ runTests() {
 		((number++))
 	done < $1/inputs.txt
 
+	printf "$ERASE"
+	printf "Finished:\n"
+	printf "$OK $success\n"
+	printf "$FAIL $failed\n"
+
 	return 0
+}
+
+runAllTests() {
+	runSingleTest "whiteCheckmate"
+	runSingleTest "blackCheckmate"
+	runSingleTest "fiftyMoveRule"
+	runSingleTest "insufficientMaterial"
+	runSingleTest "repetition"
+	runSingleTest "stalemate"
 }
 
 clean() {
