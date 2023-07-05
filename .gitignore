@@ -7,4 +7,5 @@ sc_result.txt
 sf_result.txt
 stockfish_15.1_x64_bmi2
 stockfish
+*.tmp
 *.tmp.keep

@@ -1,8 +1,10 @@
 #!/bin/bash
 
 GREEN="\033[0;32m"
+YELLOW="\033[0;33m"
 RED="\033[0;31m"
 NC="\033[0m"
+ERASE="\033[1K\r"
 
 main() {
 	# Parse input
@@ -30,20 +32,11 @@ helpCommand() {
 
 # Checks the depth input and returns the FEN string.
 parseInputs() {
-	if  [ ! -z $1 ] && ([[ ! $1 =~ ^[0-9]+$ ]] || [ $1 -gt 6 ] || [ $1 -lt 1 ]); then
+	if  [ ! -z $1 ] && ([[ ! $1 =~ ^[0-9]+$ ]] || [ $1 -lt 1 ]); then
 		echo "Invalid input"
 		showUsageMessage
 		exit -1
 	fi
-}
-
-# Get the depth.
-getDepth() {
-	depth="6"
-	if [ ! -z $1 ]; then
-		depth=$1
-	fi
-	echo $depth
 }
 
 # Runs the perft command on sicario and returns the result.
@@ -53,9 +46,8 @@ sicario() {
 		perft $2
 		quit
 	EOF
-	res=$(tail -n 1 res.tmp)
-	res=$(echo $res | cut -c 17-)
-	echo $res
+	count=$(grep -oP "(?<=Nodes searched: )[0-9]+" res.tmp)
+	echo $count
 }
 
 # Update the perftsuite.epd file with the depth value if they are missing.
@@ -76,10 +68,12 @@ updateDepths() {
 	exit 0
 }
 
+# Extract the FEN string from the given file line.
 getFen() {
 	echo "${1%%;*}"
 }
 
+# Get count for the specified depth.
 getCount() {
 	count=$(echo "$1" | grep -oP "(?<=D$2 )[0-9]+")
 	echo $count
@@ -87,7 +81,10 @@ getCount() {
 
 # Run the test cases on the specified depth.
 runTests() {
-	depth=$(getDepth "$@")
+	if [ -z $1 ]; then
+		return
+	fi
+	depth=$1
 
 	# Perform checks
 	totalTests=0
@@ -95,31 +92,73 @@ runTests() {
 	while IFS= read -r line; do
 		FEN=$(getFen "$line")
 		actualVal=$(getCount "$line" $depth)
+
+		# Check if the depth is recorded.
+		if [ -z $actualVal ]; then
+			printf "[ ${YELLOW}ERRO${NC} ] Depth $depth not recorded for $FEN\n"
+			continue
+		fi
+
+		# Test on Sicario and compare the output
+		printf "${ERASE}Testing depth $depth on \"$FEN\"..."
 		val=$(sicario "$FEN" $depth)
 		if [[ $val -eq $actualVal ]]; then
-			printf "[  ${GREEN}OK${NC}  ] ${FEN}\n"
 			((passedTests++))
 		else
-			printf "[ ${RED}FAIL${NC} ] ${FEN}\n"
+			printf "${ERASE}[ ${RED}FAIL${NC} ] ${FEN}\n"
 		fi
+
 		((totalTests++))
 	done < ./perftsuite.epd
 
 	# Show end result
 	if [[ $passedTests -eq $totalTests ]]; then
-		echo "Perft suite testing OK"
+		printf "${ERASE}Perft suite testing OK\n"
 	else
-		printf "${GREEN}OK${NC}: $((passedTests))\n"
-		printf "${RED}FAIL${NC}: $((totalTests - passedTests))\n"
+		printf "${ERASE}${GREEN}OK${NC}:\t$((passedTests))\n"
+		printf "${RED}FAIL${NC}:\t$((totalTests - passedTests))\n"
 	fi
 	rm res.tmp
+
+	exit 0
 }
 
 # Run the test cases on the maximum depth available.
 runMaxTests() {
-	echo
+
+	# Perform checks
+	totalTests=0
+	passedTests=0
+	while IFS= read -r line; do
+		FEN=$(getFen "$line")
+		depth=$(($(getNextDepth "$line") - 1))
+		actualVal=$(getCount "$line" $depth)
+
+		# Test on Sicario and compare the output
+		printf "${ERASE}Testing depth $depth on \"$FEN\"..."
+		val=$(sicario "$FEN" $depth)
+		if [[ $val -eq $actualVal ]]; then
+			((passedTests++))
+		else
+			printf "${ERASE}[ ${RED}FAIL${NC} ] ${FEN}\n"
+		fi
+
+		((totalTests++))
+	done < ./perftsuite.epd
+
+	# Show end result
+	if [[ $passedTests -eq $totalTests ]]; then
+		printf "${ERASE}Perft max suite testing OK\n"
+	else
+		printf "${ERASE}${GREEN}OK${NC}:\t$((passedTests))\n"
+		printf "${RED}FAIL${NC}:\t$((totalTests - passedTests))\n"
+	fi
+	rm res.tmp
+
+	exit 0
 }
 
+# Get the next depth of the test case.
 getNextDepth() {
 	nextDepth=$(echo $1 | grep -oP "(?<=D)[0-9](?=([0-9]+|[ \t]|;)+$)")
 	if [ -z "$nextDepth" ]; then
@@ -129,6 +168,7 @@ getNextDepth() {
 	echo $nextDepth
 }
 
+# Get the new line with the updated depth values for the fen.
 getNewLine() {
 	newLine=$line
 	fen=$(getFen "$line")
