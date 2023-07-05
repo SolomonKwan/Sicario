@@ -112,10 +112,10 @@ RaysPairs getRookRayPairs(const Square square) {
 }
 
 /**
- * @brief Get the size of the northeast, southeast, southwest and norhtwest rays of a bishop on a given square.
+ * @brief Get the size of the northeast, southeast, southwest and northwest rays of a bishop on a given square.
  *
  * @param square The square that the bishop is on.
- * @return A RaysPairs struct containg the sizes and directions of each ray.
+ * @return A RaysPairs struct containing the sizes and directions of each ray.
  */
 RaysPairs getBishopRayPairs(const Square square) {
 	int northEastSize = std::min(RANK_8 - rank(square), FILE_H - file(square));
@@ -128,44 +128,68 @@ RaysPairs getBishopRayPairs(const Square square) {
 	};
 }
 
+/**
+ * @brief Get the size of the north, east, south and west index rays of a rook on a given square.
+ *
+ * @param square The square that the rook is on.
+ * @return A RaysPairs struct containing the sizes and directions of each ray.
+ */
 RaysPairs rookReachIndexRaySizes(const Square square) {
-	int northSize = std::max(6 - rank(square), 0);
-	int eastSize  = std::max(6 - file(square), 0);
-	int southSize = std::max(rank(square) - 1, 0);
-	int westSize  = std::max(file(square) - 1, 0);
+	int northSize = std::max(RANK_7 - rank(square), 0);
+	int eastSize  = std::max(FILE_G - file(square), 0);
+	int southSize = std::max(rank(square) - RANK_2, 0);
+	int westSize  = std::max(file(square) - FILE_B, 0);
 	return {
 		{northSize, eastSize, southSize, westSize},
 		{N, E, S, W}
 	};
 }
 
+/**
+ * @brief Get the size of the northeast, southeast, southwest and northwest rays of a bishop on a given square.
+ *
+ * @param square The square that the bishop is on.
+ * @return A RaysPairs struct containing the sizes and directions of each ray.
+ */
 RaysPairs bishopReachIndexRaySizes(const Square square) {
-	int northeastSize = std::max(std::min(6 - rank(square), 6 - file(square)), 0);
-	int southeastSize = std::max(std::min(rank(square) - 1, 6 - file(square)), 0);
-	int southwestSize = std::max(std::min(rank(square) - 1, file(square) - 1), 0);
-	int northwestSize = std::max(std::min(6 - rank(square), file(square) - 1), 0);
+	int northeastSize = std::max(std::min(RANK_7 - rank(square), FILE_G - file(square)), 0);
+	int southeastSize = std::max(std::min(rank(square) - RANK_2, FILE_G - file(square)), 0);
+	int southwestSize = std::max(std::min(rank(square) - RANK_2, file(square) - FILE_B), 0);
+	int northwestSize = std::max(std::min(RANK_7 - rank(square), file(square) - FILE_B), 0);
 	return {
 		{northeastSize, southeastSize, southwestSize, northwestSize},
 		{NE, SE, SW, NW}
 	};
 }
 
+/**
+ * @brief Get the size of the north, east, south and west reach rays of a rook on a given square.
+ *
+ * @param square The square that the rook is on.
+ * @return A RaysPairs struct containing the sizes and directions of each ray.
+ */
 RaysPairs rookReachRaySizes(const Square square) {
-	int northSize = 7 - (square / 8);
-	int eastSize  = 7 - (square % 8);
-	int southSize = square / 8;
-	int westSize  = square % 8;
+	int northSize = RANK_8 - (square / RANK_COUNT);
+	int eastSize  = FILE_H - (square % FILE_COUNT);
+	int southSize = square / RANK_COUNT;
+	int westSize  = square % FILE_COUNT;
 	return {
 		{northSize, eastSize, southSize, westSize},
 		{N, E, S, W}
 	};
 }
 
+/**
+ * @brief Get the size of the northeast, southeast, southwest and northwest reach rays of a bishop on a given square.
+ *
+ * @param square The square that the bishop is on.
+ * @return A RaysPairs struct containing the sizes and directions of each ray.
+ */
 RaysPairs bishopReachRaySizes(const Square square) {
-	int northeastSize = std::min(7 - square / 8, 7 - square % 8);
-	int southeastSize = std::min(square / 8, 7 - square % 8);
-	int southwestSize = std::min(square / 8, square % 8);
-	int northwestSize = std::min(7 - square / 8, square % 8);
+	int northeastSize = std::min(RANK_8 - square / RANK_COUNT, FILE_H - square % FILE_COUNT);
+	int southeastSize = std::min(square / RANK_COUNT, FILE_H - square % FILE_COUNT);
+	int southwestSize = std::min(square / RANK_COUNT, square % FILE_COUNT);
+	int northwestSize = std::min(RANK_8 - square / RANK_COUNT, square % FILE_COUNT);
 	return {
 		{northeastSize, southeastSize, southwestSize, northwestSize},
 		{NE, SE, SW, NW}
@@ -179,7 +203,7 @@ RaysPairs bishopReachRaySizes(const Square square) {
  * @param getMovesIndex Function pointer to the moves index getter.
  * @return MoveFamilies of the piece moves on all squares and occupancies.
  */
-MoveFamilies computeStaticMoves(GetSquares getSquares, GetMovesIndex getMovesIndex, bool isPawn = false, Player player = WHITE) {
+MoveFamilies computeStaticMoves(GetSquares getSquares, GetMovesIndex getMovesIndex, bool isPawn, Player player) {
 	MoveFamilies moves;
 	for (Square square = A1; square <= H8; square++) {
 		MoveFamily& moveSet = moves[square];
@@ -191,19 +215,22 @@ MoveFamilies computeStaticMoves(GetSquares getSquares, GetMovesIndex getMovesInd
 		else
 			getPawnSquares(square, player, destinations);
 
-		// Build occupancy bitboard
 		uint16_t maxOccupancy = static_cast<uint16_t>(pow(2, destinations.size()));
 		moveSet.resize(maxOccupancy);
-		for (uint16_t j = 0; j < maxOccupancy; j++) {
+
+		// Iterate every possible occupancy.
+		for (uint16_t num = 0; num < maxOccupancy; num++) {
 			MoveVector moves;
 			uint64_t occ = ZERO_BB;
 			int shift = 0;
+
+			// Build occupancy bitboard.
 			for (Square dest : destinations) {
-				if ((j >> shift) & 1UL && isPawn == false)
+				if (isSet<uint16_t>(num, shift) && isPawn == false)
 					moves.push_back(square | (dest << DEST_SHIFT));
-				else if ((j >> shift) & 1UL && isPawn == true)
+				else if (isSet<uint16_t>(num, shift) && isPawn == true)
 					pawnMoveGenerator(square, dest, moves);
-				occ |= ((j >> shift) & 1UL) << dest;
+				occ |= (extractBit<uint16_t>(num, shift) << dest);
 				shift++;
 			}
 
@@ -231,14 +258,18 @@ MoveFamilies computeRangedMoves(GetRayPairs getRayPairs, GetMovesIndex getMovesI
 		movesSet.resize(std::pow(2, SQUARE_COUNT - shift[square]));
 		RaysPairs pair = getRayPairs(square);
 
+		// Iterate all end blocking combinations.
 		for (ArrayFour selection : getEndCombinations(pair.sizes)) {
 			uint64_t reach = ZERO_BB;
 			MoveVector moves;
 
-			for (int index = 0; index < 4; index++) {
-				for (int i = 0; i < selection[index]; i++) {
-					reach |= ONE_BB << (square + pair.directions[index] * (i + 1));
-					moves.push_back(square | ((square + pair.directions[index] * (i + 1)) << DEST_SHIFT));
+			// Iterate each ray direction.
+			for (int rayIndex = 0; rayIndex < 4; rayIndex++) {
+
+				// Build each ray and corresponding moves.
+				for (int iter = 1; iter <= selection[rayIndex]; iter++) {
+					reach |= ONE_BB << (square + pair.directions[rayIndex] * iter);
+					moves.push_back(square | ((square + pair.directions[rayIndex] * iter) << DEST_SHIFT));
 				}
 			}
 
@@ -250,7 +281,7 @@ MoveFamilies computeRangedMoves(GetRayPairs getRayPairs, GetMovesIndex getMovesI
 }
 
 MoveFamilies computeKingMoves() {
-	return computeStaticMoves(&getKingSquares, &getKingMovesIndex);
+	return computeStaticMoves(&getKingSquares, &getKingMovesIndex, false, WHITE);
 }
 
 MoveFamilies computeRookMoves() {
@@ -262,7 +293,7 @@ MoveFamilies computeBishopMoves() {
 }
 
 MoveFamilies computeKnightMoves() {
-	return computeStaticMoves(&getKnightSquares, &getKnightMovesIndex);
+	return computeStaticMoves(&getKnightSquares, &getKnightMovesIndex, false, WHITE);
 }
 
 std::array<MoveFamilies, PLAYER_COUNT> computePawnMoves() {
@@ -320,15 +351,18 @@ MoveFamilies computeBlockMoves(GetRayPairs getRayPairs, GetMovesIndex getMovesIn
 		movesSet.resize((int)std::pow(2, SQUARE_COUNT - shift[square]));
 		RaysPairs pair = getRayPairs(square);
 
+		// Iterate blocking combinations
 		for (ArrayFour selection : getEndBlockSquares(pair.sizes)) {
 			MoveVector moves;
 			uint64_t occ = ZERO_BB;
 
+			// Iterate each ray
 			for (int index = 0; index < 4; index++) {
-				if (selection[index]) {
-					moves.push_back(square | (square + (pair.directions[index] * selection[index])) << DEST_SHIFT);
-					occ |= ONE_BB << (square + (pair.directions[index] * selection[index]));
-				}
+				if (selection[index] == 0) continue;
+
+				// Build move array and occupancy bitboard.
+				moves.push_back(square | (square + (pair.directions[index] * selection[index])) << DEST_SHIFT);
+				occ |= ONE_BB << (square + (pair.directions[index] * selection[index]));
 			}
 
 			movesSet[getMovesIndex(occ, square)] = moves;
@@ -352,18 +386,22 @@ IndicesFamily computeReachIndices(GetRayPairs getRayPairs, GetMovesIndex getMove
 		int totalSize = std::accumulate(pairs.sizes.begin(), pairs.sizes.end(), 0);
 		std::vector<uint>& indices = pieceIndices[square];
 		indices.resize(pow(2, totalSize));
-
 		uint16_t maxOccupancy = pow(2, totalSize);
-		for (uint16_t j = 0; j < maxOccupancy; j++) {
+
+		// Iterate all occupancies
+		for (uint16_t num = 0; num < maxOccupancy; num++) {
 			uint64_t occ = ZERO_BB;
 			int shift = 0;
 			ArrayFour blockers = {0};
 
-			for (int index = 0; index < 4; index++) {
-				for (int k = 0; k < pairs.sizes[index]; k++, shift++) {
-					occ |= ((j >> shift) & 1UL) << (square + pairs.directions[index] * (k + 1));
-					if (!blockers[index] && ((j >> shift) & 1UL))
-						blockers[index] = k + 1;
+			// Iterate each ray
+			for (int rayIndex = 0; rayIndex < 4; rayIndex++) {
+
+				// Build occupancy bitboard.
+				for (int iter = 1; iter <= pairs.sizes[rayIndex]; iter++, shift++) {
+					occ |= extractBit<uint16_t>(num, shift) << (square + pairs.directions[rayIndex] * iter);
+					if (!blockers[rayIndex] && isSet<uint16_t>(num, shift))
+						blockers[rayIndex] = iter;
 				}
 			}
 
@@ -391,7 +429,8 @@ IndicesFamily computeBishopReachIndices() {
 	return computeReachIndices(bishopReachIndexRaySizes, getBishopReachIndex);
 }
 
-BitboardFamily computeReaches(ReachIndices getReachIndices, GetRayPairs getRayPairs, GetMovesIndex getReachIndex, const Bitboard mask[SQUARE_COUNT]) {
+BitboardFamily computeReaches(ReachIndices getReachIndices, GetRayPairs getRayPairs, GetMovesIndex getReachIndex,
+		const Bitboard mask[SQUARE_COUNT]) {
 	const IndicesFamily PIECE = getReachIndices();
 	BitboardFamily reaches;
 	for (Square square = A1; square <= H8; square++) {
@@ -400,15 +439,19 @@ BitboardFamily computeReaches(ReachIndices getReachIndices, GetRayPairs getRayPa
 		RaysPairs pairs = getRayPairs(square);
 		std::vector<ArrayFour> combos = getEndCombinations(pairs.sizes);
 
+		// Iterate all end blocking combinations.
 		for (ArrayFour combo : combos) {
 			Bitboard occ = ZERO_BB;
 			Bitboard reach = ZERO_BB;
 
+			// Iterate each ray
 			for (int index = 0; index < 4; index++) {
 				if (combo[index])
 					occ |= (ONE_BB << (square + pairs.directions[index] * combo[index]));
-				for (int i = 1; combo[index] > 0; combo[index]--, i++)
-					reach |= (ONE_BB << (square + i * pairs.directions[index]));
+
+				// Build each ray.
+				for (int iter = 1; combo[index] > 0; combo[index]--, iter++)
+					reach |= (ONE_BB << (square + iter * pairs.directions[index]));
 			}
 
 			reachSet[PIECE[square][getReachIndex(occ & mask[square], square)]] = reach;
@@ -442,16 +485,17 @@ std::array<std::vector<std::vector<Square>>, SQUARE_COUNT> computeKingReachSquar
 		uint16_t maxOccupancy = static_cast<uint16_t>(pow(2, destinations.size()));
 		reachSet.resize(maxOccupancy);
 
-		// Build occupancy bitboard
-		for (uint16_t j = 0; j < maxOccupancy; j++) {
+		// Iterate all occupancies.
+		for (uint16_t num = 0; num < maxOccupancy; num++) {
 			std::vector<Square> reach;
-
 			uint64_t occ = ZERO_BB;
 			int shift = 0;
+
+			// Build occupancy bitboard
 			for (Square dest : destinations) {
-				if ((j >> shift) & 1UL)
+				if (isSet<uint16_t>(num, shift))
 					reach.push_back(dest);
-				occ |= ((j >> shift) & 1UL) << dest;
+				occ |= (extractBit<uint16_t>(num, shift) << dest);
 				shift++;
 			}
 
@@ -463,41 +507,41 @@ std::array<std::vector<std::vector<Square>>, SQUARE_COUNT> computeKingReachSquar
 }
 
 BitboardFamily computeLevelRays() {
-	BitboardFamily rays;
-	for (int king = A1; king <= H8; king++) {
-		BitboardVector rays2;
-		for (int piece = A1; piece <= H8; piece++) {
+	BitboardFamily rayFamilies;
+	for (Square king = A1; king <= H8; king++) {
+		BitboardVector rays;
+		for (Square piece = A1; piece <= H8; piece++) {
 			Bitboard ray = ZERO_BB;
-			if (king % 8 == piece % 8) {
-				for (int i = piece; i != king;  king > piece ? i += 8 : i -= 8)
-					ray |= ONE_BB << i;
-			} else if (king / 8 == piece / 8) {
-				for (int i = piece; i != king;  king > piece ? i++ : i--)
-					ray |= ONE_BB << i;
+			if (file(king) == file(piece)) {
+				for (int sq = piece; sq != king;  king > piece ? sq += RANK_COUNT : sq -= RANK_COUNT)
+					ray |= ONE_BB << sq;
+			} else if (rank(king) == rank(piece)) {
+				for (int sq = piece; sq != king;  king > piece ? sq++ : sq--)
+					ray |= ONE_BB << sq;
 			}
-			rays2.push_back(ray);
+			rays.push_back(ray);
 		}
-		rays[king] = rays2;
+		rayFamilies[king] = rays;
 	}
-	return rays;
+	return rayFamilies;
 }
 
 BitboardFamily computeDiagonalRays() {
-	BitboardFamily rays;
-	for (int king = A1; king <= H8; king++) {
-		BitboardVector rays2;
-		for (int piece = A1; piece <= H8; piece++) {
+	BitboardFamily rayFamilies;
+	for (Square king = A1; king <= H8; king++) {
+		BitboardVector rays;
+		for (Square piece = A1; piece <= H8; piece++) {
 			Bitboard ray = ZERO_BB;
-			if (std::abs(king / 8 - piece / 8) == std::abs(king % 8 - piece % 8) && king != piece) {
-				int inc = king > piece ? (king % 8 > piece % 8 ? 9 : 7) : (king % 8 > piece % 8 ? -7 : -9);
+			if (std::abs(rank(king) - rank(piece)) == std::abs(file(king) - file(piece)) && king != piece) {
+				int inc = king > piece ? (file(king) > file(piece) ? NE : NW) : (file(king) > file(piece) ? SE : SW);
 				for (int i = piece; i != king; i += inc)
 					ray |= ONE_BB << i;
 			}
-			rays2.push_back(ray);
+			rays.push_back(ray);
 		}
-		rays[king] = rays2;
+		rayFamilies[king] = rays;
 	}
-	return rays;
+	return rayFamilies;
 }
 
 int getIndex(const std::vector<int> values, const std::vector<int> ranges) {

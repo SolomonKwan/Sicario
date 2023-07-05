@@ -228,3 +228,8 @@ template<typename T>
 inline bool isSet(T number, uint index) {
 	return number & (static_cast<T>(1) << index);
 }
+
+template<typename T>
+inline Bitboard extractBit(T number, uint index) {
+	return static_cast<Bitboard>((number >> index) & static_cast<T>(1));
+}
