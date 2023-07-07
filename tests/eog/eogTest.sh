@@ -48,7 +48,7 @@ runTests() {
 }
 
 runSingleTest() {
-	printf "$1 testing...\n"
+	printf "$1 testing..."
 
 	number=1
 	success=0
@@ -66,24 +66,25 @@ runSingleTest() {
 
 		if [ $? -eq 124 ]; then
 			((failed++))
-			printf "$ERASE"
-			printf "$ERROR $number - Timeout.\n"
+			printf "\n$ERROR $number - Timeout\n"
 		elif cmp -s $1/output$number.tmp $1/output.txt; then
 			((success++))
 		else
 			((failed++))
-			printf "$ERASE"
-			printf "$FAIL $number - Different output.\n"
+			printf "\n$FAIL $number - Different output"
 			mv $1/output$number.tmp $1/output$number.tmp.keep
 		fi
 
 		((number++))
 	done < $1/inputs.txt
 
-	printf "$ERASE"
-	printf "Finished:\n"
-	printf "$OK $success\n"
-	printf "$FAIL $failed\n"
+	if [ $failed -ne 0 ]; then
+		printf "\nDone"
+		printf "\n$OK $success"
+		printf "\n$FAIL $failed\n"
+	else
+		printf "\r\t\t\t\tOK\n"
+	fi
 
 	return 0
 }
