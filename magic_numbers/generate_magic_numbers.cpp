@@ -114,25 +114,24 @@ void findRookReachMNs() {
 
 void findRookMovesMNs() {
 	for (int sq = 0; sq < 64; sq++) {
-		if (sq == A1 || sq == F1 || sq == H1 || sq == H3 || sq == A6 || sq == H6 || sq == H7 || sq == A8 || sq == F8 || sq == H8 || sq == C1
-				|| sq == C1 || sq == G7 || sq == C8 || sq == E2 || sq == B8 || sq == E8 || sq == G8 || sq == H4 || sq == H5 || sq == B1
-				|| sq == D1 || sq == E1 || sq == G1 || sq == A2 || sq == B2 || sq == D2 || sq == G2 || sq == H2 || sq == A3 || sq == C3
-				|| sq == F3 || sq == A4 || sq == B4 || sq == G4 || sq == A5 || sq == B5 || sq == G5 || sq == F6 || sq == A7 || sq == B7
-				|| sq == D7 || sq == E7 || sq == D8 || sq == F4 || sq == F5 || sq == C7 || sq == F7 || sq == C6 || sq == F2 || sq == E5
-				|| sq == G6 || sq == B6 || sq == E3 || sq == C5 || sq == D6) continue;
+		if (
+			sq == A1 || sq == B1 || sq == C1 || sq == F1 || sq == G1 ||
+			sq == A2 || sq == B2 || sq == E2 || sq == G2 || sq == H1 ||
+			sq == H8 || sq == A8
+		) continue;
 		int northSize = max(7 - (sq / 8), 0);
 		int southSize = max(sq / 8, 0);
 		int eastSize = max(7 - (sq % 8), 0);
 		int westSize = max(sq % 8, 0);
 		int totalSize = (northSize ? northSize + 1 : 1) * (eastSize ? eastSize + 1 : 1) *
 				(southSize ? southSize + 1 : 1) * (westSize ? westSize + 1 : 1);
-		totalSize = (int)floor(log2(totalSize)) + 4;
+		totalSize = (int)floor(log2(totalSize)) + 2;
 		auto combos = getEndCombinations({northSize, eastSize, southSize, westSize});
 
 		int attempt = 0;
 		float prob = 0.5;
 		while (true) {
-			if (attempt > 100000) {
+			if (attempt > 10000000) {
 				attempt = 0;
 				prob += 0.05;
 			}
@@ -849,7 +848,7 @@ int main(int argc, char* argv[]) {
 	// findRookReachMNs();
 	// cout << "Bishop magic numbers" << '\n';
 	// findBishopReachMNs();
-	// findRookMovesMNs();
+	findRookMovesMNs();
 	// findBishopMovesMNs();
 	// findKnightMovesMNs();
 	// findKingMovesMNs();
@@ -859,7 +858,7 @@ int main(int argc, char* argv[]) {
 	// generateBishopBlockMNs();
 	// generateKnightMasks();
 	// generateKingMasks();
-	generateBlackPawnMasks();
-	std::cout << '\n';
-	generateWhitePawnMasks();
+	// generateBlackPawnMasks();
+	// std::cout << '\n';
+	// generateWhitePawnMasks();
 }
