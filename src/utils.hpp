@@ -177,6 +177,19 @@ std::string trim(std::string string);
 std::string concatFEN(const std::vector<std::string> strings, const std::string delim = " ");
 
 /**
+ * @brief Check if the bit at 'index' of 'number' is set.
+ *
+ * @tparam T Type
+ * @param number The number to check for the set bit.
+ * @param index Index of the bit to check.
+ * @return True if the bit is set, else false.
+ */
+template<typename T>
+inline bool isSet(T number, uint index) {
+	return number & (static_cast<T>(1) << index);
+}
+
+/**
  * @brief Zeroes out the bit in the given number.
  *
  * @tparam T Data type of number to alter.
@@ -214,19 +227,6 @@ inline void zeroAndSetBit(T& num, const int start, const int end) {
 	assert(isSet<T>(num, start) == true);
 	assert(isSet<T>(num, end) == false);
 	num ^= static_cast<T>(1) << start | static_cast<T>(1) << end;
-}
-
-/**
- * @brief Check if the bit at 'index' of 'number' is set.
- *
- * @tparam T Type
- * @param number The number to check for the set bit.
- * @param index Index of the bit to check.
- * @return True if the bit is set, else false.
- */
-template<typename T>
-inline bool isSet(T number, uint index) {
-	return number & (static_cast<T>(1) << index);
 }
 
 template<typename T>
