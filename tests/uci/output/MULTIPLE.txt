@@ -296,3 +296,7 @@ Pawns:
 00000000
 10100011
 00000000
+regex info depth [1-9]+
+regex bestmove [a-h][1-8][a-h][1-8]([n|b|r|q]|) ponder [a-h][1-8][a-h][1-8]([n|b|r|q]|)
+regex info depth [1-9]+
+regex bestmove [a-h][1-8][a-h][1-8]([n|b|r|q]|)

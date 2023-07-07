@@ -395,8 +395,20 @@ void Uci::sendReadyOk() {
 }
 
 void Uci::sendBestMove(MctsNode* root, bool debugMode) {
+	assert(root->bestChild() != nullptr);
+
+	// Bestmove
+	MctsNode* bestChild = root->bestChild();
 	std::cout << "bestmove ";
-	printMove(root->bestChild()->getInEdge(), false, true);
+	printMove(bestChild->getInEdge(), false, false);
+
+	// Pondermove
+	MctsNode* ponderNode = bestChild->bestChild();
+	if (ponderNode != nullptr) {
+		std::cout << " ponder ";
+		printMove(ponderNode->getInEdge(), false, false);
+	}
+	std::cout << '\n';
 
 	if (!debugMode) return;
 

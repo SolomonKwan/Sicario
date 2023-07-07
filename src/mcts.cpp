@@ -21,6 +21,7 @@ void Mcts::search() {
 
 		if (searchInfo != oldSearchInfo) Uci::sendInfo(searchInfo);
 	}
+	Uci::sendInfo(searchInfo); // Send final info command.
 	Uci::sendBestMove(root.get(), sicarioConfigs.debugMode);
 }
 
@@ -32,6 +33,7 @@ MctsNode::MctsNode(MctsNode* parent, Move move, Position& pos, SearchInfo& searc
 }
 
 MctsNode* MctsNode::bestChild() {
+	if (this->children.size() == 0) return nullptr;
 	return dynamic_cast<MctsNode*>((*std::max_element(children.begin(), children.end(), MctsNode::Ucb1Comp())).get());
 }
 
