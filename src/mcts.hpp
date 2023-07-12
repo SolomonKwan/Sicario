@@ -21,6 +21,7 @@ class MctsNode : public BaseNode {
 		inline float getValue() { return this->value; }
 		inline uint getVisits() { return this->visits; }
 		float Ucb1() const;
+		void initialise();
 
 	private:
 		float value = 0;

@@ -1,4 +1,5 @@
 #include <memory>
+#include <algorithm>
 
 #include "sicario.hpp"
 #include "mcts.hpp"
@@ -9,19 +10,24 @@
 const float C = std::sqrt(2);
 
 void Mcts::search() {
-	SearchInfo searchInfo;
+	SearchInfo searchInfo = SearchInfo(), oldSearchInfo = SearchInfo();
+
+	// Seed the start of the search.
 	std::unique_ptr<MctsNode> root(new MctsNode(nullptr, NULL_MOVE, this->getPos(), searchInfo));
+	root->initialise();
+
 	while (searchTree) {
-		SearchInfo oldSearchInfo = searchInfo; // TODO implement smarter way of checking if something has changed
+		oldSearchInfo = searchInfo; // TODO implement smarter way of checking if something has changed
 
 		MctsNode* leaf = root->select();
 		leaf = leaf->expand();
 		float val = leaf->simulate();
 		leaf->rollback(val);
 
-		if (searchInfo != oldSearchInfo) Uci::sendInfo(searchInfo);
+		if (searchInfo != oldSearchInfo) Uci::sendInfo(searchInfo, root.get());
 	}
-	Uci::sendInfo(searchInfo); // Send final info command.
+
+	Uci::sendInfo(searchInfo, root.get()); // Send final info command.
 	Uci::sendBestMove(root.get(), sicarioConfigs.debugMode);
 }
 
@@ -39,8 +45,14 @@ MctsNode* MctsNode::bestChild() {
 
 MctsNode* MctsNode::select() {
 	if (this->children.size() == 0) return this;
+
 	// NOTE this currently just chooses the last one it comes across if there are multiple of equal value
 	MctsNode* bestChild = this->bestChild();
+
+	// Set currMove for info command.
+	if (this->parent == nullptr)
+		searchInfo.currMove = bestChild->getInEdge();
+
 	this->getPos().makeMove(bestChild->getInEdge());
 	return bestChild->select();
 }
@@ -55,6 +67,7 @@ MctsNode* MctsNode::expand() {
 	// TODO check if expansion expands into EOG game condition. Need to determine how to handle if this is the case.
 
 	this->getPos().makeMove(this->children[0]->getInEdge());
+	this->searchInfo.nodes++;
 	return dynamic_cast<MctsNode*>(this->children[0].get()); // NOTE currently just getting the first child.
 }
 
@@ -110,4 +123,12 @@ float MctsNode::Ucb1() const {
 
 void MctsNode::addChild(Move move) {
 	this->children.push_back(std::unique_ptr<MctsNode>(new MctsNode(this, move, this->getPos(), this->searchInfo)));
+}
+
+void MctsNode::initialise() {
+	this->visits = 1;
+	this->value = 0;
+	MoveList moves = MoveList(this->getPos());
+	for (Move move : moves)
+		this->addChild(move);
 }

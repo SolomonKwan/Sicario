@@ -7,16 +7,27 @@
 
 struct SearchInfo {
 	int depth = 0;
+	int nodes = 0;
+	Move currMove;
+	std::chrono::_V2::system_clock::time_point start;
+
+	SearchInfo() {
+		this->start = std::chrono::high_resolution_clock::now();
+	}
 
 	bool operator!=(const SearchInfo& s) {
-		return this->depth != s.depth;
+		bool depthChange = this->depth != s.depth;
+		return depthChange;
 	}
 };
 
 class BaseSearcher {
 	public:
 		BaseSearcher(const Position& pos, const std::atomic_bool& searchTree, const SicarioConfigs& sicarioConfigs) :
-				pos(pos), rootPlayer(pos.getTurn()), searchTree(searchTree), sicarioConfigs(sicarioConfigs) {}
+				pos(pos),
+				rootPlayer(pos.getTurn()),
+				searchTree(searchTree),
+				sicarioConfigs(sicarioConfigs) {}
 		virtual void search() = 0;
 		Position& getPos();
 
@@ -30,7 +41,10 @@ class BaseSearcher {
 class BaseNode {
 	public:
 		BaseNode(BaseNode* parent, Position& pos, SearchInfo& searchInfo) :
-				parent(parent), searchInfo(searchInfo), pos(pos), rootPlayer(pos.getTurn()) {} // CHECK learn about initialiser list
+				parent(parent),
+				searchInfo(searchInfo),
+				pos(pos),
+				rootPlayer(pos.getTurn()) {} // CHECK learn about initialiser list
 		Move getInEdge() const;
 		Position& getPos();
 

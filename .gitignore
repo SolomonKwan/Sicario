@@ -1,6 +1,7 @@
 .vscode
 sicario
 *.o
+*.d
 generate
 test
 sc_result.txt

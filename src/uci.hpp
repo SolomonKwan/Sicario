@@ -39,8 +39,9 @@ namespace Uci {
 	 * @brief Send the info message.
 	 *
 	 * @param searchInfo Struct containing the search information.
+	 * @param root Pointer to the root node object.
 	 */
-	void sendInfo(SearchInfo& searchInfo);
+	void sendInfo(SearchInfo& searchInfo, MctsNode* root);
 
 	/**
 	 * @brief Send the options that the user can set.
@@ -56,6 +57,15 @@ namespace Uci {
  * @param code ExitCode of the current position.
  */
 void showEogMessage(ExitCode code);
+
+/**
+ * @brief Convert an average UCB value to a centipawn value. Currently uses a crude sigmoid function centered at y = 0
+ * with asymptotes at (-2500, 2500).
+ *
+ * @param value The average UCB value.
+ * @return A number meant to represent the centipawn value of an average UCB value.
+ */
+int convertToCentipawn(float value);
 
 struct SetOptionPair {
 	std::string name;
