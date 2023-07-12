@@ -40,7 +40,23 @@ class Position {
 		 *
 		 * @return Current game state.
 		 */
-		ExitCode isEOG(MoveList&) const;
+		ExitCode isEOG(MoveList& moves) const;
+
+		/**
+		 * @brief Check if a game is in a drawn position.
+		 *
+		 * @param moves Moves of the current position.
+		 * @return ExitCode of the current position.
+		 */
+		ExitCode isDraw(MoveList& moves) const;
+
+		/**
+		 * @brief Check if the current position is a checkmate.
+		 *
+		 * @param moves Moves of the current position.
+		 * @return ExitCode of the current position.
+		 */
+		ExitCode isCheckmate(MoveList& moves) const;
 
 		/**
 		 * @brief Retrives all legal moves of the current position.
@@ -812,14 +828,6 @@ class Position {
 		 * @return True if the current position is stalemate, else false.
 		 */
 		bool isDrawStalemate(MoveList& move_list) const;
-
-		/**
-		 * @brief Check if the current position is a checkmate.
-		 *
-		 * @param move_list The movelist of the current position.
-		 * @return True if the current position is a checkmate, else false.
-		 */
-		bool isCheckmate(MoveList& move_list) const;
 
 		/**
 		 * @brief Increment the current position count.
