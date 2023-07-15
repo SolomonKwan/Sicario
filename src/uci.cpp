@@ -450,14 +450,19 @@ void Uci::sendInfo(SearchInfo& searchInfo, MctsNode* root) {
 	}
 
 	// Show score
-	std::cout << "score ";
-	float score = 0;
-	for (auto child : root->getChildren()) {
-		float childScore = child->Ucb1();
-		if (childScore == std::numeric_limits<float>::max()) continue;
-		score += child->Ucb1();
+	// std::cout << "fawefawefawef " << root->mateDepth.getForcedMateDepth() << '\n';
+	if (root->mateDepth != 0) {
+		std::cout << "score mate " << root->mateDepth << " ";
+	} else {
+		std::cout << "score ";
+		float score = 0;
+		for (auto child : root->getChildren()) {
+			float childScore = child->Ucb1();
+			if (childScore == std::numeric_limits<float>::max()) continue;
+			score += child->Ucb1();
+		}
+		std::cout << convertToCentipawn(score / root->getChildren().size());
 	}
-	std::cout << convertToCentipawn(score / root->getChildren().size());
 
 	// Currmove
 	std::cout << " currmove ";

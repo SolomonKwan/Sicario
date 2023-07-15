@@ -10,5 +10,5 @@
 Sicario (Iteration-8 v0.8.0)
 By S. Kwan
 
-regex info depth [1-9]+
+regex info depth [1-9]+ nodes [0-9]+ pv ([a-h][1-8][a-h][1-8]([n|b|r|q]|| ))+ score (-|)[0-9]+ currmove [a-h][1-8][a-h][1-8]([n|b|r|q]|) nps [0-9]+
 regex bestmove [a-h][1-8][a-h][1-8]([n|b|r|q]|) ponder [a-h][1-8][a-h][1-8]([n|b|r|q]|)
