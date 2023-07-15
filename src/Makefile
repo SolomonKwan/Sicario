@@ -1,37 +1,37 @@
 # Optimise flag
 ifeq ($(OPTIMISE), 1)
-    OPTIMISE_FLAG = -O1
+	OPTIMISE_FLAG = -O1
 else ifeq ($(OPTIMISE), 2)
-    OPTIMISE_FLAG = -O2
+	OPTIMISE_FLAG = -O2
 else ifeq ($(OPTIMISE), 3)
-    OPTIMISE_FLAG = -O3
+	OPTIMISE_FLAG = -O3
 else ifneq ($(OPTIMISE),)
-    $(error Unknown OPTIMISE flag: "$(OPTIMISE)")
+	$(error Unknown OPTIMISE flag: "$(OPTIMISE)")
 endif
 OPTIONS = $(OPTIMISE_FLAG)
 
 # Debugging flag
 NDEBUG := FALSE
 ifeq ($(NDEBUG), TRUE)
-    OPTIONS := $(OPTIONS) -DNDEBUG
+	OPTIONS := $(OPTIONS) -DNDEBUG
 else ifneq ($(NDEBUG), FALSE)
-    $(error Unknown NDEBUG flag: "$(NDEBUG)")
+	$(error Unknown NDEBUG flag: "$(NDEBUG)")
 endif
 
 # PEXT flag
 PEXT := FALSE
 ifeq ($(PEXT), TRUE)
-    OPTIONS := $(OPTIONS) -DUSE_PEXT -march=native
+	OPTIONS := $(OPTIONS) -DUSE_PEXT -march=native
 else ifneq ($(PEXT), FALSE)
-    $(error Unknown PEXT flag: "$(PEXT)")
+	$(error Unknown PEXT flag: "$(PEXT)")
 endif
 
 # Profiling flag
 GPROF := FALSE
 ifeq ($(GPROF), TRUE)
-    OPTIONS := $(OPTIONS) -pg
+	OPTIONS := $(OPTIONS) -pg
 else ifneq ($(GPROF), FALSE)
-    $(error Unknown GPROF flag: "$(GPROF)")
+	$(error Unknown GPROF flag: "$(GPROF)")
 endif
 
 target := sicario
@@ -49,8 +49,8 @@ DEPFLAGS = -MMD -MF $(@:.o=.d)
 sicario: $(objs)
 	$(CXX) $(CXXFLAGS) -o $@ $^
 
-%.o: %.c
+%.o: %.cpp %.hpp
 	$(CXX) $(CXXFLAGS) -c $< $(DEPFLAGS)
 
 clean:
-	rm $(target) $(objs)
+	rm $(target) $(objs) $(deps)

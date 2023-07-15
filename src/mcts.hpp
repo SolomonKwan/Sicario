@@ -15,16 +15,21 @@ class MctsNode : public BaseNode {
 		MctsNode* bestChild();
 		MctsNode* select();
 		MctsNode* expand();
-		float simulate();
-		void rollback(float val);
+		ExitCode simulate();
+		void rollback(ExitCode code);
 		const std::vector<MctsNode*> getChildren() const;
 		inline float getValue() { return this->value; }
 		inline uint getVisits() { return this->visits; }
 		float Ucb1() const;
+		void updateMateDepth(int childMateDepth);
+		inline int getMateDepth() const {
+			return this->mateDepth;
+		}
 
 	private:
 		float value = 0;
 		uint visits = 0;
+		int mateDepth = 0;
 
 		void addChild(Move move);
 		uint getVisits() const { return this->visits; }

@@ -149,6 +149,20 @@ ExitCode Position::isEOG(MoveList& move_list) const {
 	return NORMAL_PLY;
 }
 
+ExitCode Position::isDraw(MoveList& moves) const {
+	if (this->isDrawFiftyMoveRule()) return FIFTY_MOVES_RULE;
+	if (this->isDrawThreeFoldRep()) return THREE_FOLD_REPETITION;
+	if (this->isDrawInsufficientMaterial()) return INSUFFICIENT_MATERIAL;
+	if (this->isDrawStalemate(moves)) return STALEMATE;
+	return NORMAL_PLY;
+}
+
+ExitCode Position::isCheckmate(MoveList& moves) const {
+	if (moves.moves_index != 0 || !this->inCheck()) return NORMAL_PLY;
+	if (this->turn == WHITE) return BLACK_WINS;
+	return WHITE_WINS;
+}
+
 void Position::getMoves(MoveList& moves) {
 	setCheckers();
 	if (inDoubleCheck()) {
@@ -1141,10 +1155,6 @@ bool Position::isDrawInsufficientMaterial() const {
 
 bool Position::isDrawStalemate(MoveList& moves) const {
 	return moves.moves_index == 0 && !inCheck();
-}
-
-bool Position::isCheckmate(MoveList& moves) const {
-	return moves.moves_index == 0 && inCheck();
 }
 
 inline bool Position::inCheck() const {

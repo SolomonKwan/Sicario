@@ -395,8 +395,20 @@ void Uci::sendReadyOk() {
 }
 
 void Uci::sendBestMove(MctsNode* root, bool debugMode) {
+	assert(root->bestChild() != nullptr);
+
+	// Bestmove
+	MctsNode* bestChild = root->bestChild();
 	std::cout << "bestmove ";
-	printMove(root->bestChild()->getInEdge(), false, true);
+	printMove(bestChild->getInEdge(), false, false);
+
+	// Pondermove
+	MctsNode* ponderNode = bestChild->bestChild();
+	if (ponderNode != nullptr) {
+		std::cout << " ponder ";
+		printMove(ponderNode->getInEdge(), false, false);
+	}
+	std::cout << '\n';
 
 	if (!debugMode) return;
 
@@ -424,8 +436,48 @@ void Uci::sendRegistration() {
 
 }
 
-void Uci::sendInfo(SearchInfo& searchInfo) {
-	std::cout << "info depth " << searchInfo.depth << '\n';
+void Uci::sendInfo(SearchInfo& searchInfo, MctsNode* root) {
+	std::cout << "info depth " << searchInfo.depth;
+	std::cout << " nodes " << searchInfo.nodes;
+
+	// Show pv
+	std::cout << " pv ";
+	MctsNode* curr = root->bestChild();
+	while (curr != nullptr) {
+		printMove(curr->getInEdge(), false, false);
+		std::cout << ' ';
+		curr = curr->bestChild();
+	}
+
+	// Show score
+	if (root->getMateDepth() != 0) {
+		std::cout << "score mate " << root->getMateDepth();
+	} else {
+		std::cout << "score ";
+		float score = 0;
+		for (auto child : root->getChildren()) {
+			float childScore = child->Ucb1();
+			if (childScore == std::numeric_limits<float>::max()) continue;
+			score += child->Ucb1();
+		}
+		std::cout << convertToCentipawn(score / root->getChildren().size());
+	}
+
+	// Currmove
+	std::cout << " currmove ";
+	printMove(searchInfo.currMove, false, false);
+
+	// Print nps
+	std::cout << " nps ";
+	auto end = std::chrono::high_resolution_clock::now();
+	float npms = searchInfo.nodes;
+	npms /= std::chrono::duration_cast<std::chrono::microseconds>(end - searchInfo.start).count();
+	npms *= 100000;
+	std::cout << static_cast<int>(npms);
+	searchInfo.start = end;
+
+	std::cout << std::flush;
+	std::cout << '\n';
 }
 
 void Uci::sendOption(const OptionInfo& option) {
@@ -595,4 +647,8 @@ SetOptionPair Sicario::getOptionNameAndValue(const std::vector<std::string>& inp
 	std::transform(name.begin(), name.end(), name.begin(), ::tolower);
 
 	return { trim(name), trim(value) };
+}
+
+int convertToCentipawn(float value) {
+	return 5000.0 / (1.0 + std::exp(-6.0 * value)) - 2500;
 }
