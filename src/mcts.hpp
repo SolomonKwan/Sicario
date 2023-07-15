@@ -22,12 +22,14 @@ class MctsNode : public BaseNode {
 		inline uint getVisits() { return this->visits; }
 		float Ucb1() const;
 		void updateMateDepth(int childMateDepth);
-
-		int mateDepth;
+		inline int getMateDepth() const {
+			return this->mateDepth;
+		}
 
 	private:
 		float value = 0;
 		uint visits = 0;
+		int mateDepth = 0;
 
 		void addChild(Move move);
 		uint getVisits() const { return this->visits; }

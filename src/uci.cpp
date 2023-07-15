@@ -450,9 +450,8 @@ void Uci::sendInfo(SearchInfo& searchInfo, MctsNode* root) {
 	}
 
 	// Show score
-	// std::cout << "fawefawefawef " << root->mateDepth.getForcedMateDepth() << '\n';
-	if (root->mateDepth != 0) {
-		std::cout << "score mate " << root->mateDepth << " ";
+	if (root->getMateDepth() != 0) {
+		std::cout << "score mate " << root->getMateDepth();
 	} else {
 		std::cout << "score ";
 		float score = 0;
@@ -472,9 +471,10 @@ void Uci::sendInfo(SearchInfo& searchInfo, MctsNode* root) {
 	std::cout << " nps ";
 	auto end = std::chrono::high_resolution_clock::now();
 	float npms = searchInfo.nodes;
-	npms /= std::chrono::duration_cast<std::chrono::milliseconds>(end - searchInfo.start).count();
-	npms *= 1000;
+	npms /= std::chrono::duration_cast<std::chrono::microseconds>(end - searchInfo.start).count();
+	npms *= 100000;
 	std::cout << static_cast<int>(npms);
+	searchInfo.start = end;
 
 	std::cout << std::flush;
 	std::cout << '\n';

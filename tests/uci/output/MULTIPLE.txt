@@ -205,9 +205,9 @@ Fullmove: 1
 
 
 1
-regex info depth [1-9]+ nodes [0-9]+ pv ([a-h][1-8][a-h][1-8]([n|b|r|q]|| ))+ score (-|)[0-9]+ currmove [a-h][1-8][a-h][1-8]([n|b|r|q]|) nps [0-9]+
+regex info depth [1-9]+ nodes [0-9]+ pv ([a-h][1-8][a-h][1-8]([n|b|r|q]|| ))+ score ((-|)[0-9]+|mate [0-9]+) currmove [a-h][1-8][a-h][1-8]([n|b|r|q]|) nps [0-9]+
 regex bestmove [a-h][1-8][a-h][1-8][n|b|r|q]
-regex info depth [1-9]+ nodes [0-9]+ pv ([a-h][1-8][a-h][1-8]([n|b|r|q]|| ))+ score (-|)[0-9]+ currmove [a-h][1-8][a-h][1-8]([n|b|r|q]|) nps [0-9]+
+regex info depth [1-9]+ nodes [0-9]+ pv ([a-h][1-8][a-h][1-8]([n|b|r|q]|| ))+ score ((-|)[0-9]+|mate [0-9]+) currmove [a-h][1-8][a-h][1-8]([n|b|r|q]|) nps [0-9]+
 regex bestmove [a-h][1-8][a-h][1-8][n|b|r|q]
 8 [1;30;47m  [0m[1;30;45m♜ [0m[1;30;47m♝ [0m[1;30;45m  [0m[1;30;47m  [0m[1;30;45m  [0m[1;30;47m  [0m[1;30;45m♜ [0m
 7 [1;30;45m♟ [0m[1;30;47m  [0m[1;30;45m♙ [0m[1;30;47m♟ [0m[1;30;45m  [0m[1;30;47m  [0m[1;30;45m  [0m[1;30;47m♟ [0m
@@ -298,5 +298,5 @@ Pawns:
 00000000
 regex info depth [1-9]+ nodes [0-9]+ pv ([a-h][1-8][a-h][1-8]([n|b|r|q]|| ))+ score (-|)[0-9]+ currmove [a-h][1-8][a-h][1-8]([n|b|r|q]|) nps [0-9]+
 regex bestmove [a-h][1-8][a-h][1-8]([n|b|r|q]|) ponder [a-h][1-8][a-h][1-8]([n|b|r|q]|)
-regex info depth [1-9]+ nodes [0-9]+ pv ([a-h][1-8][a-h][1-8]([n|b|r|q]|| ))+ score (-|)[0-9]+ currmove [a-h][1-8][a-h][1-8]([n|b|r|q]|) nps [0-9]+
+regex info depth [1-9]+ nodes [0-9]+ pv ([a-h][1-8][a-h][1-8]([n|b|r|q]|| ))+ score ((-|)[0-9]+|mate [0-9]+) currmove [a-h][1-8][a-h][1-8]([n|b|r|q]|) nps [0-9]+
 regex bestmove [a-h][1-8][a-h][1-8]([n|b|r|q]|)
