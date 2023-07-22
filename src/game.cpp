@@ -1713,14 +1713,10 @@ MoveList::MoveList(Position& position) {
 	position.getMoves(*this);
 }
 
-std::random_device rdev;
-std::mt19937 rgen(rdev());
-std::uniform_int_distribution<int> rndNum(0, 16);
-
 Move MoveList::randomMove() const {
-	int vecIndex = rndNum(rgen) % this->moves_index;
-	int movIndex = rndNum(rgen) % this->moveSets[vecIndex]->size();
-	return (*this->moveSets[vecIndex])[movIndex];
+	int vecIndex = std::rand() % (this->moves_index);
+	uint movesIndex = std::rand() % (this->moveSets[vecIndex]->size());
+	return (*this->moveSets[vecIndex])[movesIndex];
 }
 
 uint64_t MoveList::size() const {
