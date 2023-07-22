@@ -8,7 +8,6 @@
 #include "uci.hpp"
 #include "utils.hpp"
 #include "sicario.hpp"
-#include "search.hpp"
 
 void showEogMessage(ExitCode code) {
 	switch (code) {

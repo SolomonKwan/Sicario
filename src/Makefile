@@ -35,7 +35,7 @@ else ifneq ($(GPROF), FALSE)
 endif
 
 target := sicario
-objs := game.o main.o mcts.o movegen.o search.o sicario.o uci.o utils.o
+objs := game.o main.o mcts.o movegen.o sicario.o uci.o utils.o
 
 CXX := g++
 CXXFLAGS := -std=c++20 -g -pedantic -Wall -pthread $(OPTIONS)
