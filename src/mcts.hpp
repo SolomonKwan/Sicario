@@ -34,6 +34,7 @@ class Mcts {
 		inline Position& getPos() {
 			return this->pos;
 		}
+		bool rootIsEOG();
 
 	private:
 		Position pos;
@@ -45,9 +46,6 @@ class Mcts {
 class MctsNode {
 	public:
 		MctsNode(MctsNode* parent, Move move, Position& pos, SearchInfo& searchInfo) :
-				value(0),
-				visits(0),
-				mateDepth(0),
 				depth(parent == nullptr ? 0 : parent->depth + 1),
 				inEdge(move),
 				parent(parent),
@@ -89,9 +87,9 @@ class MctsNode {
 		}
 
 	private:
-		float value;
-		uint visits;
-		int mateDepth;
+		float value = 0;
+		uint visits = 0;
+		int mateDepth = 0;
 
 		int depth;
 		Move inEdge;

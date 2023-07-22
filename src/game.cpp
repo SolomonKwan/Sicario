@@ -137,12 +137,12 @@ void Position::resetPosition() {
 	this->epHashed = false;
 }
 
-ExitCode Position::isEOG(MoveList& move_list) const {
+ExitCode Position::isEOG(MoveList& moves) const {
 	if (this->isDrawFiftyMoveRule()) return FIFTY_MOVES_RULE;
 	if (this->isDrawThreeFoldRep()) return THREE_FOLD_REPETITION;
 	if (this->isDrawInsufficientMaterial()) return INSUFFICIENT_MATERIAL;
-	if (this->isDrawStalemate(move_list)) return STALEMATE;
-	if (this->isCheckmate(move_list)) {
+	if (this->isDrawStalemate(moves)) return STALEMATE;
+	if (this->isCheckmate(moves)) {
 		if (this->turn == WHITE) return BLACK_WINS;
 		return WHITE_WINS;
 	}

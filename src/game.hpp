@@ -59,6 +59,14 @@ class Position {
 		ExitCode isCheckmate(MoveList& moves) const;
 
 		/**
+		 * @brief Check if the current position is a draw by stalemate.
+		 *
+		 * @param move_list The movelist of the current position.
+		 * @return True if the current position is stalemate, else false.
+		 */
+		bool isDrawStalemate(MoveList& move_list) const;
+
+		/**
 		 * @brief Retrives all legal moves of the current position.
 		 *
 		 * @param moves Reference to moveList to populate.
@@ -820,14 +828,6 @@ class Position {
 		 * @return True if draw by insufficient material, else false.
 		 */
 		bool isDrawInsufficientMaterial() const;
-
-		/**
-		 * @brief Check if the current position is a draw by stalemate.
-		 *
-		 * @param move_list The movelist of the current position.
-		 * @return True if the current position is stalemate, else false.
-		 */
-		bool isDrawStalemate(MoveList& move_list) const;
 
 		/**
 		 * @brief Increment the current position count.

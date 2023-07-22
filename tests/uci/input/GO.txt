@@ -1,4 +1,35 @@
 go
-delay 5
+delay 1
 stop
+delay 1
+go
+delay 1
+stop
+delay 1
+position fen k7/2N5/8/8/8/8/8/4K3 b - - 0 1
+go
+delay 1
+go
+stop
+delay 1
+position fen k7/2Q5/8/8/8/8/8/4K3 b - - 0 1
+go
+delay 1
+go
+stop
+delay 1
+position fen k1Q5/p7/8/8/8/8/8/4K3 b - - 0 1
+go
+delay 1
+go
+delay 1
+stop
+delay 1
+go
+delay 1
+position fen rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
+go
+delay 1
+stop
+delay 1
 quit

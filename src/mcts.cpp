@@ -1,5 +1,6 @@
 #include <memory>
 #include <algorithm>
+#include <iostream>
 
 #include "sicario.hpp"
 #include "mcts.hpp"
@@ -8,14 +9,29 @@
 void Sicario::search() {
 	Mcts searcher(this->getPosition(), this->searchTree, this->sicarioConfigs);
 	searcher.search();
+	this->searchTree = false;
+}
+
+bool Mcts::rootIsEOG() {
+	MoveList moves = MoveList(this->pos);
+	if (this->pos.isCheckmate(moves)) {
+		std::cout << "info depth 0 score mate 0" << '\n';
+		std::cout << "bestmove (none)" << '\n';
+		return true;
+	} else if (this->pos.isDrawStalemate(moves)) {
+		std::cout << "info depth 0 score cp 0" << '\n';
+		std::cout << "bestmove (none)" << '\n';
+		return true;
+	}
+	return false;
 }
 
 // NOTE Due to way that the tree is constructed, it may result in stack overflow error due to node deletion/pruning.
 
-const float C = std::sqrt(2);
-
 // TODO handle case where the root is a terminal node
 void Mcts::search() {
+	if (this->rootIsEOG()) return;
+
 	SearchInfo searchInfo = SearchInfo(), oldSearchInfo = SearchInfo();
 	std::unique_ptr<MctsNode> root(new MctsNode(nullptr, NULL_MOVE, this->getPos(), searchInfo));
 
@@ -59,7 +75,7 @@ MctsNode* MctsNode::expand() {
 		this->mateDepth = -1 * this->depth;
 		return this;
 	}
-	if (visits == 0 || this->getPos().isDraw(moves)) return this;
+	if (visits == 0 || this->getPos().isDrawStalemate(moves)) return this;
 
 	for (Move move : moves)
 		this->addChild(move);
@@ -114,7 +130,7 @@ const std::vector<MctsNode*> MctsNode::getChildren() const {
 
 float MctsNode::Ucb1() const {
 	if (this->visits == 0) return std::numeric_limits<float>::max();
-	return (value / static_cast<float>(visits)) + C *
+	return (value / static_cast<float>(visits)) + std::sqrt(2) *
 			std::sqrt(std::log(static_cast<float>(this->parent->getVisits())) /
 			static_cast<float>(visits));
 }

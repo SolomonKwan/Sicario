@@ -229,7 +229,6 @@ void Sicario::handlePosition(const std::vector<std::string>& inputs) {
 }
 
 void Sicario::handleGo(const std::vector<std::string>& inputs) {
-	// TODO Parse search parameters and utilise number of threads
 	if (this->searchTree == false) {
 		this->searchTree = true;
 		this->threads.push_back(std::thread(&Sicario::search, this));
