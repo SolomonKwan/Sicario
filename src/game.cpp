@@ -5,6 +5,7 @@
 #include <iostream>
 #include <bitset>
 #include <cassert>
+#include <random>
 
 #include "game.hpp"
 #include "utils.hpp"
@@ -1714,8 +1715,8 @@ MoveList::MoveList(Position& position) {
 }
 
 Move MoveList::randomMove() const {
-	int vecIndex = std::rand() % (this->moves_index);
-	uint movesIndex = std::rand() % (this->moveSets[vecIndex]->size());
+	int vecIndex = randInt() % (this->moves_index);
+	uint movesIndex = randInt() % (this->moveSets[vecIndex]->size());
 	return (*this->moveSets[vecIndex])[movesIndex];
 }
 

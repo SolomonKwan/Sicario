@@ -435,8 +435,8 @@ void Uci::sendRegistration() {
 }
 
 void Uci::sendInfo(SearchInfo& searchInfo, MctsNode* root) {
-	std::cout << "info depth " << searchInfo.depth;
-	std::cout << " nodes " << searchInfo.nodes;
+	std::cout << "info depth " << searchInfo.getDepth();
+	std::cout << " nodes " << searchInfo.getDepth();
 
 	// Show pv
 	std::cout << " pv ";
@@ -463,19 +463,21 @@ void Uci::sendInfo(SearchInfo& searchInfo, MctsNode* root) {
 
 	// Currmove
 	std::cout << " currmove ";
-	printMove(searchInfo.currMove, false, false);
+	printMove(searchInfo.getCurrMove(), false, false);
 
 	// Print nps
 	std::cout << " nps ";
 	auto end = std::chrono::high_resolution_clock::now();
-	float npms = searchInfo.nodes;
-	npms /= std::chrono::duration_cast<std::chrono::microseconds>(end - searchInfo.start).count();
+	float npms = searchInfo.getNodes();
+	npms /= std::chrono::duration_cast<std::chrono::microseconds>(end - searchInfo.getStart()).count();
 	npms *= 100000;
 	std::cout << static_cast<int>(npms);
-	searchInfo.start = end;
+	searchInfo.setStart(end);
 
 	std::cout << std::flush;
 	std::cout << '\n';
+
+	searchInfo.setChanged(false);
 }
 
 void Uci::sendOption(const OptionInfo& option) {

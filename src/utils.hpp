@@ -160,6 +160,13 @@ std::vector<size_t> rankSort(const std::vector<float>& vec);
 Square mirror(Square square);
 
 /**
+ * @brief Get a random integer between 0 and 100 (inclusive).
+ *
+ * @return A random integer between 0 and 100 (inclusive).
+ */
+int randInt();
+
+/**
  * @brief Returns a copy of the string with leading and trailing whitepaces removed.
  *
  * @param string The string to trim.

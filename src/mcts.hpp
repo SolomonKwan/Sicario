@@ -8,19 +8,36 @@
 #include "sicario.hpp"
 
 struct SearchInfo {
-	int depth = 0;
-	int nodes = 0;
-	Move currMove;
-	std::chrono::_V2::system_clock::time_point start;
-
 	SearchInfo() {
-		this->start = std::chrono::high_resolution_clock::now();
+		this->lastMessage = std::chrono::high_resolution_clock::now();
 	}
 
-	bool operator!=(const SearchInfo& s) {
-		bool depthChange = this->depth != s.depth;
-		return depthChange;
-	}
+	public:
+		int getDepth() const;
+		void setDepth(int depth);
+
+		bool getChanged() const;
+		void setChanged(bool changed);
+
+		Move getCurrMove() const;
+		void setCurrMove(Move move);
+
+		int getNodes() const;
+		void incNodes();
+
+		std::chrono::_V2::system_clock::time_point getStart() const;
+		void setStart(std::chrono::_V2::system_clock::time_point time);
+
+		bool sendNextInfo() const;
+
+	private:
+		bool changed = false;
+
+		int depth = 0;
+		int nodes = 0;
+		Move currMove;
+		std::vector<std::vector<Move>> pvs;
+		std::chrono::_V2::system_clock::time_point lastMessage;
 };
 
 class Mcts {
@@ -52,7 +69,7 @@ class MctsNode {
 				searchInfo(searchInfo),
 				pos(pos),
 				rootPlayer(pos.getTurn()) {
-			this->searchInfo.depth = std::max(this->searchInfo.depth, this->depth);
+			this->searchInfo.setDepth(this->depth);
 		}
 
 		MctsNode* bestChild();

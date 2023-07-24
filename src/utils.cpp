@@ -1,6 +1,7 @@
 #include <bitset>
 #include <iostream>
 #include <algorithm>
+#include <random>
 
 #include "utils.hpp"
 #include "constants.hpp"
@@ -127,4 +128,10 @@ std::string concatFEN(const std::vector<std::string> strings, const std::string 
 
 Square mirror(Square square) {
 	return static_cast<Square>(static_cast<int>(square) ^ 56);
+}
+
+int randInt() {
+	static std::mt19937 eng {std::random_device{}()};
+	static std::uniform_int_distribution<int> dist(0, 100);
+	return dist(eng);
 }

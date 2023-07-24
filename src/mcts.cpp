@@ -6,6 +6,54 @@
 #include "mcts.hpp"
 #include "uci.hpp"
 
+int SearchInfo::getDepth() const {
+	return this->depth;
+}
+
+void SearchInfo::setDepth(int depth) {
+	if (this->depth == std::max(depth, this->depth)) return;
+	this->changed = true;
+	this->depth = std::max(depth, this->depth);
+}
+
+void SearchInfo::setChanged(bool changed) {
+	this->changed = changed;
+}
+
+bool SearchInfo::getChanged() const {
+	return this->changed;
+}
+
+Move SearchInfo::getCurrMove() const {
+	return this->currMove;
+}
+
+void SearchInfo::setCurrMove(Move move) {
+	this->currMove = move;
+}
+
+int SearchInfo::getNodes() const {
+	return this->nodes;
+}
+
+void SearchInfo::incNodes() {
+	this->nodes++;
+}
+
+std::chrono::_V2::system_clock::time_point SearchInfo::getStart() const {
+	return this->lastMessage;
+}
+
+void SearchInfo::setStart(std::chrono::_V2::system_clock::time_point time) {
+	this->lastMessage = time;
+}
+
+bool SearchInfo::sendNextInfo() const {
+	auto now = std::chrono::high_resolution_clock::now();
+	int timeSinceLastInfo = std::chrono::duration_cast<std::chrono::seconds>(now - this->getStart()).count();
+	return changed || (timeSinceLastInfo >= 3);
+}
+
 void Sicario::search() {
 	Mcts searcher(this->getPosition(), this->searchTree, this->sicarioConfigs);
 	searcher.search();
@@ -28,22 +76,19 @@ bool Mcts::rootIsEOG() {
 
 // NOTE Due to way that the tree is constructed, it may result in stack overflow error due to node deletion/pruning.
 
-// TODO handle case where the root is a terminal node
 void Mcts::search() {
 	if (this->rootIsEOG()) return;
 
-	SearchInfo searchInfo = SearchInfo(), oldSearchInfo = SearchInfo();
+	SearchInfo searchInfo = SearchInfo();
 	std::unique_ptr<MctsNode> root(new MctsNode(nullptr, NULL_MOVE, this->getPos(), searchInfo));
 
 	while (searchTree) {
-		oldSearchInfo = searchInfo; // TODO implement smarter way of checking if something has changed
-
 		MctsNode* leaf = root->select();
 		leaf = leaf->expand();
 		ExitCode code = leaf->simulate();
 		leaf->rollback(code);
 
-		if (searchInfo != oldSearchInfo) Uci::sendInfo(searchInfo, root.get());
+		if (searchInfo.sendNextInfo()) Uci::sendInfo(searchInfo, root.get());
 	}
 
 	Uci::sendInfo(searchInfo, root.get()); // Send final info command.
@@ -52,18 +97,25 @@ void Mcts::search() {
 
 MctsNode* MctsNode::bestChild() {
 	if (this->children.size() == 0) return nullptr;
-	return (*std::max_element(children.begin(), children.end(), MctsNode::Ucb1Comp())).get();
+	std::vector<MctsNode*> ptrs;
+	for (auto& child : this->children) {
+		if (ptrs.size() == 0 || child.get()->Ucb1() == ptrs.front()->Ucb1()) {
+			ptrs.push_back(child.get());
+		} else if (child.get()->Ucb1() > ptrs.front()->Ucb1()) {
+			ptrs.clear();
+			ptrs.push_back(child.get());
+		}
+	}
+	return ptrs[randInt() % ptrs.size()];
 }
 
 MctsNode* MctsNode::select() {
 	if (this->children.size() == 0) return this;
 
-	// NOTE this currently just chooses the last one it comes across if there are multiple of equal value
-	MctsNode* bestChild = this->bestChild();
-
 	// Set currMove for info command.
+	MctsNode* bestChild = this->bestChild();
 	if (this->parent == nullptr)
-		searchInfo.currMove = bestChild->getInEdge();
+		searchInfo.setCurrMove(bestChild->getInEdge());
 
 	this->getPos().makeMove(bestChild->getInEdge());
 	return bestChild->select();
@@ -80,11 +132,9 @@ MctsNode* MctsNode::expand() {
 	for (Move move : moves)
 		this->addChild(move);
 
-	// TODO check if expansion expands into EOG game condition. Need to determine how to handle if this is the case.
-
 	this->getPos().makeMove(this->children[0]->getInEdge());
-	this->searchInfo.nodes++;
-	return this->children[0].get(); // NOTE currently just getting the first child.
+	this->searchInfo.incNodes();
+	return this->children[randInt() % this->children.size()].get();
 }
 
 ExitCode MctsNode::simulate() {
