@@ -59,6 +59,14 @@ void printMove(const Move move, const bool extraInfo, const bool flush) {
 	if (flush) std::cout << '\n';
 }
 
+std::string getMoveString(Move move) {
+	if (type(move) == PROMOTION) {
+		return squareName[start(move)] + squareName[end(move)] + getPromoString(promo(move));
+	} else {
+		return squareName[start(move)] + squareName[end(move)];
+	}
+}
+
 std::string getPromoString(const Promotion promo) {
 	switch (promo) {
 		case pKNIGHT:

@@ -127,6 +127,14 @@ inline File file(Square square) {
 void printMove(Move move, bool extraInfo, bool flush = false);
 
 /**
+ * @brief Get the string representation of the move.
+ *
+ * @param move The move to convert to a string.
+ * @return String representation of the move.
+ */
+std::string getMoveString(Move move);
+
+/**
  * @brief Get the promotion string.
  *
  * @param promo Promotion type.

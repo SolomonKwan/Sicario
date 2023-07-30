@@ -40,8 +40,9 @@ namespace Uci {
 	 *
 	 * @param searchInfo Struct containing the search information.
 	 * @param root Pointer to the root node object.
+	 * @param sicarioConfigs Configurations for the engine.
 	 */
-	void sendInfo(SearchInfo& searchInfo, MctsNode* root);
+	void sendInfo(SearchInfo& searchInfo, MctsNode* root, const SicarioConfigs& sicarioConfigs);
 
 	/**
 	 * @brief Send the options that the user can set.
@@ -49,6 +50,18 @@ namespace Uci {
 	 * @param option Struct containing the object information.
 	 */
 	void sendOption(const OptionInfo& option);
+}
+
+namespace Info {
+	void send(std::string string, char end = ' ');
+	void info();
+	void depth(SearchInfo& searchInfo);
+	void nodes(SearchInfo& searchInfo);
+	void pv(MctsNode* root, int pvLine);
+	void multiPv(MctsNode* root, int pvLine);
+	void score(MctsNode* root);
+	void currMove(SearchInfo& searchInfo, MctsNode* root);
+	void nps(SearchInfo& searchInfo);
 }
 
 /**

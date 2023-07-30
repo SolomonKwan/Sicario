@@ -1,6 +1,7 @@
 #include <memory>
 #include <algorithm>
 #include <iostream>
+#include <map>
 
 #include "sicario.hpp"
 #include "mcts.hpp"
@@ -44,7 +45,7 @@ std::chrono::_V2::system_clock::time_point SearchInfo::getStart() const {
 	return this->lastMessage;
 }
 
-void SearchInfo::setStart(std::chrono::_V2::system_clock::time_point time) {
+void SearchInfo::setLastMessage(std::chrono::_V2::system_clock::time_point time) {
 	this->lastMessage = time;
 }
 
@@ -81,6 +82,7 @@ void Mcts::search() {
 
 	SearchInfo searchInfo = SearchInfo();
 	std::unique_ptr<MctsNode> root(new MctsNode(nullptr, NULL_MOVE, this->getPos(), searchInfo));
+	root->rootInitialise();
 
 	while (searchTree) {
 		MctsNode* leaf = root->select();
@@ -88,10 +90,10 @@ void Mcts::search() {
 		ExitCode code = leaf->simulate();
 		leaf->rollback(code);
 
-		if (searchInfo.sendNextInfo()) Uci::sendInfo(searchInfo, root.get());
+		if (searchInfo.sendNextInfo()) Uci::sendInfo(searchInfo, root.get(), this->sicarioConfigs);
 	}
 
-	Uci::sendInfo(searchInfo, root.get()); // Send final info command.
+	Uci::sendInfo(searchInfo, root.get(), this->sicarioConfigs); // Send final info command.
 	Uci::sendBestMove(root.get(), sicarioConfigs.debugMode);
 }
 
@@ -107,6 +109,25 @@ MctsNode* MctsNode::bestChild() {
 		}
 	}
 	return ptrs[randInt() % ptrs.size()];
+}
+
+MctsNode* MctsNode::bestChildPv(int pvLine) {
+	std::map<float, std::vector<MctsNode*>> map;
+	for (auto& child : this->children)
+		map[child->Ucb1()].push_back(child.get());
+
+	MctsNode* node = nullptr;
+	for (auto itr = map.rbegin(); itr != map.rend(); itr++) {
+		if (pvLine <= static_cast<int>(itr->second.size())) {
+			node = itr->second[pvLine - 1];
+			break;
+		} else {
+			pvLine -= itr->second.size();
+		}
+	}
+
+	assert(node != nullptr);
+	return node;
 }
 
 MctsNode* MctsNode::select() {
@@ -169,6 +190,13 @@ void MctsNode::rollback(ExitCode code) {
 		this->pos.undoMove();
 	}
 	curr->visits++;
+}
+
+void MctsNode::rootInitialise() {
+	assert(this->parent == nullptr);
+	MoveList moves = MoveList(this->getPos());
+	for (Move move : moves)
+		this->addChild(move);
 }
 
 const std::vector<MctsNode*> MctsNode::getChildren() const {

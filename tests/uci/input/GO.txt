@@ -32,4 +32,9 @@ go
 delay 1
 stop
 delay 1
+setoption name multipv value 3
+delay 1
+go
+delay 3
+stop
 quit

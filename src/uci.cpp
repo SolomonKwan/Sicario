@@ -434,58 +434,86 @@ void Uci::sendRegistration() {
 
 }
 
-void Uci::sendInfo(SearchInfo& searchInfo, MctsNode* root) {
-	std::cout << "info depth " << searchInfo.getDepth();
-	std::cout << " nodes " << searchInfo.getDepth();
-
-	// Show pv
-	std::cout << " pv ";
-	MctsNode* curr = root->bestChild();
-	while (curr != nullptr) {
-		printMove(curr->getInEdge(), false, false);
-		std::cout << ' ';
-		curr = curr->bestChild();
+void Uci::sendInfo(SearchInfo& searchInfo, MctsNode* root, const SicarioConfigs& sicarioConfigs) {
+	for (int pvLine = 1; pvLine <= std::stoi(sicarioConfigs.options[MULTI_PV].value); pvLine++) {
+		Info::info();
+		Info::depth(searchInfo);
+		Info::nodes(searchInfo);
+		Info::pv(root, pvLine);
+		Info::multiPv(root, pvLine);
+		Info::score(root);
+		Info::currMove(searchInfo, root);
+		Info::nps(searchInfo);
 	}
 
-	// Show score
+	searchInfo.setLastMessage(std::chrono::high_resolution_clock::now());
+	searchInfo.setChanged(false);
+}
+
+void Uci::sendOption(const OptionInfo& option) {
+	std::string optionString = "option name " + option.name + " type " + option.type +
+			(option.def != "" ? " default " + option.def : "");
+	if (option.min != "")
+		optionString += " min " + option.min + " max " + option.max;
+	for (std::string var : option.vars)
+		optionString += " var " + var;
+	Uci::communicate(optionString);
+}
+
+void Info::send(std::string string, char end) {
+	std::cout << string << end;
+}
+
+void Info::info() {
+	Info::send("info");
+}
+
+void Info::depth(SearchInfo& searchInfo) {
+	Info::send("depth " + std::to_string(searchInfo.getDepth()));
+}
+
+void Info::nodes(SearchInfo& searchInfo) {
+	Info::send("nodes " + std::to_string(searchInfo.getNodes()));
+}
+
+void Info::pv(MctsNode* root, int pvLine) {
+	Info::send("pv");
+	MctsNode* curr = root->bestChildPv(pvLine);
+	while (curr != nullptr) {
+		Info::send(getMoveString(curr->getInEdge()));
+		curr = curr->bestChild();
+	}
+}
+
+void Info::multiPv(MctsNode* root, int pvLine) {
+	if (pvLine > static_cast<int>(root->getChildren().size())) return;
+	Info::send("multipv " + std::to_string(pvLine));
+}
+
+void Info::score(MctsNode* root) {
+	Info::send("score");
 	if (root->getMateDepth() != 0) {
-		std::cout << "score mate " << root->getMateDepth();
+		Info::send("mate " + std::to_string(root->getMateDepth()));
 	} else {
-		std::cout << "score ";
 		float score = 0;
 		for (auto child : root->getChildren()) {
 			float childScore = child->Ucb1();
 			if (childScore == std::numeric_limits<float>::max()) continue;
 			score += child->Ucb1();
 		}
-		std::cout << convertToCentipawn(score / root->getChildren().size());
+		Info::send(std::to_string(convertToCentipawn(score / root->getChildren().size())));
 	}
-
-	// Currmove
-	std::cout << " currmove ";
-	printMove(searchInfo.getCurrMove(), false, false);
-
-	// Print nps
-	std::cout << " nps ";
-	auto end = std::chrono::high_resolution_clock::now();
-	float npms = searchInfo.getNodes();
-	npms /= std::chrono::duration_cast<std::chrono::microseconds>(end - searchInfo.getStart()).count();
-	npms *= 100000;
-	std::cout << static_cast<int>(npms);
-	searchInfo.setStart(end);
-
-	std::cout << std::flush;
-	std::cout << '\n';
-
-	searchInfo.setChanged(false);
 }
 
-void Uci::sendOption(const OptionInfo& option) {
-	std::string optionString =
-			"option name " + option.name + " type " + option.type + (option.def != "" ? " default " + option.def : "");
-	if (option.min != "") optionString += " min " + option.min + " max " + option.max;
-	for (std::string var : option.vars) optionString += " var " + var;
-	Uci::communicate(optionString);
+void Info::currMove(SearchInfo& searchInfo, MctsNode* root) {
+	Info::send("currmove " + getMoveString(searchInfo.getCurrMove()));
+}
+
+void Info::nps(SearchInfo& searchInfo) {
+	auto end = std::chrono::high_resolution_clock::now();
+	float npms = searchInfo.getNodes() * 1000;
+	npms /= std::chrono::duration_cast<std::chrono::milliseconds>(end - searchInfo.getStart()).count();
+	Info::send("nps " + std::to_string(static_cast<uint>(npms)), '\n');
 }
 
 void Sicario::sendInvalidCommand(const std::vector<std::string>& inputs, const std::string& customMsg) {

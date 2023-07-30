@@ -26,7 +26,7 @@ struct SearchInfo {
 		void incNodes();
 
 		std::chrono::_V2::system_clock::time_point getStart() const;
-		void setStart(std::chrono::_V2::system_clock::time_point time);
+		void setLastMessage(std::chrono::_V2::system_clock::time_point time);
 
 		bool sendNextInfo() const;
 
@@ -73,10 +73,13 @@ class MctsNode {
 		}
 
 		MctsNode* bestChild();
+		MctsNode* bestChildPv(int pvLine);
 		MctsNode* select();
 		MctsNode* expand();
 		ExitCode simulate();
 		void rollback(ExitCode code);
+
+		void rootInitialise();
 
 		inline Move getInEdge() const {
 			return this->inEdge;
