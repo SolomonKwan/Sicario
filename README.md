@@ -171,6 +171,11 @@ There are 2 other markdown files in this repo.
 	<li><code>MOVEGEN.md</code> - Contains information on how move generation works.</li>
 </ul>
 
+Another point to mention is that random number generation currently uses a basic approach. In the <code>utils.cpp</code>
+file there is a function that contains a static variable for generating random integers between 0 and 100. This is used
+to generate random integers and a modulo operation by n on the generated random number is used get a random
+number within the range [0, n - 1].
+
 ## Acknowledgements
 
 <strong>www.chessprogramming.org</strong> - Primary source of information and knowledge.
