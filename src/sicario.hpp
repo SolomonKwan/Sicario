@@ -23,6 +23,24 @@ struct SicarioConfigs {
 	OptionInfo options[CONFIGS_COUNT];
 };
 
+struct SearchParams {
+	std::vector<Move> searchMoves;
+	bool ponder = false;
+	int wtime = -1;
+	int btime = -1;
+	int winc = -1;
+	int binc = -1;
+	int movesToGo = -1;
+	int depth = -1;
+	int nodes = -1;
+	int mate = -1;
+	int moveTime = -1;
+	bool infinite = false;
+	bool suddenDeath = false;
+
+	void reset();
+};
+
 /**
  * @brief Show the engine information.
  *
@@ -53,6 +71,7 @@ class Sicario {
 	private:
 		Position position;
 		SicarioConfigs sicarioConfigs;
+		SearchParams searchParams;
 		std::vector<std::thread> threads;
 		std::atomic_bool searchTree = false;
 
@@ -64,11 +83,27 @@ class Sicario {
 		void processInput(const std::string& input);
 
 		/**
-		 * @brief Hash the input string to the GUI.
+		 * @brief Hash the input string from the GUI.
 		 *
+		 * @param input Input from the GUI.
 		 * @return Type of the input string.
 		 */
-		UciInput hashCommandInput(const std::string&);
+		UciInput hashCommandInput(const std::string& input);
+
+		/**
+		 * @brief Hash the input string from the GUI.
+		 *
+		 * @param input Input from the GUI.
+		 * @return Type of the input string.
+		 */
+		SearchCommand hashSearchCommand(const std::string& input);
+
+		/**
+		 * @brief Parse the parameters of the search.
+		 *
+		 * @param inputs Entire input given to the GUI.
+		 */
+		void parseSearchParams(const std::vector<std::string>& inputs);
 
 		/**
 		 * @brief Handle the uci command.

@@ -6,7 +6,7 @@
 #include <cassert>
 
 /**
- * @brief Splits a string by a delimeter string and returns vector of results without empty strings.
+ * @brief Splits a string by a delimeter string and returns vector of results (tokens) without empty strings.
  *
  * @param input String to split.
  * @param delim String delimiter.
@@ -24,12 +24,63 @@ std::vector<std::string> split(std::string input, std::string delim);
 std::string concat(std::vector<std::string> strings, std::string delimeter);
 
 /**
+ * @brief Checks if a string is a non-negative integer.
+ *
+ * @param str String to check.
+ * @return True if the string is a non-negative integer, else false (if any characters are not numbers).
+ * TODO strip before or after?
+ */
+bool isNonNegativeInteger(const std::string str);
+
+/**
  * @brief Checks if a string is a positive integer.
  *
  * @param str String to check.
  * @return True if the string is a positive integer, else false (if any characters are not numbers).
+ * TODO strip before or after?
  */
-bool isPostiveInteger(std::string str);
+bool isPositiveInteger(const std::string str);
+
+/**
+ * @brief Checks if a string is of type Move. Does not check if the move is a valid or legal move. Only checks for valid
+ * start and end squares and valid promotion option (if present).
+ *
+ * @param str String to check.
+ * @return True if the string is of type Move. Else, false.
+ */
+bool isMove(const std::string str);
+
+/**
+ * @brief Check if the char is a valid rank character. i.e., one of '1', '2', '3', '4', '5', '6', '7', or '8'.
+ *
+ * @param c Char to check.
+ * @return True if valid. Else false.
+ */
+bool isRank(const char c);
+
+/**
+ * @brief Check if the char is a valid file character. i.e., one of 'a', 'b', 'c', 'd', 'e', 'f', 'g', or 'h'.
+ *
+ * @param c Char to check.
+ * @return True if valid. Else false.
+ */
+bool isFile(const char c);
+
+/**
+ * @brief Check if the char is a valid poromotion character. i.e., one of 'q', 'r', 'b', or 'n'.
+ *
+ * @param c Char to check.
+ * @return True, if valid. Else false.
+ */
+bool isPromotion(const char c);
+
+/**
+ * @brief Get the Move object from the string. Does not set the MoveClass bits (PROMOTION, CASTLING, or EN_PASSANT).
+ *
+ * @param str String of the move in algebraic notation.
+ * @return Move object.
+ */
+Move getMoveFromString(const std::string str);
 
 /**
  * @brief Prints the bitboard in white's view. LSB is a1 and 2nd LSB is h1. 9th LSB is a2 and so on.

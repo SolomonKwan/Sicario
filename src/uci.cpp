@@ -44,7 +44,7 @@ inline bool isValidPlayerType(std::string str) {
 }
 
 inline bool isValidElo(std::string str) {
-	return isPostiveInteger(str) || str == "none";
+	return isNonNegativeInteger(str) || str == "none";
 }
 
 void Sicario::processInput(const std::string& input) {
@@ -156,6 +156,78 @@ UciInput Sicario::hashCommandInput(const std::string& input) {
 	return INVALID_COMMAND;
 }
 
+SearchCommand Sicario::hashSearchCommand(const std::string& input) {
+	if (input == "searchmoves") return GO_SEARCHMOVES;
+	if (input == "ponder") return GO_PONDER;
+	if (input == "infinite") return GO_INFINITE;
+	if (input == "wtime") return GO_WTIME;
+	if (input == "btime") return GO_BTIME;
+	if (input == "winc") return GO_WINC;
+	if (input == "binc") return GO_BINC;
+	if (input == "movestogo") return GO_MOVESTOGO;
+	if (input == "depth") return GO_DEPTH;
+	if (input == "nodes") return GO_NODES;
+	if (input == "mate") return GO_MATE;
+	if (input == "movetime") return GO_MOVETIME;
+
+	return INVALID_SEARCH_PARAM;
+}
+
+// NOTE maybe just do this the straightforward and long-winded way. would be more clear at least.
+void Sicario::parseSearchParams(const std::vector<std::string>& inputs) {
+	this->searchParams.reset(); // Default to not ponder.
+
+	for (auto it = inputs.begin(); it != inputs.end(); it++) {
+		SearchCommand comm = hashSearchCommand(*it);
+		if (comm == INVALID_SEARCH_PARAM) {
+			continue;
+		} else if (comm == GO_PONDER) {
+			this->searchParams.ponder = true;
+			continue;
+		} else if (comm == GO_INFINITE) {
+			this->searchParams.infinite = true;
+			continue;
+		} else if (it == inputs.end() - 1) {
+			continue;
+		} else if (comm == GO_SEARCHMOVES) {
+			for (auto move = it + 1; move != inputs.end() && !isMove(*move); move++)
+				this->searchParams.searchMoves.push_back(getMoveFromString(*move));
+			continue;
+		} else if ((comm == GO_WINC || comm == GO_BINC || comm == GO_MOVESTOGO) && !isPositiveInteger(*(it + 1))) {
+			sendInvalidValue(*(it + 1), *it + " must be a positive integer");
+			continue;
+		} else if (!isNonNegativeInteger(*(it + 1))) { // wtime, btime, depth, nodes, mate, or movetime
+			sendInvalidValue(*(it + 1), *it + " must be a non-negative integer");
+			continue;
+		}
+
+		int value = std::stoi(*(it + 1));
+		if (comm == GO_WTIME) {
+			this->searchParams.wtime = value;
+		} else if (comm == GO_BTIME) {
+			this->searchParams.btime = value;
+		} else if (comm == GO_WINC) {
+			this->searchParams.winc = value;
+		} else if (comm == GO_BINC) {
+			this->searchParams.binc = value;
+		} else if (comm == GO_MOVESTOGO) {
+			this->searchParams.movesToGo = value;
+		} else if (comm == GO_DEPTH) {
+			this->searchParams.depth = value;
+		} else if (comm == GO_NODES) {
+			this->searchParams.nodes = value;
+		} else if (comm == GO_MATE) {
+			this->searchParams.mate = value;
+		} else if (comm == GO_MOVETIME) {
+			this->searchParams.moveTime = value;
+		}
+
+		if (this->searchParams.movesToGo == -1 && this->searchParams.wtime >= 0 && this->searchParams.btime >= 0) {
+			this->searchParams.suddenDeath = true;
+		}
+	}
+}
+
 void Sicario::handleUci() {
 	// ID information
 	Uci::communicate("id name " + NAME + " (" + CODENAME + " " + VERSION + ")");
@@ -229,6 +301,7 @@ void Sicario::handlePosition(const std::vector<std::string>& inputs) {
 }
 
 void Sicario::handleGo(const std::vector<std::string>& inputs) {
+	this->parseSearchParams(inputs);
 	if (this->searchTree == false) {
 		this->searchTree = true;
 		this->threads.push_back(std::thread(&Sicario::search, this));

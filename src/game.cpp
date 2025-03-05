@@ -1585,32 +1585,16 @@ void Position::decrementPositionCounter(const Hash hash) {
 }
 
 Move Position::getMovefromAlgebraic(const std::string& string) const {
-	if (string[0] < 'a' || string[0] > 'h' || string[2] < 'a' || string[2] > 'h') return NULL_MOVE;
-	if (string[1] < '1' || string[1] > '8' || string[3] < '1' || string[3] > '8') return NULL_MOVE;
-	if (string.size() < 4 || string.size() > 5) return NULL_MOVE;
+	Move move;
+	if ((move = getMoveFromString(string)) == NULL_MOVE)
+		return NULL_MOVE;
 
-	// Get rank and file of move.
-	Move move = 0;
 	int start_file = string[0] - 'a';
 	int start_rank = string[1] - '1';
-	Square start = static_cast<Square>(RANK_COUNT * start_rank + start_file);
 	int end_file = string[2] - 'a';
 	int end_rank = string[3] - '1';
+	Square start = static_cast<Square>(RANK_COUNT * start_rank + start_file);
 	Square end = static_cast<Square>(RANK_COUNT * end_rank + end_file);
-	move |= (start | end << DEST_SHIFT);
-
-	// Check if promotion move.
-	if (string.length() == 5) {
-		move |= PROMOTION;
-		if (string[4] == 'q')
-			move |= pQUEEN;
-		else if (string[4] == 'r')
-			move |= pROOK;
-		else if (string[4] == 'b')
-			move |= pBISHOP;
-		else
-			move |= pKNIGHT;
-	}
 
 	// Check if en passant move.
 	bool pawnMove = this->pieces[start] == W_PAWN || this->pieces[start] == B_PAWN;

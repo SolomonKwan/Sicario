@@ -1,6 +1,9 @@
 # Information
 This file is just for me to document project development information. Purely for my own information.
 
+<strong>Potential Considerations</strong>
+- Precompute and store all the moves as integers at compile time?
+
 <strong>Upcoming release</strong>
 </br>
 v0.9.0
@@ -9,29 +12,29 @@ v0.9.0
 - Complete UCI communication
 
 <strong>GUI to Engine Communications</strong>
-- [ - ] uci
-- [ - ] debug
-- [ - ] isready
-- [ - ] setoption
-- [ - ] register
-- [ - ] ucinewgame
-- [ - ] position
-- [ - ] go
-    - [ - ] searchmoves
-    - [ - ] ponder
-    - [ - ] wtime
-    - [ - ] btime
-    - [ - ] winc
-    - [ - ] binc
-    - [ - ] movestogo
-    - [ - ] depth
-    - [ - ] nodes
-    - [ - ] mate
-    - [ - ] movetime
-    - [ - ] infinite
-- [ - ] stop
+- [ x ] uci
+- [ x ] debug
+- [ x ] isready
+- [ x ] setoption
+- [ ? ] register
+- [ x ] ucinewgame
+- [ x ] position
+- [ x ] go
+    - [ x ] searchmoves
+    - [ x ] ponder
+    - [ x ] wtime
+    - [ x ] btime
+    - [ x ] winc
+    - [ x ] binc
+    - [ x ] movestogo
+    - [ x ] depth
+    - [ x ] nodes
+    - [ x ] mate
+    - [ x ] movetime
+    - [ x ] infinite
+- [ x ] stop
 - [ - ] ponderhit
-- [ - ] quit
+- [ x ] quit
 
 <strong>Engine to GUI Communications</strong>
 - [ - ] id

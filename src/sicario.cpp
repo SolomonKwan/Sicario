@@ -94,3 +94,19 @@ uint64_t Sicario::perft(const int depth, const bool root) {
 
 	return nodes;
 }
+
+void SearchParams::reset() {
+	this->searchMoves.clear();
+	this->ponder = false;
+	this->wtime = -1;
+	this->btime = -1;
+	this->winc = -1;
+	this->binc = -1;
+	this->movesToGo = -1;
+	this->depth = -1;
+	this->nodes = -1;
+	this->mate = -1;
+	this->moveTime = -1;
+	this->infinite = false;
+	this->suddenDeath = false;
+}

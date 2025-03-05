@@ -28,11 +28,74 @@ std::string concat(const std::vector<std::string> strings, const std::string del
 	return combinedStr;
 }
 
-bool isPostiveInteger(const std::string str) {
+bool isNonNegativeInteger(const std::string str) {
 	for (char c : str) {
 		if (!std::isdigit(c)) return false;
 	}
 	return true;
+}
+
+bool isPositiveInteger(const std::string str) {
+	for (char c : str) {
+		if (!std::isdigit(c)) return false;
+	}
+	return true && str != "0";
+}
+
+bool isMove(const std::string str) {
+	if (str.length() != 4 && str.length() != 5)
+		return false;
+
+	if (!isFile(str[0]) || !isRank(str[1]) || !isFile(str[2] || !isRank(str[3])))
+		return false;
+
+	if (str.length() == 5 && !isPromotion(str[4]))
+		return false;
+
+	return true;
+}
+
+bool isRank(const char c) {
+	return c == '1' || c == '2' || c == '3' || c == '4' || c == '5' || c == '6' || c == '7' || c == '8';
+}
+
+bool isFile(const char c) {
+	return c == 'a' || c == 'b' || c == 'c' || c == 'd' || c == 'e' || c == 'f' || c == 'g' || c == 'h';
+}
+
+bool isPromotion(const char c) {
+	return c == 'q' || c == 'r' || c == 'b' || 'n';
+}
+
+Move getMoveFromString(const std::string str) {
+	if (str[0] < 'a' || str[0] > 'h' || str[2] < 'a' || str[2] > 'h') return NULL_MOVE;
+	if (str[1] < '1' || str[1] > '8' || str[3] < '1' || str[3] > '8') return NULL_MOVE;
+	if (str.size() < 4 || str.size() > 5) return NULL_MOVE;
+
+	// Get rank and file of move.
+	Move move = 0;
+	int start_file = str[0] - 'a';
+	int start_rank = str[1] - '1';
+	Square start = static_cast<Square>(RANK_COUNT * start_rank + start_file);
+	int end_file = str[2] - 'a';
+	int end_rank = str[3] - '1';
+	Square end = static_cast<Square>(RANK_COUNT * end_rank + end_file);
+	move |= (start | end << DEST_SHIFT);
+
+	// Check if promotion move.
+	if (str.length() == 5) {
+		move |= PROMOTION;
+		if (str[4] == 'q')
+			move |= pQUEEN;
+		else if (str[4] == 'r')
+			move |= pROOK;
+		else if (str[4] == 'b')
+			move |= pBISHOP;
+		else
+			move |= pKNIGHT;
+	}
+
+	return move;
 }
 
 void displayBB(const uint64_t position) {
