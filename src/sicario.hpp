@@ -26,7 +26,7 @@ struct SicarioConfigs {
 };
 
 struct SearchParams {
-	std::vector<Move> searchMoves; // Need to check for en passant and castling separately against a Position. TODO could do a search on parsing and only add if valid.
+	std::vector<Move> searchMoves; // Need to check for en passant and castling separately against a Position.
 	bool ponder = false;
 	int wtime = -1;
 	int btime = -1;

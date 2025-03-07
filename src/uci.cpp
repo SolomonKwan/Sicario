@@ -311,8 +311,11 @@ void Sicario::handlePosition(const std::vector<std::string>& inputs) {
 
 	auto ptr = std::find(inputs.begin(), inputs.end(), "moves");
 	if (ptr == inputs.end()) return;
+
+	MoveList moves = MoveList(this->position);
 	while (++ptr != inputs.end()) {
-		this->position.makeMove(this->getPosition().getPositionMove(*ptr)); // TODO check if move is valid
+		if (moves.contains(this->position.getPositionMove(*ptr)))
+			this->position.makeMove(this->getPosition().getPositionMove(*ptr));
 	}
 }
 
