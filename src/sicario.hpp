@@ -93,19 +93,107 @@ class Sicario {
 		UciInput hashCommandInput(const std::string& input);
 
 		/**
-		 * @brief Hash the input string from the GUI.
-		 *
-		 * @param input Input from the GUI.
-		 * @return Type of the input string.
-		 */
-		SearchCommand hashSearchCommand(const std::string& input);
-
-		/**
 		 * @brief Parse the parameters of the search.
 		 *
 		 * @param inputs Entire input given to the GUI.
 		 */
-		void parseSearchParams(const std::vector<std::string>& inputs);
+		void parseGo(const std::vector<std::string>& inputs);
+
+		/**
+		 * @brief Parse the searchmoves sub-command of the go command.
+		 *
+		 * @param index Index of the searchmoves sub-command in the inputs vector.
+		 * @param inputs Vector of inputs from the GUI.
+		 */
+		void parseSearchmoves(int index, const std::vector<std::string>& inputs);
+
+		/**
+		 * @brief Parse the ponder sub-command of the go command.
+		 *
+		 * @param index Index of the ponder sub-command in the inputs vector.
+		 * @param inputs Vector of inputs from the GUI.
+		 */
+		void parsePonder(int index, const std::vector<std::string>& inputs);
+
+		/**
+		 * @brief Parse the wtime sub-command of the go command.
+		 *
+		 * @param index Index of the wtime sub-command in the inputs vector.
+		 * @param inputs Vector of inputs from the GUI.
+		 */
+		void parseWtime(int index, const std::vector<std::string>& inputs);
+
+		/**
+		 * @brief Parse the btime sub-command of the go command.
+		 *
+		 * @param index Index of the btime sub-command in the inputs vector.
+		 * @param inputs Vector of inputs from the GUI.
+		 */
+		void parseBtime(int index, const std::vector<std::string>& inputs);
+
+		/**
+		 * @brief Parse the winc sub-command of the go command.
+		 *
+		 * @param index Index of the winc sub-command in the inputs vector.
+		 * @param inputs Vector of inputs from the GUI.
+		 */
+		void parseWinc(int index, const std::vector<std::string>& inputs);
+
+		/**
+		 * @brief Parse the binc sub-command of the go command.
+		 *
+		 * @param index Index of the binc sub-command in the inputs vector.
+		 * @param inputs Vector of inputs from the GUI.
+		 */
+		void parseBinc(int index, const std::vector<std::string>& inputs);
+
+		/**
+		 * @brief Parse the movestogo sub-command of the go command.
+		 *
+		 * @param index Index of the movestogo sub-command in the inputs vector.
+		 * @param inputs Vector of inputs from the GUI.
+		 */
+		void parseMovestogo(int index, const std::vector<std::string>& inputs);
+
+		/**
+		 * @brief Parse the depth sub-command of the go command.
+		 *
+		 * @param index Index of the depth sub-command in the inputs vector.
+		 * @param inputs Vector of inputs from the GUI.
+		 */
+		void parseDepth(int index, const std::vector<std::string>& inputs);
+
+		/**
+		 * @brief Parse the nodes sub-command of the go command.
+		 *
+		 * @param index Index of the nodes sub-command in the inputs vector.
+		 * @param inputs Vector of inputs from the GUI.
+		 */
+		void parseNodes(int index, const std::vector<std::string>& inputs);
+
+		/**
+		 * @brief Parse the mate sub-command of the go command.
+		 *
+		 * @param index Index of the mate sub-command in the inputs vector.
+		 * @param inputs Vector of inputs from the GUI.
+		 */
+		void parseMate(int index, const std::vector<std::string>& inputs);
+
+		/**
+		 * @brief Parse the movetime sub-command of the go command.
+		 *
+		 * @param index Index of the movetime sub-command in the inputs vector.
+		 * @param inputs Vector of inputs from the GUI.
+		 */
+		void parseMovetime(int index, const std::vector<std::string>& inputs);
+
+		/**
+		 * @brief Parse the infinite sub-command of the go command.
+		 *
+		 * @param index Index of the infinite sub-command in the inputs vector.
+		 * @param inputs Vector of inputs from the GUI.
+		 */
+		void parseInfinite(int index, const std::vector<std::string>& inputs);
 
 		/**
 		 * @brief Handle the uci command.

@@ -224,24 +224,6 @@ enum ConfigOption {
 	CONFIGS_COUNT,
 };
 
-enum SearchCommand {
-	GO_SEARCHMOVES,
-	GO_PONDER,
-	GO_INFINITE,
-	GO_WTIME,
-	GO_BTIME,
-	GO_WINC,
-	GO_BINC,
-	GO_MOVESTOGO,
-	GO_DEPTH,
-	GO_NODES,
-	GO_MATE,
-	GO_MOVETIME,
-
-	// Sentinel for invalid go commands
-	INVALID_SEARCH_PARAM
-};
-
 inline Square operator+(const Square& square, const Direction& direction) {
 	return static_cast<Square>(static_cast<uint>(square) + static_cast<uint>(direction));
 }

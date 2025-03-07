@@ -156,76 +156,96 @@ UciInput Sicario::hashCommandInput(const std::string& input) {
 	return INVALID_COMMAND;
 }
 
-SearchCommand Sicario::hashSearchCommand(const std::string& input) {
-	if (input == "searchmoves") return GO_SEARCHMOVES;
-	if (input == "ponder") return GO_PONDER;
-	if (input == "infinite") return GO_INFINITE;
-	if (input == "wtime") return GO_WTIME;
-	if (input == "btime") return GO_BTIME;
-	if (input == "winc") return GO_WINC;
-	if (input == "binc") return GO_BINC;
-	if (input == "movestogo") return GO_MOVESTOGO;
-	if (input == "depth") return GO_DEPTH;
-	if (input == "nodes") return GO_NODES;
-	if (input == "mate") return GO_MATE;
-	if (input == "movetime") return GO_MOVETIME;
+void Sicario::parseGo(const std::vector<std::string>& inputs) {
+	this->searchParams.reset();
 
-	return INVALID_SEARCH_PARAM;
+	for (int index = 0; static_cast<size_t>(index) < inputs.size(); index++) {
+		if (inputs[index] == "searchmoves") parseSearchmoves(index, inputs);
+		else if (inputs[index] == "ponder") parsePonder(index, inputs);
+		else if (inputs[index] == "wtime") parseWtime(index, inputs);
+		else if (inputs[index] == "btime") parseBtime(index, inputs);
+		else if (inputs[index] == "winc") parseWinc(index, inputs);
+		else if (inputs[index] == "binc") parseBinc(index, inputs);
+		else if (inputs[index] == "movestogo") parseMovestogo(index, inputs);
+		else if (inputs[index] == "depth") parseDepth(index, inputs);
+		else if (inputs[index] == "nodes") parseNodes(index, inputs);
+		else if (inputs[index] == "mate") parseMate(index, inputs);
+		else if (inputs[index] == "movetime") parseMovetime(index, inputs);
+		else if (inputs[index] == "infinite") parseInfinite(index, inputs);
+	}
+
+	if (this->searchParams.movesToGo == -1 && this->searchParams.wtime >= 0 && this->searchParams.btime >= 0) {
+		this->searchParams.suddenDeath = true;
+	}
 }
 
-// NOTE maybe just do this the straightforward and long-winded way. would be more clear at least.
-void Sicario::parseSearchParams(const std::vector<std::string>& inputs) {
-	this->searchParams.reset(); // Reset the search parameters.
+void Sicario::parseSearchmoves(int index, const std::vector<std::string>& inputs) {
+	MoveList moves = MoveList(this->position);
+	for (auto moveIndex = index + 1; static_cast<size_t>(moveIndex) < inputs.size(); moveIndex++)
+		if (moves.contains(this->position.getPositionMove(inputs[moveIndex])))
+			this->searchParams.searchMoves.push_back(getMove(inputs[moveIndex]));
+}
 
-	for (auto it = inputs.begin(); it != inputs.end(); it++) {
-		SearchCommand comm = hashSearchCommand(*it);
-		if (comm == INVALID_SEARCH_PARAM) {
-			continue;
-		} else if (comm == GO_PONDER) {
-			this->searchParams.ponder = true;
-			continue;
-		} else if (comm == GO_INFINITE) {
-			this->searchParams.infinite = true;
-			continue;
-		} else if (it == inputs.end() - 1) {
-			continue;
-		} else if (comm == GO_SEARCHMOVES) {
-			for (auto move = it + 1; move != inputs.end() && !isMove(*move); move++)
-				this->searchParams.searchMoves.push_back(getMove(*move)); // TODO could do a check against an existing position here.
-			continue;
-		} else if ((comm == GO_WINC || comm == GO_BINC || comm == GO_MOVESTOGO) && !isPositiveInteger(*(it + 1))) {
-			sendInvalidValue(*(it + 1), *it + " must be a positive integer");
-			continue;
-		} else if (!isNonNegativeInteger(*(it + 1))) { // wtime, btime, depth, nodes, mate, or movetime
-			sendInvalidValue(*(it + 1), *it + " must be a non-negative integer");
-			continue;
-		}
+void Sicario::parsePonder(int index, const std::vector<std::string>& inputs) {
+	this->searchParams.ponder = true;
+}
 
-		int value = std::stoi(*(it + 1));
-		if (comm == GO_WTIME) {
-			this->searchParams.wtime = value;
-		} else if (comm == GO_BTIME) {
-			this->searchParams.btime = value;
-		} else if (comm == GO_WINC) {
-			this->searchParams.winc = value;
-		} else if (comm == GO_BINC) {
-			this->searchParams.binc = value;
-		} else if (comm == GO_MOVESTOGO) {
-			this->searchParams.movesToGo = value;
-		} else if (comm == GO_DEPTH) {
-			this->searchParams.depth = value;
-		} else if (comm == GO_NODES) {
-			this->searchParams.nodes = value;
-		} else if (comm == GO_MATE) {
-			this->searchParams.mate = value;
-		} else if (comm == GO_MOVETIME) {
-			this->searchParams.moveTime = value;
-		}
+void Sicario::parseWtime(int index, const std::vector<std::string>& inputs) {
+	if (static_cast<size_t>(index + 1) >= inputs.size() || !isNonNegativeInteger(inputs[index + 1]))
+		return;
+	this->searchParams.wtime = std::stoi(inputs[index + 1]);
+}
 
-		if (this->searchParams.movesToGo == -1 && this->searchParams.wtime >= 0 && this->searchParams.btime >= 0) {
-			this->searchParams.suddenDeath = true;
-		}
-	}
+void Sicario::parseBtime(int index, const std::vector<std::string>& inputs) {
+	if (static_cast<size_t>(index + 1) >= inputs.size() || !isNonNegativeInteger(inputs[index + 1]))
+		return;
+	this->searchParams.btime = std::stoi(inputs[index + 1]);
+}
+
+void Sicario::parseWinc(int index, const std::vector<std::string>& inputs) {
+	if (static_cast<size_t>(index + 1) >= inputs.size() || !isPositiveInteger(inputs[index + 1]))
+		return;
+	this->searchParams.winc = std::stoi(inputs[index + 1]);
+}
+
+void Sicario::parseBinc(int index, const std::vector<std::string>& inputs) {
+	if (static_cast<size_t>(index + 1) >= inputs.size() || !isPositiveInteger(inputs[index + 1]))
+		return;
+	this->searchParams.binc = std::stoi(inputs[index + 1]);
+}
+
+void Sicario::parseMovestogo(int index, const std::vector<std::string>& inputs) {
+	if (static_cast<size_t>(index + 1) >= inputs.size() || !isPositiveInteger(inputs[index + 1]))
+		return;
+	this->searchParams.movesToGo = std::stoi(inputs[index + 1]);
+}
+
+void Sicario::parseDepth(int index, const std::vector<std::string>& inputs) {
+	if (static_cast<size_t>(index + 1) >= inputs.size() || !isNonNegativeInteger(inputs[index + 1]))
+		return;
+	this->searchParams.depth = std::stoi(inputs[index + 1]);
+}
+
+void Sicario::parseNodes(int index, const std::vector<std::string>& inputs) {
+	if (static_cast<size_t>(index + 1) >= inputs.size() || !isNonNegativeInteger(inputs[index + 1]))
+		return;
+	this->searchParams.nodes = std::stoi(inputs[index + 1]);
+}
+
+void Sicario::parseMate(int index, const std::vector<std::string>& inputs) {
+	if (static_cast<size_t>(index + 1) >= inputs.size() || !isNonNegativeInteger(inputs[index + 1]))
+		return;
+	this->searchParams.mate = std::stoi(inputs[index + 1]);
+}
+
+void Sicario::parseMovetime(int index, const std::vector<std::string>& inputs) {
+	if (static_cast<size_t>(index + 1) >= inputs.size() || !isNonNegativeInteger(inputs[index + 1]))
+		return;
+	this->searchParams.moveTime = std::stoi(inputs[index + 1]);
+}
+
+void Sicario::parseInfinite(int index, const std::vector<std::string>& inputs) {
+	this->searchParams.infinite = true;
 }
 
 void Sicario::handleUci() {
@@ -297,7 +317,7 @@ void Sicario::handlePosition(const std::vector<std::string>& inputs) {
 }
 
 void Sicario::handleGo(const std::vector<std::string>& inputs) {
-	this->parseSearchParams(inputs);
+	this->parseGo(inputs);
 	if (this->searchTree == false) {
 		this->searchTree = true;
 		this->threads.push_back(std::thread(&Sicario::search, this));

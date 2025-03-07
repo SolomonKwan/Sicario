@@ -46,7 +46,7 @@ bool isMove(const std::string str) {
 	if (str.length() != 4 && str.length() != 5)
 		return false;
 
-	if (!isFile(str[0]) || !isRank(str[1]) || !isFile(str[2] || !isRank(str[3])))
+	if (!isFile(str[0]) || !isRank(str[1]) || !isFile(str[2]) || !isRank(str[3]))
 		return false;
 
 	if (str.length() == 5 && !isPromotion(str[4]))
