@@ -6,11 +6,21 @@
 
 namespace Uci {
 	/**
-	 * Print all UCI messages to stdout. Used to distinguish from other print commands.
+	 * Print UCI message to stdout. This method is used to distinguish from other non-UCI messages to stdout.
 	 *
-	 * @param communication: The communication message to be sent to Uci GUI.
+	 * @param message: The message to be sent to the UCI GUI.
 	 */
-	void communicate(const std::string communication);
+	void send(const std::string message);
+
+	/**
+	 * @brief Send the UCI "id" commands. Called upon receiving the "uci" command.
+	 */
+	void sendId();
+
+	/**
+	 * @brief Send the UCI "uciok" command.
+	 */
+	void sendUciok();
 
 	/**
 	 * @brief Send the readyOk message.
