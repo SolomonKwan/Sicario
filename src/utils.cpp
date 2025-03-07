@@ -67,37 +67,6 @@ bool isPromotion(const char c) {
 	return c == 'q' || c == 'r' || c == 'b' || 'n';
 }
 
-Move getMoveFromString(const std::string str) {
-	if (str[0] < 'a' || str[0] > 'h' || str[2] < 'a' || str[2] > 'h') return NULL_MOVE;
-	if (str[1] < '1' || str[1] > '8' || str[3] < '1' || str[3] > '8') return NULL_MOVE;
-	if (str.size() < 4 || str.size() > 5) return NULL_MOVE;
-
-	// Get rank and file of move.
-	Move move = 0;
-	int start_file = str[0] - 'a';
-	int start_rank = str[1] - '1';
-	Square start = static_cast<Square>(RANK_COUNT * start_rank + start_file);
-	int end_file = str[2] - 'a';
-	int end_rank = str[3] - '1';
-	Square end = static_cast<Square>(RANK_COUNT * end_rank + end_file);
-	move |= (start | end << DEST_SHIFT);
-
-	// Check if promotion move.
-	if (str.length() == 5) {
-		move |= PROMOTION;
-		if (str[4] == 'q')
-			move |= pQUEEN;
-		else if (str[4] == 'r')
-			move |= pROOK;
-		else if (str[4] == 'b')
-			move |= pBISHOP;
-		else
-			move |= pKNIGHT;
-	}
-
-	return move;
-}
-
 void displayBB(const uint64_t position) {
 	std::string positionString = std::bitset<SQUARE_COUNT>(position).to_string();
 	for (int i = 0; i < 8; i++) {
@@ -108,26 +77,47 @@ void displayBB(const uint64_t position) {
 	}
 }
 
-void printMove(const Move move, const bool extraInfo, const bool flush) {
-	if (extraInfo) {
-		std::cout << squareName[start(move)] << squareName[end(move)];
-		std::cout << " ";
-		std::cout << getTypeString(type(move)) << " " << getPromoString(promo(move));
-	} else if (type(move) == PROMOTION) {
-		std::cout << squareName[start(move)] << squareName[end(move)] << getPromoString(promo(move));
-	} else {
-		std::cout << squareName[start(move)] << squareName[end(move)];
+Move getMove(const std::string& moveStr) {  // TODO could combine this with the function below, getMovefromAlgebraic
+	if (moveStr[0] < 'a' || moveStr[0] > 'h' || moveStr[2] < 'a' || moveStr[2] > 'h') return NULL_MOVE;
+	if (moveStr[1] < '1' || moveStr[1] > '8' || moveStr[3] < '1' || moveStr[3] > '8') return NULL_MOVE;
+	if (moveStr.size() < 4 || moveStr.size() > 5) return NULL_MOVE;
+
+	// Get rank and file of move.
+	Move move = 0;
+	int start_file = moveStr[0] - 'a';
+	int start_rank = moveStr[1] - '1';
+	Square start = static_cast<Square>(RANK_COUNT * start_rank + start_file);
+	int end_file = moveStr[2] - 'a';
+	int end_rank = moveStr[3] - '1';
+	Square end = static_cast<Square>(RANK_COUNT * end_rank + end_file);
+	move |= (start | end << DEST_SHIFT);
+
+	// Check if promotion move.
+	if (moveStr.length() == 5) {
+		move |= PROMOTION;
+		if (moveStr[4] == 'q')
+			move |= pQUEEN;
+		else if (moveStr[4] == 'r')
+			move |= pROOK;
+		else if (moveStr[4] == 'b')
+			move |= pBISHOP;
+		else
+			move |= pKNIGHT;
 	}
 
-	if (flush) std::cout << '\n';
+	return move;
 }
 
-std::string getMoveString(Move move) {
-	if (type(move) == PROMOTION) {
-		return squareName[start(move)] + squareName[end(move)] + getPromoString(promo(move));
-	} else {
-		return squareName[start(move)] + squareName[end(move)];
-	}
+std::string getMove(const Move& move, bool moreInfo) {
+	std::string moveString = squareName[start(move)] + squareName[end(move)];
+
+	if (moreInfo)
+		return moveString + " " + getTypeString(type(move)) + " " + getPromoString(promo(move));
+
+	if (type(move) == PROMOTION)
+		moveString += getPromoString(promo(move));
+
+	return moveString;
 }
 
 std::string getPromoString(const Promotion promo) {

@@ -75,14 +75,6 @@ bool isFile(const char c);
 bool isPromotion(const char c);
 
 /**
- * @brief Get the Move object from the string. Does not set the MoveClass bits (PROMOTION, CASTLING, or EN_PASSANT).
- *
- * @param str String of the move in algebraic notation.
- * @return Move object.
- */
-Move getMoveFromString(const std::string str);
-
-/**
  * @brief Prints the bitboard in white's view. LSB is a1 and 2nd LSB is h1. 9th LSB is a2 and so on.
  *
  * @param position A bitboard.
@@ -170,20 +162,24 @@ inline File file(Square square) {
 }
 
 /**
- * @brief Print the move for debugging/development purposes.
+ * @brief Get the Move object from the string of the move in algebraic notation form. Note, this does not do any checks
+ * to see if the move is a castling or en passant move (and therefore does not mark any of the bits to represent this).
+ * It does, however, set the promotion move type and promotion piece if present in the string.
  *
- * @param move The move to print.
- * @param extraInfo Whether or not to print the extra information relating to the move type and promotion.
+ * @param move The move to convert to a Move object.
+ * @return Move object.
  */
-void printMove(Move move, bool extraInfo, bool flush = false);
+Move getMove(const std::string& move);
 
 /**
- * @brief Get the string representation of the move.
+ * @brief Get the string representation of the move in algebraic notation. If moreInfo is true, the format returned is
+ *
  *
  * @param move The move to convert to a string.
+ * @param moreInfo Whether or not to print extra information about the move type and promotion.
  * @return String representation of the move.
  */
-std::string getMoveString(Move move);
+std::string getMove(const Move& move, bool moreInfo = false);
 
 /**
  * @brief Get the promotion string.

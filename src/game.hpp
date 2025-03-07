@@ -189,12 +189,14 @@ class Position {
 		void clearData();
 
 		/**
-		 * @brief Convert a string in algebraic move format to a Move object and return it.
+		 * @brief Convert a string in algebraic move format to a Move object and return it. This conversion takes into
+		 * account en passant and castling moves. Does not check if the move
+		 * is valid.
 		 *
 		 * @param string Move string in algebraic notation.
 		 * @return Move object.
 		 */
-		Move getMovefromAlgebraic(const std::string& string) const;
+		Move getPositionMove(const std::string& string) const;
 
 	private:
 		// Non-position information

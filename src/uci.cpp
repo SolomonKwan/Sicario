@@ -191,7 +191,7 @@ void Sicario::parseSearchParams(const std::vector<std::string>& inputs) {
 			continue;
 		} else if (comm == GO_SEARCHMOVES) {
 			for (auto move = it + 1; move != inputs.end() && !isMove(*move); move++)
-				this->searchParams.searchMoves.push_back(getMoveFromString(*move));
+				this->searchParams.searchMoves.push_back(getMove(*move)); // TODO could do a check against an existing position here.
 			continue;
 		} else if ((comm == GO_WINC || comm == GO_BINC || comm == GO_MOVESTOGO) && !isPositiveInteger(*(it + 1))) {
 			sendInvalidValue(*(it + 1), *it + " must be a positive integer");
@@ -292,7 +292,7 @@ void Sicario::handlePosition(const std::vector<std::string>& inputs) {
 	auto ptr = std::find(inputs.begin(), inputs.end(), "moves");
 	if (ptr == inputs.end()) return;
 	while (++ptr != inputs.end()) {
-		this->position.makeMove(this->getPosition().getMovefromAlgebraic(*ptr));
+		this->position.makeMove(this->getPosition().getPositionMove(*ptr)); // TODO check if move is valid
 	}
 }
 
@@ -334,15 +334,15 @@ void Sicario::handlePerft(const std::vector<std::string>& inputs) {
 }
 
 void Sicario::handleMove(const std::vector<std::string>& inputs) {
-	Move move = this->getPosition().getMovefromAlgebraic(inputs[1]);
+	Move move = this->getPosition().getPositionMove(inputs[1]);
 	if (move == NULL_MOVE) {
-		Uci::send("Invalid move: " + move);
+		Uci::send("Invalid move: " + move); // TODO dont use uci::send and check all uci::send
 		return;
 	}
 
 	MoveList moves = MoveList(this->position);
 	if (!moves.contains(move)) {
-		Uci::send("Invalid move");
+		Uci::send("Invalid move"); // TODO dont use uci::send and check all uci::send
 		return;
 	}
 
@@ -360,10 +360,8 @@ void Sicario::handleDisplay() {
 void Sicario::handleMoves() {
 	MoveList moves = MoveList(this->position);
 	std::cout << "There are " << moves.size() << " moves" << '\n';
-	for (Move move : moves) {
-		printMove(move, true);
-		std::cout << '\n';
-	}
+	for (Move move : moves)
+		std::cout << getMove(move, true) << '\n';
 }
 
 void Sicario::handleBitboards() {
@@ -427,7 +425,7 @@ void Sicario::handleData() {
 	// Print the move history.
 	const std::vector<History>& historyVec = this->getPosition().getHistory();
 	for (const History& history : historyVec) {
-		printMove(history.move, false);
+		std::cout << getMove(history.move);
 		if (&history != &historyVec.back()) std::cout << ' ';
 	}
 	std::cout << '\n';
@@ -475,16 +473,14 @@ void Uci::sendBestMove(MctsNode* root, bool debugMode) {
 
 	// Bestmove
 	MctsNode* bestChild = root->bestChild();
-	std::cout << "bestmove ";
-	printMove(bestChild->getInEdge(), false, false);
+	std::string message = "bestmove " + getMove(bestChild->getInEdge());
 
 	// Pondermove
 	MctsNode* ponderNode = bestChild->bestChild();
-	if (ponderNode != nullptr) {
-		std::cout << " ponder ";
-		printMove(ponderNode->getInEdge(), false, false);
-	}
-	std::cout << '\n';
+	if (ponderNode != nullptr)
+		message += " ponder " + getMove(ponderNode->getInEdge());
+
+	Uci::send(message);
 
 	if (!debugMode) return;
 
@@ -494,7 +490,7 @@ void Uci::sendBestMove(MctsNode* root, bool debugMode) {
 	std::vector<size_t> ucbRanks = rankSort(ucb1Values);
 
 	for (auto child : root->getChildren()) {
-		printMove(child->getInEdge(), true);
+		std::cout << getMove(child->getInEdge(), true);
 		std::cout << "\tValue: " << child->getValue();
 		std::cout << "\tVisits: " << child->getVisits();
 		std::cout << "\tUCB1: " << ucb1Values.front();
@@ -565,7 +561,7 @@ void Info::pv(MctsNode* root, int pvLine) {
 	Info::send("pv");
 	MctsNode* curr = root->bestChildPv(pvLine);
 	while (curr != nullptr) {
-		Info::send(getMoveString(curr->getInEdge()));
+		Info::send(getMove(curr->getInEdge()));
 		curr = curr->bestChild();
 	}
 }
@@ -591,7 +587,7 @@ void Info::score(MctsNode* root) {
 }
 
 void Info::currMove(SearchInfo& searchInfo, MctsNode* root) {
-	Info::send("currmove " + getMoveString(searchInfo.getCurrMove()));
+	Info::send("currmove " + getMove(searchInfo.getCurrMove()));
 }
 
 void Info::nps(SearchInfo& searchInfo) {

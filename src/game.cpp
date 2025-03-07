@@ -1584,9 +1584,9 @@ void Position::decrementPositionCounter(const Hash hash) {
 	}
 }
 
-Move Position::getMovefromAlgebraic(const std::string& string) const {
-	Move move;
-	if ((move = getMoveFromString(string)) == NULL_MOVE)
+Move Position::getPositionMove(const std::string& string) const {
+	Move move = getMove(string);
+	if (move == NULL_MOVE)
 		return NULL_MOVE;
 
 	int start_file = string[0] - 'a';

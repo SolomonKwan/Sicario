@@ -86,10 +86,8 @@ uint64_t Sicario::perft(const int depth, const bool root) {
 			nodes += current_node_count;
 		}
 
-		if (root) {
-			printMove(move, false);
-			std::cout << ": " << current_node_count << '\n';
-		}
+		if (root)
+			std::cout << getMove(move) << ": " << current_node_count << '\n';
 	}
 
 	return nodes;
