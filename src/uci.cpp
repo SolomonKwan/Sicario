@@ -175,7 +175,7 @@ SearchCommand Sicario::hashSearchCommand(const std::string& input) {
 
 // NOTE maybe just do this the straightforward and long-winded way. would be more clear at least.
 void Sicario::parseSearchParams(const std::vector<std::string>& inputs) {
-	this->searchParams.reset(); // Default to not ponder.
+	this->searchParams.reset(); // Reset the search parameters.
 
 	for (auto it = inputs.begin(); it != inputs.end(); it++) {
 		SearchCommand comm = hashSearchCommand(*it);
@@ -336,13 +336,13 @@ void Sicario::handlePerft(const std::vector<std::string>& inputs) {
 void Sicario::handleMove(const std::vector<std::string>& inputs) {
 	Move move = this->getPosition().getPositionMove(inputs[1]);
 	if (move == NULL_MOVE) {
-		Uci::send("Invalid move: " + move); // TODO dont use uci::send and check all uci::send
+		std::cerr << "Invalid move: " + inputs[1] << '\n';
 		return;
 	}
 
 	MoveList moves = MoveList(this->position);
 	if (!moves.contains(move)) {
-		Uci::send("Invalid move"); // TODO dont use uci::send and check all uci::send
+		std::cerr << "Invalid move: " + inputs[1]  << '\n';
 		return;
 	}
 
@@ -510,14 +510,15 @@ void Uci::sendRegistration() {
 
 void Uci::sendInfo(SearchInfo& searchInfo, MctsNode* root, const SicarioConfigs& sicarioConfigs) {
 	for (int pvLine = 1; pvLine <= std::stoi(sicarioConfigs.options[MULTI_PV].value); pvLine++) {
-		Info::info();
-		Info::depth(searchInfo);
-		Info::nodes(searchInfo);
-		Info::pv(root, pvLine);
-		Info::multiPv(root, pvLine);
-		Info::score(root);
-		Info::currMove(searchInfo, root);
-		Info::nps(searchInfo);
+		std::string infoMessage = "info ";
+		infoMessage += Info::depth(searchInfo) + " ";
+		infoMessage += Info::nodes(searchInfo) + " ";
+		infoMessage += Info::pv(root, pvLine) + " ";
+		infoMessage += Info::multiPv(root, pvLine) + " ";
+		infoMessage += Info::score(root) + " ";
+		infoMessage += Info::currMove(searchInfo, root) + " ";
+		infoMessage += Info::nps(searchInfo);
+		Uci::send(infoMessage);
 	}
 
 	searchInfo.setLastMessage(std::chrono::high_resolution_clock::now());
@@ -541,40 +542,35 @@ void Uci::sendOption(const OptionInfo& option) {
 	Uci::send(optionString);
 }
 
-void Info::send(std::string string, char end) {
-	std::cout << string << end;
+std::string Info::depth(SearchInfo& searchInfo) {
+	return "depth " + std::to_string(searchInfo.getDepth());
 }
 
-void Info::info() {
-	Info::send("info");
+std::string Info::nodes(SearchInfo& searchInfo) {
+	return "nodes " + std::to_string(searchInfo.getNodes());
 }
 
-void Info::depth(SearchInfo& searchInfo) {
-	Info::send("depth " + std::to_string(searchInfo.getDepth()));
-}
-
-void Info::nodes(SearchInfo& searchInfo) {
-	Info::send("nodes " + std::to_string(searchInfo.getNodes()));
-}
-
-void Info::pv(MctsNode* root, int pvLine) {
-	Info::send("pv");
+std::string Info::pv(MctsNode* root, int pvLine) {
+	std::string pv = "pv ";
 	MctsNode* curr = root->bestChildPv(pvLine);
 	while (curr != nullptr) {
-		Info::send(getMove(curr->getInEdge()));
+		pv += getMove(curr->getInEdge());
 		curr = curr->bestChild();
+		if (curr != nullptr)
+			pv += " ";
 	}
+	return pv;
 }
 
-void Info::multiPv(MctsNode* root, int pvLine) {
-	if (pvLine > static_cast<int>(root->getChildren().size())) return;
-	Info::send("multipv " + std::to_string(pvLine));
+std::string Info::multiPv(MctsNode* root, int pvLine) {
+	if (pvLine > static_cast<int>(root->getChildren().size())) return "";
+	return "multipv " + std::to_string(pvLine);
 }
 
-void Info::score(MctsNode* root) {
-	Info::send("score");
+std::string Info::score(MctsNode* root) {
+	std::string scoreStr = "score ";
 	if (root->getMateDepth() != 0) {
-		Info::send("mate " + std::to_string(root->getMateDepth()));
+		scoreStr += "mate " + std::to_string(root->getMateDepth());
 	} else {
 		float score = 0;
 		for (auto child : root->getChildren()) {
@@ -582,43 +578,44 @@ void Info::score(MctsNode* root) {
 			if (childScore == std::numeric_limits<float>::max()) continue;
 			score += child->Ucb1();
 		}
-		Info::send(std::to_string(convertToCentipawn(score / root->getChildren().size())));
+		scoreStr += "cp " + std::to_string(convertToCentipawn(score / root->getChildren().size()));
 	}
+	return scoreStr;
 }
 
-void Info::currMove(SearchInfo& searchInfo, MctsNode* root) {
-	Info::send("currmove " + getMove(searchInfo.getCurrMove()));
+std::string Info::currMove(SearchInfo& searchInfo, MctsNode* root) {
+	return "currmove " + getMove(searchInfo.getCurrMove());
 }
 
-void Info::nps(SearchInfo& searchInfo) {
+std::string Info::nps(SearchInfo& searchInfo) {
 	auto end = std::chrono::high_resolution_clock::now();
 	float npms = searchInfo.getNodes() * 1000;
 	npms /= std::chrono::duration_cast<std::chrono::milliseconds>(end - searchInfo.getStart()).count();
-	Info::send("nps " + std::to_string(static_cast<uint>(npms)), '\n');
+	return "nps " + std::to_string(static_cast<uint>(npms));
 }
 
 void Sicario::sendInvalidCommand(const std::vector<std::string>& inputs, const std::string& customMsg) {
-	Uci::send("Unknown command: " + (customMsg == "" ? inputs[0] : customMsg));
+	std::cerr << "Unknown command: " + (customMsg == "" ? inputs[0] : customMsg) << '\n';
 }
 
 void Sicario::sendMissingArgument(const std::vector<std::string>& inputs, const std::string& customMsg) {
-	Uci::send("Missing argument: " + (customMsg == "" ? concat(inputs, " ") : customMsg));
+	std::cerr << "Missing argument: " + (customMsg == "" ? concat(inputs, " ") : customMsg) << '\n';
 }
 
 void Sicario::sendInvalidArgument(const std::string& value, const std::string& customMsg) {
-	Uci::send("Invalid argument: " + (customMsg == "" ? value : customMsg));
+	std::cerr << "Invalid argument: " + (customMsg == "" ? value : customMsg) << '\n';
 }
 
 void Sicario::sendUnknownOption(const std::string& option, const std::string& customMsg) {
-	Uci::send("Unknown option: " + (customMsg == "" ? option : customMsg));
+	std::cerr << "Unknown option: " + (customMsg == "" ? option : customMsg) << '\n';
 }
 
 void Sicario::sendInvalidValue(const std::string& value, const std::string& customMsg) {
-	Uci::send("Invalid argument: " + (customMsg == "" ? value : customMsg));
+	std::cerr << "Invalid argument: " + (customMsg == "" ? value : customMsg) << '\n';
 }
 
 void Sicario::sendArgumentOutOfRange(const std::string& value, const std::string& customMsg) {
-	Uci::send("Argument out of range: " + (customMsg == "" ? value : customMsg));
+	std::cerr << "Argument out of range: " + (customMsg == "" ? value : customMsg) << '\n';
 }
 
 void Sicario::setOptionThread(const std::string& value) {

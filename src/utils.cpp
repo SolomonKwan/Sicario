@@ -77,7 +77,7 @@ void displayBB(const uint64_t position) {
 	}
 }
 
-Move getMove(const std::string& moveStr) {  // TODO could combine this with the function below, getMovefromAlgebraic
+Move getMove(const std::string& moveStr) {
 	if (moveStr[0] < 'a' || moveStr[0] > 'h' || moveStr[2] < 'a' || moveStr[2] > 'h') return NULL_MOVE;
 	if (moveStr[1] < '1' || moveStr[1] > '8' || moveStr[3] < '1' || moveStr[3] > '8') return NULL_MOVE;
 	if (moveStr.size() < 4 || moveStr.size() > 5) return NULL_MOVE;
@@ -94,15 +94,17 @@ Move getMove(const std::string& moveStr) {  // TODO could combine this with the 
 
 	// Check if promotion move.
 	if (moveStr.length() == 5) {
-		move |= PROMOTION;
 		if (moveStr[4] == 'q')
 			move |= pQUEEN;
 		else if (moveStr[4] == 'r')
 			move |= pROOK;
 		else if (moveStr[4] == 'b')
 			move |= pBISHOP;
-		else
+		else if (moveStr[4] == 'n')
 			move |= pKNIGHT;
+		else
+			return NULL_MOVE;
+		move |= PROMOTION;
 	}
 
 	return move;

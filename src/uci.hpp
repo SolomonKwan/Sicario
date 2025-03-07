@@ -63,15 +63,13 @@ namespace Uci {
 }
 
 namespace Info {
-	void send(std::string string, char end = ' ');
-	void info();
-	void depth(SearchInfo& searchInfo);
-	void nodes(SearchInfo& searchInfo);
-	void pv(MctsNode* root, int pvLine);
-	void multiPv(MctsNode* root, int pvLine);
-	void score(MctsNode* root);
-	void currMove(SearchInfo& searchInfo, MctsNode* root);
-	void nps(SearchInfo& searchInfo);
+	std::string depth(SearchInfo& searchInfo);
+	std::string nodes(SearchInfo& searchInfo);
+	std::string pv(MctsNode* root, int pvLine);
+	std::string multiPv(MctsNode* root, int pvLine);
+	std::string score(MctsNode* root);
+	std::string currMove(SearchInfo& searchInfo, MctsNode* root);
+	std::string nps(SearchInfo& searchInfo);
 }
 
 /**

@@ -8,8 +8,13 @@ This file is just for me to document project development information. Purely for
 </br>
 v0.9.0
 
+<strong>Branches of interest</strong>
+- release/0.9.0
+- feature/uci
+
 <strong>Release goal</strong>
 - Complete UCI communication
+- Double check all writes to stdout/stderr and make sure that only UCI commands go to stdout
 
 <strong>GUI to Engine Communications</strong>
 - [ x ] uci

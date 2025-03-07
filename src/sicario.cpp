@@ -10,11 +10,7 @@ void showInfo(int argc, char* argv[]) {
 	if (argv[1] == std::string("-h") || argv[1] == std::string("--help")) {
 		std::cout << NAME << " (" << CODENAME << " " << VERSION << ")\n";
 		std::cout << "By " << AUTHOR << '\n';
-		std::cout << "Refer to README for more information on how to use." << '\n';
-		std::cout << "Acknowledgments:\n";
-		std::cout << "    " << CHESS_PROGRAMMING << '\n';
-		std::cout << "    " << STOCKFISH << '\n';
-		std::cout << "    " << BLUE_FEVER_SOFT << '\n';
+		std::cout << "Refer to README for more information." << '\n';
 		exit(0);
 	}
 }

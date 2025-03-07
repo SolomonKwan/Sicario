@@ -63,13 +63,9 @@ void Sicario::search() {
 
 bool Mcts::rootIsEOG() {
 	MoveList moves = MoveList(this->pos);
-	if (this->pos.isCheckmate(moves)) {
-		std::cout << "info depth 0 score mate 0" << '\n';
-		std::cout << "bestmove (none)" << '\n';
-		return true;
-	} else if (this->pos.isDrawStalemate(moves)) {
-		std::cout << "info depth 0 score cp 0" << '\n';
-		std::cout << "bestmove (none)" << '\n';
+	if (this->pos.isCheckmate(moves) || this->pos.isDrawStalemate(moves)) {
+		Uci::send("info depth 0 score cp 0 mate 0");
+		Uci::send("bestmove (none)");
 		return true;
 	}
 	return false;

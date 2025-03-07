@@ -28,7 +28,6 @@ std::string concat(std::vector<std::string> strings, std::string delimeter);
  *
  * @param str String to check.
  * @return True if the string is a non-negative integer, else false (if any characters are not numbers).
- * TODO strip before or after?
  */
 bool isNonNegativeInteger(const std::string str);
 
@@ -37,7 +36,6 @@ bool isNonNegativeInteger(const std::string str);
  *
  * @param str String to check.
  * @return True if the string is a positive integer, else false (if any characters are not numbers).
- * TODO strip before or after?
  */
 bool isPositiveInteger(const std::string str);
 
