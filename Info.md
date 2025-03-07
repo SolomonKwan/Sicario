@@ -33,18 +33,18 @@ v0.9.0
     - [ x ] movetime
     - [ x ] infinite
 - [ x ] stop
-- [ - ] ponderhit
+- [ x ] ponderhit
 - [ x ] quit
 
 <strong>Engine to GUI Communications</strong>
-- [ - ] id
-    - [ - ] name
-    - [ - ] author
-- [ - ] uciok
-- [ - ] readyok
-- [ - ] bestmove
-- [ - ] copyprotection
-- [ - ] registration
+- [ x ] id
+    - [ x ] name
+    - [ x ] author
+- [ x ] uciok
+- [ x ] readyok
+- [ x ] bestmove
+- [ ? ] copyprotection
+- [ ? ] registration
 - [ - ] info
     - [ - ] depth
     - [ - ] seldepth

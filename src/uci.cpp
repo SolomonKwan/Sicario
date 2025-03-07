@@ -313,7 +313,7 @@ void Sicario::handleStop() {
 }
 
 void Sicario::handlePonderHit() {
-	// TODO
+	this->searchParams.ponder = false;
 }
 
 void Sicario::handleQuit() {

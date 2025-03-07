@@ -8,6 +8,7 @@
 struct SetOptionPair;
 
 struct OptionInfo {
+	// TODO have these set as the types that they are meant to be. e.g., have a button type be set as a bool instead of a string
 	std::string name = "";
 	std::string type = "";
 	std::string def = "";
