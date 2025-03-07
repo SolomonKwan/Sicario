@@ -15,7 +15,8 @@ struct OptionInfo {
 	std::string min = "";
 	std::string max = "";
 	std::vector<std::string> vars = {};
-	std::string value;
+
+	std::string value; // The actual value that has been set for this option.
 };
 
 struct SicarioConfigs {

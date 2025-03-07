@@ -529,12 +529,19 @@ void Uci::sendInfo(SearchInfo& searchInfo, MctsNode* root, const SicarioConfigs&
 }
 
 void Uci::sendOption(const OptionInfo& option) {
-	std::string optionString = "option name " + option.name + " type " + option.type +
-			(option.def != "" ? " default " + option.def : "");
+	std::string optionString = "option name " + option.name;
+	optionString += " type " + option.type;
+	optionString += " default " + (option.def == "" ? "" : option.def);
+
 	if (option.min != "")
-		optionString += " min " + option.min + " max " + option.max;
+		optionString += " min " + option.min;
+
+	if (option.max != "")
+		optionString += " max " + option.max;
+
 	for (std::string var : option.vars)
 		optionString += " var " + var;
+
 	Uci::send(optionString);
 }
 
