@@ -50,16 +50,18 @@ namespace Uci {
 	 *
 	 * @param searchInfo Struct containing the search information.
 	 * @param root Pointer to the root node object.
-	 * @param sicarioConfigs Configurations for the engine.
+	 * @param options Configurations for the engine.
 	 */
-	void sendInfo(SearchInfo& searchInfo, MctsNode* root, const SicarioOptions& sicarioConfigs);
+	void sendInfo(SearchInfo& searchInfo, MctsNode* root, const Option& options);
 
 	/**
-	 * @brief Send the options that the user can set.
+	 * @brief Send the option message.
 	 *
-	 * @param option Struct containing the object information.
+	 * @tparam T Data type of the option parameter.
+	 * @param option OptionConfig object for the option.
 	 */
-	void sendOption(const OptionInfo& option);
+	template<typename T>
+	void sendOption(const OptionConfig<T>& option);
 }
 
 namespace Info {

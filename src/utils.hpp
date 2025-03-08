@@ -9,10 +9,10 @@
  * @brief Splits a string by a delimeter string and returns vector of results (tokens) without empty strings.
  *
  * @param input String to split.
- * @param delim String delimiter.
- * @return Vector of input split by delim ignoring empty strings.
+ * @param delimeter String delimiter.
+ * @return Vector of input split by delimeter ignoring empty strings.
  */
-std::vector<std::string> split(std::string input, std::string delim);
+std::vector<std::string> split(std::string input, std::string delimeter);
 
 /**
  * @brief Concatentate the vector of strings, split by delimeter.

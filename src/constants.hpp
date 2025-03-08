@@ -207,23 +207,6 @@ enum UciInput {
 	INVALID_COMMAND
 };
 
-enum ConfigOption {
-	THREAD,
-	HASH,
-	PONDER,
-	OWN_BOOK,
-	MULTI_PV,
-	UCI_SHOW_CURR_LINE,
-	UCI_SHOW_REFUTATIONS,
-	UCI_LIMIT_STRENGTH,
-	UCI_ELO,
-	UCI_ANALYSE_MODE,
-	UCI_OPPONENT,
-	CLEAR_HASH,
-
-	CONFIGS_COUNT,
-};
-
 inline Square operator+(const Square& square, const Direction& direction) {
 	return static_cast<Square>(static_cast<uint>(square) + static_cast<uint>(direction));
 }

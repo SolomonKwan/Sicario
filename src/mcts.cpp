@@ -56,7 +56,7 @@ bool SearchInfo::sendNextInfo() const {
 }
 
 void Sicario::search() {
-	Mcts searcher(this->getPosition(), this->searchTree, this->sicarioConfigs);
+	Mcts searcher(this->getPosition(), this->searchTree, this->options);
 	searcher.search();
 	this->searchTree = false;
 }
@@ -86,11 +86,11 @@ void Mcts::search() {
 		ExitCode code = leaf->simulate();
 		leaf->rollback(code);
 
-		if (searchInfo.sendNextInfo()) Uci::sendInfo(searchInfo, root.get(), this->sicarioConfigs);
+		if (searchInfo.sendNextInfo()) Uci::sendInfo(searchInfo, root.get(), this->options);
 	}
 
-	Uci::sendInfo(searchInfo, root.get(), this->sicarioConfigs); // Send final info command.
-	Uci::sendBestMove(root.get(), sicarioConfigs.debugMode);
+	Uci::sendInfo(searchInfo, root.get(), this->options); // Send final info command.
+	Uci::sendBestMove(root.get(), options.debugMode);
 }
 
 MctsNode* MctsNode::bestChild() {

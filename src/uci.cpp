@@ -250,8 +250,18 @@ void Sicario::parseInfinite(int index, const std::vector<std::string>& inputs) {
 
 void Sicario::handleUci() {
 	Uci::sendId();
-	for (int index = THREAD; index < CONFIGS_COUNT; index++)
-		Uci::sendOption(this->sicarioConfigs.options[index]);
+	Uci::sendOption(this->options.ThreadOption);
+	Uci::sendOption(this->options.HashOption);
+	Uci::sendOption(this->options.PonderOption);
+	Uci::sendOption(this->options.OwnBookOption);
+	Uci::sendOption(this->options.MultiPVOption);
+	Uci::sendOption(this->options.UCIShowCurrLineOption);
+	Uci::sendOption(this->options.UCIShowRefutationsOption);
+	Uci::sendOption(this->options.UCILimitStrengthOption);
+	Uci::sendOption(this->options.UCIEloOption);
+	Uci::sendOption(this->options.UCIAnalyseModeOption);
+	Uci::sendOption(this->options.UCIOpponentOption);
+	Uci::sendOption(this->options.ClearHashOption);
 	Uci::sendUciok();
 }
 
@@ -265,27 +275,27 @@ void Sicario::handleDebug(const std::vector<std::string>& inputs) {
 	} else if (inputs[1] != "on" && inputs[1] != "off") {
 		sendInvalidArgument(inputs[1]);
 	} else if (inputs.size() == 2 && inputs[1] == "on") {
-		this->sicarioConfigs.debugMode = true;
+		this->options.debugMode = true;
 	} else if (inputs.size() == 2 && inputs[1] == "off") {
-		this->sicarioConfigs.debugMode = false;
+		this->options.debugMode = false;
 	}
 }
 
 void Sicario::handleSetOption(const std::vector<std::string>& inputs) {
 	const auto[ name, value ] = getOptionNameAndValue(inputs);
 
-	if (name == "thread") return setOptionThread(value);
-	else if (name == "hash") return setOptionHash(value);
-	else if (name == "ponder") return setOptionPonder(value);
-	else if (name == "ownbook") return setOptionOwnBook(value);
-	else if (name == "multipv") return setOptionMultiPV(value);
-	else if (name == "uci_showcurrline") return setOptionUciShowCurrLine(value);
-	else if (name == "uci_showrefutations") return setOptionUciShowRefutations(value);
-	else if (name == "uci_limitstrength") return setOptionUciLimitStrength(value);
-	else if (name == "uci_elo") return setOptionUciElo(value);
-	else if (name == "uci_analysemode") return setOptionUciAnalyseMode(value);
-	else if (name == "uci_opponent") return setOptionUciOpponent(value);
-	else if (name == "clearhash") return setOptionClearHash();
+	if (name == "thread") return setSpinOption(this->options.ThreadOption, value);
+	else if (name == "hash") return setSpinOption(this->options.HashOption, value);
+	else if (name == "ponder") return setCheckOption(this->options.PonderOption, value);
+	else if (name == "ownbook") return setCheckOption(this->options.OwnBookOption, value);
+	else if (name == "multipv") return setSpinOption(this->options.MultiPVOption, value);
+	else if (name == "uci_showcurrline") return setCheckOption(this->options.UCIShowCurrLineOption, value);
+	else if (name == "uci_showrefutations") return setCheckOption(this->options.UCIShowRefutationsOption, value);
+	else if (name == "uci_limitstrength") return setCheckOption(this->options.UCILimitStrengthOption, value);
+	else if (name == "uci_elo") return setSpinOption(this->options.UCIEloOption, value);
+	else if (name == "uci_analysemode") return setCheckOption(this->options.UCIAnalyseModeOption, value);
+	else if (name == "uci_opponent") return setStringOption(this->options.UCIOpponentOption, value);
+	else if (name == "clearhash") return this->clearCache();
 	else {
 		std::cerr << "This should not be happening..." << '\n';
 		sendUnknownOption(name);
@@ -348,7 +358,7 @@ void Sicario::handlePerft(const std::vector<std::string>& inputs) {
 	auto finish = std::chrono::high_resolution_clock::now();
 	std::cout << "Nodes searched: " << totalNodes << '\n';
 
-	if (this->sicarioConfigs.debugMode) {
+	if (this->options.debugMode) {
 		std::cout << std::chrono::duration_cast<std::chrono::nanoseconds>(finish - start).count() << "ns\n";
 		std::cout << std::chrono::duration_cast<std::chrono::microseconds>(finish - start).count() << "μs\n";
 		std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(finish - start).count() << "ms\n";
@@ -377,7 +387,7 @@ void Sicario::handleUndo() {
 }
 
 void Sicario::handleDisplay() {
-	this->position.display(this->sicarioConfigs.letterMode);
+	this->position.display(this->options.letterMode);
 }
 
 void Sicario::handleMoves() {
@@ -435,13 +445,17 @@ void Sicario::handleState() {
 }
 
 void Sicario::handleOptions() {
-	for (int index = THREAD; index < CONFIGS_COUNT; index++) {
-		std::cout << sicarioConfigs.options[index].name;
-		if (sicarioConfigs.options[index].value != "")
-			std::cout << ' ' << sicarioConfigs.options[index].value << '\n';
-		else
-			std::cout << '\n';
-	}
+	std::cout << this->options.ThreadOption.toString() << '\n';
+	std::cout << this->options.HashOption.toString() << '\n';
+	std::cout << this->options.PonderOption.toString() << '\n';
+	std::cout << this->options.OwnBookOption.toString() << '\n';
+	std::cout << this->options.MultiPVOption.toString() << '\n';
+	std::cout << this->options.UCIShowCurrLineOption.toString() << '\n';
+	std::cout << this->options.UCIShowRefutationsOption.toString() << '\n';
+	std::cout << this->options.UCILimitStrengthOption.toString() << '\n';
+	std::cout << this->options.UCIEloOption.toString() << '\n';
+	std::cout << this->options.UCIAnalyseModeOption.toString() << '\n';
+	std::cout << this->options.UCIOpponentOption.toString() << '\n';
 }
 
 void Sicario::handleData() {
@@ -469,9 +483,9 @@ void Sicario::handleLetterMode(const std::vector<std::string>& inputs) {
 	else if (inputs[1] != "on" && inputs[1] != "off")
 		sendInvalidArgument(inputs[1]);
 	else if (inputs.size() == 2 && inputs[1] == "on")
-		this->sicarioConfigs.letterMode = true;
+		this->options.letterMode = true;
 	else if (inputs.size() == 2 && inputs[1] == "off")
-		this->sicarioConfigs.letterMode = false;
+		this->options.letterMode = false;
 }
 
 void Uci::send(std::string message) {
@@ -531,8 +545,8 @@ void Uci::sendRegistration() {
 
 }
 
-void Uci::sendInfo(SearchInfo& searchInfo, MctsNode* root, const SicarioOptions& sicarioConfigs) {
-	for (int pvLine = 1; pvLine <= std::stoi(sicarioConfigs.options[MULTI_PV].value); pvLine++) {
+void Uci::sendInfo(SearchInfo& searchInfo, MctsNode* root, const Option& options) {
+	for (int pvLine = 1; pvLine <= options.MultiPVOption.getValue(); pvLine++) {
 		std::string infoMessage = "info ";
 		infoMessage += Info::depth(searchInfo) + " ";
 		infoMessage += Info::nodes(searchInfo) + " ";
@@ -548,21 +562,9 @@ void Uci::sendInfo(SearchInfo& searchInfo, MctsNode* root, const SicarioOptions&
 	searchInfo.setChanged(false);
 }
 
-void Uci::sendOption(const OptionInfo& option) {
-	std::string optionString = "option name " + option.name;
-	optionString += " type " + option.type;
-	optionString += " default " + (option.def == "" ? "" : option.def);
-
-	if (option.min != "")
-		optionString += " min " + option.min;
-
-	if (option.max != "")
-		optionString += " max " + option.max;
-
-	for (std::string var : option.vars)
-		optionString += " var " + var;
-
-	Uci::send(optionString);
+template<typename T>
+void Uci::sendOption(const OptionConfig<T>& option) {
+	Uci::send(option.toUciString());
 }
 
 std::string Info::depth(SearchInfo& searchInfo) {
@@ -641,119 +643,37 @@ void Sicario::sendArgumentOutOfRange(const std::string& value, const std::string
 	std::cerr << "Argument out of range: " + (customMsg == "" ? value : customMsg) << '\n';
 }
 
-void Sicario::setOptionThread(const std::string& value) {
+void Sicario::setCheckOption(OptionConfig<bool>& option, const std::string& value) {
 	if (value == "") return;
-	OptionInfo& option = sicarioConfigs.options[THREAD];
-	if (std::stoi(value) < std::stoi(option.min) || std::stoi(value) > std::stoi(option.max)) {
+	if (value == "true" || value == "false") {
+		option.setValue(value == "true" ? true : false);
+	} else {
+		sendInvalidArgument(value);
+	}
+}
+
+void Sicario::setSpinOption(OptionConfig<int>& option, const std::string& value) {
+	if (value == "") return;
+	if (!isPositiveInteger(value) || std::stoi(value) < option.getMin() || std::stoi(value) > option.getMax()) {
 		sendArgumentOutOfRange(value);
 		return;
 	}
-	option.value = value;
+	option.setValue(std::stoi(value));
 }
 
-void Sicario::setOptionHash(const std::string& value) {
-	if (value == "") return;
-	OptionInfo& option = sicarioConfigs.options[HASH];
-	if (std::stoi(value) < std::stoi(option.min) || std::stoi(value) > std::stoi(option.max)) {
-		sendArgumentOutOfRange(value);
+void Sicario::setComboOption(OptionConfig<std::string>& option, const std::string& value) {
+	std::vector<std::string>& vars = option.getVars();
+	if (std::find(vars.begin(), vars.end(), value) != vars.end())
 		return;
-	}
-	option.value = value;
+	option.setValue(value);
 }
 
-void Sicario::setOptionPonder(const std::string& value) {
-	if (value == "") return;
-	OptionInfo& option = sicarioConfigs.options[PONDER];
-	if (value == "true" || value == "false") {
-		option.value = value;
-	} else {
-		sendInvalidArgument(value);
-	}
+void Sicario::setStringOption(OptionConfig<std::string>& option, const std::string& value) {
+	option.setValue(value);
 }
 
-void Sicario::setOptionOwnBook(const std::string& value) {
-	if (value == "") return;
-	OptionInfo& option = sicarioConfigs.options[OWN_BOOK];
-	if (value == "true" || value == "false") {
-		option.value = value;
-	} else {
-		sendInvalidArgument(value);
-	}
-}
+void Sicario::clearCache() {
 
-void Sicario::setOptionMultiPV(const std::string& value) {
-	if (value == "") return;
-	OptionInfo& option = sicarioConfigs.options[MULTI_PV];
-	if (std::stoi(value) < std::stoi(option.min) || std::stoi(value) > std::stoi(option.max)) {
-		sendArgumentOutOfRange(value);
-		return;
-	}
-	option.value = value;
-}
-
-void Sicario::setOptionUciShowCurrLine(const std::string& value) {
-	if (value == "") return;
-	OptionInfo& option = sicarioConfigs.options[UCI_SHOW_CURR_LINE];
-	if (value == "true" || value == "false") {
-		option.value = value;
-	} else {
-		sendInvalidArgument(value);
-	}
-}
-
-void Sicario::setOptionUciShowRefutations(const std::string& value) {
-	if (value == "") return;
-	OptionInfo& option = sicarioConfigs.options[UCI_SHOW_REFUTATIONS];
-	if (value == "true" || value == "false") {
-		option.value = value;
-	} else {
-		sendInvalidArgument(value);
-	}
-}
-
-void Sicario::setOptionUciLimitStrength(const std::string& value) {
-	if (value == "") return;
-	OptionInfo& option = sicarioConfigs.options[UCI_LIMIT_STRENGTH];
-	if (value == "true" || value == "false") {
-		option.value = value;
-	} else {
-		sendInvalidArgument(value);
-	}
-}
-
-void Sicario::setOptionUciElo(const std::string& value) {
-	if (value == "") return;
-	OptionInfo& option = sicarioConfigs.options[UCI_ELO];
-	if (std::stoi(value) < std::stoi(option.min) || std::stoi(value) > std::stoi(option.max)) {
-		sendArgumentOutOfRange(value);
-		return;
-	}
-	option.value = value;
-}
-
-void Sicario::setOptionUciAnalyseMode(const std::string& value) {
-	if (value == "") return;
-	OptionInfo& option = sicarioConfigs.options[UCI_ANALYSE_MODE];
-	if (value == "true" || value == "false") {
-		option.value = value;
-	} else {
-		sendInvalidArgument(value);
-	}
-}
-
-void Sicario::setOptionUciOpponent(const std::string& value) {
-	std::vector<std::string> values = split(value, " ");
-	OptionInfo& option = sicarioConfigs.options[UCI_OPPONENT];
-	if (value != "" && (values.size() < 4 || !isValidTitle(values[0]) || !isValidElo(values[1]) ||
-			!isValidPlayerType(values[2]))) {
-		sendInvalidArgument(value, "[GM|IM|FM|WGM|WIM|none] [<elo>|none] [computer|human] <name>");
-		return;
-	}
-	option.value = value;
-}
-
-void Sicario::setOptionClearHash() {
-	// TODO
 }
 
 SetOptionPair Sicario::getOptionNameAndValue(const std::vector<std::string>& inputs) {

@@ -7,18 +7,6 @@
 
 struct SetOptionPair;
 
-struct OptionInfo {
-	// TODO have these set as the types that they are meant to be. e.g., have a button type be set as a bool instead of a string
-	std::string name = "";
-	std::string type = "";
-	std::string def = "";
-	std::string min = "";
-	std::string max = "";
-	std::vector<std::string> vars = {};
-
-	std::string value; // The actual value that has been set for this option.
-};
-
 template <typename T>
 class OptionConfig {
 	public:
@@ -80,21 +68,54 @@ class OptionConfig {
 				name(name),
 				type(type) {}
 
-		std::string getName() { return this->name; }
-
-		std::string getType() { return this->type; }
-
-		T getDef() { return this->def; }
-
+		/**
+		 * @brief Get the minimum value of the option.
+		 *
+		 * @return String of the minimum value.
+		 */
 		T getMin() { return this->min; }
 
+		/**
+		 * @brief Get the maximum value of the option.
+		 *
+		 * @return String of the maximum value.
+		 */
 		T getMax() { return this->max; }
 
-		std::vector<T> getVars() { return this->vars; }
+		/**
+		 * @brief Get the vector of predefined values for the option.
+		 *
+		 * @return Reference to the vector of predefined values.
+		 */
+		std::vector<T>& getVars() { return this->vars; }
 
-		T getValue() { return this->value; }
+		/**
+		 * @brief Get the current value of the option.
+		 *
+		 * @return Current value of the option.
+		 */
+		T getValue() const { return this->value; }
 
+		/**
+		 * @brief Set the value of the option.
+		 *
+		 * @param value Value to set the option to.
+		 */
 		void setValue(T value) { this->value = value; }
+
+		/**
+		 * @brief Get a string representation of the option for the UCI option command.
+		 *
+		 * @return UCI string representation of the object.
+		 */
+		std::string toUciString() const;
+
+		/**
+		 * @brief Get a string representation of the option
+		 *
+		 * @return String representation of the option.
+		 */
+		std::string toString() const;
 
 	private:
 		std::string name;
@@ -106,23 +127,24 @@ class OptionConfig {
 		T value;
 };
 
-struct SicarioOptions {
+struct Option {
 	bool debugMode = false; // This is set with the "debug" command, not "setoption".
 	bool letterMode = false; // This is set with the "lettermode" command, not "setoption".
-	OptionInfo options[CONFIGS_COUNT];
 
+	// NOTE Currently, the default, min, max and var are all arbitrary
 	OptionConfig<int> ThreadOption {"Thread", "spin", 1, 1, 512};
 	OptionConfig<int> HashOption { "Hash", "spin", 16, 0, 5000 };
 	OptionConfig<bool> PonderOption { "Ponder", "check", false };
 	OptionConfig<bool> OwnBookOption { "OwnBook", "check", false };
 	OptionConfig<int> MultiPVOption { "MultiPV", "spin", 1, 1, 5 };
-	OptionConfig<bool> UCI_ShowCurrLineOption { "UCI_ShowCurrLine", "check", false };
-	OptionConfig<bool> UCI_ShowRefutationsOption { "UCI_ShowRefutations", "check", false };
-	OptionConfig<bool> UCI_LimitStrengthOption { "UCI_LimitStrength", "check", false };
-	OptionConfig<int> UCI_EloOption { "UCI_Elo", "spin", 3000, 1000, 3500 };
-	OptionConfig<bool> UCI_AnalyseModeOption { "UCI_AnalyseMode", "check", true };
-	OptionConfig<std::string> UCI_OpponentOption { "UCI_Opponent", "string", "" };
+	OptionConfig<bool> UCIShowCurrLineOption { "UCI_ShowCurrLine", "check", false };
+	OptionConfig<bool> UCIShowRefutationsOption { "UCI_ShowRefutations", "check", false };
+	OptionConfig<bool> UCILimitStrengthOption { "UCI_LimitStrength", "check", false };
+	OptionConfig<int> UCIEloOption { "UCI_Elo", "spin", 3000, 1000, 3500 };
+	OptionConfig<bool> UCIAnalyseModeOption { "UCI_AnalyseMode", "check", true };
+	OptionConfig<std::string> UCIOpponentOption { "UCI_Opponent", "string", "" };
 	OptionConfig<bool> ClearHashOption { "ClearHash", "button" };
+	// OptionConfig<std::string> FooOption { "foo", "combo", "foo", {"foo", "bar", "baz", "foobar"} };
 };
 
 struct SearchParams {
@@ -163,7 +185,7 @@ void showStartUp();
 
 class Sicario {
 	public:
-		Sicario();
+		Sicario() {};
 
 		/**
 		 * @brief Start and run the engine main loop.
@@ -172,7 +194,7 @@ class Sicario {
 
 	private:
 		Position position;
-		SicarioOptions sicarioConfigs;
+		Option options;
 		SearchParams searchParams;
 		std::vector<std::thread> threads;
 		std::atomic_bool searchTree = false;
@@ -470,86 +492,41 @@ class Sicario {
 		void sendArgumentOutOfRange(const std::string& value, const std::string& customMsg = "");
 
 		/**
-		 * @brief Set the Thread option.
+		 * @brief Set an option of type check.
 		 *
-		 * @param value The value to set Thread to.
+		 * @param option OptionConfig object for the option.
+		 * @param value String of the value to set the option to.
 		 */
-		void setOptionThread(const std::string& value);
+		void setCheckOption(OptionConfig<bool>& option, const std::string& value);
 
 		/**
-		 * @brief Set the Hash option.
+		 * @brief Set an option of type spin.
 		 *
-		 * @param inputs The value to set Hash to.
+		 * @param option OptionConfig object for the option.
+		 * @param value String of the value to set the option to.
 		 */
-		void setOptionHash(const std::string& value);
+		void setSpinOption(OptionConfig<int>& option, const std::string& value);
 
 		/**
-		 * @brief Set the Ponder option.
+		 * @brief Set an option of type combo.
 		 *
-		 * @param value The value to set Ponder to.
+		 * @param option OptionConfig object for the option.
+		 * @param value String of the value to set the option to.
 		 */
-		void setOptionPonder(const std::string& value);
+		void setComboOption(OptionConfig<std::string>& option, const std::string& value);
 
 		/**
-		 * @brief Set the OwnBook option.
+		 * @brief Set an option of type string.
 		 *
-		 * @param value The value to set OwnBook to.
+		 * @param option OptionConfig object for the option.
+		 * @param value String of the value to set the option to.
 		 */
-		void setOptionOwnBook(const std::string& value);
+		void setStringOption(OptionConfig<std::string>& option, const std::string& value);
 
 		/**
-		 * @brief Set the MultiPV option.
-		 *
-		 * @param value The value to set MultiPV to.
+		 * @brief Clear the cache.
 		 */
-		void setOptionMultiPV(const std::string& value);
-
-		/**
-		 * @brief Set the UCI_ShowCurrLine option.
-		 *
-		 * @param value The value to set UCI_ShowCurrLine to.
-		 */
-		void setOptionUciShowCurrLine(const std::string& value);
-
-		/**
-		 * @brief Set the UCI_ShowRefutations option.
-		 *
-		 * @param value The value to set UCI_ShowRefutations to.
-		 */
-		void setOptionUciShowRefutations(const std::string& value);
-
-		/**
-		 * @brief Set the UCI_LimitStrength option.
-		 *
-		 * @param value The value to set UCI_LimitStrength to.
-		 */
-		void setOptionUciLimitStrength(const std::string& value);
-
-		/**
-		 * @brief Set the UCI_Elo option.
-		 *
-		 * @param value The value to set UCI_Elo to.
-		 */
-		void setOptionUciElo(const std::string& value);
-
-		/**
-		 * @brief Set the UCI_AnalyseMode option.
-		 *
-		 * @param value The value to set UCI_AnalyseMode to.
-		 */
-		void setOptionUciAnalyseMode(const std::string& value);
-
-		/**
-		 * @brief Set the UCI_Opponent option.
-		 *
-		 * @param value The value to set UCI_Opponent to.
-		 */
-		void setOptionUciOpponent(const std::string& value);
-
-		/**
-		 * @brief Clear the hash.
-		 */
-		void setOptionClearHash();
+		void clearCache();
 
 		/**
 		 * @brief Get the name and value of the setoption command.

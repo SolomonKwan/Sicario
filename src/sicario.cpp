@@ -31,30 +31,43 @@ void showStartUp() {
 	std::cout << "By " << AUTHOR << "\n\n";
 }
 
-Sicario::Sicario() {
-	// NOTE Currently, the default, min, max and var are all arbitrary
-	// Set the config informations
-	sicarioConfigs.options[THREAD] = { "Thread", "spin", "1", "1", "512" };
-	sicarioConfigs.options[HASH] = { "Hash", "spin", "16", "0", "5000" };
-	sicarioConfigs.options[PONDER] = { "Ponder", "check", "false" };
-	sicarioConfigs.options[OWN_BOOK] = { "OwnBook", "check", "false" };
-	sicarioConfigs.options[MULTI_PV] = { "MultiPV", "spin", "1", "1", "5" };
-	sicarioConfigs.options[UCI_SHOW_CURR_LINE] = { "UCI_ShowCurrLine", "check", "false" };
-	sicarioConfigs.options[UCI_SHOW_REFUTATIONS] = { "UCI_ShowRefutations", "check", "false" };
-	sicarioConfigs.options[UCI_LIMIT_STRENGTH] = { "UCI_LimitStrength", "check", "false" };
-	sicarioConfigs.options[UCI_ELO] = { "UCI_Elo", "spin", "3000", "1000", "3500" };
-	sicarioConfigs.options[UCI_ANALYSE_MODE] = { "UCI_AnalyseMode", "check", "true" };
-	sicarioConfigs.options[UCI_OPPONENT] = { "UCI_Opponent", "string", "" };
-	sicarioConfigs.options[CLEAR_HASH] = { "ClearHash", "button" };
+template<>
+std::string OptionConfig<int>::toUciString() const {
+	std::string optionString = "option name " + this->name + " type " + this->type;
+	optionString += " default " + std::to_string(this->def);
+	optionString += " min " + std::to_string(this->min);
+	optionString += " max " + std::to_string(this->max);
+	return optionString;
+}
 
-	// Set the configs to the default
-	for (int index = THREAD; index < CONFIGS_COUNT; index++)
-		sicarioConfigs.options[index].value = sicarioConfigs.options[index].def;
+template<>
+std::string OptionConfig<bool>::toUciString() const {
+	std::string optionString = "option name " + this->name + " type " + this->type;
+	optionString += (this->type == "check" ? " default " + std::string(this->def ? "true" : "false") : "");
+	return optionString;
+}
 
-	#ifndef NDEBUG
-	for (int index = THREAD; index < CONFIGS_COUNT; index++)
-		assert(sicarioConfigs.options[index].name != "");
-	#endif
+template<>
+std::string OptionConfig<std::string>::toUciString() const {
+	std::string optionString = "option name " + this->name + " type " + this->type;
+	optionString += " default " + this->def;
+	optionString += (this->vars.size() ? " var " + concat(this->vars, " var ") : "");
+	return optionString;
+}
+
+template<>
+std::string OptionConfig<int>::toString() const {
+	return this->name + " " + std::to_string(this->value);
+}
+
+template<>
+std::string OptionConfig<bool>::toString() const {
+	return this->name + " " + (this->value ? "true" : "false");
+}
+
+template<>
+std::string OptionConfig<std::string>::toString() const {
+	return this->name + " " + this->value;
 }
 
 void Sicario::run() {

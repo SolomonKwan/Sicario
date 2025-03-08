@@ -6,13 +6,13 @@
 #include "utils.hpp"
 #include "constants.hpp"
 
-std::vector<std::string> split(std::string input, const std::string delim) {
+std::vector<std::string> split(std::string input, const std::string delimeter) {
 	std::vector<std::string> result;
 	std::size_t pos;
 
-	while ((pos = input.find(delim)) != std::string::npos) {
+	while ((pos = input.find(delimeter)) != std::string::npos) {
 		if (input.substr(0, pos) != "") result.push_back(input.substr(0, pos));
-		input = input.substr(pos + delim.length(), input.length() - 1);
+		input = input.substr(pos + delimeter.length(), input.length() - 1);
 	}
 	if (input.substr(0, pos) != "") result.push_back(input.substr(0, pos));
 
@@ -21,10 +21,13 @@ std::vector<std::string> split(std::string input, const std::string delim) {
 
 std::string concat(const std::vector<std::string> strings, const std::string delimeter) {
 	std::string combinedStr = "";
-	for (std::string str : strings) {
-		combinedStr += str + delimeter;
-	}
-	combinedStr = combinedStr.substr(0, combinedStr.size() - 1);
+
+	for (int index = 1; static_cast<size_t>(index) < strings.size(); index++)
+		combinedStr += strings[index - 1] + delimeter;
+
+	if (strings.size())
+		combinedStr += strings.back();
+
 	return combinedStr;
 }
 
