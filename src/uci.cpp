@@ -531,7 +531,7 @@ void Uci::sendRegistration() {
 
 }
 
-void Uci::sendInfo(SearchInfo& searchInfo, MctsNode* root, const SicarioConfigs& sicarioConfigs) {
+void Uci::sendInfo(SearchInfo& searchInfo, MctsNode* root, const SicarioOptions& sicarioConfigs) {
 	for (int pvLine = 1; pvLine <= std::stoi(sicarioConfigs.options[MULTI_PV].value); pvLine++) {
 		std::string infoMessage = "info ";
 		infoMessage += Info::depth(searchInfo) + " ";

@@ -19,10 +19,110 @@ struct OptionInfo {
 	std::string value; // The actual value that has been set for this option.
 };
 
-struct SicarioConfigs {
+template <typename T>
+class OptionConfig {
+	public:
+		/**
+		 * @brief Construct a new OptionConfig object. Used for options of type check (bool) or string.
+		 *
+		 * @param name Name of the option.
+		 * @param type Type fo the option.
+		 * @param def The default value of the option.
+		 */
+		OptionConfig(std::string name, std::string type, T def) :
+				name(name),
+				type(type),
+				def(def) {
+			this->value = def;
+		}
+
+		/**
+		 * @brief Construct a new OptionConfig object. Used for options of type spin (int).
+		 *
+		 * @param name Name of the option.
+		 * @param type Type fo the option.
+		 * @param def The default value of the option.
+		 * @param min Minimum value the option can take.
+		 * @param max Maximum value the option can take.
+		 */
+		OptionConfig(std::string name, std::string type, T def, T min, T max) :
+				name(name),
+				type(type),
+				def(def),
+				min(min),
+				max(max) {
+			this->value = def;
+		}
+
+		/**
+		 * @brief Construct a new OptionConfig object. Used for options of type combo (string) with predefined values.
+		 *
+		 * @param name Name of the option.
+		 * @param type Type fo the option.
+		 * @param def The default value of the option.
+		 * @param vars The possible values the option can take.
+		 */
+		OptionConfig(std::string name, std::string type, T def, std::vector<T> vars) :
+				name(name),
+				type(type),
+				def(def),
+				vars(vars) {
+			this->value = def;
+		}
+
+		/**
+		 * @brief Construct a new OptionConfig object. Used for options of type button.
+		 *
+		 * @param name Name of the option.
+		 * @param type Type fo the option.
+		 */
+		OptionConfig(std::string name, std::string type) :
+				name(name),
+				type(type) {}
+
+		std::string getName() { return this->name; }
+
+		std::string getType() { return this->type; }
+
+		T getDef() { return this->def; }
+
+		T getMin() { return this->min; }
+
+		T getMax() { return this->max; }
+
+		std::vector<T> getVars() { return this->vars; }
+
+		T getValue() { return this->value; }
+
+		void setValue(T value) { this->value = value; }
+
+	private:
+		std::string name;
+		std::string type;
+		T def;
+		T min;
+		T max;
+		std::vector<T> vars = {};
+		T value;
+};
+
+struct SicarioOptions {
 	bool debugMode = false; // This is set with the "debug" command, not "setoption".
 	bool letterMode = false; // This is set with the "lettermode" command, not "setoption".
 	OptionInfo options[CONFIGS_COUNT];
+
+	OptionConfig<int> ThreadOption {"Thread", "spin", 1, 1, 512};
+	OptionConfig<int> HashOption { "Hash", "spin", 16, 0, 5000 };
+	OptionConfig<bool> PonderOption { "Ponder", "check", false };
+	OptionConfig<bool> OwnBookOption { "OwnBook", "check", false };
+	OptionConfig<int> MultiPVOption { "MultiPV", "spin", 1, 1, 5 };
+	OptionConfig<bool> UCI_ShowCurrLineOption { "UCI_ShowCurrLine", "check", false };
+	OptionConfig<bool> UCI_ShowRefutationsOption { "UCI_ShowRefutations", "check", false };
+	OptionConfig<bool> UCI_LimitStrengthOption { "UCI_LimitStrength", "check", false };
+	OptionConfig<int> UCI_EloOption { "UCI_Elo", "spin", 3000, 1000, 3500 };
+	OptionConfig<bool> UCI_AnalyseModeOption { "UCI_AnalyseMode", "check", true };
+	OptionConfig<std::string> UCI_OpponentOption { "UCI_Opponent", "string", "" };
+	OptionConfig<bool> ClearHashOption { "ClearHash", "button" };
 };
 
 struct SearchParams {
@@ -72,7 +172,7 @@ class Sicario {
 
 	private:
 		Position position;
-		SicarioConfigs sicarioConfigs;
+		SicarioOptions sicarioConfigs;
 		SearchParams searchParams;
 		std::vector<std::thread> threads;
 		std::atomic_bool searchTree = false;

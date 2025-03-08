@@ -52,7 +52,7 @@ namespace Uci {
 	 * @param root Pointer to the root node object.
 	 * @param sicarioConfigs Configurations for the engine.
 	 */
-	void sendInfo(SearchInfo& searchInfo, MctsNode* root, const SicarioConfigs& sicarioConfigs);
+	void sendInfo(SearchInfo& searchInfo, MctsNode* root, const SicarioOptions& sicarioConfigs);
 
 	/**
 	 * @brief Send the options that the user can set.

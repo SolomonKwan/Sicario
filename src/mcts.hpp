@@ -42,7 +42,7 @@ struct SearchInfo {
 
 class Mcts {
 	public:
-		Mcts(Position& pos, const std::atomic_bool& searchTree, const SicarioConfigs& sicarioConfigs) :
+		Mcts(Position& pos, const std::atomic_bool& searchTree, const SicarioOptions& sicarioConfigs) :
 				pos(pos),
 				rootPlayer(pos.getTurn()),
 				searchTree(searchTree),
@@ -57,7 +57,7 @@ class Mcts {
 		Position pos;
 		const Player rootPlayer;
 		const std::atomic_bool& searchTree;
-		const SicarioConfigs& sicarioConfigs;
+		const SicarioOptions& sicarioConfigs;
 };
 
 class MctsNode {
