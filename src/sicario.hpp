@@ -137,7 +137,6 @@ struct Option {
 	OptionConfig<bool> PonderOption { "Ponder", "check", false };
 	OptionConfig<bool> OwnBookOption { "OwnBook", "check", false };
 	OptionConfig<int> MultiPVOption { "MultiPV", "spin", 1, 1, 5 };
-	OptionConfig<bool> UCIShowCurrLineOption { "UCI_ShowCurrLine", "check", false };
 	OptionConfig<bool> UCIShowRefutationsOption { "UCI_ShowRefutations", "check", false };
 	OptionConfig<bool> UCILimitStrengthOption { "UCI_LimitStrength", "check", false };
 	OptionConfig<int> UCIEloOption { "UCI_Elo", "spin", 3000, 1000, 3500 };
@@ -522,6 +521,14 @@ class Sicario {
 		 * @param value String of the value to set the option to.
 		 */
 		void setStringOption(OptionConfig<std::string>& option, const std::string& value);
+
+		/**
+		 * @brief Set the Uci_Opponent option.
+		 *
+		 * @param option OptionConfig object for the option.
+		 * @param value String of the value to set the option to.
+		 */
+		void setUciOpponentOption(OptionConfig<std::string>& option, const std::string& value);
 
 		/**
 		 * @brief Clear the cache.

@@ -17,6 +17,14 @@ void SearchInfo::setDepth(int depth) {
 	this->depth = std::max(depth, this->depth);
 }
 
+int SearchInfo::getSeldepth() const {
+	return this->selDepth;
+}
+
+void SearchInfo::setSeldepth(int seldepth) {
+	this->selDepth = seldepth;
+}
+
 void SearchInfo::setChanged(bool changed) {
 	this->changed = changed;
 }

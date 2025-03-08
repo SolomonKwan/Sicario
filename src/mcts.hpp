@@ -16,6 +16,9 @@ struct SearchInfo {
 		int getDepth() const;
 		void setDepth(int depth);
 
+		int getSeldepth() const;
+		void setSeldepth(int seldepth);
+
 		bool getChanged() const;
 		void setChanged(bool changed);
 
@@ -34,6 +37,7 @@ struct SearchInfo {
 		bool changed = false;
 
 		int depth = 0;
+		int selDepth = 0;
 		int nodes = 0;
 		Move currMove;
 		std::vector<std::vector<Move>> pvs;

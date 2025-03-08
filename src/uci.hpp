@@ -65,12 +65,130 @@ namespace Uci {
 }
 
 namespace Info {
+	/**
+	 * @brief Return the depth string for the UCI info command. In Sicario, depth is defined as the node depth of the
+	 * current search.
+	 *
+	 * @param searchInfo Object containing the information of the search.
+	 * @return String of the depth part of the UCI info command.
+	 */
 	std::string depth(SearchInfo& searchInfo);
+
+	/**
+	 * @brief Return the seldepth string for the UCI info command. In Sicario, seldepth is defined as the node depth of
+	 * deepest line searched so far.
+	 *
+	 * @param searchInfo Object containing the information of the search.
+	 * @return String of the seldepth part of the UCI info command.
+	 */
+	std::string selDepth(SearchInfo& searchInfo);
+
+	/**
+	 * @brief Return the time in milliseconds that the search has been running.
+	 *
+	 * @param searchInfo Object containing the information of the search.
+	 * @return String of the time part of the UCI info command.
+	 */
+	std::string time(SearchInfo& searchInfo);
+
+	/**
+	 * @brief Return the number of nodes that have been searched.
+	 *
+	 * @param searchInfo Object containing the information of the search.
+	 * @return String of the number of nodes for the UCI info command.
+	 */
 	std::string nodes(SearchInfo& searchInfo);
+
+	/**
+	 * @brief Return a principle variation.
+	 *
+	 * @param root Root node.
+	 * @param pvLine The principle variation ranked as pvLine.
+	 * @return String of the princple variation ranked as pvLine.
+	 */
 	std::string pv(MctsNode* root, int pvLine);
+
+	/**
+	 * @brief Return the pv number string.
+	 *
+	 * @param root Root node.
+	 * @param pvLine The princple variation rank.
+	 * @return String of the multipv of the UCI info command.
+	 */
 	std::string multiPv(MctsNode* root, int pvLine);
+
+	/**
+	 * @brief Return the score of the current search.
+	 *
+	 * @param root Root node.
+	 * @return String of the score UCI command.
+	 */
 	std::string score(MctsNode* root);
+
+	/**
+	 * @brief Return the centipawn evaluation.
+	 *
+	 * @param root Root node.
+	 * @return String of the UCI centipawn evaluation.
+	 */
+	std::string cp(MctsNode* root);
+
+	/**
+	 * @brief Return the mate if there is one in plies.
+	 *
+	 * @param root Root node.
+	 * @return String of the UCI mate depth in plies.
+	 */
+	std::string mate(MctsNode* root);
+
+	/**
+	 * @brief Return the lowerbound of the evaluation in centipawns.
+	 *
+	 * @param root Root node.
+	 * @return String of the UCI lowerbound centipawn evaluation.
+	 */
+	std::string lowerBound(MctsNode* root);
+
+	/**
+	 * @brief Return the upperbound of the evaluation in centipawns.
+	 *
+	 * @param root Root node.
+	 * @return String of the UCI upperbound centipawn evaluation.
+	 */
+	std::string upperBound(MctsNode* root);
+
+	/**
+	 * @brief Return the current move being searched.
+	 *
+	 * @param searchInfo Object containing the information of the search.
+	 * @param root Root node.
+	 * @return String of the move being searched for the currmove part of the UCI info command.
+	 */
 	std::string currMove(SearchInfo& searchInfo, MctsNode* root);
+
+	/**
+	 * @brief Return the move number of the current move being searched.
+	 *
+	 * @param searchInfo Object containing the information of the search.
+	 * @param root Root node.
+	 * @return String of the move number of the current move being searched for the UCI info command.
+	 */
+	std::string currMoveNumber(SearchInfo& searchInfo, MctsNode* root);
+
+	/**
+	 * @brief Return the hashfull value.
+	 *
+	 * @param searchInfo Object containing the information of the search.
+	 * @return String of the hashfull for the UCI info command.
+	 */
+	std::string hashfull(SearchInfo& searchInfo);
+
+	/**
+	 * @brief Return the nodes per seconds of the search.
+	 *
+	 * @param searchInfo Object containing the nodes per seconds of the search.
+	 * @return String of the nodes per seconds for the UCI info command.
+	 */
 	std::string nps(SearchInfo& searchInfo);
 }
 

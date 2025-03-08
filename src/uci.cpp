@@ -255,7 +255,6 @@ void Sicario::handleUci() {
 	Uci::sendOption(this->options.PonderOption);
 	Uci::sendOption(this->options.OwnBookOption);
 	Uci::sendOption(this->options.MultiPVOption);
-	Uci::sendOption(this->options.UCIShowCurrLineOption);
 	Uci::sendOption(this->options.UCIShowRefutationsOption);
 	Uci::sendOption(this->options.UCILimitStrengthOption);
 	Uci::sendOption(this->options.UCIEloOption);
@@ -289,12 +288,11 @@ void Sicario::handleSetOption(const std::vector<std::string>& inputs) {
 	else if (name == "ponder") return setCheckOption(this->options.PonderOption, value);
 	else if (name == "ownbook") return setCheckOption(this->options.OwnBookOption, value);
 	else if (name == "multipv") return setSpinOption(this->options.MultiPVOption, value);
-	else if (name == "uci_showcurrline") return setCheckOption(this->options.UCIShowCurrLineOption, value);
 	else if (name == "uci_showrefutations") return setCheckOption(this->options.UCIShowRefutationsOption, value);
 	else if (name == "uci_limitstrength") return setCheckOption(this->options.UCILimitStrengthOption, value);
 	else if (name == "uci_elo") return setSpinOption(this->options.UCIEloOption, value);
 	else if (name == "uci_analysemode") return setCheckOption(this->options.UCIAnalyseModeOption, value);
-	else if (name == "uci_opponent") return setStringOption(this->options.UCIOpponentOption, value);
+	else if (name == "uci_opponent") return setUciOpponentOption(this->options.UCIOpponentOption, value);
 	else if (name == "clearhash") return this->clearCache();
 	else {
 		std::cerr << "This should not be happening..." << '\n';
@@ -450,7 +448,6 @@ void Sicario::handleOptions() {
 	std::cout << this->options.PonderOption.toString() << '\n';
 	std::cout << this->options.OwnBookOption.toString() << '\n';
 	std::cout << this->options.MultiPVOption.toString() << '\n';
-	std::cout << this->options.UCIShowCurrLineOption.toString() << '\n';
 	std::cout << this->options.UCIShowRefutationsOption.toString() << '\n';
 	std::cout << this->options.UCILimitStrengthOption.toString() << '\n';
 	std::cout << this->options.UCIEloOption.toString() << '\n';
@@ -549,11 +546,15 @@ void Uci::sendInfo(SearchInfo& searchInfo, MctsNode* root, const Option& options
 	for (int pvLine = 1; pvLine <= options.MultiPVOption.getValue(); pvLine++) {
 		std::string infoMessage = "info ";
 		infoMessage += Info::depth(searchInfo) + " ";
+		infoMessage += Info::selDepth(searchInfo) + " ";
+		infoMessage += Info::time(searchInfo) + " ";
 		infoMessage += Info::nodes(searchInfo) + " ";
-		infoMessage += Info::pv(root, pvLine) + " ";
 		infoMessage += Info::multiPv(root, pvLine) + " ";
+		infoMessage += Info::pv(root, pvLine) + " ";
 		infoMessage += Info::score(root) + " ";
 		infoMessage += Info::currMove(searchInfo, root) + " ";
+		infoMessage += Info::currMoveNumber(searchInfo, root) + " ";
+		infoMessage += Info::hashfull(searchInfo) + " ";
 		infoMessage += Info::nps(searchInfo);
 		Uci::send(infoMessage);
 	}
@@ -569,6 +570,14 @@ void Uci::sendOption(const OptionConfig<T>& option) {
 
 std::string Info::depth(SearchInfo& searchInfo) {
 	return "depth " + std::to_string(searchInfo.getDepth());
+}
+
+std::string Info::selDepth(SearchInfo& searchInfo) {
+	return "seldepth " + std::to_string(searchInfo.getSeldepth());
+}
+
+std::string Info::time(SearchInfo& searchInfo) {
+	return "time xxxx";
 }
 
 std::string Info::nodes(SearchInfo& searchInfo) {
@@ -595,7 +604,7 @@ std::string Info::multiPv(MctsNode* root, int pvLine) {
 std::string Info::score(MctsNode* root) {
 	std::string scoreStr = "score ";
 	if (root->getMateDepth() != 0) {
-		scoreStr += "mate " + std::to_string(root->getMateDepth());
+		scoreStr += "mate " + Info::mate(root);
 	} else {
 		float score = 0;
 		for (auto child : root->getChildren()) {
@@ -603,13 +612,51 @@ std::string Info::score(MctsNode* root) {
 			if (childScore == std::numeric_limits<float>::max()) continue;
 			score += child->Ucb1();
 		}
-		scoreStr += "cp " + std::to_string(convertToCentipawn(score / root->getChildren().size()));
+		scoreStr += "cp " + Info::cp(root);
 	}
+
+	scoreStr += Info::lowerBound(root);
+	scoreStr += Info::upperBound(root);
+
 	return scoreStr;
+}
+
+std::string Info::mate(MctsNode* root) {
+	return std::to_string(root->getMateDepth());
+}
+
+std::string Info::cp(MctsNode* root) {
+	float score = 0;
+	for (auto child : root->getChildren()) {
+		float childScore = child->Ucb1();
+		if (childScore == std::numeric_limits<float>::max()) continue;
+		score += child->Ucb1();
+	}
+	return std::to_string(convertToCentipawn(score / root->getChildren().size()));
+}
+
+std::string Info::lowerBound(MctsNode* root) {
+	if (true) // TODO calculate condition
+		return " lowerbound";
+	return "";
+}
+
+std::string Info::upperBound(MctsNode* root) {
+	if (true) // TODO calculate condition
+		return " upperbound";
+	return "";
 }
 
 std::string Info::currMove(SearchInfo& searchInfo, MctsNode* root) {
 	return "currmove " + getMove(searchInfo.getCurrMove());
+}
+
+std::string Info::currMoveNumber(SearchInfo& searchInfo, MctsNode* root) {
+	return "currmovenumber x";
+}
+
+std::string Info::hashfull(SearchInfo& searchInfo) {
+	return "hashfull xxxx";
 }
 
 std::string Info::nps(SearchInfo& searchInfo) {
@@ -669,6 +716,16 @@ void Sicario::setComboOption(OptionConfig<std::string>& option, const std::strin
 }
 
 void Sicario::setStringOption(OptionConfig<std::string>& option, const std::string& value) {
+	option.setValue(value);
+}
+
+void Sicario::setUciOpponentOption(OptionConfig<std::string>& option, const std::string& value) { // TODO might be able to abstract the logic check out to fn pointers thereby no need for individual option commands at all
+	std::vector<std::string> values = split(value, " ");
+	if (value != "" && (values.size() < 4 || !isValidTitle(values[0]) || !isValidElo(values[1]) ||
+			!isValidPlayerType(values[2]))) {
+		sendInvalidArgument(value, "[GM|IM|FM|WGM|WIM|none] [<elo>|none] [computer|human] <name>");
+		return;
+	}
 	option.setValue(value);
 }
 
