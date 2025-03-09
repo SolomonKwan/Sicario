@@ -7,6 +7,9 @@
 #include "game.hpp"
 #include "sicario.hpp"
 
+/**
+ * @brief Struct used to store information about the current tree search.
+ */
 struct SearchInfo {
 	SearchInfo() {
 		this->lastMessage = std::chrono::high_resolution_clock::now();
@@ -26,7 +29,7 @@ struct SearchInfo {
 		void setCurrMove(Move move);
 
 		int getNodes() const;
-		void incNodes();
+		void incrementNodes();
 
 		std::chrono::_V2::system_clock::time_point getStart() const;
 		void setLastMessage(std::chrono::_V2::system_clock::time_point time);

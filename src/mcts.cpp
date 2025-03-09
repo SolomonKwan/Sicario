@@ -45,7 +45,7 @@ int SearchInfo::getNodes() const {
 	return this->nodes;
 }
 
-void SearchInfo::incNodes() {
+void SearchInfo::incrementNodes() {
 	this->nodes++;
 }
 
@@ -75,8 +75,12 @@ bool Mcts::rootIsEOG() {
 		Uci::send("info depth 0 score mate 0");
 		Uci::send("bestmove (none)");
 		return true;
-	} else if (this->pos.isDrawStalemate(moves)) {
+	} else if (this->pos.isDrawStalemate(moves) || this->pos.isDrawInsufficientMaterial()) {
 		Uci::send("info depth 0 score cp 0");
+		Uci::send("bestmove (none)");
+		return true;
+	} else if (this->pos.isDrawThreeFoldRep() || this->pos.isDrawFiftyMoveRule()) {
+		Uci::send("info depth 0 score cp xxxx");
 		Uci::send("bestmove (none)");
 		return true;
 	}
@@ -99,7 +103,8 @@ void Mcts::search() {
 		ExitCode code = leaf->simulate();
 		leaf->rollback(code);
 
-		if (searchInfo.sendNextInfo()) Uci::sendInfo(searchInfo, root.get(), this->options);
+		if (searchInfo.sendNextInfo())
+			Uci::sendInfo(searchInfo, root.get(), this->options);
 	}
 
 	Uci::sendInfo(searchInfo, root.get(), this->options); // Send final info command.
@@ -163,7 +168,7 @@ Node* Node::expand() {
 		this->addChild(move);
 
 	this->getPos().makeMove(this->children[0]->getInEdge());
-	this->searchInfo.incNodes();
+	this->searchInfo.incrementNodes();
 	return this->children[randInt() % this->children.size()].get();
 }
 

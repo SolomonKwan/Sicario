@@ -66,6 +66,29 @@ class Position {
 		bool isDrawStalemate(MoveList& move_list) const;
 
 		/**
+		 * @brief Check if the current position is a draw by threefold repetition.
+		 *
+		 * @return True if draw by threefold repetition, else false.
+		 */
+		bool isDrawThreeFoldRep() const;
+
+		/**
+		 * @brief Check if the current position is a draw by fifty move rule.
+		 *
+		 * @return True if draw by fifty move rule, else false.
+		 */
+		inline bool isDrawFiftyMoveRule() const {
+			return this->halfmove == 100;
+		}
+
+		/**
+		 * @brief Check if the game has ended by insufficient material.
+		 *
+		 * @return True if draw by insufficient material, else false.
+		 */
+		bool isDrawInsufficientMaterial() const;
+
+		/**
 		 * @brief Retrives all legal moves of the current position.
 		 *
 		 * @param moves Reference to moveList to populate.
@@ -806,29 +829,6 @@ class Position {
 		 * @brief Update the turn.
 		 */
 		void updateTurn();
-
-		/**
-		 * @brief Check if the current position is a draw by threefold repetition.
-		 *
-		 * @return True if draw by threefold repetition, else false.
-		 */
-		bool isDrawThreeFoldRep() const;
-
-		/**
-		 * @brief Check if the current position is a draw by fifty move rule.
-		 *
-		 * @return True if draw by fifty move rule, else false.
-		 */
-		inline bool isDrawFiftyMoveRule() const {
-			return this->halfmove == 100;
-		}
-
-		/**
-		 * @brief Check if the game has ended by insufficient material.
-		 *
-		 * @return True if draw by insufficient material, else false.
-		 */
-		bool isDrawInsufficientMaterial() const;
 
 		/**
 		 * @brief Increment the current position count.
