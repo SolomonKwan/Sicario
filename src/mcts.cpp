@@ -64,15 +64,19 @@ bool SearchInfo::sendNextInfo() const {
 }
 
 void Sicario::search() {
-	Mcts searcher(this->getPosition(), this->searchTree, this->options);
-	searcher.search();
+	Mcts mcts(this->getPosition(), this->searchTree, this->options);
+	mcts.search();
 	this->searchTree = false;
 }
 
 bool Mcts::rootIsEOG() {
 	MoveList moves = MoveList(this->pos);
-	if (this->pos.isCheckmate(moves) || this->pos.isDrawStalemate(moves)) {
-		Uci::send("info depth 0 score cp 0 mate 0");
+	if (this->pos.isCheckmate(moves)) {
+		Uci::send("info depth 0 score mate 0");
+		Uci::send("bestmove (none)");
+		return true;
+	} else if (this->pos.isDrawStalemate(moves)) {
+		Uci::send("info depth 0 score cp 0");
 		Uci::send("bestmove (none)");
 		return true;
 	}
@@ -82,14 +86,15 @@ bool Mcts::rootIsEOG() {
 // NOTE Due to way that the tree is constructed, it may result in stack overflow error due to node deletion/pruning.
 
 void Mcts::search() {
-	if (this->rootIsEOG()) return;
+	if (this->rootIsEOG())
+		return;
 
 	SearchInfo searchInfo = SearchInfo();
-	std::unique_ptr<MctsNode> root(new MctsNode(nullptr, NULL_MOVE, this->getPos(), searchInfo));
+	std::unique_ptr<Node> root(new Node(nullptr, NULL_MOVE, this->getPos(), searchInfo));
 	root->rootInitialise();
 
 	while (searchTree) {
-		MctsNode* leaf = root->select();
+		Node* leaf = root->select();
 		leaf = leaf->expand();
 		ExitCode code = leaf->simulate();
 		leaf->rollback(code);
@@ -101,9 +106,9 @@ void Mcts::search() {
 	Uci::sendBestMove(root.get(), options.debugMode);
 }
 
-MctsNode* MctsNode::bestChild() {
+Node* Node::bestChild() {
 	if (this->children.size() == 0) return nullptr;
-	std::vector<MctsNode*> ptrs;
+	std::vector<Node*> ptrs;
 	for (auto& child : this->children) {
 		if (ptrs.size() == 0 || child.get()->Ucb1() == ptrs.front()->Ucb1()) {
 			ptrs.push_back(child.get());
@@ -115,12 +120,12 @@ MctsNode* MctsNode::bestChild() {
 	return ptrs[randInt() % ptrs.size()];
 }
 
-MctsNode* MctsNode::bestChildPv(int pvLine) {
-	std::map<float, std::vector<MctsNode*>> map;
+Node* Node::bestChildPv(int pvLine) {
+	std::map<float, std::vector<Node*>> map;
 	for (auto& child : this->children)
 		map[child->Ucb1()].push_back(child.get());
 
-	MctsNode* node = nullptr;
+	Node* node = nullptr;
 	for (auto itr = map.rbegin(); itr != map.rend(); itr++) {
 		if (pvLine <= static_cast<int>(itr->second.size())) {
 			node = itr->second[pvLine - 1];
@@ -134,11 +139,11 @@ MctsNode* MctsNode::bestChildPv(int pvLine) {
 	return node;
 }
 
-MctsNode* MctsNode::select() {
+Node* Node::select() {
 	if (this->children.size() == 0) return this;
 
 	// Set currMove for info command.
-	MctsNode* bestChild = this->bestChild();
+	Node* bestChild = this->bestChild();
 	if (this->parent == nullptr)
 		searchInfo.setCurrMove(bestChild->getInEdge());
 
@@ -146,7 +151,7 @@ MctsNode* MctsNode::select() {
 	return bestChild->select();
 }
 
-MctsNode* MctsNode::expand() {
+Node* Node::expand() {
 	MoveList moves = MoveList(this->getPos());
 	if (this->getPos().isCheckmate(moves)) {
 		this->mateDepth = -1 * this->depth;
@@ -162,7 +167,7 @@ MctsNode* MctsNode::expand() {
 	return this->children[randInt() % this->children.size()].get();
 }
 
-ExitCode MctsNode::simulate() {
+ExitCode Node::simulate() {
 	MoveList moves = MoveList(this->pos);
 	int moveCount = 0;
 	ExitCode code;
@@ -178,8 +183,8 @@ ExitCode MctsNode::simulate() {
 	return code;
 }
 
-void MctsNode::rollback(ExitCode code) {
-	MctsNode* curr = this;
+void Node::rollback(ExitCode code) {
+	Node* curr = this;
 	while (curr->parent != nullptr) {
 		curr->visits++;
 		if (code == WHITE_WINS && this->rootPlayer == WHITE) {
@@ -196,32 +201,32 @@ void MctsNode::rollback(ExitCode code) {
 	curr->visits++;
 }
 
-void MctsNode::rootInitialise() {
+void Node::rootInitialise() {
 	assert(this->parent == nullptr);
 	MoveList moves = MoveList(this->getPos());
 	for (Move move : moves)
 		this->addChild(move);
 }
 
-const std::vector<MctsNode*> MctsNode::getChildren() const {
-	std::vector<MctsNode*> children;
+const std::vector<Node*> Node::getChildren() const {
+	std::vector<Node*> children;
 	for (auto& child : this->children)
 		children.push_back(child.get());
 	return children;
 }
 
-float MctsNode::Ucb1() const {
+float Node::Ucb1() const {
 	if (this->visits == 0) return std::numeric_limits<float>::max();
 	return (value / static_cast<float>(visits)) + std::sqrt(2) *
 			std::sqrt(std::log(static_cast<float>(this->parent->getVisits())) /
 			static_cast<float>(visits));
 }
 
-void MctsNode::addChild(Move move) {
-	this->children.push_back(std::unique_ptr<MctsNode>(new MctsNode(this, move, this->getPos(), this->searchInfo)));
+void Node::addChild(Move move) {
+	this->children.push_back(std::unique_ptr<Node>(new Node(this, move, this->getPos(), this->searchInfo)));
 }
 
-void MctsNode::updateMateDepth(int childMateDepth) {
+void Node::updateMateDepth(int childMateDepth) {
 	int parent = this->mateDepth;
 	int child = childMateDepth;
 

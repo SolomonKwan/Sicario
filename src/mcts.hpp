@@ -52,9 +52,7 @@ class Mcts {
 				searchTree(searchTree),
 				options(options) {}
 		void search();
-		inline Position& getPos() {
-			return this->pos;
-		}
+		inline Position& getPos() { return this->pos; }
 		bool rootIsEOG();
 
 	private:
@@ -64,9 +62,9 @@ class Mcts {
 		const Option& options;
 };
 
-class MctsNode {
+class Node {
 	public:
-		MctsNode(MctsNode* parent, Move move, Position& pos, SearchInfo& searchInfo) :
+		Node(Node* parent, Move move, Position& pos, SearchInfo& searchInfo) :
 				depth(parent == nullptr ? 0 : parent->depth + 1),
 				inEdge(move),
 				parent(parent),
@@ -76,39 +74,29 @@ class MctsNode {
 			this->searchInfo.setDepth(this->depth);
 		}
 
-		MctsNode* bestChild();
-		MctsNode* bestChildPv(int pvLine);
-		MctsNode* select();
-		MctsNode* expand();
+		Node* bestChild();
+		Node* bestChildPv(int pvLine);
+		Node* select();
+		Node* expand();
 		ExitCode simulate();
 		void rollback(ExitCode code);
 
 		void rootInitialise();
 
-		inline Move getInEdge() const {
-			return this->inEdge;
-		}
+		inline Move getInEdge() const { return this->inEdge; }
 
-		inline Position& getPos() {
-			return this->pos;
-		}
+		inline Position& getPos() { return this->pos; }
 
-		const std::vector<MctsNode*> getChildren() const;
+		const std::vector<Node*> getChildren() const;
 
-		inline float getValue() {
-			return this->value;
-		}
+		inline float getValue() { return this->value; }
 
-		inline uint getVisits() {
-			return this->visits;
-		}
+		inline uint getVisits() { return this->visits; }
 
 		float Ucb1() const;
 		void updateMateDepth(int childMateDepth);
 
-		inline int getMateDepth() const {
-			return this->mateDepth;
-		}
+		inline int getMateDepth() const { return this->mateDepth; }
 
 	private:
 		float value = 0;
@@ -117,9 +105,9 @@ class MctsNode {
 
 		int depth;
 		Move inEdge;
-		MctsNode* parent;
+		Node* parent;
 		SearchInfo& searchInfo;
-		std::vector<std::unique_ptr<MctsNode>> children; // CHECK unique? or shared?
+		std::vector<std::unique_ptr<Node>> children; // CHECK unique? or shared?
 		Position& pos;
 		const Player rootPlayer;
 
@@ -127,7 +115,7 @@ class MctsNode {
 		uint getVisits() const { return this->visits; }
 
 		struct Ucb1Comp {
-			bool operator()(const std::unique_ptr<MctsNode>& a, const std::unique_ptr<MctsNode>& b) const {
+			bool operator()(const std::unique_ptr<Node>& a, const std::unique_ptr<Node>& b) const {
 				return a.get()->Ucb1() < b.get()->Ucb1();
 			}
 		};

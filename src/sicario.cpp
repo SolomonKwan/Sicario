@@ -72,11 +72,10 @@ std::string OptionConfig<std::string>::toString() const {
 
 void Sicario::run() {
 	std::string input("");
-	do {
+	while (input != "quit") {
 		std::getline(std::cin, input);
 		processInput(input);
-	} while (input != "quit");
-
+	}
 	this->searchTree = false;
 }
 

@@ -33,7 +33,7 @@ namespace Uci {
 	 * @param root Pointer to McstNode object that is the root of the search tree.
 	 * @param debugMode Flag to display information on all children. Used for development and debugging.
 	 */
-	void sendBestMove(MctsNode* root, bool debugMode);
+	void sendBestMove(Node* root, bool debugMode);
 
 	/**
 	 * @brief Send the copyProtection message.
@@ -52,7 +52,7 @@ namespace Uci {
 	 * @param root Pointer to the root node object.
 	 * @param options Configurations for the engine.
 	 */
-	void sendInfo(SearchInfo& searchInfo, MctsNode* root, const Option& options);
+	void sendInfo(SearchInfo& searchInfo, Node* root, const Option& options);
 
 	/**
 	 * @brief Send the option message.
@@ -106,7 +106,7 @@ namespace Info {
 	 * @param pvLine The principle variation ranked as pvLine.
 	 * @return String of the princple variation ranked as pvLine.
 	 */
-	std::string pv(MctsNode* root, int pvLine);
+	std::string pv(Node* root, int pvLine);
 
 	/**
 	 * @brief Return the pv number string.
@@ -115,7 +115,7 @@ namespace Info {
 	 * @param pvLine The princple variation rank.
 	 * @return String of the multipv of the UCI info command.
 	 */
-	std::string multiPv(MctsNode* root, int pvLine);
+	std::string multiPv(Node* root, int pvLine);
 
 	/**
 	 * @brief Return the score of the current search.
@@ -123,7 +123,7 @@ namespace Info {
 	 * @param root Root node.
 	 * @return String of the score UCI command.
 	 */
-	std::string score(MctsNode* root);
+	std::string score(Node* root);
 
 	/**
 	 * @brief Return the centipawn evaluation.
@@ -131,7 +131,7 @@ namespace Info {
 	 * @param root Root node.
 	 * @return String of the UCI centipawn evaluation.
 	 */
-	std::string cp(MctsNode* root);
+	std::string cp(Node* root);
 
 	/**
 	 * @brief Return the mate if there is one in plies.
@@ -139,7 +139,7 @@ namespace Info {
 	 * @param root Root node.
 	 * @return String of the UCI mate depth in plies.
 	 */
-	std::string mate(MctsNode* root);
+	std::string mate(Node* root);
 
 	/**
 	 * @brief Return the lowerbound of the evaluation in centipawns.
@@ -147,7 +147,7 @@ namespace Info {
 	 * @param root Root node.
 	 * @return String of the UCI lowerbound centipawn evaluation.
 	 */
-	std::string lowerBound(MctsNode* root);
+	std::string lowerBound(Node* root);
 
 	/**
 	 * @brief Return the upperbound of the evaluation in centipawns.
@@ -155,7 +155,7 @@ namespace Info {
 	 * @param root Root node.
 	 * @return String of the UCI upperbound centipawn evaluation.
 	 */
-	std::string upperBound(MctsNode* root);
+	std::string upperBound(Node* root);
 
 	/**
 	 * @brief Return the current move being searched.
@@ -164,7 +164,7 @@ namespace Info {
 	 * @param root Root node.
 	 * @return String of the move being searched for the currmove part of the UCI info command.
 	 */
-	std::string currMove(SearchInfo& searchInfo, MctsNode* root);
+	std::string currMove(SearchInfo& searchInfo, Node* root);
 
 	/**
 	 * @brief Return the move number of the current move being searched.
@@ -173,7 +173,7 @@ namespace Info {
 	 * @param root Root node.
 	 * @return String of the move number of the current move being searched for the UCI info command.
 	 */
-	std::string currMoveNumber(SearchInfo& searchInfo, MctsNode* root);
+	std::string currMoveNumber(SearchInfo& searchInfo, Node* root);
 
 	/**
 	 * @brief Return the hashfull value.

@@ -49,9 +49,10 @@ inline bool isValidElo(std::string str) {
 
 void Sicario::processInput(const std::string& input) {
 	std::vector<std::string> commands = split(input, " ");
-	if (commands.size() == 0) return;
-	UciInput hashedInput = hashCommandInput(commands[0]);
+	if (commands.size() == 0)
+		return;
 
+	UciInput hashedInput = hashCommandInput(commands[0]);
 	switch (hashedInput) {
 		case UCI:
 			handleUci();
@@ -502,15 +503,15 @@ void Uci::sendReadyOk() {
 	Uci::send("readyok");
 }
 
-void Uci::sendBestMove(MctsNode* root, bool debugMode) {
+void Uci::sendBestMove(Node* root, bool debugMode) {
 	assert(root->bestChild() != nullptr);
 
 	// Bestmove
-	MctsNode* bestChild = root->bestChild();
+	Node* bestChild = root->bestChild();
 	std::string message = "bestmove " + getMove(bestChild->getInEdge());
 
 	// Pondermove
-	MctsNode* ponderNode = bestChild->bestChild();
+	Node* ponderNode = bestChild->bestChild();
 	if (ponderNode != nullptr)
 		message += " ponder " + getMove(ponderNode->getInEdge());
 
@@ -542,7 +543,7 @@ void Uci::sendRegistration() {
 
 }
 
-void Uci::sendInfo(SearchInfo& searchInfo, MctsNode* root, const Option& options) {
+void Uci::sendInfo(SearchInfo& searchInfo, Node* root, const Option& options) {
 	for (int pvLine = 1; pvLine <= options.MultiPVOption.getValue(); pvLine++) {
 		std::string infoMessage = "info ";
 		infoMessage += Info::depth(searchInfo) + " ";
@@ -584,9 +585,9 @@ std::string Info::nodes(SearchInfo& searchInfo) {
 	return "nodes " + std::to_string(searchInfo.getNodes());
 }
 
-std::string Info::pv(MctsNode* root, int pvLine) {
+std::string Info::pv(Node* root, int pvLine) {
 	std::string pv = "pv ";
-	MctsNode* curr = root->bestChildPv(pvLine);
+	Node* curr = root->bestChildPv(pvLine);
 	while (curr != nullptr) {
 		pv += getMove(curr->getInEdge());
 		curr = curr->bestChild();
@@ -596,12 +597,12 @@ std::string Info::pv(MctsNode* root, int pvLine) {
 	return pv;
 }
 
-std::string Info::multiPv(MctsNode* root, int pvLine) {
+std::string Info::multiPv(Node* root, int pvLine) {
 	if (pvLine > static_cast<int>(root->getChildren().size())) return "";
 	return "multipv " + std::to_string(pvLine);
 }
 
-std::string Info::score(MctsNode* root) {
+std::string Info::score(Node* root) {
 	std::string scoreStr = "score ";
 	if (root->getMateDepth() != 0) {
 		scoreStr += "mate " + Info::mate(root);
@@ -621,11 +622,11 @@ std::string Info::score(MctsNode* root) {
 	return scoreStr;
 }
 
-std::string Info::mate(MctsNode* root) {
+std::string Info::mate(Node* root) {
 	return std::to_string(root->getMateDepth());
 }
 
-std::string Info::cp(MctsNode* root) {
+std::string Info::cp(Node* root) {
 	float score = 0;
 	for (auto child : root->getChildren()) {
 		float childScore = child->Ucb1();
@@ -635,23 +636,23 @@ std::string Info::cp(MctsNode* root) {
 	return std::to_string(convertToCentipawn(score / root->getChildren().size()));
 }
 
-std::string Info::lowerBound(MctsNode* root) {
+std::string Info::lowerBound(Node* root) {
 	if (true) // TODO calculate condition
 		return " lowerbound";
 	return "";
 }
 
-std::string Info::upperBound(MctsNode* root) {
+std::string Info::upperBound(Node* root) {
 	if (true) // TODO calculate condition
 		return " upperbound";
 	return "";
 }
 
-std::string Info::currMove(SearchInfo& searchInfo, MctsNode* root) {
+std::string Info::currMove(SearchInfo& searchInfo, Node* root) {
 	return "currmove " + getMove(searchInfo.getCurrMove());
 }
 
-std::string Info::currMoveNumber(SearchInfo& searchInfo, MctsNode* root) {
+std::string Info::currMoveNumber(SearchInfo& searchInfo, Node* root) {
 	return "currmovenumber x";
 }
 
@@ -719,7 +720,7 @@ void Sicario::setStringOption(OptionConfig<std::string>& option, const std::stri
 	option.setValue(value);
 }
 
-void Sicario::setUciOpponentOption(OptionConfig<std::string>& option, const std::string& value) { // TODO might be able to abstract the logic check out to fn pointers thereby no need for individual option commands at all
+void Sicario::setUciOpponentOption(OptionConfig<std::string>& option, const std::string& value) { // TODO might be able to abstract the logic check out to fn pointers thereby no need for individual option commands at all. Might be able to combine with the other sets for the other types
 	std::vector<std::string> values = split(value, " ");
 	if (value != "" && (values.size() < 4 || !isValidTitle(values[0]) || !isValidElo(values[1]) ||
 			!isValidPlayerType(values[2]))) {
