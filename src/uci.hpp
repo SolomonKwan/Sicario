@@ -66,8 +66,7 @@ namespace Uci {
 
 namespace Info {
 	/**
-	 * @brief Return the depth string for the UCI info command. In Sicario, depth is defined as the node depth of the
-	 * current search.
+	 * @brief Return the depth string for the UCI info command.
 	 *
 	 * @param searchInfo Object containing the information of the search.
 	 * @return String of the depth part of the UCI info command.
@@ -75,8 +74,7 @@ namespace Info {
 	std::string depth(SearchInfo& searchInfo);
 
 	/**
-	 * @brief Return the seldepth string for the UCI info command. In Sicario, seldepth is defined as the node depth of
-	 * deepest line searched so far.
+	 * @brief Return the seldepth string for the UCI info command.
 	 *
 	 * @param searchInfo Object containing the information of the search.
 	 * @return String of the seldepth part of the UCI info command.

@@ -13,7 +13,7 @@ int SearchInfo::getDepth() const {
 
 void SearchInfo::setDepth(int depth) {
 	if (this->depth == std::max(depth, this->depth)) return;
-	this->changed = true;
+	this->printInfo = true;
 	this->depth = std::max(depth, this->depth);
 }
 
@@ -25,12 +25,12 @@ void SearchInfo::setSeldepth(int seldepth) {
 	this->selDepth = seldepth;
 }
 
-void SearchInfo::setChanged(bool changed) {
-	this->changed = changed;
+void SearchInfo::setPrintInfo(bool printInfo) {
+	this->printInfo = printInfo;
 }
 
-bool SearchInfo::getChanged() const {
-	return this->changed;
+bool SearchInfo::getPrintInfo() const {
+	return this->printInfo;
 }
 
 Move SearchInfo::getCurrMove() const {
@@ -49,18 +49,8 @@ void SearchInfo::incrementNodes() {
 	this->nodes++;
 }
 
-std::chrono::_V2::system_clock::time_point SearchInfo::getStart() const {
-	return this->lastMessage;
-}
-
-void SearchInfo::setLastMessage(std::chrono::_V2::system_clock::time_point time) {
-	this->lastMessage = time;
-}
-
 bool SearchInfo::sendNextInfo() const {
-	auto now = std::chrono::high_resolution_clock::now();
-	int timeSinceLastInfo = std::chrono::duration_cast<std::chrono::seconds>(now - this->getStart()).count();
-	return changed || (timeSinceLastInfo >= 3);
+	return true;
 }
 
 void Sicario::search() {
@@ -90,6 +80,7 @@ bool Mcts::rootIsEOG() {
 // NOTE Due to way that the tree is constructed, it may result in stack overflow error due to node deletion/pruning.
 
 void Mcts::search() {
+	// Don't search if the game is already ended.
 	if (this->rootIsEOG())
 		return;
 
@@ -99,16 +90,115 @@ void Mcts::search() {
 
 	while (searchTree) {
 		Node* leaf = root->select();
+		// this->pos.display();
 		leaf = leaf->expand();
+		// this->pos.display();
 		ExitCode code = leaf->simulate();
+		// this->pos.display();
+		// std::cout << "Exitcode " << code << '\n';
+		// std::cout << "Original turn " << this->getPos().getOriginalTurn() << '\n';
 		leaf->rollback(code);
+		// break;
 
-		if (searchInfo.sendNextInfo())
-			Uci::sendInfo(searchInfo, root.get(), this->options);
+		// if (searchInfo.sendNextInfo())
+		// 	Uci::sendInfo(searchInfo, root.get(), this->options);
 	}
 
 	Uci::sendInfo(searchInfo, root.get(), this->options); // Send final info command.
 	Uci::sendBestMove(root.get(), options.debugMode);
+}
+
+Node* Node::select() {
+	if (this->children.size() == 0)
+		return this;
+
+	Node* bestChild = this->bestChild();
+
+	// Only set currMove if we are at the root.
+	if (this->parent == nullptr)
+		searchInfo.setCurrMove(bestChild->getInEdge());
+
+	this->getPos().makeMove(bestChild->getInEdge());
+	return bestChild->select();
+}
+
+Node* Node::expand() {
+	// Return node if it has never been simulated from or if it's end of game.
+	MoveList moves = MoveList(this->getPos());
+	if (visits == 0 || this->getPos().isEOG(moves))
+		return this;
+
+	// Expand the node.
+	for (Move move : moves)
+		this->addChild(move);
+
+	// Choose a child node (NOTE currenty just choosing the first one.).
+	this->getPos().makeMove(this->children[0]->getInEdge());
+	return this->children[0].get();
+}
+
+ExitCode Node::simulate() {
+	ExitCode code;
+	int moveCount = 0;
+	MoveList moves = MoveList(this->pos);
+	while (!(code = this->pos.isEOG(moves))) {
+		this->pos.makeMove(moves.randomMove());
+		moves = MoveList(this->pos);
+		moveCount++;
+	}
+
+	// this->pos.display();
+	// std::cout << "Original turn " << this->pos.getOriginalTurn() << '\n';
+	// std::cout << "Exitcode " << code << '\n';
+
+	// Increment node count if this is the first simulation for the node.
+	if (this->getVisits() == 0)
+		this->searchInfo.incrementNodes();
+
+	// TODO could potentially create some kind of "copy" method for the Position object which we can copy only the information we need and then discard removing the need for this undo loop. Would need to test the performance.
+	for (; moveCount > 0; moveCount--)
+		this->pos.undoMove();
+
+	return code;
+}
+
+void Node::rollback(ExitCode code) {
+	bool rootWins = (
+		(code == WHITE_WINS && this->pos.getOriginalTurn() == WHITE) ||
+		(code == BLACK_WINS && this->pos.getOriginalTurn() == BLACK)
+	);
+
+	// std::cout << "Rootwins: " << rootWins << '\n';
+
+	Node* curr = this;
+// 	if (code == WHITE_WINS || code == BLACK_WINS){
+// 	std::cout << code << '\n';
+// 	std::cout << (code == WHITE_WINS && this->pos.getOriginalTurn() == WHITE) << '\n';
+// 	std::cout << (code == BLACK_WINS && this->pos.getOriginalTurn() == BLACK) << '\n';
+// 		exit(-1);
+// }
+	while (curr != nullptr) {
+		curr->visits++;
+		// std::cout << this->pos.getTurn() << '\n';
+		// this->pos.display();
+
+		// NOTE: Side to move in a checkmate position is the side that lost.
+		if (
+			(code == WHITE_WINS && this->pos.getOriginalTurn() == WHITE && this->pos.getTurn() == BLACK) ||
+			(code == BLACK_WINS && this->pos.getOriginalTurn() == BLACK && this->pos.getTurn() == WHITE)
+		)
+		// if (rootWins && this->pos.getOriginalTurn() != this->pos.getTurn())
+		{
+			// std::cout << "rolling back 1" << '\n';
+			curr->value += 1;
+		} else if (code == STALEMATE || code == THREE_FOLD_REPETITION || code == FIFTY_MOVES_RULE || code == INSUFFICIENT_MATERIAL) {
+			// std::cout << "rolling back 0.5" << '\n';
+			curr->value += 0.5;
+		}
+		curr = curr->parent;
+		if (curr != nullptr)
+			this->pos.undoMove();
+	}
 }
 
 Node* Node::bestChild() {
@@ -144,68 +234,6 @@ Node* Node::bestChildPv(int pvLine) {
 	return node;
 }
 
-Node* Node::select() {
-	if (this->children.size() == 0) return this;
-
-	// Set currMove for info command.
-	Node* bestChild = this->bestChild();
-	if (this->parent == nullptr)
-		searchInfo.setCurrMove(bestChild->getInEdge());
-
-	this->getPos().makeMove(bestChild->getInEdge());
-	return bestChild->select();
-}
-
-Node* Node::expand() {
-	MoveList moves = MoveList(this->getPos());
-	if (this->getPos().isCheckmate(moves)) {
-		this->mateDepth = -1 * this->depth;
-		return this;
-	}
-	if (visits == 0 || this->getPos().isDrawStalemate(moves)) return this;
-
-	for (Move move : moves)
-		this->addChild(move);
-
-	this->getPos().makeMove(this->children[0]->getInEdge());
-	this->searchInfo.incrementNodes();
-	return this->children[randInt() % this->children.size()].get();
-}
-
-ExitCode Node::simulate() {
-	MoveList moves = MoveList(this->pos);
-	int moveCount = 0;
-	ExitCode code;
-	while (!(code = this->pos.isEOG(moves))) {
-		this->pos.makeMove(moves.randomMove());
-		moves = MoveList(this->pos);
-		moveCount++;
-	}
-
-	for (; moveCount > 0; moveCount--)
-		this->pos.undoMove();
-
-	return code;
-}
-
-void Node::rollback(ExitCode code) {
-	Node* curr = this;
-	while (curr->parent != nullptr) {
-		curr->visits++;
-		if (code == WHITE_WINS && this->rootPlayer == WHITE) {
-			curr->value += 1;
-		} else if (code == BLACK_WINS && this->rootPlayer == BLACK) {
-			curr->value += 1;
-		} else if (code != WHITE_WINS && code != BLACK_WINS) {
-			curr->value += 0.5;
-		}
-		curr->parent->updateMateDepth(-1 * curr->mateDepth);
-		curr = curr->parent;
-		this->pos.undoMove();
-	}
-	curr->visits++;
-}
-
 void Node::rootInitialise() {
 	assert(this->parent == nullptr);
 	MoveList moves = MoveList(this->getPos());
@@ -229,21 +257,4 @@ float Node::Ucb1() const {
 
 void Node::addChild(Move move) {
 	this->children.push_back(std::unique_ptr<Node>(new Node(this, move, this->getPos(), this->searchInfo)));
-}
-
-void Node::updateMateDepth(int childMateDepth) {
-	int parent = this->mateDepth;
-	int child = childMateDepth;
-
-	if (parent > 0 && child > 0) {
-		this->mateDepth = std::min(parent, child);
-	} else if (parent < 0 && child > 0) {
-		this->mateDepth = child;
-	} else if (parent < 0 && child < 0) {
-		this->mateDepth = std::max(parent, child);
-	} else if (parent < 0 && child == 0) {
-		this->mateDepth = 0;
-	} else if (parent == 0 && child > 0) {
-		this->mateDepth = child;
-	}
 }

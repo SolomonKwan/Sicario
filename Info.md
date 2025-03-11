@@ -11,10 +11,12 @@ v0.9.0
 <strong>Branches of interest</strong>
 - release/0.9.0
 - feature/uci
+- feature/mcts
 
 <strong>Release goal</strong>
 - Complete UCI communication
 - Double check all writes to stdout/stderr and make sure that only UCI commands go to stdout
+- Rewrite and cleanup the basic mcts algorithm
 
 <strong>GUI to Engine Communications</strong>
 - [ x ] uci

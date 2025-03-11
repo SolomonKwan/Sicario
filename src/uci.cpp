@@ -559,9 +559,7 @@ void Uci::sendInfo(SearchInfo& searchInfo, Node* root, const Option& options) {
 		infoMessage += Info::nps(searchInfo);
 		Uci::send(infoMessage);
 	}
-
-	searchInfo.setLastMessage(std::chrono::high_resolution_clock::now());
-	searchInfo.setChanged(false);
+	searchInfo.setPrintInfo(false);
 }
 
 template<typename T>
@@ -604,17 +602,17 @@ std::string Info::multiPv(Node* root, int pvLine) {
 
 std::string Info::score(Node* root) {
 	std::string scoreStr = "score ";
-	if (root->getMateDepth() != 0) {
-		scoreStr += "mate " + Info::mate(root);
-	} else {
-		float score = 0;
-		for (auto child : root->getChildren()) {
-			float childScore = child->Ucb1();
-			if (childScore == std::numeric_limits<float>::max()) continue;
-			score += child->Ucb1();
-		}
-		scoreStr += "cp " + Info::cp(root);
-	}
+	// if (root->getMateDepth() != 0) {
+	// 	scoreStr += "mate " + Info::mate(root);
+	// } else {
+	// 	float score = 0;
+	// 	for (auto child : root->getChildren()) {
+	// 		float childScore = child->Ucb1();
+	// 		if (childScore == std::numeric_limits<float>::max()) continue;
+	// 		score += child->Ucb1();
+	// 	}
+	// 	scoreStr += "cp " + Info::cp(root);
+	// }
 
 	scoreStr += Info::lowerBound(root);
 	scoreStr += Info::upperBound(root);
@@ -623,7 +621,8 @@ std::string Info::score(Node* root) {
 }
 
 std::string Info::mate(Node* root) {
-	return std::to_string(root->getMateDepth());
+	// return std::to_string(root->getMateDepth());
+	return "";
 }
 
 std::string Info::cp(Node* root) {
@@ -661,10 +660,11 @@ std::string Info::hashfull(SearchInfo& searchInfo) {
 }
 
 std::string Info::nps(SearchInfo& searchInfo) {
-	auto end = std::chrono::high_resolution_clock::now();
-	float npms = searchInfo.getNodes() * 1000;
-	npms /= std::chrono::duration_cast<std::chrono::milliseconds>(end - searchInfo.getStart()).count();
-	return "nps " + std::to_string(static_cast<uint>(npms));
+	// auto end = std::chrono::high_resolution_clock::now();
+	// float npms = searchInfo.getNodes() * 1000;
+	// npms /= std::chrono::duration_cast<std::chrono::milliseconds>(end - searchInfo.getStart()).count();
+	// return "nps " + std::to_string(static_cast<uint>(npms));
+	return "";
 }
 
 void Sicario::sendInvalidCommand(const std::vector<std::string>& inputs, const std::string& customMsg) {

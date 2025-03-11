@@ -8,12 +8,10 @@
 #include "sicario.hpp"
 
 /**
- * @brief Struct used to store information about the current tree search.
+ * @brief Struct used to store information about the current tree search. Used mainly for sending the UCI info message.
  */
 struct SearchInfo {
-	SearchInfo() {
-		this->lastMessage = std::chrono::high_resolution_clock::now();
-	}
+	SearchInfo() {}
 
 	public:
 		int getDepth() const;
@@ -22,8 +20,8 @@ struct SearchInfo {
 		int getSeldepth() const;
 		void setSeldepth(int seldepth);
 
-		bool getChanged() const;
-		void setChanged(bool changed);
+		bool getPrintInfo() const;
+		void setPrintInfo(bool printInfo);
 
 		Move getCurrMove() const;
 		void setCurrMove(Move move);
@@ -31,20 +29,34 @@ struct SearchInfo {
 		int getNodes() const;
 		void incrementNodes();
 
-		std::chrono::_V2::system_clock::time_point getStart() const;
-		void setLastMessage(std::chrono::_V2::system_clock::time_point time);
-
 		bool sendNextInfo() const;
 
 	private:
-		bool changed = false;
+		/**
+		 * @brief True, if the engine should print the UCI info command. False, otherwise.
+		 */
+		bool printInfo = false;
 
+		/**
+		 * @brief The depth (in plies) of the current search.
+		 */
 		int depth = 0;
+
+		/**
+		 * @brief Also called selective depth - the depth (in plies) of the deepest PV line.
+		 */
 		int selDepth = 0;
+
+		/**
+		 * @brief The number of nodes searched. A node is considered "searched" if it has gone through the simulation
+		 * stage at least once.
+		 */
 		int nodes = 0;
+
+		/**
+		 * @brief Current move (from the root) being searched.
+		 */
 		Move currMove;
-		std::vector<std::vector<Move>> pvs;
-		std::chrono::_V2::system_clock::time_point lastMessage;
 };
 
 class Mcts {
@@ -68,21 +80,26 @@ class Mcts {
 class Node {
 	public:
 		Node(Node* parent, Move move, Position& pos, SearchInfo& searchInfo) :
-				depth(parent == nullptr ? 0 : parent->depth + 1),
+				depth(parent == nullptr ? 0 : parent->depth + 1), // TODO check depth
 				inEdge(move),
 				parent(parent),
 				searchInfo(searchInfo),
 				pos(pos),
-				rootPlayer(pos.getTurn()) {
-			this->searchInfo.setDepth(this->depth);
+				rootPlayer(pos.getOriginalTurn()) {
+			this->searchInfo.setDepth(this->depth); // TODO check depth
 		}
 
-		Node* bestChild();
-		Node* bestChildPv(int pvLine);
 		Node* select();
+
 		Node* expand();
+
 		ExitCode simulate();
+
 		void rollback(ExitCode code);
+
+		Node* bestChild();
+
+		Node* bestChildPv(int pvLine);
 
 		void rootInitialise();
 
@@ -97,14 +114,10 @@ class Node {
 		inline uint getVisits() { return this->visits; }
 
 		float Ucb1() const;
-		void updateMateDepth(int childMateDepth);
-
-		inline int getMateDepth() const { return this->mateDepth; }
 
 	private:
 		float value = 0;
 		uint visits = 0;
-		int mateDepth = 0;
 
 		int depth;
 		Move inEdge;

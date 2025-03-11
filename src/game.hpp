@@ -164,6 +164,15 @@ class Position {
 		}
 
 		/**
+		 * @brief Get the player whose turn it is at the original position before any moves have been made.
+		 *
+		 * @return Player whose turn it is at the orignal position before any moves have been made.
+		 */
+		inline const Player getOriginalTurn() const {
+			return this->rootPlayer;
+		}
+
+		/**
 		 * @brief Get the piece count.
 		 *
 		 * @return Piece count.
@@ -227,6 +236,7 @@ class Position {
 		uint castling;
 		Square enPassant;
 		uint halfmove, fullmove;
+		Player rootPlayer;
 
 		// Bitboards
 		Bitboard sides[PLAYER_COUNT];

@@ -1053,10 +1053,13 @@ void Position::setPinAndCheckRayBitboards() {
 }
 
 void Position::parseFenMove(const std::string& fenMove) {
-	if (fenMove == "w")
+	if (fenMove == "w") {
 		this->turn = WHITE;
-	else
+		this->rootPlayer = WHITE;
+	} else {
 		this->turn = BLACK;
+		this->rootPlayer = BLACK;
+	}
 }
 
 void Position::parseFenCastling(const std::string& fenCastling) {

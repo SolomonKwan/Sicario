@@ -2,8 +2,12 @@ Positional positions
 r4rk1/4R2p/pp6/3p3q/3Pp3/1Q3pPN/PP3P1P/4R1K1 b - - 0 1
 3B4/1r2p3/r2p1p2/bkp1P1p1/1p1P1PPp/p1P4P/PPB1K3/8 w - - 0 1 (actually a forced draw)
 
+Mate in 1
+k1b1b3/pp1Q4/8/4n3/3K4/8/8/8 w - - 0 1
+k1bBbK2/p1PQP3/2PPPn2/3P4/8/8/8/8 w - - 0 1
+
 Mate in 2
-r2qkb1r/pp2nppp/3p4/2pNN1B1/2BnP3/3P4/PPP2PPP/R2bK2R w KQkq - 1 0
+r2qkb1r/pp2nppp/3p4/2pNN1B1/2BnP3/3P4/PPP2PPP/R2bK2R w KQkq - 0 1 (d5f6 g7f6 c4f7)
 1rb4r/pkPp3p/1b1P3n/1Q6/N3Pp2/8/P1P3PP/7K w - - 1 0
 4kb1r/p2n1ppp/4q3/4p1B1/4P3/1Q6/PPP2PPP/2KR4 w k - 1 0
 r1b2k1r/ppp1bppp/8/1B1Q4/5q2/2P5/PPP2PPP/R3R1K1 w - - 1 0
@@ -12,7 +16,9 @@ r1b2k1r/ppp1bppp/8/1B1Q4/5q2/2P5/PPP2PPP/R3R1K1 w - - 1 0
 5rk1/1p1q2bp/p2pN1p1/2pP2Bn/2P3P1/1P6/P4QKP/5R2 w - - 1 0
 
 Mate in 3
-r1b1kb1r/pppp1ppp/5q2/4n3/3KP3/2N3PN/PPP4P/R1BQ1B1R b kq - 0 1
+r1b1kb1r/pppp1ppp/5q2/4n3/3KP3/2N3PN/PPP4P/R1BQ1B1R b kq - 0 1 (f8c5 d4c5 f6b6 b6d6)
+4k3/1pp2N2/1b5n/7b/2B4q/BQ6/7P/7K w - - 0 1
+4k3/ppp2Npp/1b5n/4p2b/2B1P2q/BQP2P2/P5PP/7K w - - 0 1
 r3k2r/ppp2Npp/1b5n/4p2b/2B1P2q/BQP2P2/P5PP/RN5K w kq - 1 0
 r1b3kr/ppp1Bp1p/1b6/n2P4/2p3q1/2Q2N2/P4PPP/RN2R1K1 w - - 1 0
 r2n1rk1/1ppb2pp/1p1p4/3Ppq1n/2B3P1/2P4P/PP1N1P1K/R2Q1RN1 b - - 0 1
