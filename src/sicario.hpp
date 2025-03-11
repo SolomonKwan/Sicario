@@ -143,6 +143,7 @@ struct Option {
 	OptionConfig<bool> UCIAnalyseModeOption { "UCI_AnalyseMode", "check", true };
 	OptionConfig<std::string> UCIOpponentOption { "UCI_Opponent", "string", "" };
 	OptionConfig<bool> ClearHashOption { "ClearHash", "button" };
+	OptionConfig<int> ExplorationOption {"Exploration", "spin", 2000, 0, 10000};
 	// OptionConfig<std::string> FooOption { "foo", "combo", "foo", {"foo", "bar", "baz", "foobar"} };
 };
 

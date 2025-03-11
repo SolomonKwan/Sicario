@@ -262,6 +262,7 @@ void Sicario::handleUci() {
 	Uci::sendOption(this->options.UCIAnalyseModeOption);
 	Uci::sendOption(this->options.UCIOpponentOption);
 	Uci::sendOption(this->options.ClearHashOption);
+	Uci::sendOption(this->options.ExplorationOption);
 	Uci::sendUciok();
 }
 
@@ -295,6 +296,7 @@ void Sicario::handleSetOption(const std::vector<std::string>& inputs) {
 	else if (name == "uci_analysemode") return setCheckOption(this->options.UCIAnalyseModeOption, value);
 	else if (name == "uci_opponent") return setUciOpponentOption(this->options.UCIOpponentOption, value);
 	else if (name == "clearhash") return this->clearCache();
+	else if (name == "exploration") return this->setSpinOption(this->options.ExplorationOption, value);
 	else {
 		std::cerr << "This should not be happening..." << '\n';
 		sendUnknownOption(name);
@@ -454,6 +456,7 @@ void Sicario::handleOptions() {
 	std::cout << this->options.UCIEloOption.toString() << '\n';
 	std::cout << this->options.UCIAnalyseModeOption.toString() << '\n';
 	std::cout << this->options.UCIOpponentOption.toString() << '\n';
+	std::cout << this->options.ExplorationOption.toString() << '\n';
 }
 
 void Sicario::handleData() {

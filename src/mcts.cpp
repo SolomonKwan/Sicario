@@ -85,20 +85,14 @@ void Mcts::search() {
 		return;
 
 	SearchInfo searchInfo = SearchInfo();
-	std::unique_ptr<Node> root(new Node(nullptr, NULL_MOVE, this->getPos(), searchInfo));
+	std::unique_ptr<Node> root(new Node(nullptr, NULL_MOVE, this->getPos(), searchInfo, this->options));
 	root->rootInitialise();
 
 	while (searchTree) {
 		Node* leaf = root->select();
-		// this->pos.display();
 		leaf = leaf->expand();
-		// this->pos.display();
 		ExitCode code = leaf->simulate();
-		// this->pos.display();
-		// std::cout << "Exitcode " << code << '\n';
-		// std::cout << "Original turn " << this->getPos().getOriginalTurn() << '\n';
 		leaf->rollback(code);
-		// break;
 
 		// if (searchInfo.sendNextInfo())
 		// 	Uci::sendInfo(searchInfo, root.get(), this->options);
@@ -147,10 +141,6 @@ ExitCode Node::simulate() {
 		moveCount++;
 	}
 
-	// this->pos.display();
-	// std::cout << "Original turn " << this->pos.getOriginalTurn() << '\n';
-	// std::cout << "Exitcode " << code << '\n';
-
 	// Increment node count if this is the first simulation for the node.
 	if (this->getVisits() == 0)
 		this->searchInfo.incrementNodes();
@@ -163,36 +153,18 @@ ExitCode Node::simulate() {
 }
 
 void Node::rollback(ExitCode code) {
-	bool rootWins = (
-		(code == WHITE_WINS && this->pos.getOriginalTurn() == WHITE) ||
-		(code == BLACK_WINS && this->pos.getOriginalTurn() == BLACK)
-	);
-
-	// std::cout << "Rootwins: " << rootWins << '\n';
+	bool whiteRootWins = (code == WHITE_WINS && this->pos.getOriginalTurn() == WHITE);
+	bool blackRootWins = (code == BLACK_WINS && this->pos.getOriginalTurn() == BLACK);
 
 	Node* curr = this;
-// 	if (code == WHITE_WINS || code == BLACK_WINS){
-// 	std::cout << code << '\n';
-// 	std::cout << (code == WHITE_WINS && this->pos.getOriginalTurn() == WHITE) << '\n';
-// 	std::cout << (code == BLACK_WINS && this->pos.getOriginalTurn() == BLACK) << '\n';
-// 		exit(-1);
-// }
 	while (curr != nullptr) {
 		curr->visits++;
-		// std::cout << this->pos.getTurn() << '\n';
-		// this->pos.display();
 
 		// NOTE: Side to move in a checkmate position is the side that lost.
-		if (
-			(code == WHITE_WINS && this->pos.getOriginalTurn() == WHITE && this->pos.getTurn() == BLACK) ||
-			(code == BLACK_WINS && this->pos.getOriginalTurn() == BLACK && this->pos.getTurn() == WHITE)
-		)
-		// if (rootWins && this->pos.getOriginalTurn() != this->pos.getTurn())
-		{
-			// std::cout << "rolling back 1" << '\n';
+		if ((whiteRootWins && this->pos.getTurn() == BLACK) || (blackRootWins && this->pos.getTurn() == WHITE)) {
 			curr->value += 1;
-		} else if (code == STALEMATE || code == THREE_FOLD_REPETITION || code == FIFTY_MOVES_RULE || code == INSUFFICIENT_MATERIAL) {
-			// std::cout << "rolling back 0.5" << '\n';
+		} else if (code == STALEMATE || code == THREE_FOLD_REPETITION || code == FIFTY_MOVES_RULE ||
+				code == INSUFFICIENT_MATERIAL) {
 			curr->value += 0.5;
 		}
 		curr = curr->parent;
@@ -250,11 +222,12 @@ const std::vector<Node*> Node::getChildren() const {
 
 float Node::Ucb1() const {
 	if (this->visits == 0) return std::numeric_limits<float>::max();
-	return (value / static_cast<float>(visits)) + std::sqrt(2) *
+	return (value / static_cast<float>(visits)) +
+			std::sqrt(static_cast<double>(this->options.ExplorationOption.getValue() / 1000)) *
 			std::sqrt(std::log(static_cast<float>(this->parent->getVisits())) /
 			static_cast<float>(visits));
 }
 
 void Node::addChild(Move move) {
-	this->children.push_back(std::unique_ptr<Node>(new Node(this, move, this->getPos(), this->searchInfo)));
+	this->children.push_back(std::unique_ptr<Node>(new Node(this, move, this->getPos(), this->searchInfo, this->options)));
 }

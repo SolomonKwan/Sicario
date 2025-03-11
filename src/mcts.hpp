@@ -79,13 +79,14 @@ class Mcts {
 
 class Node {
 	public:
-		Node(Node* parent, Move move, Position& pos, SearchInfo& searchInfo) :
+		Node(Node* parent, Move move, Position& pos, SearchInfo& searchInfo, const Option& options) :
 				depth(parent == nullptr ? 0 : parent->depth + 1), // TODO check depth
 				inEdge(move),
 				parent(parent),
 				searchInfo(searchInfo),
 				pos(pos),
-				rootPlayer(pos.getOriginalTurn()) {
+				rootPlayer(pos.getOriginalTurn()),
+				options(options) {
 			this->searchInfo.setDepth(this->depth); // TODO check depth
 		}
 
@@ -126,6 +127,8 @@ class Node {
 		std::vector<std::unique_ptr<Node>> children; // CHECK unique? or shared?
 		Position& pos;
 		const Player rootPlayer;
+
+		const Option& options;
 
 		void addChild(Move move);
 		uint getVisits() const { return this->visits; }
