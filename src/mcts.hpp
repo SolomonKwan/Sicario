@@ -11,25 +11,76 @@
  * @brief Struct used to store information about the current tree search. Used mainly for sending the UCI info message.
  */
 struct SearchInfo {
-	SearchInfo() {}
-
 	public:
+		/**
+		 * @brief Get the depth (in plies) of the current search.
+		 *
+		 * @return Depth of the current search in plies.
+		 */
 		int getDepth() const;
+
+		/**
+		 * @brief Set the depth (in plies) of the current search.
+		 *
+		 * @param Depth Depth of the current search in plies.
+		 */
 		void setDepth(int depth);
 
+		/**
+		 * @brief Get the selective depth (in plies) of the deepest PV line.
+		 *
+		 * @return Depth of the deepest PV line in plies.
+		 */
 		int getSeldepth() const;
+
+		/**
+		 * @brief Set the selective depth (in plies) of the deepest PV line.
+		 *
+		 * @param seldepth
+		 */
 		void setSeldepth(int seldepth);
 
+		/**
+		 * @brief Return whether or not to print the next UCI info command. This is currently set to true whenever there
+		 * is a change in information in any of the member variables.
+		 *
+		 * @return True if the next UCI info command should be sent. Else, false.
+		 */
 		bool getPrintInfo() const;
+
+		/**
+		 * @brief Set the printInfo member variable.
+		 *
+		 * @param printInfo The value to set the printInfo command to.
+		 */
 		void setPrintInfo(bool printInfo);
 
+		/**
+		 * @brief Get the current move (from the root) being searched.
+		 *
+		 * @return Current move (from the root) being searched.
+		 */
 		Move getCurrMove() const;
+
+		/**
+		 * @brief Set the current move (from the root) being searched.
+		 *
+		 * @param move The move to set the currMove member variable to.
+		 */
 		void setCurrMove(Move move);
 
+		/**
+		 * @brief Get the number of nodes that have been searched. A node is considered "searched" if it has gone
+		 * through the simulation stage at least once.
+		 *
+		 * @return The number of nodes searched.
+		 */
 		int getNodes() const;
-		void incrementNodes();
 
-		bool sendNextInfo() const;
+		/**
+		 * @brief Increment the nodes count.
+		 */
+		void incrementNodes();
 
 	private:
 		/**
@@ -80,14 +131,13 @@ class Mcts {
 class Node {
 	public:
 		Node(Node* parent, Move move, Position& pos, SearchInfo& searchInfo, const Option& options) :
-				depth(parent == nullptr ? 0 : parent->depth + 1), // TODO check depth
+				depth(parent == nullptr ? 0 : parent->depth + 1),
 				inEdge(move),
 				parent(parent),
 				searchInfo(searchInfo),
 				pos(pos),
 				rootPlayer(pos.getOriginalTurn()),
 				options(options) {
-			this->searchInfo.setDepth(this->depth); // TODO check depth
 		}
 
 		Node* select();

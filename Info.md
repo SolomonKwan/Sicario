@@ -17,6 +17,8 @@ v0.9.0
 - Complete UCI communication
 - Double check all writes to stdout/stderr and make sure that only UCI commands go to stdout
 - Rewrite and cleanup the basic mcts algorithm
+- Create basic position evaluation
+- Create basic pruning policy
 
 <strong>GUI to Engine Communications</strong>
 - [ x ] uci

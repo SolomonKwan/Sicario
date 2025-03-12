@@ -12,9 +12,10 @@ int SearchInfo::getDepth() const {
 }
 
 void SearchInfo::setDepth(int depth) {
-	if (this->depth == std::max(depth, this->depth)) return;
+	if (this->depth == depth)
+		return;
 	this->printInfo = true;
-	this->depth = std::max(depth, this->depth);
+	this->depth = depth;
 }
 
 int SearchInfo::getSeldepth() const {
@@ -47,10 +48,6 @@ int SearchInfo::getNodes() const {
 
 void SearchInfo::incrementNodes() {
 	this->nodes++;
-}
-
-bool SearchInfo::sendNextInfo() const {
-	return true;
 }
 
 void Sicario::search() {
@@ -94,8 +91,8 @@ void Mcts::search() {
 		ExitCode code = leaf->simulate();
 		leaf->rollback(code);
 
-		// if (searchInfo.sendNextInfo())
-		// 	Uci::sendInfo(searchInfo, root.get(), this->options);
+		if (searchInfo.getPrintInfo())
+			Uci::sendInfo(searchInfo, root.get(), this->options);
 	}
 
 	Uci::sendInfo(searchInfo, root.get(), this->options); // Send final info command.
@@ -103,8 +100,11 @@ void Mcts::search() {
 }
 
 Node* Node::select() {
-	if (this->children.size() == 0)
+	// Found leaf node. Set depth and return;
+	if (this->children.size() == 0) {
+		this->searchInfo.setDepth(this->depth);
 		return this;
+	}
 
 	Node* bestChild = this->bestChild();
 
@@ -167,6 +167,7 @@ void Node::rollback(ExitCode code) {
 				code == INSUFFICIENT_MATERIAL) {
 			curr->value += 0.5;
 		}
+
 		curr = curr->parent;
 		if (curr != nullptr)
 			this->pos.undoMove();
