@@ -93,6 +93,16 @@ const std::string squareName[SQUARE_COUNT + 1] = {
 	"None"
 };
 
+const std::string ExitCodeStrings[7] = {
+	"Normal ply",
+	"White wins",
+	"Black wins",
+	"Stalemate",
+	"Three-fold repetition",
+	"Fifty move rule",
+	"Insufficient material"
+};
+
 enum File { FILE_A, FILE_B, FILE_C, FILE_D, FILE_E, FILE_F, FILE_G, FILE_H };
 
 enum Rank { RANK_1, RANK_2, RANK_3, RANK_4, RANK_5, RANK_6, RANK_7, RANK_8 };

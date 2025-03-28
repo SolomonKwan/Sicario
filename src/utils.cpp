@@ -3,6 +3,8 @@
 #include <algorithm>
 #include <random>
 #include <fstream>
+#include <sstream>
+#include <iomanip>
 
 #include "utils.hpp"
 #include "constants.hpp"
@@ -175,6 +177,54 @@ std::string getDataLabel(std::string prefix, int numSimulations) {
 	}
 
 	return "";
+}
+
+std::string getSimulationResultString(std::unordered_map<ExitCode, float>& results) {
+	float total = 0;
+	for (auto pair : results)
+		total += pair.second;
+
+	std::stringstream str;
+	str << std::left << std::setw(21) << "Result";
+	str << std::right << std::setw(15) << "Count";
+	str << std::right << std::setw(15) << "Percentage" << "\n";
+	str << "---------------------------------------------------\n";
+
+	str << std::left << std::setw(21) << ExitCodeStrings[WHITE_WINS];
+	str << std::right << std::setw(15) << std::to_string(static_cast<int>(results[WHITE_WINS]));
+	str << std::right << std::setw(15) << std::fixed << std::setprecision(2) <<
+			(results[WHITE_WINS] / total * 100) << "\n";
+
+	str << std::left << std::setw(21) << ExitCodeStrings[BLACK_WINS];
+	str << std::right << std::setw(15) << std::to_string(static_cast<int>(results[BLACK_WINS]));
+	str << std::right << std::setw(15) << std::fixed << std::setprecision(2) <<
+			(results[BLACK_WINS] / total * 100) << "\n";
+
+	str << std::left << std::setw(21) << ExitCodeStrings[STALEMATE];
+	str << std::right << std::setw(15) << std::to_string(static_cast<int>(results[STALEMATE]));
+	str << std::right << std::setw(15) << std::fixed << std::setprecision(2) <<
+			(results[STALEMATE] / total * 100) << "\n";
+
+	str << std::left << std::setw(21) << ExitCodeStrings[THREE_FOLD_REPETITION];
+	str << std::right << std::setw(15) << std::to_string(static_cast<int>(results[THREE_FOLD_REPETITION]));
+	str << std::right << std::setw(15) << std::fixed << std::setprecision(2) <<
+			(results[THREE_FOLD_REPETITION] / total * 100) << "\n";
+
+	str << std::left << std::setw(21) << ExitCodeStrings[FIFTY_MOVES_RULE];
+	str << std::right << std::setw(15) << std::to_string(static_cast<int>(results[FIFTY_MOVES_RULE]));
+	str << std::right << std::setw(15) << std::fixed << std::setprecision(2) <<
+			(results[FIFTY_MOVES_RULE] / total * 100) << "\n";
+
+	str << std::left << std::setw(21) << ExitCodeStrings[INSUFFICIENT_MATERIAL];
+	str << std::right << std::setw(15) << std::to_string(static_cast<int>(results[INSUFFICIENT_MATERIAL]));
+	str << std::right << std::setw(15) << std::fixed << std::setprecision(2) <<
+			(results[INSUFFICIENT_MATERIAL] / total * 100) << "\n";
+
+	return str.str();
+}
+
+float twoDecimalPlaces(float num) {
+	return std::roundf(num * 100) / 100;
 }
 
 std::vector<size_t> rankSort(const std::vector<float>& v_temp) {

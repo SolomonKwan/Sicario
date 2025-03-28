@@ -404,7 +404,7 @@ void Sicario::handleBitboards() {
 }
 
 void Sicario::handleRandom(const std::vector<std::string> &inputs) {
-	std::unordered_map<ExitCode, int> results;
+	std::unordered_map<ExitCode, float> results;
 	int simulations = inputs.size() == 2 ? std::stoi(inputs[1]) : 100;
 
 	std::string fileName = getDataLabel("../model/data", simulations);
@@ -434,20 +434,7 @@ void Sicario::handleRandom(const std::vector<std::string> &inputs) {
 	myfile.close();
 
 	// Print overall results
-	int total = 0;
-	for (auto pair : results) total += pair.second;
-	printf("WHITE_WINS: \t\t%d\t %.2f%%\n", results[WHITE_WINS],
-			static_cast<float>(results[WHITE_WINS]) / total * 100);
-	printf("BLACK_WINS: \t\t%d\t %.2f%%\n", results[BLACK_WINS],
-			static_cast<float>(results[BLACK_WINS]) / total * 100);
-	printf("STALEMATE: \t\t%d\t %.2f%%\n", results[STALEMATE],
-			static_cast<float>(results[STALEMATE]) / total * 100);
-	printf("THREE_FOLD_REPETITION: \t%d\t %.2f%%\n", results[THREE_FOLD_REPETITION],
-			static_cast<float>(results[THREE_FOLD_REPETITION]) / total * 100);
-	printf("FIFTY_MOVES_RULE: \t%d\t %.2f%%\n", results[FIFTY_MOVES_RULE],
-			static_cast<float>(results[FIFTY_MOVES_RULE]) / total * 100);
-	printf("INSUFFICIENT_MATERIAL: \t%d\t %.2f%%\n", results[INSUFFICIENT_MATERIAL],
-			static_cast<float>(results[INSUFFICIENT_MATERIAL]) / total * 100);
+	std::cout << getSimulationResultString(results) << '\n';
 }
 
 void Sicario::handleState() {

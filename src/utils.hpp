@@ -214,6 +214,14 @@ std::string getResult(const ExitCode& code);
 std::string getDataLabel(std::string prefix, int numSimulations);
 
 /**
+ * @brief Get the string summarising the simulations results.
+ *
+ * @param results Map of all the result strings.
+ * @return String summarising the simulation results.
+ */
+std::string getSimulationResultString(std::unordered_map<ExitCode, float>& results);
+
+/**
  * @brief Calculates the ranks of the numbers in an array of length N. The smallest number has the highest rank (N),
  * while the largest number has the lowest rank (1). Does not consider duplicate elements.
  *
