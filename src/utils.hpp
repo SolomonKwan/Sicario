@@ -196,6 +196,14 @@ std::string getPromoString(Promotion promo);
 std::string getTypeString(MoveClass type);
 
 /**
+ * @brief Get the result string. Either "1-0", "0-1", or "1/2-1/2".
+ *
+ * @param code End of game ExitCode value.
+ * @return String fo the game result.
+ */
+std::string getResult(const ExitCode& code);
+
+/**
  * @brief Calculates the ranks of the numbers in an array of length N. The smallest number has the highest rank (N),
  * while the largest number has the lowest rank (1). Does not consider duplicate elements.
  *

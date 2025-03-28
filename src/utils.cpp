@@ -151,6 +151,14 @@ std::string getTypeString(const MoveClass type) {
 	}
 }
 
+std::string getResult(const ExitCode& code) {
+	if (code == WHITE_WINS)
+		return "1-0";
+	if (code == BLACK_WINS)
+		return "0-1";
+	return "1/2-1/2";
+}
+
 std::vector<size_t> rankSort(const std::vector<float>& v_temp) {
 	std::vector<std::pair<float, size_t> > v_sort(v_temp.size());
 
