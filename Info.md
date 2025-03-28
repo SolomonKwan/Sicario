@@ -19,6 +19,7 @@ v0.9.0
 - Rewrite and cleanup the basic mcts algorithm
 - Create basic position evaluation
 - Create basic pruning policy
+- Refactor the Position class (and any other) to only contains methods that alter the state
 
 <strong>GUI to Engine Communications</strong>
 - [ x ] uci

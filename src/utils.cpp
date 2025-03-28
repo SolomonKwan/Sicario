@@ -2,6 +2,7 @@
 #include <iostream>
 #include <algorithm>
 #include <random>
+#include <fstream>
 
 #include "utils.hpp"
 #include "constants.hpp"
@@ -157,6 +158,23 @@ std::string getResult(const ExitCode& code) {
 	if (code == BLACK_WINS)
 		return "0-1";
 	return "1/2-1/2";
+}
+
+std::string getDataLabel(std::string prefix, int numSimulations) {
+	int iteration = 1;
+	while (true) {
+		std::string fileName = prefix + "/" + NN_MODEL;
+		fileName += "_simulations_" + std::to_string(numSimulations);
+		fileName += "_iteration_" + std::to_string(iteration) + ".txt";
+
+		std::ifstream file(fileName);
+		if (!file.good())
+			return fileName;
+
+		iteration++;
+	}
+
+	return "";
 }
 
 std::vector<size_t> rankSort(const std::vector<float>& v_temp) {

@@ -3,6 +3,7 @@
 #include <thread>
 #include <algorithm>
 #include <ranges>
+#include <fstream>
 
 #include "game.hpp"
 #include "uci.hpp"
@@ -404,8 +405,12 @@ void Sicario::handleBitboards() {
 
 void Sicario::handleRandom(const std::vector<std::string> &inputs) {
 	std::unordered_map<ExitCode, int> results;
-	int iterations = inputs.size() == 2 ? std::stoi(inputs[1]) : 100;
-	for (int i = 0; i < iterations; i++) {
+	int simulations = inputs.size() == 2 ? std::stoi(inputs[1]) : 100;
+
+	std::string fileName = getDataLabel("../model/data", simulations);
+	std::ofstream myfile(fileName);
+
+	for (int i = 0; i < simulations; i++) {
 		MoveList moves = MoveList(this->position);
 		int moveCount = 0;
 		while (!this->position.isEOG(moves)) {
@@ -416,12 +421,17 @@ void Sicario::handleRandom(const std::vector<std::string> &inputs) {
 		}
 		results[this->position.isEOG(moves)]++;
 
+		for (History hist: this->position.getHistory())
+			myfile << getMove(hist.move) << ' ';
+		myfile << getResult(this->position.isEOG(moves)) << '\n';
+
 		// Undo moves back to original position.
 		while (moveCount > 0) {
 			this->position.undoMove();
 			moveCount--;
 		}
 	}
+	myfile.close();
 
 	// Print overall results
 	int total = 0;

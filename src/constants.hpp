@@ -18,6 +18,7 @@ const std::string CHESS_PROGRAMMING = "www.chessprogramming.org";
 const std::string STOCKFISH = "Stockfish";
 const std::string BLUE_FEVER_SOFT = "bluefeversoft";
 const std::string STANDARD_GAME = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+const std::string NN_MODEL = "nn-model-1";
 
 const uint PLAYER_COUNT = 2;
 const uint SQUARE_COUNT = 64;

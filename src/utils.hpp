@@ -204,6 +204,16 @@ std::string getTypeString(MoveClass type);
 std::string getResult(const ExitCode& code);
 
 /**
+ * @brief Get the next available name of the file in the format of NN_MODEL + "_iteration_n" + ".txt" where "n" is the
+ * next available positive integer.
+ *
+ * @param prefix Prefix of the file location without a trailing "/".
+ * @param numSimulations Number of simulation in this file.
+ * @return String of the next available name of the file in the format of NN_MODEL + "_iteration_1" + ".txt"
+ */
+std::string getDataLabel(std::string prefix, int numSimulations);
+
+/**
  * @brief Calculates the ranks of the numbers in an array of length N. The smallest number has the highest rank (N),
  * while the largest number has the lowest rank (1). Does not consider duplicate elements.
  *
